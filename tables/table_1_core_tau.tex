@@ -1,0 +1,34 @@
+\begin{table}[!t]
+\centering
+\caption{Bias (mean of estimate minus true value over replications) and coverage of nominal 95\% confidence intervals for $\tau$ in the 16 core scenarios.}
+\label{tab:sim-core-tau}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{ccccrrrrrrrrrrrrrr}
+\toprule
+$N$ & $T$ & adopt & spill & \multicolumn{2}{c}{M0} & \multicolumn{2}{c}{M0-G} & \multicolumn{2}{c}{M1} & \multicolumn{2}{c}{M1-BC} & \multicolumn{2}{c}{M2} & \multicolumn{2}{c}{M3} & \multicolumn{2}{c}{Oracle} \\
+\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}\cmidrule(lr){11-12}\cmidrule(lr){13-14}\cmidrule(lr){15-16}\cmidrule(lr){17-18}
+ & & & & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov \\
+\midrule
+500 & 12 & FB & yes & -0.002 & 94.8 & -0.002 & 94.8 & -0.027 & 83.9 & -0.028 & 64.9 & -0.105 & 0.0 & -0.030 & 91.6 & -0.000 & 94.1 \\
+500 & 26 & FB & yes & -0.000 & 94.5 & -0.000 & 94.5 & -0.020 & 88.2 & 0.040 & 40.1 & 0.010 & 93.3 & -0.355 & 2.1 & -0.001 & 93.5 \\
+2000 & 12 & FB & yes & 0.000 & 95.0 & 0.000 & 95.0 & -0.023 & 78.1 & -0.034 & 55.0 & -0.110 & 0.0 & -0.072 & 58.1 & -0.000 & 94.8 \\
+2000 & 26 & FB & yes & -0.000 & 94.9 & -0.000 & 94.9 & -0.017 & 87.0 & 0.082 & 25.7 & 0.013 & 90.5 & -0.563 & 0.0 & -0.000 & 94.3 \\
+500 & 12 & FB & no & 0.170 & 38.8 & 0.085 & 67.2 & -0.024 & 87.5 & -0.056 & 56.2 & -0.119 & 0.0 & 0.150 & 23.4 & 0.001 & 94.2 \\
+500 & 26 & FB & no & 0.132 & 36.0 & 0.053 & 70.9 & -0.042 & 74.5 & 0.006 & 45.4 & 0.023 & 84.9 & -0.458 & 5.5 & -0.001 & 90.1 \\
+2000 & 12 & FB & no & 0.198 & 0.6 & 0.073 & 59.8 & -0.012 & 91.1 & -0.063 & 30.2 & -0.104 & 0.0 & 0.113 & 23.0 & 0.000 & 94.5 \\
+2000 & 26 & FB & no & 0.154 & 0.9 & 0.039 & 71.0 & -0.048 & 51.3 & -0.038 & 45.2 & 0.038 & 41.9 & -0.530 & 0.2 & 0.002 & 91.8 \\
+500 & 12 & RD & yes & -0.001 & 95.4 & -0.001 & 95.4 & -0.023 & 87.5 & -0.024 & 80.1 & -0.029 & 75.7 & -0.167 & 28.9 & -0.000 & 93.6 \\
+500 & 26 & RD & yes & 0.001 & 95.2 & 0.001 & 95.2 & -0.021 & 82.3 & -0.013 & 82.7 & 0.008 & 94.0 & -0.361 & 1.0 & -0.000 & 92.0 \\
+2000 & 12 & RD & yes & -0.001 & 95.3 & -0.001 & 95.3 & -0.023 & 83.9 & -0.024 & 76.7 & -0.072 & 0.9 & -0.199 & 22.8 & 0.000 & 93.8 \\
+2000 & 26 & RD & yes & 0.000 & 94.6 & 0.000 & 94.6 & -0.021 & 80.5 & -0.013 & 82.1 & -0.052 & 62.8 & -0.441 & 0.3 & 0.000 & 91.3 \\
+500 & 12 & RD & no & 0.469 & 12.1 & 0.194 & 60.8 & -0.014 & 91.0 & -0.020 & 82.0 & 0.009 & 93.5 & -0.073 & 87.9 & 0.005 & 89.4 \\
+500 & 26 & RD & no & 0.431 & 4.6 & 0.202 & 52.9 & -0.009 & 83.1 & -0.005 & 74.0 & 0.048 & 77.1 & -0.219 & 47.8 & 0.008 & 80.5 \\
+2000 & 12 & RD & no & 0.405 & 0.7 & 0.124 & 65.8 & -0.015 & 90.3 & -0.022 & 79.5 & 0.009 & 93.2 & -0.071 & 86.9 & 0.003 & 91.1 \\
+2000 & 26 & RD & no & 0.363 & 1.0 & 0.144 & 57.9 & -0.008 & 83.5 & 0.000 & 74.4 & 0.048 & 70.2 & -0.222 & 38.5 & 0.008 & 80.2 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Core scenarios, policy effect $\tau_0=\log 0.8$. bias = mean$(\hat\tau)-\tau_0$; cov = coverage (\%) of 95\% $t_{G-1}$ intervals. FB = feedback adoption, RD = random adoption; spill = $(\phi_0,\kappa_0)=(0.4,-0.1)$ vs $(0,0)$. R = 8000 per scenario; largest MCSE: bias 0.004, coverage 1.4 (percentage points). Biases and coverages are computed over converged replications (convergence rates in the supplementary table). M2 and M3 target $\tau$ on different scales and are shown against $\tau_0$ as in the pre-specified protocol.}
+\end{table}

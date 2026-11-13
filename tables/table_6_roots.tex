@@ -1,0 +1,41 @@
+\begin{table}[!t]
+\centering
+\caption{Multiple roots and boundary solutions of the QD-GMM equations.}
+\label{tab:sim-roots}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrrrr}
+\toprule
+scenario & $\phi_0$ & conv.\ M0 & conv.\ M0-G & $>1$ root & no interior root & boundary & M0-G $\neq$ M0 \\
+\midrule
+1 $N=500$, $T=12$, FB, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+2 $N=500$, $T=26$, FB, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+3 $N=2000$, $T=12$, FB, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+4 $N=2000$, $T=26$, FB, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+5 $N=500$, $T=12$, FB, no spill & 0.0 & 97.8 & 100.0 & 48.3 & 2.3 & 28.6 & 49.7 \\
+6 $N=500$, $T=26$, FB, no spill & 0.0 & 99.3 & 100.0 & 51.7 & 0.5 & 33.6 & 59.1 \\
+7 $N=2000$, $T=12$, FB, no spill & 0.0 & 100.0 & 100.0 & 50.0 & 0.0 & 36.6 & 62.5 \\
+8 $N=2000$, $T=26$, FB, no spill & 0.0 & 100.0 & 100.0 & 51.0 & 0.0 & 44.8 & 74.2 \\
+9 $N=500$, $T=12$, RD, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+10 $N=500$, $T=26$, RD, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+11 $N=2000$, $T=12$, RD, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+12 $N=2000$, $T=26$, RD, spill & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+13 $N=500$, $T=12$, RD, no spill & 0.0 & 92.9 & 100.0 & 47.2 & 5.8 & 33.6 & 55.3 \\
+14 $N=500$, $T=26$, RD, no spill & 0.0 & 100.0 & 100.0 & 50.1 & 0.1 & 30.2 & 53.2 \\
+15 $N=2000$, $T=12$, RD, no spill & 0.0 & 100.0 & 100.0 & 50.1 & 0.0 & 40.4 & 69.0 \\
+16 $N=2000$, $T=26$, RD, no spill & 0.0 & 100.0 & 100.0 & 50.2 & 0.0 & 34.8 & 60.4 \\
+17 $N=500$, $T=12$, FB, $k=10$ & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+18 $N=500$, $T=12$, FB, $k=\infty$ & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+19 $N=500$, $T=12$, RD, $k=10$ & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+20 $N=500$, $T=12$, RD, $k=\infty$ & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+21 X1: wrong generation interval & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.1 & 0.1 \\
+22 X2: reporting drops after adoption & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+23 X3: heterogeneous effects & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+24 X4: susceptible depletion & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+25 X5: dynamic effects & 0.4 & 100.0 & 100.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Root diagnostics of the profiled QD-GMM equations over the grid $\phi\in[0,3]$ (M0-G): share (\%) of replications with more than one interior root, with no interior root, in which the minimum-$Q$ selection is the boundary $\phi=0$, and in which M0-G differs from M0 (local root from the pre-specified start). R = 8000.}
+\end{table}

@@ -1,0 +1,132 @@
+% =================================================================
+% Manuscript prepared with the official Biometrics class (biom.cls,
+% referee option as required for submission) and biom.bst.
+% Compile with XeLaTeX (see compile.sh): fontspec selects Times New Roman.
+% =================================================================
+% The referee option loads endfloat; floats are kept in the text so that each figure and table
+% appears near its first citation and References is the final block.
+\PassOptionsToPackage{disable}{endfloat}
+\documentclass[useAMS,usenatbib,referee]{biom}
+\usepackage{iftex}
+\ifXeTeX\else
+  \PackageError{manuscript}{XeLaTeX is required}{Run xelatex; Times New Roman is loaded through fontspec.}
+\fi
+\usepackage{fontspec}
+% Times New Roman: use the installed system face when available; otherwise
+% load the same face from a local fonts/ directory (font files are licensed
+% separately and are not distributed with the manuscript source).
+\IfFontExistsTF{Times New Roman}{
+  \setmainfont{Times New Roman}
+}{
+  \IfFileExists{fonts/times.ttf}{
+    \setmainfont{Times New Roman}[Path=fonts/,Extension=.ttf,UprightFont=times,BoldFont=timesbd,ItalicFont=timesi,BoldItalicFont=timesbi]
+  }{
+    \PackageError{manuscript}{Times New Roman is not available}{Install Times New Roman or place times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf in fonts/.}
+  }
+}
+\usepackage{amsmath,amssymb}
+% OpenType math (same Computer Modern design as the class default) so that every math glyph,
+% including sized delimiters, carries a Unicode mapping in the PDF text layer.
+\usepackage[math-style=TeX,bold-style=TeX]{unicode-math}
+\setmathfont{Latin Modern Math}
+% \mathcal in the Latin Modern Math OpenType face maps to a missing script glyph;
+% take calligraphic letters from XITS Math, which has them at the standard positions.
+\setmathfont{XITS Math}[range={\mathcal,\mathscr}]
+\usepackage{graphicx}
+\usepackage{etoolbox}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xurl}
+% biom.cls (referee option) does not set the physical page size; Biometrics uses US letter.
+\setlength{\paperwidth}{8.5in}
+\setlength{\paperheight}{11in}
+\usepackage[hidelinks,unicode=true]{hyperref}
+\urlstyle{same}
+\usepackage{caption}
+\usepackage{placeins}
+\captionsetup{
+  font=small,
+  labelfont=normalfont,
+  textfont=normalfont,
+  labelsep=period,
+  justification=justified,
+  singlelinecheck=true,
+  skip=6pt
+}
+\setlength{\textfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setcounter{topnumber}{5}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{8}
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.70}
+
+% biom.cls sets the page number in a zero-width box; \hss keeps the same placement
+% without an overfull-box warning on every page.
+\makeatletter
+\def\ps@headings{\let\@mkboth\markboth
+ \def\@oddhead{\Large\hfill{\small\it\@shorttitle}\hfill\hspace{1.5em}%
+   \rm\@ddell\hbox to 0pt{\small\thepage\hss}}
+ \def\@oddfoot{}%
+ \def\@evenhead{\Large\@ddell\hbox to
+ 0pt{\small\thepage\hss}\hspace{1.5em}\hfill\small{\it Biometrics, \@month}\ \@pubyear\hfill}
+ \def\@evenfoot{}%
+ \def\sectionmark##1{\markboth{##1}{}}
+ \def\subsectionmark##1{\markright{##1}}}
+\makeatother
+\pagestyle{headings}
+\setlength{\emergencystretch}{2em}
+% The running head of the class is taller than its 14pt \headheight; enlarge it without moving the text block.
+\addtolength{\topmargin}{-11pt}
+\setlength{\headheight}{25pt}
+
+% Supplementary floats in Web Appendix C are numbered as Web Figures and Web Tables.
+\makeatletter
+\newcommand{\webfloats}{%
+  \patchcmd{\fnum@figure}{Figure}{Web Figure}{}{}%
+  \patchcmd{\fnum@table}{Table}{Web Table}{}{}}
+\makeatother
+% Theorem-like environments and notation used in the Methods and Web Appendices.
+\makeatletter
+\@ifundefined{theorem}{\newtheorem{theorem}{Theorem}}{}
+\@ifundefined{lemma}{\newtheorem{lemma}{Lemma}}{}
+\@ifundefined{corollary}{\newtheorem{corollary}{Corollary}}{}
+\@ifundefined{remark}{\newtheorem{remark}{Remark}}{}
+\@ifundefined{proposition}{\newtheorem{proposition}{Proposition}}{}
+\makeatother
+\providecommand{\E}{\mathbb{E}}
+\providecommand{\F}{\mathcal{F}}
+\providecommand{\ind}{\mathbf{1}}
+\providecommand{\Sw}{\mathrm{Sw}}
+\providecommand{\cov}{\operatorname{Cov}}
+\providecommand{\plim}{\operatorname*{plim}}
+
+\title[Difference-in-differences on the transmission scale]{Difference-in-differences on the transmission scale: sequential moment estimation of policy effects on the reproduction number under feedback and spatial contagion}
+\author{Apevon Science}
+
+\begin{document}
+
+\input{sections/abstract}
+\maketitle
+\normalfont\mdseries
+
+\input{sections/introduction}
+\input{sections/methods}
+\input{sections/simulation}
+\input{sections/application}
+\input{sections/discussion}
+\input{sections/backmatter}
+\input{sections/appendix}
+
+% Drain every queued float, then start References on a new page.
+\FloatBarrier
+\clearpage
+\bibliographystyle{biom}
+\bibliography{bibliography}
+
+\end{document}

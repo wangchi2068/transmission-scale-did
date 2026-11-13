@@ -1,0 +1,19 @@
+# pilot (not paper numbers): M0 vs M0-G, 30 reps per scenario, seeds = simulation seeds reps 0..29; 2026-11-12 13:31:39 UTC
+15 core_N2000_T12_rd_nospill M0  ok 1.00 bias [ 0.418 -0.42   0.573] empSD [0.112 0.107 0.103] cov [0. 0. 0.]
+15 core_N2000_T12_rd_nospill M0G ok 1.00 bias [ 0.094 -0.098  0.106] empSD [0.2   0.202 0.213] cov [0.77 0.8  0.54]
+    nroots dist [ 0 19 11] boundary share 0.5666666666666667 time M0G 0.29
+13 core_N500_T12_rd_nospill M0  ok 0.93 bias [ 0.431 -0.393  0.907] empSD [0.18  0.184 0.405] cov [0.11 0.36 0.54]
+13 core_N500_T12_rd_nospill M0G ok 1.00 bias [ 0.187 -0.162  0.4  ] empSD [0.258 0.247 0.521] cov [0.53 0.7  0.81]
+    nroots dist [ 2 12 16] boundary share 0.3 time M0G 0.08
+8 core_N2000_T26_fb_nospill M0  ok 1.00 bias [ 0.153 -0.177  0.515] empSD [0.035 0.04  0.086] cov [0.03 0.03 0.  ]
+8 core_N2000_T26_fb_nospill M0G ok 1.00 bias [ 0.022 -0.028  0.1  ] empSD [0.065 0.074 0.203] cov [0.83 0.77 0.5 ]
+    nroots dist [ 0 17 13] boundary share 0.6 time M0G 0.74
+1 core_N500_T12_fb_spill M0  ok 1.00 bias [-0.011  0.014 -0.005] empSD [0.055 0.07  0.054] cov [1.   1.   0.97]
+1 core_N500_T12_fb_spill M0G ok 1.00 bias [-0.011  0.014 -0.005] empSD [0.055 0.07  0.054] cov [1.   1.   0.97]
+    nroots dist [ 0 30] boundary share 0.0 time M0G 0.07
+4 core_N2000_T26_fb_spill M0  ok 1.00 bias [-0.003 -0.002  0.   ] empSD [0.043 0.058 0.017] cov [0.9  0.83 0.97]
+4 core_N2000_T26_fb_spill M0G ok 1.00 bias [-0.003 -0.002  0.   ] empSD [0.043 0.058 0.017] cov [0.9  0.83 0.97]
+    nroots dist [ 0 30] boundary share 0.0 time M0G 0.69
+12 core_N2000_T26_rd_spill M0  ok 1.00 bias [ 0.008 -0.007 -0.002] empSD [0.046 0.053 0.015] cov [1.   1.   0.97]
+12 core_N2000_T26_rd_spill M0G ok 1.00 bias [ 0.008 -0.007 -0.002] empSD [0.046 0.053 0.015] cov [1.   1.   0.97]
+    nroots dist [ 0 30] boundary share 0.0 time M0G 0.71

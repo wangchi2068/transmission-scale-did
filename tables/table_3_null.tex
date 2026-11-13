@@ -1,0 +1,20 @@
+\begin{table}[!t]
+\centering
+\caption{Type I error: rejection rate of the 5\%-level $t_{G-1}$ test of $H_0\colon \tau = 0$ when the null holds.}
+\label{tab:sim-null}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+scenario & M0 & M0-G & M0-ET & M1 & M1-BC & M2 & M3 & M4 & Oracle & $J$ (M0-OI) \\
+\midrule
+FB, $k=10$ & 5.1 & 5.1 & 4.4 & 6.3 & 21.9 & 100.0 & 11.9 & 98.4 & 5.8 & 4.9 \\
+FB, $k=\infty$ & 4.8 & 4.8 & 3.9 & 9.7 & 28.6 & 100.0 & 61.9 & 100.0 & 5.6 & 4.4 \\
+RD, $k=10$ & 4.7 & 4.7 & 4.5 & 6.5 & 14.7 & 76.1 & 25.6 & 6.5 & 6.5 & 4.9 \\
+RD, $k=\infty$ & 5.2 & 5.2 & 4.9 & 6.3 & 15.0 & 99.5 & 32.4 & 4.6 & 5.6 & 4.8 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Null block ($\tau_0=0$, $N=500$, $T=12$, spillover present): rejection rate (\%) of $H_0{:}\,\tau=0$ at nominal 5\% with $t_{G-1}$ critical values (M0-ET: first event-time bin), and rejection rate of the Hansen $J$ test of M0-OI at 5\%. $k$ = negative-binomial dispersion ($\infty$ = Poisson). R = 8000 per scenario; largest MCSE 0.5 percentage points.}
+\end{table}

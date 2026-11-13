@@ -1,0 +1,76 @@
+\section{Discussion}
+\label{s:discussion}
+
+For panels of reported cases we have proposed parallel trends in log transmission, a
+quasi-differenced GMM estimator that removes unit effects without requiring strictly exogenous
+adoption, and an estimator of cases averted that propagates the counterfactual through the renewal
+equation and the network. Under adoption feedback, spillover, overdispersion and small counts the
+simulation study supports the first two, and the three recommendations below follow from it.
+
+\textbf{Report the profile with the estimate.} The estimating equations are nonlinear in
+$\phi$, and a local solver can settle on a root that is not the consistent one without any
+warning. Reporting the profiled $\phi$-moment over a grid, together with the selection criterion
+$Q$ and the over-identification statistic $J$, makes the multiplicity visible and turns root choice
+into a reported analytical decision rather than a silent one. The specification test has power
+against a wrong generation interval and against a change in ascertainment after adoption, which are
+the two misspecifications most likely in surveillance data.
+
+\textbf{Use the event-time specification when effects may build up.} In scenario X5 the
+constant-effect estimate fell outside the range of the true effects while the event-time version
+recovered every bin, the same pattern that motivates recent work on event studies with
+heterogeneous effects \citep{sun2021event,borusyak2024imputation}. The constant effect still has an
+interpretation as a non-negative weighted average of heterogeneous effects
+(Proposition~\ref{prop:hetero}), which scenario X3 confirms. Estimating the multiplicative mean
+directly also sidesteps the sensitivity of log-count regressions to the handling of zeros
+\citep{santossilva2006log,chen2024logs}.
+
+\textbf{Match the inferential target to the level at which the policy is set.} When the order is
+imposed above the unit, interior units have no variation that separates the own effect from the
+spillover effect, and the coefficient attached to the total exposure is the one the panel
+identifies. The application shows how much this matters and how little it costs: the two
+components are estimated with wide intervals, their sum with a narrower one, and a re-indexing of
+the same moments delivers the sum directly as a coefficient.
+
+\textbf{Where the method needs care.} Near $\phi_0=0$ the neighbour term carries no identifying
+information and the parameter sits on the boundary of its space
+\citep{self1987boundary,andrews1999boundary}, so the equations can have several roots; the profile
+of Section~\ref{ss:weekwithin} aside, this is the one region in which the estimator requires a
+deliberate choice, and Section~\ref{ss:estimation} sets out the sequence we recommend for it. Weak
+identification near the boundary also makes Wald intervals unreliable even at the correct root,
+which points to inference robust to weak identification as the natural next step
+\citep{stock2000weak,andrews2019weak}. Identification itself rests on parallel trends in log
+transmission and on sequential exogeneity of adoption given the observed past; the latter cannot be
+tested with the moments used for estimation, and the conventional lead placebo is not a valid check
+under feedback (Proposition~\ref{prop:sources}(c)); pre-tests of parallel trends also distort
+subsequent inference \citep{roth2022pretest}, and sensitivity analysis for departures from parallel
+trends \citep{rambachan2023credible} can be adapted to the transmission scale.
+\textbf{Scope of the evidence.} The simulation uses one family of data-generating mechanisms,
+with two generation-interval lags, a nearest-neighbour graph, 50 clusters and one adoption rule.
+Few clusters, longer generation intervals and other network shapes are outside its range; for few
+clusters the small-sample corrections of cluster-robust inference become relevant
+\citep{imbens2016robust} and should be added. About 30\% of COVID-19 transmission occurs within the
+same week and cannot enter a model with lags of one week or more, which leaves a second-order
+autocorrelated remainder; Section~\ref{ss:weekwithin} traces what this does to the variance. These
+are properties of the designs, and the diagnostic of the first recommendation is what makes them
+visible in a given application.
+
+\textbf{Reading the application.} The order is set at state level while the unit is the county, so
+for 61.9\% of counties the own and the neighbours' order are the same variable; the panel
+identifies the total effect of a state order on an interior county, $\hat\tau+\hat\kappa=-0.466$
+(95\% interval $-1.091$ to $0.159$), and places little information on the two components. The
+event-time estimates are negative in every bin, the profile that scenario X5 associates with
+effects that build up after adoption and that a change in ascertainment also produces; with the
+over-identification test rejecting the working model, the interval reported here describes what
+this panel supports rather than estimating the effect of mask orders. The cases-averted recursion
+is informative over the first weeks, where susceptible depletion is negligible, and its 26-week
+value shows why a depletion term is needed beyond that horizon.
+
+Three extensions follow naturally. Sharper instruments, either those that attain the efficiency
+bound for sequential moment restrictions
+\citep{chamberlain1992sequential,chamberlain2022feedback} or those that exploit the full count
+likelihood \citep{bonhomme2025feedback}, would tighten intervals without changing the design.
+Group-time and dynamic causal effects defined on the transmission scale
+\citep{bojinov2021panel} would extend the event-time analysis used here. Estimating the generation
+interval and the reporting process jointly with the policy effect, building on frequentist renewal
+estimators \citep{goldwasser2026rt}, would remove two assumptions the design maintains as known;
+a bias correction for $\hat\phi$ would improve both the interior case and the boundary one.

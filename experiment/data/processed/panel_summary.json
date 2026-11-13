@@ -1,0 +1,104 @@
+{
+ "created_utc": "2026-11-12T14:16:14Z",
+ "runtime_sec": 17.3,
+ "n_units": 3091,
+ "n_states": 49,
+ "weeks_total": 28,
+ "S": 2,
+ "T": 26,
+ "first_week": "2020-05-18",
+ "first_estimation_week": "2020-06-01",
+ "last_week": "2020-11-23",
+ "n_edges": 9185,
+ "isolated_units": [],
+ "adjacency_fips_not_in_units": [],
+ "commuting_edges": 131124,
+ "negative_weekly_increments_truncated": 417,
+ "negative_mass_truncated": 4006.0,
+ "cases_window_all_rows": 11751953.0,
+ "cases_window_units": 11528182.0,
+ "cases_window_dropped_rows_contiguous": 8711.0,
+ "dropped_rows_examples": [
+  "Adjuntas, Puerto Rico, US",
+  "Aguada, Puerto Rico, US",
+  "Aguadilla, Puerto Rico, US",
+  "Aguas Buenas, Puerto Rico, US",
+  "Aibonito, Puerto Rico, US",
+  "Aleutians East, Alaska, US",
+  "Aleutians West, Alaska, US",
+  "American Samoa, US",
+  "Anasco, Puerto Rico, US",
+  "Anchorage, Alaska, US",
+  "Arecibo, Puerto Rico, US",
+  "Arroyo, Puerto Rico, US",
+  "Barceloneta, Puerto Rico, US",
+  "Barranquitas, Puerto Rico, US",
+  "Bayamon, Puerto Rico, US",
+  "Bethel, Alaska, US",
+  "Bristol Bay plus Lake and Peninsula, Alaska, US",
+  "Bristol Bay, Alaska, US",
+  "Cabo Rojo, Puerto Rico, US",
+  "Caguas, Puerto Rico, US",
+  "Camuy, Puerto Rico, US",
+  "Canovanas, Puerto Rico, US",
+  "Carolina, Puerto Rico, US",
+  "Catano, Puerto Rico, US",
+  "Cayey, Puerto Rico, US",
+  "Ceiba, Puerto Rico, US",
+  "Chugach, Alaska, US",
+  "Ciales, Puerto Rico, US",
+  "Cidra, Puerto Rico, US",
+  "Coamo, Puerto Rico, US"
+ ],
+ "cdc_fips_missing": [],
+ "cdc_all_unit_weeks_have_7_days": true,
+ "share_unit_weeks_treated": 0.5677027598735784,
+ "median_weekly_cases": 27.0,
+ "frac_zero_unit_weeks": 0.07427270238658139,
+ "n_units_ever_treated_in_window": 2291,
+ "n_units_treated_at_window_start": 571,
+ "n_units_on_to_off": 82,
+ "merged_units": {
+  "C29095": [
+   29095
+  ],
+  "U25007": [
+   25007,
+   25019
+  ],
+  "UT_Bear River": [
+   49003,
+   49005,
+   49033
+  ],
+  "UT_Central Utah": [
+   49023,
+   49027,
+   49031,
+   49039,
+   49041,
+   49055
+  ],
+  "UT_Southeast Utah": [
+   49007,
+   49015,
+   49019
+  ],
+  "UT_Southwest Utah": [
+   49001,
+   49017,
+   49021,
+   49025,
+   49053
+  ],
+  "UT_TriCounty": [
+   49009,
+   49013,
+   49047
+  ],
+  "UT_Weber-Morgan": [
+   49029,
+   49057
+  ]
+ }
+}

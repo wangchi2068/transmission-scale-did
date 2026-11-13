@@ -1,0 +1,26 @@
+\begin{abstract}
+Panels of reported cases are the standard data for evaluating non-pharmaceutical interventions, yet
+difference-in-differences estimators on case counts or log cases rest on assumptions that epidemic
+data violate: transmission is multiplicative and self-exciting, policies are adopted in response to
+rising cases, and units infect one another. We place parallel trends on the log reproduction number
+inside a renewal model whose infection pressure is imported from neighbouring units, and estimate
+the resulting effects by quasi-differenced generalised method of moments. The quasi-difference
+removes unrestricted unit effects while using instruments built only from the past, so adoption
+that responds to the epidemic is allowed. Moment contributions form a martingale difference array
+across weeks even when neighbouring clusters exchange infections, so the conventional
+cluster-robust sandwich applies without spatial adjustments, and the week effects are profiled out
+analytically, leaving a three-dimensional problem: on a panel of 3091 counties over 26 weeks a fit
+takes 0.05 seconds and a global root search 0.73 seconds. A pre-specified simulation with 8000
+replications per scenario under adoption feedback, overdispersion and small counts gives bias
+between $-0.002$ and $0.001$ for the direct effect and 94.5\% to 95.4\% coverage of nominal 95\%
+intervals, with correct size under the null, while two-step reproduction-number regressions and
+Poisson fixed effects are biased and reject far too often. An estimand of cases averted propagates
+the counterfactual through the renewal equation and the network. In an application to state mask
+orders and county COVID-19 cases, the order is set above the unit, so interior counties have no
+variation that separates own from neighbours' orders; the total effect of a state order on an
+interior county, $-0.466$ (95\% interval $-1.091$ to $0.159$), is what the panel identifies, and
+the profile of the estimating equations makes the remaining ambiguity visible.
+\end{abstract}
+\begin{keywords}
+Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.
+\end{keywords}

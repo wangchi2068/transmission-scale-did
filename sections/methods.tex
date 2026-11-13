@@ -1,0 +1,541 @@
+\section{Methods}
+\label{s:methods}
+
+\subsection{Setting, potential outcomes and estimands}
+
+Units $i=1,\dots,N$ (counties) are partitioned into $G$ clusters (states); $g(i)$ denotes the
+cluster of unit $i$ and the cluster sizes $n_g$ are bounded. Weeks are indexed by
+$t=1-S,\dots,T$; weeks $1,\dots,T$ form the estimation window and the $S$ earlier weeks are
+used only to build lags. $Y_{it}$ denotes reported new cases and $D_{it}\in\{0,1\}$ the policy,
+with $D_{it}=0$ for $t\le 0$. The matrix $W=(W_{ij})$ is a known, non-negative, row-normalised
+spatial weight matrix with zero diagonal, and $\bar D_{it}=\sum_j W_{ij}D_{jt}$ is the share of
+neighbours under the policy. With known weekly generation-interval weights $w_1,\dots,w_S\ge 0$,
+$\sum_s w_s=1$ \citep{wallinga2007generation}, we write
+\begin{gather*}
+L_{it}=\sum_{s=1}^{S} w_s Y_{i,t-s},\qquad
+N_{it}=\sum_{s=1}^{S} w_s \sum_{j} W_{ij}Y_{j,t-s},\\
+\Lambda_{it}(\phi)=L_{it}+\phi N_{it}+\omega_i ,
+\end{gather*}
+for the local, imported and total infection pressure; $\omega_i>0$ is a small known background
+importation term. For $\theta=(\gamma_2,\dots,\gamma_T,\tau,\kappa,\phi)$, with $\gamma_1=0$, let
+\begin{equation}
+m_{it}(\theta)=\exp(\gamma_t+\tau D_{it}+\kappa\bar D_{it})\,\Lambda_{it}(\phi).
+\label{eq:mean}
+\end{equation}
+
+Potential outcomes $Y_{it}(\mathbf d)$ are indexed by the whole policy array
+$\mathbf d=(\mathbf d_1,\dots,\mathbf d_T)$, $\mathbf d_t\in\{0,1\}^N$, so that interference between
+units is allowed \citep{hudgens2008interference}. $H_{t-1}(\mathbf d)$ is the potential history
+of all units' outcomes up to week $t-1$, and $\Lambda_{it}(\mathbf d;\phi)$ is the pressure computed
+from it. The unit effects $\alpha=(\alpha_1,\dots,\alpha_N)$ are unobserved. We work with the
+filtration
+\[
+\F_t=\sigma\bigl(\alpha,\ Y_{js}\ (j\le N,\ s\le t),\ D_{js}\ (j\le N,\ s\le t+1)\bigr),
+\]
+which contains the policy for week $t+1$, decided at the end of week $t$. Instruments are
+functions of the observable part of $\F_{t-1}$.
+
+The target parameters are defined by the transmission model of Assumption A1 below. The
+\emph{direct transmission effect} $\tau$ is the log ratio of a unit's conditional reproduction
+number, $R_{it}(\mathbf d)=\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d)\}/\Lambda_{it}(\mathbf d;\phi_0)$,
+with and without its own policy, holding the history and the neighbours' policies fixed. The
+\emph{policy spillover} $\kappa$ is the corresponding effect of the share of neighbours under the
+policy, and the \emph{contagion coupling} $\phi$ is the relative infectiousness of neighbours'
+recent cases. For a set $\mathcal P$ of post-adoption unit-weeks, the \emph{cases averted} are
+\begin{equation}
+\psi_{\mathcal P}=\E\sum_{(i,t)\in\mathcal P}\{Y_{it}(\mathbf 0)-Y_{it}\},
+\label{eq:psi}
+\end{equation}
+where $\mathbf 0$ is the array with no policy anywhere; $\psi_{\mathcal P}$ includes propagation
+through the renewal process and across units.
+
+\subsection{Assumptions}
+
+\begin{description}
+\item[A1 (renewal model with parallel log-transmission trends).] For every policy array
+$\mathbf d$, unit $i$ and week $t\ge 1$,
+$\E\{Y_{it}(\mathbf d)\mid \alpha,H_{t-1}(\mathbf d)\}=\exp(\alpha_i+\gamma_{t}+\tau_0 d_{it}+\kappa_0\bar d_{it})\Lambda_{it}(\mathbf d;\phi_0)$.
+\item[A2 (no anticipation and sequential ignorability).] (a) $Y_{it}(\mathbf d)$ depends on
+$\mathbf d$ only through $\mathbf d_1,\dots,\mathbf d_t$. (b) For every $t$ and $\mathbf d$ with
+$\Pr(D_{1:t}=\mathbf d_{1:t})>0$,
+$\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d),D_{1:t}=\mathbf d_{1:t}\}=\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d)\}$.
+\item[A3 (consistency).] $Y_{it}=Y_{it}(D)$.
+\item[A4 (conditional independence across clusters).] For every $t$, conditionally on $\F_{t-1}$,
+the cluster vectors $(Y_{it})_{i:g(i)=g}$, $g=1,\dots,G$, are independent. This rules out
+infection that crosses a cluster boundary within the same week. Section~\ref{ss:weekwithin}
+discusses what the assumption buys and what happens without it.
+\item[A4$'$ (local dependence).] Let $\mathcal C$ be the graph on clusters in which $g$ and $h$
+are adjacent if $W_{ij}>0$ for some $i\in g$, $j\in h$, or if the policy rule of $g$ uses data
+from $h$; its maximal degree is bounded. (i) The cluster primitives (unit effects and pre-sample
+outcomes, weekly outcome innovations, weekly policy randomisation) are independent across
+clusters, and the week-$t$ outcome innovations are independent of all primitives dated before
+week $t$ and of the week-$t$ policy randomisation. (ii) $D_{gt}$ is a
+measurable function of the week-$t$ policy randomisation of $g$ and of the histories before week
+$t$ of clusters within distance $\rho$ of $g$ in $\mathcal C$; $Y_{gt}$ is a measurable function of
+the week-$t$ innovation and unit effects of $g$ and of the outcomes before week $t$ and the
+week-$t$ policies of $g$ and of the clusters adjacent to $g$.
+\item[A5 (positive pressure).] $\Lambda_{it}(\phi)\ge c>0$ for all $i$, $t$ and $\phi\in[0,\bar\phi]$.
+\item[A6 (regularity).] Web Appendix A.1: compact parameter space with $\theta_0$ interior;
+moment dominance; existence of the limits $\bar g$, $\Gamma$, $\Omega$ defined below, with
+$\Omega$ positive definite; $\bar g(\theta)=0$ only at $\theta_0$; $\Gamma$ of full rank.
+\item[A7 (reporting).] Reported cases are $Y_{it}=c_ic_tI_{it}$, where $I_{it}$ are infections,
+$c_i>0$ is a unit reporting factor and $c_t>0$ a week reporting factor.
+\end{description}
+
+Assumption A1 states that, in the absence of any policy, $\log R_{it}(\mathbf 0)=\alpha_i+\gamma_t$.
+Untreated transmission paths are therefore parallel on the log scale, while levels may differ arbitrarily
+and may be related to adoption. The conditional variance is unrestricted, so overdispersion and
+clustering of cases are allowed. Assumption A2(b) is a mean version of sequential randomisation
+\citep{robins2000msm}. Policies may depend on $\alpha$ and on the entire past of all units, which
+is the feedback that motivates this paper, but not on the shocks of the week they apply to.
+A4 allows arbitrary dependence within clusters and dependence across clusters through past
+outcomes (contagion); it rules out common unmodelled shocks to neighbouring clusters within a
+week beyond those absorbed by $\gamma_t$. A4$'$ implies A4 and is only used to verify the laws
+of large numbers. It fails when policies respond to national aggregates, in which case the laws
+of large numbers become high-level conditions. A5 holds by construction when $\omega_i\ge c$.
+
+\begin{proposition}[Ascertainment]
+\label{prop:ascertainment}
+Suppose A1 holds for infections, with infection pressure $\Lambda^{I}_{it}$, and reported cases
+satisfy A7. Suppose also that the reported pressure uses the background term
+$\omega^{Y}_{it}=c_ic_{t-1}\omega_i{}^{I}$ and that either $\phi_0=0$ or $c_i=c_j$ whenever $W_{ij}>0$.
+(a) If $c_{t-s}=c_{t-1}$ for $s=1,\dots,S$, then reported cases satisfy A1 with the same
+$\alpha_i$, $\tau_0$, $\kappa_0$, $\phi_0$ and with $\gamma_t$ replaced by $\gamma_t+\log(c_t/c_{t-1})$.
+(b) Otherwise, $|\log\Lambda^{Y}_{it}-\log(c_ic_{t-1}\Lambda^{I}_{it})|\le\max_{1\le s\le S}|\log(c_{t-s}/c_{t-1})|$,
+so the error in the log reproduction number of week $t$ is bounded by the largest relative change
+in ascertainment within the generation window.
+\end{proposition}
+
+Proposition~\ref{prop:ascertainment} is why time-varying testing intensity does not bias $\tau$
+as long as it is common across units and smooth relative to the generation interval. When
+reports are a binomial thinning of infections, the reported pressure is a noisy proxy for
+$c_ic_{t-1}\Lambda^I_{it}$, and A1 holds for reported data only approximately; we treat this
+case as a sensitivity analysis, not as a theorem.
+
+\subsection{Quasi-differenced moments}
+\label{ss:moments}
+
+For $t=1,\dots,T-1$ let $r_{it}(\theta)=m_{it}(\theta)/m_{i,t+1}(\theta)$ and define the forward
+quasi-difference \citep{chamberlain1992sequential,wooldridge1997multiplicative}
+\begin{equation}
+u_{it}(\theta)=Y_{i,t+1}\,r_{it}(\theta)-Y_{it}.
+\label{eq:qd}
+\end{equation}
+
+\begin{lemma}[Observed-data model and moment]
+\label{lem:moment}
+Under A1--A3, $\E(Y_{it}\mid\F_{t-1})=\mu_{it}:=e^{\alpha_i}m_{it}(\theta_0)$ for $t\ge 1$, and
+the quasi-difference \eqref{eq:qd} satisfies $\E\{u_{it}(\theta_0)\mid\F_{t-1}\}=0$ for $t=1,\dots,T-1$, provided
+$\E|Y_{i,t+1}r_{it}(\theta_0)|<\infty$.
+\end{lemma}
+
+The unit effect $e^{\alpha_i}$ cancels because $r_{it}$ is a ratio of means, so $\alpha_i$ is
+neither estimated nor needed. Let $z_{it}$ be a $q$-vector of instruments that are
+$\F_{t-1}$-measurable. Cluster contributions and the sample moment are
+\[
+g_g(\theta)=\sum_{i:g(i)=g}\sum_{t=1}^{T-1} z_{it}u_{it}(\theta),\qquad
+\hat g(\theta)=G^{-1}\sum_{g=1}^{G}g_g(\theta).
+\]
+Write $\varepsilon_{is}=Y_{is}-\mu_{is}$ and $r_{is}=r_{is}(\theta_0)$.
+
+\begin{lemma}[Martingale representation]
+\label{lem:mds}
+Under A1--A3, $g_g(\theta_0)=\sum_{s=1}^{T}\xi_{gs}$ with
+\begin{gather*}
+\xi_{gs}=\sum_{i:g(i)=g}a_{is}\varepsilon_{is},\\
+a_{is}=z_{i,s-1}r_{i,s-1}\ind(s\ge 2)-z_{is}\ind(s\le T-1),
+\end{gather*}
+where $a_{is}$ is $\F_{s-1}$-measurable.
+Hence $\E(\xi_{gs}\mid\F_{s-1})=0$ and $\E(g_gg_g{}^{\top})=\sum_{s}\E(\xi_{gs}\xi_{gs}{}^{\top})$. If
+also A4 holds, then $\E\{g_g(\theta_0)g_h(\theta_0)^{\top}\}=0$ for $g\ne h$.
+\end{lemma}
+
+Lemma~\ref{lem:mds} is the key to inference under contagion. Neighbouring clusters have
+correlated outcomes, because each one's cases seed the other's epidemic; this correlation is
+visible in the numerical checks of Web Appendix B. Their moment contributions are nevertheless
+uncorrelated, because each contribution is a sum of innovations weighted by predetermined
+quantities. The ordinary cluster-robust variance therefore remains valid and no spatial HAC
+correction is needed for $\hat\theta$.
+
+\subsection{Identification}
+\label{ss:ident}
+
+Let $x_{it}(\phi)=(D_{it},\bar D_{it},N_{it}/\Lambda_{it}(\phi))^{\top}$ and $e_t$ the $t$th unit
+vector of length $T-1$, and parametrise the week effects by $\delta_t=\gamma_{t+1}-\gamma_t$, so
+that $\theta=(\delta^{\top},\beta^{\top})^{\top}$ with $\beta=(\tau,\kappa,\phi)^{\top}$ and
+$p=T+2$. Then
+\begin{equation}
+\frac{\partial u_{it}(\theta)}{\partial\theta^{\top}}=Y_{i,t+1}r_{it}(\theta)\bigl\{-e_t{}^{\top},\,x_{it}(\phi)^{\top}-x_{i,t+1}(\phi)^{\top}\bigr\}.
+\label{eq:jac}
+\end{equation}
+Here and below, $\lim$ denotes the limit as $G\to\infty$. Let $\bar g(\theta)=\lim G^{-1}\sum_g\E g_g(\theta)$ and $\Gamma=\partial\bar g(\theta_0)/\partial\theta^{\top}$.
+With absorbing adoption, write $\Sw_{i,t+1}=\ind(D_{it}=0,D_{i,t+1}=1)$ for switchers.
+
+\begin{theorem}[Identification]
+\label{thm:ident}
+Assume A1--A3, A5 and A6.
+(a) $\bar g(\theta_0)=0$, and the Jacobian is
+\begin{equation*}
+\Gamma=\lim G^{-1}\sum_g\E\sum_{i\in g}\sum_{t}z_{it}\mu_{it}\{-e_t{}^{\top},x_{it}{}^{\top}-x_{i,t+1}{}^{\top}\}.
+\end{equation*}
+If $\operatorname{rank}\Gamma=p$, then $\theta_0$ is the unique zero of $\bar g$ in a
+neighbourhood of $\theta_0$. If $\operatorname{rank}\partial\bar g(\theta)/\partial\theta^{\top}=r<p$
+for all $\theta$ in a neighbourhood of $\theta_0$, then $\theta_0$ is not locally identified.
+(b) Let adoption be absorbing, fix $(\kappa,\phi)=(\kappa_0,\phi_0)$, use the instruments
+$s_{it}e_t$ and $s_{it}D_{it}$ with $s_{it}>0$ $\F_{t-1}$-measurable, and solve the week moments
+for $\delta$. With $A_t=\lim G^{-1}\E\sum_i s_{it}D_{it}\mu_{it}$ and
+$K_t=\lim G^{-1}\E\sum_i s_{it}\mu_{it}\Sw_{i,t+1}$, if $A_t>0$ and $K_t>0$ for some $t$, then
+the profiled moment for $\tau$ is strictly increasing and $\tau_0$ is its unique root on
+$\mathbb R$.
+\end{theorem}
+
+Part (a) is the moment-condition analogue of \citet{rothenberg1971identification}. Part (b) shows
+where the information about $\tau$ comes from, which the next result makes explicit.
+
+\begin{proposition}[Sources of identification]
+\label{prop:sources}
+Assume A1--A3 and absorbing adoption.
+(a) If $D_{it}=D_{i,t+1}$, then $u_{it}(\theta)$ does not depend on $\tau$.
+(b) The $\tau$-column of $\Gamma$ is
+\begin{equation*}
+-\lim G^{-1}\sum_g\E\sum_{i\in g}\sum_t z_{it}\mu_{it}\Sw_{i,t+1}.
+\end{equation*}
+(c) For the lead $D_{i,t+1}$, which is $\F_t$- but not $\F_{t-1}$-measurable, and any
+$\F_{t-1}$-measurable $z_{it}$,
+$\E\{z_{it}D_{i,t+1}u_{it}(\theta_0)\}=-\E\{z_{it}\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})\}$.
+\end{proposition}
+
+Treated stayers carry no direct information on $\tau$; they enter only through the week effects,
+which are pinned down by all units. The effect is learned from the growth of cases in switchers
+relative to the common growth. Part (c) shows that the usual lead-placebo test is
+\emph{invalid under feedback}. When adoption responds to high current cases,
+$\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})>0$ and the lead moment is negative even though
+the model is correct. Leads are valid placebo instruments only when adoption dates are fixed at
+least two weeks in advance. Under feedback we instead test the model with the over-identification
+statistic of Corollary~\ref{cor:J}, using additional predetermined instruments.
+
+\subsection{Estimation and inference}
+\label{ss:estimation}
+
+The default instruments are
+$z_{it}=s_{it}\{e_t{}^{\top},D_{it},\bar D_{it},\bar\phi N_{it}/\Lambda_{it}(\bar\phi)\}^{\top}$
+with scale weight $s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$ and a reference value $\bar\phi$. This
+gives $q=p$, and the estimator $\hat\theta$ solves $\hat g(\theta)=0$. The week moments solve in
+closed form for given $\beta$:
+\begin{equation}
+e^{\hat\delta_t(\beta)}=\frac{\sum_i s_{it}Y_{i,t+1}q_{it}(\beta)}{\sum_i s_{it}Y_{it}},
+\label{eq:profile}
+\end{equation}
+with $q_{it}(\beta)=e^{\tau(D_{it}-D_{i,t+1})+\kappa(\bar D_{it}-\bar D_{i,t+1})}\Lambda_{it}(\phi)/\Lambda_{i,t+1}(\phi)$,
+so only a three-dimensional root search over $\beta$ is required. With
+$\hat\Gamma=G^{-1}\sum_g\partial g_g(\hat\theta)/\partial\theta^{\top}$, computed analytically from
+\eqref{eq:jac}, and $\hat\Omega=G^{-1}\sum_g g_g(\hat\theta)g_g(\hat\theta)^{\top}$, the variance
+estimator is $\hat V=\{G/(G-1)\}\hat\Gamma^{-1}\hat\Omega\hat\Gamma^{-\top}/G$. Confidence intervals
+use $t_{G-1}$ critical values, a small-cluster adjustment recommended by
+\citet{cameron2015practitioner}. For over-identified versions with $q>p$, $\hat\theta$ minimises
+$\hat g(\theta)^{\top}\hat W\hat g(\theta)$.
+
+Efficient two-step GMM with all available instruments is not our primary estimator. With
+$G\approx 49$ states and $T+2$ or more moments, the estimated optimal weight matrix is close to
+singular and two-step standard errors are known to be too small \citep{windmeijer2005finite}.
+Over-identification is used only for specification tests with a few additional instruments.
+
+\begin{theorem}[Asymptotic properties]
+\label{thm:asy}
+Assume A1--A6, and either A4$'$ or the high-level laws of large numbers (L) of Web Appendix A.1.
+Let $\hat W\to_p W$ positive definite (with $W=I$ when $q=p$).
+(a) $\hat\theta\to_p\theta_0$.
+(b) $\sqrt G(\hat\theta-\theta_0)=G^{-1/2}\sum_g\varphi_g+o_p(1)\to_d N(0,V)$ with influence function
+$\varphi_g=-(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}Wg_g(\theta_0)$ and
+$V=(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}W\Omega W\Gamma(\Gamma^{\top}W\Gamma)^{-1}$, where
+\[
+\Omega=\lim G^{-1}\sum_g\E\{g_g(\theta_0)g_g(\theta_0)^{\top}\}=\lim G^{-1}\sum_g\sum_s\E(\xi_{gs}\xi_{gs}{}^{\top}).
+\]
+In the just-identified case $\varphi_g=-\Gamma^{-1}g_g(\theta_0)$ and $V=\Gamma^{-1}\Omega\Gamma^{-\top}$.
+(c) $\hat\Gamma\to_p\Gamma$ and $\hat\Omega\to_p\Omega$, so that $G\hat V\to_p V$.
+\end{theorem}
+
+\begin{corollary}[Over-identification test]
+\label{cor:J}
+Under the conditions of Theorem~\ref{thm:asy} with $q>p$ and $\hat W=\tilde\Omega^{-1}$ computed
+at a consistent first-step estimator, $J=G\,\hat g(\hat\theta)^{\top}\hat W\hat g(\hat\theta)\to_d\chi^2_{q-p}$.
+\end{corollary}
+
+The central-limit step uses a martingale argument over the $T$ week blocks combined with a
+conditional Lindeberg argument across clusters within each block (Lemma~3, Web Appendix A). It
+is self-contained, so we need not appeal to the nesting conditions of the general martingale
+central limit theorem \citep{hall1980martingale}. With independent clusters the result reduces to
+standard clustered-sample theory \citep{hansen2019clustered}. Instruments that depend on a
+first-step estimate, such as $\bar\phi=\hat\phi$ from a first pass or a predicted adoption hazard,
+do not change $V$ (Lemma~5, Web Appendix A), because derivatives of predetermined instruments
+are orthogonal to $u_{it}(\theta_0)$.
+
+\begin{remark}[Working-optimal instruments]
+\label{rem:optimal}
+Ignoring the correlation between $u_{it}$ and $u_{i,t+1}$ and using a Poisson working variance,
+$\E\{\partial u_{it}/\partial\theta\mid\F_{t-1}\}=\mu_{it}\{-e_t,x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}$
+and $\operatorname{var}(u_{it}\mid\F_{t-1})=\mu_{it}\{1+\E(r_{it}\mid\F_{t-1})\}$, so the working-optimal
+instrument $\{x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}/\{1+\E(r_{it}\mid\F_{t-1})\}$ is free of
+$\alpha_i$. Its policy component is the predicted switching hazard, which can be estimated in a
+first step (Lemma~5). Fully efficient instruments for sequential moment restrictions require
+forward orthogonalisation \citep{chamberlain1992sequential,chamberlain2022feedback}, and we do not
+derive the efficiency bound. Under a full Poisson likelihood more feedback-robust moments exist
+\citep{bonhomme2025feedback}; under our conditional-mean model only quasi-differenced moments
+are used.
+\end{remark}
+
+\subsection{Transmission within a week and assumption A4}
+\label{ss:weekwithin}
+
+A4 states that, conditionally on the history, outcomes are independent across clusters within a
+week. If an infection crosses a cluster boundary inside the same week and both counties are
+recorded in that week, the two week-$t$ innovations are dependent given $\F_{t-1}$, and A4 fails
+exactly where it matters. When does that happen, and what does it cost?
+
+First, the assumption is about the innovations, not the outcomes. Neighbouring clusters share
+history through $\bar D$ and through the network pressure $\Lambda$, and Lemma~\ref{lem:mds}
+accounts for that by weighting each moment contribution with a $\F_{s-1}$-measurable factor. What
+A4 excludes is a correlation that arrives in the same week as the outcome, before it can enter
+the information set.
+
+Second, a weekly panel can only be internally consistent if contagion is lagged at least one
+period, because the renewal equation used to define the estimand, equation~\eqref{eq:mean}, is
+itself written in completed weeks. With same-week transmission the model is
+misspecified for any lag structure, and the question is not whether the estimator is consistent but
+how the misspecification interacts with the variance. Two consequences follow. The moments are no
+longer martingale differences, so a fraction of the cross-cluster covariance survives; the
+cluster-robust sandwich, which sets those terms to zero, then has a negative bias. The direction is
+clear and the magnitude is not: the omitted covariance is proportional to the share of transmission
+that crosses a cluster boundary within a week, which the data do not identify. In the application
+about 30\% of transmission occurs within a week and most of it stays inside a cluster, since
+between-county transmission inside a state is absorbed by the neighbour term only across states.
+
+Third, the residual dependence is weak and sparse, and the moment-relevance condition in Lemma 2
+requires only that the contribution of a cluster be uncorrelated with those of clusters at
+distance beyond the radius that the instrument spans. A dependence confined to adjacent clusters
+in one week does not violate that condition; what it does is make the variance estimate downward
+biased in the direction of the omitted term. A conservative reading is that the reported standard
+errors are a lower bound, and that the over-identification test, which is sensitive to precisely
+this kind of second-order dependence, rejects for that reason as well as for the ones discussed in
+Section~\ref{s:application}.
+
+Fourth, the remedies are either to shorten the observation window below the generation interval,
+which is rarely possible with surveillance data, or to add a spatial autocorrelation correction
+\citep{conley1999gmm} on top of the cluster-robust one, at the cost of a bandwidth choice. For the
+designs studied here the omitted covariance is confined to adjacent clusters, so a Conley-type
+correction would add at most the terms of the adjacent-pair block; the simulation does not
+contain same-week transmission, so this is a statement about the direction of the bias rather than
+an estimate of it.
+
+\subsection{What standard estimators estimate under feedback}
+\label{ss:bias}
+
+Parts (a)--(c) take $\kappa_0=\phi_0=0$ and the pressure $\Lambda_{it}=L_{it}+\omega_i$ as
+known, which favours the comparators. $\ddot D_{it}$ denotes two-way demeaned $D_{it}$ in a
+balanced panel, $d^2=\lim N^{-1}\E\sum_{i,t}\ddot D_{it}{}^2>0$, and limits are taken as
+$G\to\infty$ with $T$ fixed.
+
+\begin{theorem}[Pseudo-true values]
+\label{thm:bias}
+Assume A1--A6 and (L).
+\begin{enumerate}
+\item[(a)] \emph{Two-step log-$R$ difference-in-differences.} Let $\hat\tau_2$ be the two-way
+fixed-effects slope of $y_{it}=\log\{(Y_{it}+c)/\Lambda_{it}\}$ on $D_{it}$, $c>0$
+\citep{feng2024parallel}. Define $b_{it}=\log\mu_{it}-\E\{\log(Y_{it}+c)\mid\F_{t-1}\}$ and
+$\eta_{it}=\log(Y_{it}+c)-\E\{\log(Y_{it}+c)\mid\F_{t-1}\}$. Then exactly
+$\hat\tau_2-\tau_0=\{-\sum\ddot D_{it}b_{it}+\sum\ddot D_{it}\eta_{it}\}/\sum\ddot D_{it}{}^2$, and
+$\hat\tau_2\to_p\tau_0+B_J+B_F$ with
+\begin{gather*}
+B_J=-\lim\frac{\E\sum_{i,t}\ddot D_{it}b_{it}}{Nd^2},\\
+B_F=-\lim\frac{\E\sum_i\sum_{t<s}D_{is}\eta_{it}}{NTd^2},\qquad
+|B_F|\le\frac{2\bar\sigma_\eta T^{1/2}}{3d^2},
+\end{gather*}
+where $\bar\sigma_\eta{}^2=\sup_{i,t}\E\eta_{it}{}^2$. Under a negative binomial working law with mean
+$\mu$ and shape $k$, a second-order expansion gives $b_{it}\approx-(c-1/2+c/k)/\mu_{it}+1/(2k)$.
+$B_F=0$ if $\E(\eta_{it}\mid D_{i1},\dots,D_{iT})=0$, and $B_F<0$ when adoption follows unusually
+high case counts.
+\item[(b)] \emph{Poisson fixed effects.} Let $\hat\beta_1$ be the conditional (Poisson
+fixed-effects) estimator with offset $\log\Lambda_{it}$, unit and week effects, and regressors
+$x_{it}$. Its estimating function is $S_i(\beta)=\sum_s\{x_{is}-\bar x^m_i(\beta)\}Y_{is}$, where
+$\bar x^m_i=\sum_s m_{is}x_{is}/\sum_s m_{is}$, and
+$\E S_i(\beta_0)=-\sum_s\E\{\bar x^m_i(\beta_0)\varepsilon_{is}\}$, which is non-zero in general when
+$\Lambda_{i,s+1}$ or $D_{i,s+1}$ depends on $Y_{is}$. If $Y_{is}\mid\F_{s-1}$ is Poisson and
+$\bar x^m_i=f(Y_{is},R_{is})$ with $R_{is}$ conditionally independent of $Y_{is}$, then
+$\E(\bar x^m_i\varepsilon_{is}\mid\F_{s-1})=\mu_{is}\E\{f(Y_{is}+1,R_{is})-f(Y_{is},R_{is})\mid\F_{s-1}\}$
+\citep{chen1975poisson}. For $T=2$, $S=1$, $D_{i1}=0$ and $D_{i2}$ a function of $Y_{i1}$ and
+independent noise, the pseudo-true week-2 log growth $\tilde h_d$ in group $D_{i2}=d$ solves
+\begin{equation}
+\E\Bigl[\ind(D_{i2}=d)\,\Lambda_{i2}\,\frac{\Lambda_{i1}e^{\alpha_i+h_0+\tau_0d}-e^{\tilde h_d}Y_{i1}}{\Lambda_{i1}+e^{\tilde h_d}\Lambda_{i2}}\Bigr]=0,
+\label{eq:t2fe}
+\end{equation}
+and $\hat\tau_1\to_p\tilde h_1-\tilde h_0$. Because $\Lambda_{i2}=Y_{i1}+\omega_i$, $\tilde h_d\ne h_0+\tau_0d$, and in general
+$\tilde h_1-\tilde h_0\ne\tau_0$, even when $D_{i2}$ is randomised.
+\item[(c)] \emph{Two-way fixed effects on $\log(Y+1)$.} The slope $\hat\tau_3$ satisfies
+\[
+\hat\tau_3-\tau_0=\frac{\sum\ddot D_{it}\log\Lambda_{it}}{\sum\ddot D_{it}{}^2}+\frac{-\sum\ddot D_{it}b^{(1)}_{it}+\sum\ddot D_{it}\eta^{(1)}_{it}}{\sum\ddot D_{it}{}^2},
+\]
+with $b^{(1)},\eta^{(1)}$ as in (a) with $c=1$. The first, omitted-pressure term is positive when
+adoption follows rising pressure and negative when the policy lowers later pressure, so the
+sign of the bias is not determined.
+\item[(d)] \emph{Ignoring spillover.} Let $(\tilde\delta,\tilde\tau)$ be the pseudo-true value of
+QD-GMM with $\kappa=\phi=0$ imposed and instruments $s_{it}e_t$, $s_{it}D_{it}$. It solves
+$\lim G^{-1}\E\sum_{i,t}z_{it}\mu_{it}\{R_{it}(\delta,\tau)-1\}=0$, where
+\begin{multline*}
+R_{it}(\delta,\tau)=\exp\{\gamma_{t+1}-\gamma_t-\delta_t\\
+-(\tau-\tau_0)\Delta D_{i,t+1}+\kappa_0\Delta\bar D_{i,t+1}\}\,
+\frac{1+\phi_0\tilde N_{i,t+1}}{1+\phi_0\tilde N_{it}},
+\end{multline*}
+$\tilde N_{it}=N_{it}/(L_{it}+\omega_i)$ and $\Delta X_{i,t+1}=X_{i,t+1}-X_{it}$. If $\kappa_0=\phi_0=0$ then $\tilde\tau=\tau_0$. To first
+order in $(\kappa_0,\phi_0)$, $\tilde\tau-\tau_0$ is the coefficient of $\Delta D_{i,t+1}$ in the
+just-identified instrumental-variable fit, with weights $s_{it}\mu_{it}$ and instruments
+$(e_t,D_{it})$, of $\kappa_0\Delta\bar D_{i,t+1}+\phi_0\Delta\tilde N_{i,t+1}$ on week indicators
+and $\Delta D_{i,t+1}$. When $\Delta\bar D$ moves with $\Delta D$, as under state-level adoption,
+the $\kappa_0$ contribution has the sign of $\kappa_0$.
+\end{enumerate}
+\end{theorem}
+
+Part (a) separates two mechanisms. The Jensen term $B_J$ is the small-count problem of
+estimated reproduction numbers and does not vanish as $T$ grows. The feedback term $B_F$ arises
+because the unit mean of $D$ uses future adoption, which responds to current shocks. This is the
+mechanism behind the fixed-$T$ bias of within estimators in dynamic panels
+\citep{nickell1981biases}. Our bound shows that $B_F$ decays no faster than $T^{-1/2}$ in general.
+Part (b) shows that the Poisson fixed-effects estimator is inconsistent for fixed $T$ even with
+randomised adoption, through the lagged-outcome offset. We do not derive a general $O(1/T)$ rate.
+Split-panel jackknife corrections \citep{dhaene2015splitpanel} assume stationarity, which week
+effects and staggered adoption violate, so the corrected estimator is assessed only by
+simulation.
+
+\subsection{Heterogeneous and dynamic effects}
+
+\begin{proposition}[Heterogeneous effects]
+\label{prop:hetero}
+Suppose A1 holds with unit-specific, time-invariant $\tau_i$, possibly dependent on $\alpha_i$ and
+on the adoption process, adoption is absorbing, and $(\kappa,\phi)=(\kappa_0,\phi_0)$ is fixed. Use
+the instruments of Theorem~\ref{thm:ident}(b). Let $M_t=\lim G^{-1}\E\sum_i s_{it}\mu_{it}$ and
+assume $A_t>0$, $K_t>0$ for some $t$. Then the pseudo-true value $\tilde\tau$ exists, is unique,
+and lies in the closed convex hull of the support of $\tau_i$ under the measure
+$s_{it}\mu_{it}\Sw_{i,t+1}$ restricted to weeks with $A_t>0$. A first-order expansion in
+$\tau_i-\tilde\tau$ gives the following approximation.
+\[
+\tilde\tau\approx\frac{\sum_t(A_t/M_t)\lim G^{-1}\E\sum_i s_{it}\mu_{it}\Sw_{i,t+1}\tau_i}{\sum_t(A_t/M_t)K_t},
+\]
+This is a weighted average with non-negative weights.
+\end{proposition}
+
+Unlike two-way fixed effects with staggered adoption
+\citep{goodmanbacon2021did,dechaisemartin2020twfe}, the constant-effect QD-GMM estimand cannot
+place negative weight on any unit's effect when effects are time-invariant. Switchers in weeks
+with no treated units receive zero first-order weight.
+
+\begin{remark}[Dynamic effects]
+\label{rem:dynamic}
+If the effect changes with time since adoption, treated stayers no longer cancel $\tau$; their
+case growth contains $\tau_{e+1}-\tau_e$. Because already-treated units help pin down the week
+effects (Proposition~\ref{prop:sources}), the constant-effect estimand can lie outside the range of
+the true effects and can even have the wrong sign, as with already-treated comparisons in
+two-way fixed effects \citep{goodmanbacon2021did}. We therefore recommend the event-time
+specification $\sum_{e=0}^{E}\tau_e\ind\{t-A_i=e\}$, where $A_i$ is the adoption week and the
+last bin collects $e\ge E$,
+instrumented by $s_{it}\ind\{t-A_i=e\}$. These indicators are $\F_{t-1}$-measurable, so
+Theorem~\ref{thm:asy} applies whenever the rank condition holds. The rank condition requires
+not-yet-treated or never-treated units.
+\end{remark}
+
+\subsection{Cases averted}
+
+Set $\nu_{it}=Y_{it}$ for $t\le 0$. For $t\ge 1$ the counterfactual is defined recursively, for all units jointly, as follows.
+\begin{equation}
+\nu_{it}(\theta)=c_{it}(\theta)Y_{it},\qquad
+c_{it}(\theta)=e^{-\tau D_{it}-\kappa\bar D_{it}}\,\frac{\Lambda_{it}(\nu;\phi)}{\Lambda_{it}(Y;\phi)},
+\label{eq:nu}
+\end{equation}
+Here $\Lambda_{it}(\nu;\phi)$ is the pressure computed from $\nu$. The recursion leaves
+$\nu_{it}=Y_{it}$ until a policy affects unit $i$ directly, through $\bar D_{it}$, or through the
+pressure it receives, so no counterfactual start date has to be chosen. Let $\hat\psi_{\mathcal P}=\sum_{(i,t)\in\mathcal P}\{\nu_{it}(\hat\theta)-Y_{it}\}$
+and $\psi^\dagger_{\mathcal P}=\sum_{(i,t)\in\mathcal P}\{\nu_{it}(\theta_0)-Y_{it}\}$.
+
+\begin{theorem}[Counterfactual propagation]
+\label{thm:psi}
+(a) Under A1--A3 and A5, $\E(\nu_{it}(\theta_0)\mid\alpha,Y_{\le 0})=\E\{Y_{it}(\mathbf 0)\mid\alpha,Y_{\le 0}\}$
+for all $i$ and $t$, so $\E\psi^\dagger_{\mathcal P}=\psi_{\mathcal P}$.
+(b) Under the conditions of Theorem~\ref{thm:asy}, if $|\mathcal P|/G$ is bounded and the
+dominance conditions of Web Appendix A.1 hold for $\partial\nu_{it}/\partial\beta$, then
+$\sqrt G(\hat\psi_{\mathcal P}-\psi^\dagger_{\mathcal P})/G\to_d N(0,\Psi V\Psi^{\top})$ with
+$\Psi=\plim G^{-1}\sum_{(i,t)\in\mathcal P}\partial\nu_{it}(\theta_0)/\partial\theta^{\top}$.
+\end{theorem}
+
+The naive rescaling $Y_{it}e^{-\tau D_{it}-\kappa\bar D_{it}}$ ignores that averted cases would
+themselves have infected others; Theorem~\ref{thm:psi} propagates the counterfactual through the
+renewal equation and the network. Inference in (b) targets the realised-path quantity
+$\psi^\dagger$, whose expectation is $\psi$.
+
+\begin{remark}[Process noise and depletion]
+\label{rem:psi}
+$\psi^\dagger_{\mathcal P}-\psi_{\mathcal P}$ is a sum of mean-zero, locally dependent terms.
+Unlike the moment contributions, these terms are correlated across neighbouring clusters, because
+$\nu_{it}$ depends on neighbours' outcomes. A variance estimator for the population-level
+$\psi_{\mathcal P}$ would add a cluster-graph HAC term; we conjecture that it is consistent but do
+not prove it. If susceptible depletion multiplies the mean in A1 by
+$1-C_{i,t-1}/P_i$, where $C$ is cumulative cases and $P$ population, the recursion is no longer
+linear in past $\nu$ and Theorem~\ref{thm:psi}(a) holds only approximately.
+\end{remark}
+
+\begin{remark}[Testability]
+\label{rem:testable}
+Lemma~\ref{lem:mds} implies that moment contributions of adjacent clusters are uncorrelated,
+which can be checked directly. The J test of Corollary~\ref{cor:J} checks the multiplicative
+renewal structure against extra predetermined instruments. A sensitivity analysis lagging $D$ by
+one week addresses anticipation. Sequential ignorability (A2(b)) and parallel untreated
+log-transmission paths after adoption are not testable.
+\end{remark}
+
+\subsection{Computation, variants and root selection}
+\label{ss:computation}
+
+The primary estimator, M0, uses the instruments of Section~\ref{ss:estimation} with the
+pre-specified reference value $\bar\phi=0.5$. It is computed by a local root search for $\beta$
+from a fixed starting value, with $\gamma$ profiled out by \eqref{eq:profile}. Three variants are
+used for checks and are fixed in advance. M0-OI adds two predetermined instruments,
+$s_{it}N_{i,t-1}/\Lambda_{i,t-1}(\bar\phi)$ and $s_{it}\log\{(Y_{i,t-1}+0.5)/(Y_{i,t-2}+0.5)\}$, and is
+estimated by two-step GMM; its role is to provide the $J$ statistic of Corollary~\ref{cor:J}.
+M0-ET replaces $\tau D_{it}$ by event-time effects $\tau_0,\dots,\tau_5$ and a pooled effect for
+six or more weeks since adoption, as recommended in Remark~\ref{rem:dynamic}. M0$'$ imposes
+$\kappa=\phi=0$ and corresponds to Theorem~\ref{thm:bias}(d).
+
+Theorem~\ref{thm:ident} is a local result and A6 assumes that $\theta_0$ is interior. When
+contagion between units is absent ($\phi_0=0$), the true value is on the boundary of the
+parameter space. Estimating equations can then have several roots, of which at most one is
+consistent \citep{small2000multiple}, and boundary values change the limiting distribution of
+the estimator \citep{self1987boundary,andrews1999boundary}. We therefore pre-specified a
+global version, M0-G. For each $\phi$ on a grid in $[0,3]$, $(\gamma,\tau,\kappa)$ are profiled
+out and the remaining $\phi$-equation is evaluated. Every sign change on the grid is refined to
+a root, and the boundary point $\phi=0$ is added as a candidate. Among the candidates, M0-G
+selects the one with the smallest over-identified GMM criterion $Q$ computed with the M0-OI
+instruments, following the idea of choosing among roots with a goodness-of-fit criterion
+\citep{heyde1998multiple}. Inference is conditional on the selected candidate, and a boundary
+selection is reported as such, without a Wald interval for $\phi$.
+
+The simulation in Section~\ref{s:simulation} showed that this pre-specified rule is not
+sufficient. We therefore also report a variant designed after interim results had been seen,
+M0-GI, which is labelled post hoc wherever it appears. It uses the same candidates as M0-G,
+but $Q$ is built from the M0 moments together with the $\phi$-instrument evaluated at two
+other reference values, $N_{it}/\Lambda_{it}(0.05)$ and $N_{it}/\Lambda_{it}(2.0)$. The rationale
+follows from Lemma~\ref{lem:moment}: moments formed with any predetermined instrument have mean
+zero at $\theta_0$, whatever the reference value, whereas a spurious root that solves the
+$\bar\phi$-instrument equation need not solve the equations at other reference values. Because
+the selection rule was chosen after seeing results, its performance requires confirmation in
+designs that were not used to choose it. The profiled $\phi$-moment over the grid, together with $Q$, shows whether more than one root
+exists; both are reported for the application in Section~\ref{s:application}.
+
+For applied work the rules amount to the following sequence, which we recommend reporting in
+full. (1) Fit M0 from a fixed starting value and record the local solution. (2) Evaluate the
+profiled $\phi$-equation on a grid over $[0,3]$ with steps of 0.05 and refine every sign change;
+the code uses 61 points, and a finer grid than 0.05 did not change the candidate roots in the
+designs we examined. (3) If the profile has a single sign change, report M0 with its cluster-robust
+interval, together with the profile as a diagnostic figure. (4) If there are several sign changes,
+report every candidate root and the value of $Q$ at each, and report the rule's selection as
+conditional on that choice; when the selected candidate is on the boundary, state that no
+interval for $\phi$ is available. (5) Report the over-identification statistic $J$ in every case,
+because it has power against some forms of misspecification but, as the simulation shows, little
+power against a spurious root. A score test of $H_0:\phi_0=0$ would be a natural pre-test for
+step (3); we have not derived it, and the profile itself plays that role here.

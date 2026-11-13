@@ -1,0 +1,35 @@
+\begin{table}[!t]
+\centering
+\caption{Bias (mean of estimate minus true value) and coverage of nominal 95\% confidence intervals for the spillover parameters $\kappa$ and $\phi$ (core scenarios).}
+\label{tab:sim-core-spill}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{ccccrrrrrrrrrrrrrrrrrrrr}
+\toprule
+$N$ & $T$ & adopt & spill & \multicolumn{4}{c}{M0} & \multicolumn{4}{c}{M0-G} & \multicolumn{4}{c}{M1} & \multicolumn{4}{c}{M4} & \multicolumn{4}{c}{Oracle} \\
+\cmidrule(lr){5-8}\cmidrule(lr){9-12}\cmidrule(lr){13-16}\cmidrule(lr){17-20}\cmidrule(lr){21-24}
+ & & & & \multicolumn{2}{c}{$\kappa$} & \multicolumn{2}{c}{$\phi$} & \multicolumn{2}{c}{$\kappa$} & \multicolumn{2}{c}{$\phi$} & \multicolumn{2}{c}{$\kappa$} & \multicolumn{2}{c}{$\phi$} & \multicolumn{2}{c}{$\kappa$} & \multicolumn{2}{c}{$\phi$} & \multicolumn{2}{c}{$\kappa$} & \multicolumn{2}{c}{$\phi$} \\
+ & & & & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov & bias & cov \\
+\midrule
+500 & 12 & FB & yes & 0.002 & 94.6 & 0.002 & 95.1 & 0.002 & 94.6 & 0.002 & 95.1 & -0.009 & 93.9 & 0.458 & 0.0 & 0.017 & 89.1 & -0.050 & 33.5 & 0.000 & 94.7 & 0.001 & 94.5 \\
+500 & 26 & FB & yes & -0.000 & 94.8 & 0.001 & 95.1 & -0.000 & 94.8 & 0.001 & 95.1 & 0.002 & 94.0 & 0.197 & 0.0 & 0.029 & 84.5 & -0.100 & 0.1 & 0.000 & 93.8 & 0.001 & 93.9 \\
+2000 & 12 & FB & yes & 0.000 & 94.9 & 0.001 & 95.1 & 0.000 & 94.9 & 0.001 & 95.1 & 0.012 & 91.8 & 0.473 & 0.0 & 0.037 & 59.3 & -0.042 & 2.9 & 0.000 & 95.0 & 0.000 & 94.9 \\
+2000 & 26 & FB & yes & 0.000 & 95.0 & 0.000 & 94.5 & 0.000 & 95.0 & 0.000 & 94.5 & 0.011 & 92.3 & 0.204 & 0.0 & 0.048 & 57.7 & -0.076 & 0.0 & 0.000 & 94.1 & 0.000 & 93.3 \\
+500 & 12 & FB & no & -0.206 & 58.2 & 0.536 & 34.1 & -0.103 & 77.2 & 0.264 & 55.3 & -0.010 & 94.0 & 0.160 & 0.0 & 0.043 & 80.1 & -0.002 & 58.0 & 0.001 & 93.9 & 0.000 & 94.3 \\
+500 & 26 & FB & no & -0.150 & 58.0 & 0.742 & 4.1 & -0.061 & 79.8 & 0.283 & 40.4 & 0.024 & 89.9 & 0.006 & 53.0 & 0.084 & 64.0 & -0.000 & 37.9 & 0.008 & 89.4 & 0.000 & 90.6 \\
+2000 & 12 & FB & no & -0.236 & 2.0 & 0.473 & 0.0 & -0.087 & 59.9 & 0.171 & 40.9 & 0.003 & 94.6 & 0.169 & 0.0 & 0.086 & 19.8 & -0.001 & 28.3 & 0.000 & 94.3 & 0.000 & 94.3 \\
+2000 & 26 & FB & no & -0.173 & 3.7 & 0.489 & 0.0 & -0.044 & 71.2 & 0.120 & 52.7 & 0.041 & 72.1 & 0.007 & 27.9 & 0.133 & 25.6 & -0.000 & 41.8 & 0.004 & 90.1 & 0.000 & 88.3 \\
+500 & 12 & RD & yes & 0.003 & 95.5 & 0.004 & 94.9 & 0.003 & 95.5 & 0.004 & 94.9 & 0.020 & 91.4 & 0.481 & 0.0 & -0.010 & 91.6 & -0.092 & 2.4 & 0.000 & 93.3 & 0.002 & 94.2 \\
+500 & 26 & RD & yes & 0.002 & 95.3 & 0.002 & 95.3 & 0.002 & 95.3 & 0.002 & 95.3 & 0.018 & 88.2 & 0.221 & 0.2 & -0.010 & 88.2 & -0.121 & 0.2 & 0.001 & 91.4 & 0.002 & 91.9 \\
+2000 & 12 & RD & yes & 0.001 & 95.3 & 0.001 & 95.3 & 0.001 & 95.3 & 0.001 & 95.3 & 0.022 & 86.8 & 0.503 & 0.0 & -0.009 & 92.1 & -0.067 & 0.1 & -0.000 & 93.5 & 0.000 & 94.0 \\
+2000 & 26 & RD & yes & 0.001 & 94.8 & 0.000 & 95.5 & 0.001 & 94.8 & 0.000 & 95.5 & 0.019 & 84.0 & 0.240 & 0.0 & -0.009 & 86.2 & -0.095 & 0.7 & -0.000 & 90.0 & 0.001 & 90.1 \\
+500 & 12 & RD & no & -0.457 & 25.2 & 0.888 & 51.6 & -0.189 & 66.8 & 0.348 & 68.0 & 0.012 & 91.8 & 0.117 & 1.8 & -0.005 & 94.8 & -0.002 & 41.6 & -0.001 & 93.1 & 0.001 & 94.1 \\
+500 & 26 & RD & no & -0.456 & 14.0 & 0.323 & 1.0 & -0.213 & 57.7 & 0.146 & 33.6 & 0.003 & 82.9 & 0.006 & 62.7 & -0.003 & 87.1 & -0.000 & 36.2 & -0.001 & 83.9 & 0.000 & 92.1 \\
+2000 & 12 & RD & no & -0.412 & 1.8 & 0.617 & 0.0 & -0.126 & 66.1 & 0.182 & 47.9 & 0.012 & 92.0 & 0.151 & 0.0 & -0.013 & 94.5 & -0.001 & 37.2 & -0.001 & 92.7 & 0.000 & 94.0 \\
+2000 & 26 & RD & no & -0.389 & 1.6 & 0.232 & 0.1 & -0.154 & 58.1 & 0.089 & 39.0 & 0.000 & 83.0 & 0.009 & 38.7 & -0.010 & 86.3 & -0.000 & 40.2 & -0.003 & 82.2 & 0.000 & 89.8 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Spillover parameters in the core scenarios (truth $(\kappa_0,\phi_0)=(-0.1,0.4)$ with spillover, $(0,0)$ without). For M0-G, $\phi$ coverage is computed over replications whose selected solution is interior; boundary selections ($\hat\phi=0$) have no Wald interval for $\phi$ (shares in Table~\ref{tab:sim-roots}). R = 8000 per scenario; largest MCSE: bias 0.006, coverage 0.8 (percentage points).}
+\end{table}

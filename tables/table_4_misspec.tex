@@ -1,0 +1,27 @@
+\begin{table}[!t]
+\centering
+\caption{Robustness of M0 under misspecification: bias (mean over replications) and coverage of nominal 95\% confidence intervals.}
+\label{tab:sim-misspec}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+scenario & \multicolumn{2}{c}{$\tau$} & \multicolumn{2}{c}{$\kappa$} & \multicolumn{2}{c}{$\phi$} & $J$ rej. & M1 $\tau$ bias & M2 $\tau$ bias \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+ & bias & cov & bias & cov & bias & cov & & & \\
+\midrule
+X1: wrong generation interval & 0.010 & 94.6 & -0.050 & 80.2 & 0.516 & 0.0 & 100.0 & -0.022 & 0.007 \\
+X2: reporting drops after adoption & -0.057 & 59.4 & -0.294 & 0.0 & 0.424 & 0.0 & 100.0 & -0.099 & -0.094 \\
+X3: heterogeneous effects & 0.005 & 94.0 & 0.000 & 94.6 & 0.000 & 95.6 & 4.4 & -0.009 & 0.004 \\
+X4: susceptible depletion & -0.000 & 95.2 & -0.000 & 94.9 & -0.002 & 94.6 & 4.6 & -0.015 & 0.024 \\
+X5: dynamic effects & 0.219 & 0.0 & 0.014 & 94.6 & 0.000 & 95.0 & 4.7 & 0.110 & 0.124 \\
+\midrule
+\multicolumn{10}{l}{X3, M0 $\tau$ vs switcher mean of $\tau_i$: bias 0.005, coverage 94.0\%} \\
+\multicolumn{10}{l}{X3, M0 $\tau$ vs first-order $\tilde\tau$: bias 0.005, coverage 94.0\%} \\
+\multicolumn{10}{l}{X5, M0-ET bins $e=0,\dots,6^{+}$: bias -0.000, -0.000, -0.000, -0.000, -0.000, -0.000, -0.000; coverage (\%) 95.8, 95.5, 95.4, 95.5, 95.7, 95.5, 95.3} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Misspecification block (base: $N=2000$, $T=26$, feedback adoption, spillover). M0 bias and coverage (\%) against the generating parameters; $J$ rej. = rejection rate of the M0-OI Hansen test at 5\% (power, since every scenario violates the working model). X3 compares $\hat\tau$ also with the replication-specific switcher mean and with the first-order pseudo-true value of Proposition~3; X5 reports the event-time specification. R = 8000 per scenario.}
+\end{table}

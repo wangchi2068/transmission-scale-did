@@ -1,0 +1,147 @@
+{
+ "schema_version": 1,
+ "provenance": {
+  "mode": "measured",
+  "source": "Monte Carlo run of src/simulate.py, rows sim/rows.jsonl, aggregated by src/aggregate.py",
+  "dataset_contract": "./data_contract.md",
+  "timestamp": "2026-11-12T18:24:37Z",
+  "git_sha": "6bab1e0",
+  "simulate_version": "1.0.0",
+  "R_target": 8000,
+  "n_rep_rows": 200000,
+  "n_truncated_lines_ignored": 0,
+  "run_complete": true,
+  "label": null,
+  "supplementary": {
+   "path": "sim/rows_m0gi.jsonl",
+   "n_rows": 200000,
+   "merged": 200000,
+   "mismatch": 0,
+   "orphan": 0,
+   "bad_lines": 0,
+   "methods": [
+    "M0_GI"
+   ],
+   "note": "M0_GI is a post-hoc addition (run-sim-application, experiment_design.md deviation 7), fitted by src/simulate_supp.py on the same seeds/data sets; its measures use the replications it reached (scenarios[sid].supp_R)"
+  }
+ },
+ "tables": [
+  {
+   "id": "tab:sim-core-tau",
+   "path": "table_1_core_tau.tex",
+   "sha256": "240216d4b4c7deb853611f92cd0288e1dbdedef826b78fee107578fb8dcbee0f",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  },
+  {
+   "id": "tab:sim-core-spill",
+   "path": "table_2_core_spill.tex",
+   "sha256": "15d0bab21d8c83aeac72b786284da75d3ffc35ce613abdb1dfc3c2792993e7b6",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  },
+  {
+   "id": "tab:sim-null",
+   "path": "table_3_null.tex",
+   "sha256": "ad88589d281a9d6c8fcf5b3ea3cb8e0b8375e53f89ec68be4ee5cc2439ff2d03",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  },
+  {
+   "id": "tab:sim-misspec",
+   "path": "table_4_misspec.tex",
+   "sha256": "09f30c71d2a95caeb537e81de2febef9f1d1691896c3164b8b44249a0bf2217d",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  },
+  {
+   "id": "tab:sim-psi",
+   "path": "table_5_psi.tex",
+   "sha256": "2949caa582d3cd0806edfbb53058ea1410c8b7748c0557806478d6d0e9e40f1a",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  },
+  {
+   "id": "tab:sim-roots",
+   "path": "table_6_roots.tex",
+   "sha256": "826e4fd0191bf88ff02509f79ad72d3762734240a52191aa7f98172573e4061e",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  },
+  {
+   "id": "tab:app",
+   "path": "table_7_application.tex",
+   "sha256": "54ee19825be366b1bbd2fede5de65d4351e07178b6dd36188f6bf282e85f2d1b",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 1,
+   "std_ddof": 1,
+   "note": "point estimates with 95% CIs (single observed data set)"
+  },
+  {
+   "id": "tab:sim-m0gi",
+   "path": "table_8_m0gi_posthoc.tex",
+   "sha256": "830bfa26c2362d450e9fc218b8ae892c940263535f29d97eb65ccbfaef5ee80d",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  },
+  {
+   "id": "tab:sim-m0-full",
+   "path": "table_9_m0_full.tex",
+   "sha256": "0252d1beafbb3f04d13cc750c51bd824f0711026baeebb9ad192fcabd6419720",
+   "generator": "src/make_tables.py",
+   "data_sources": [
+    "results.json"
+   ],
+   "display": "raw",
+   "n_seeds": 8000,
+   "std_ddof": 1,
+   "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+  }
+ ]
+}

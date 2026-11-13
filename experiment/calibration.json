@@ -1,0 +1,10 @@
+{
+ "gbar": {
+  "T12_feedback": 0.1016,
+  "T26_feedback": 0.2118,
+  "T12_random": 0.0056,
+  "T26_random": 0.0231
+ },
+ "depletion_pop": 34391.9,
+ "note": "Rebuilt from analysis/results.json (the original package omitted this file)."
+}

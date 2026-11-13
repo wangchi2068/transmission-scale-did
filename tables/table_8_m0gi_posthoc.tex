@@ -1,0 +1,43 @@
+\begin{table}[!t]
+\centering
+\caption{Post-hoc root selection M0-GI versus the pre-specified M0 and M0-G ($\tau$): bias (mean over replications) and coverage of nominal 95\% confidence intervals.}
+\label{tab:sim-m0gi}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrrrrrrrrr}
+\toprule
+scenario & $\phi_0$ & \multicolumn{2}{c}{M0} & \multicolumn{2}{c}{M0-G} & \multicolumn{5}{c}{M0-GI (post hoc)} & boundary & $R_{\rm GI}$ \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-11}
+ & & bias & cov & bias & cov & bias & empSE & modSE & RMSE & cov & GI & \\
+\midrule
+1 $N=500$, $T=12$, FB, spill & 0.4 & -0.002 & 94.8 & -0.002 & 94.8 & -0.002 & 0.068 & 0.067 & 0.068 & 94.8 & 0.0 & 8000 \\
+2 $N=500$, $T=26$, FB, spill & 0.4 & -0.000 & 94.5 & -0.000 & 94.5 & -0.000 & 0.055 & 0.055 & 0.055 & 94.5 & 0.0 & 8000 \\
+3 $N=2000$, $T=12$, FB, spill & 0.4 & 0.000 & 95.0 & 0.000 & 95.0 & 0.000 & 0.041 & 0.040 & 0.041 & 95.0 & 0.0 & 8000 \\
+4 $N=2000$, $T=26$, FB, spill & 0.4 & -0.000 & 94.9 & -0.000 & 94.9 & -0.000 & 0.037 & 0.037 & 0.037 & 94.9 & 0.0 & 8000 \\
+5 $N=500$, $T=12$, FB, no spill & 0.0 & 0.170 & 38.8 & 0.085 & 67.2 & 0.015 & 0.081 & 0.069 & 0.083 & 91.2 & 64.8 & 8000 \\
+6 $N=500$, $T=26$, FB, no spill & 0.0 & 0.132 & 36.0 & 0.053 & 70.9 & 0.001 & 0.055 & 0.054 & 0.055 & 94.5 & 78.8 & 8000 \\
+7 $N=2000$, $T=12$, FB, no spill & 0.0 & 0.198 & 0.6 & 0.073 & 59.8 & 0.001 & 0.042 & 0.041 & 0.042 & 95.2 & 74.3 & 8000 \\
+8 $N=2000$, $T=26$, FB, no spill & 0.0 & 0.154 & 0.9 & 0.039 & 71.0 & 0.000 & 0.036 & 0.036 & 0.036 & 95.1 & 80.9 & 8000 \\
+9 $N=500$, $T=12$, RD, spill & 0.4 & -0.001 & 95.4 & -0.001 & 95.4 & -0.001 & 0.082 & 0.081 & 0.082 & 95.4 & 0.0 & 8000 \\
+10 $N=500$, $T=26$, RD, spill & 0.4 & 0.001 & 95.2 & 0.001 & 95.2 & 0.001 & 0.070 & 0.069 & 0.070 & 95.2 & 0.0 & 8000 \\
+11 $N=2000$, $T=12$, RD, spill & 0.4 & -0.001 & 95.3 & -0.001 & 95.3 & -0.001 & 0.063 & 0.063 & 0.063 & 95.3 & 0.0 & 8000 \\
+12 $N=2000$, $T=26$, RD, spill & 0.4 & 0.000 & 94.6 & 0.000 & 94.6 & 0.000 & 0.054 & 0.054 & 0.054 & 94.6 & 0.0 & 8000 \\
+13 $N=500$, $T=12$, RD, no spill & 0.0 & 0.469 & 12.1 & 0.194 & 60.8 & 0.052 & 0.178 & 0.102 & 0.185 & 87.5 & 63.7 & 8000 \\
+14 $N=500$, $T=26$, RD, no spill & 0.0 & 0.431 & 4.6 & 0.202 & 52.9 & 0.008 & 0.093 & 0.092 & 0.094 & 95.0 & 73.5 & 8000 \\
+15 $N=2000$, $T=12$, RD, no spill & 0.0 & 0.405 & 0.7 & 0.124 & 65.8 & 0.003 & 0.075 & 0.071 & 0.075 & 94.7 & 72.8 & 8000 \\
+16 $N=2000$, $T=26$, RD, no spill & 0.0 & 0.363 & 1.0 & 0.144 & 57.9 & 0.004 & 0.070 & 0.069 & 0.070 & 95.0 & 75.4 & 8000 \\
+17 $N=500$, $T=12$, FB, $k=10$ & 0.4 & -0.001 & 94.9 & -0.001 & 94.9 & -0.001 & 0.055 & 0.055 & 0.055 & 94.9 & 0.0 & 8000 \\
+18 $N=500$, $T=12$, FB, $k=\infty$ & 0.4 & -0.000 & 95.2 & -0.000 & 95.2 & -0.000 & 0.029 & 0.029 & 0.029 & 95.2 & 0.0 & 8000 \\
+19 $N=500$, $T=12$, RD, $k=10$ & 0.4 & 0.001 & 95.3 & 0.001 & 95.3 & 0.001 & 0.077 & 0.076 & 0.077 & 95.3 & 0.0 & 8000 \\
+20 $N=500$, $T=12$, RD, $k=\infty$ & 0.4 & 0.001 & 94.8 & 0.001 & 94.8 & 0.001 & 0.039 & 0.038 & 0.039 & 94.8 & 0.0 & 8000 \\
+21 X1: wrong generation interval & 0.4 & 0.010 & 94.6 & 0.010 & 94.6 & 0.010 & 0.036 & 0.036 & 0.037 & 94.6 & 0.0 & 8000 \\
+22 X2: reporting drops after adoption & 0.4 & -0.057 & 59.4 & -0.057 & 59.4 & -0.057 & 0.032 & 0.032 & 0.065 & 59.4 & 0.0 & 8000 \\
+23 X3: heterogeneous effects & 0.4 & 0.005 & 94.0 & 0.005 & 94.0 & 0.005 & 0.038 & 0.037 & 0.038 & 94.0 & 0.0 & 8000 \\
+24 X4: susceptible depletion & 0.4 & -0.000 & 95.2 & -0.000 & 95.2 & -0.000 & 0.037 & 0.037 & 0.037 & 95.2 & 0.0 & 8000 \\
+25 X5: dynamic effects & 0.4 & 0.219 & 0.0 & 0.219 & 0.0 & 0.219 & 0.038 & 0.039 & 0.222 & 0.0 & 0.0 & 8000 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Post-hoc root-selection variant M0-GI (not pre-specified; added after the zero-coupling failure of M0 and M0-G was observed; see the Web Appendix for the protocol record): same candidate roots as M0-G, selection criterion built from the $\phi$-instrument at reference values $0.05$ and $2$ instead of the M0-OI instruments. Same data sets (seeds) as the main run; M0 and M0-G: R = 8000, M0-GI: $R_{\rm GI}$ replications (bias, cov over the replications it reached). boundary. GI = share (\%) of boundary ($\hat\phi=0$) selections. Largest MCSE for M0-GI: bias 0.002, coverage 0.5 (percentage points).}
+\end{table}

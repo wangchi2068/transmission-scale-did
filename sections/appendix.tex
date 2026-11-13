@@ -1,0 +1,510 @@
+\appendix
+\setcounter{lemma}{2}
+
+\section{Web Appendix A: Regularity conditions and proofs}
+\label{app:proofs}
+
+\subsection{A.1 Regularity conditions}
+
+Throughout, $T$, $S$ and the cluster sizes are bounded, $G\to\infty$, and $C$ denotes a generic
+finite constant. $\|\cdot\|$ is the Euclidean or Frobenius norm.
+
+\begin{description}
+\item[A6(i)] $\Theta=\Delta\times\mathcal B$ is compact, $\mathcal B\subset\mathbb R^2\times[0,\bar\phi]$,
+and $\theta_0$ is an interior point.
+\item[A6(ii)] For all $i,t$: $\E\sup_\theta\|z_{it}\|^4|Y_{i,t+1}r_{it}(\theta)|^4\le C$,
+$\E\|z_{it}\|^4Y_{it}{}^4\le C$, $\E\sup_\theta\|z_{it}\,\partial u_{it}(\theta)/\partial\theta^{\top}\|^2\le C$ and
+$\E\sup_\theta\|z_{it}\otimes\partial^2u_{it}(\theta)/\partial\theta\partial\theta^{\top}\|^2\le C$. When the
+instruments depend on a nuisance value $\eta$ (Lemma~\ref{lem:generated}), the same bounds hold
+for $\partial z_{it}/\partial\eta$ and $\partial^2z_{it}/\partial\eta\partial\eta^{\top}$ uniformly in a
+neighbourhood of $\eta^*$.
+\item[A6(iii)] The limits as $G\to\infty$, $\bar g(\theta)=\lim G^{-1}\sum_g\E g_g(\theta)$ and
+$\bar\Gamma(\theta)=\lim G^{-1}\sum_g\E\,\partial g_g(\theta)/\partial\theta^{\top}$ exist uniformly in
+$\theta$; $\Gamma=\bar\Gamma(\theta_0)$; and
+$\Sigma_s=\lim G^{-1}\sum_g\E(\xi_{gs}\xi_{gs}{}^{\top})$ exists for $s=1,\dots,T$.
+\item[A6(iv)] $\Omega=\sum_s\Sigma_s$ is positive definite; $\Gamma$ has full column rank $p$;
+$\bar g(\theta)^{\top}W\bar g(\theta)=0$ only at $\theta=\theta_0$.
+\end{description}
+
+\noindent Condition (L) collects the laws of large numbers. For every $\theta\in\Theta$,
+$G^{-1}\sum_g\{f_g-\E f_g\}\to_p0$ for each of $f_g=g_g(\theta)$, $\partial g_g(\theta)/\partial\theta^{\top}$,
+$g_g(\theta_0)g_g(\theta_0)^{\top}$, $\sup_\theta\|\partial g_g(\theta)/\partial\theta^{\top}\|$ and
+$\sup_\theta\|\partial^2g_g(\theta)/\partial\theta\partial\theta^{\top}\|$; and, for $s=1,\dots,T$,
+$V_s:=G^{-1}\sum_g\E(\xi_{gs}\xi_{gs}{}^{\top}\mid\F_{s-1})\to_p\Sigma_s$.
+
+\noindent Lemma~\ref{lem:lln} shows that A4$'$ together with A6(ii)--(iii) implies (L). Under A4,
+A6(ii) also implies the conditional Lyapunov condition of Lemma~\ref{lem:clt} with $\delta=1$:
+$\E\{G^{-3/2}\sum_g\E(\|\xi_{gs}\|^3\mid\F_{s-1})\}\le CG^{-1/2}\to0$, so the conditional sum tends to
+zero in probability by Markov's inequality.
+
+\subsection{A.2 Proofs for Section~\ref{ss:moments}}
+
+\begin{proof}[Proof of Lemma~\ref{lem:moment}]
+Fix $t\ge1$ and a policy path $\mathbf d$. On the event $\{D_{1:t}=\mathbf d_{1:t}\}$, A3 and A2(a)
+give $Y_{is}=Y_{is}(\mathbf d)$ for all $s\le t$, so $H_{t-1}=H_{t-1}(\mathbf d)$ and
+$\Lambda_{it}=\Lambda_{it}(\mathbf d;\phi_0)$ there. Pre-sample outcomes do not depend on
+$\mathbf d$ by A2(a), and $D=0$ before week 1. Because $D_{1:t}$ is discrete, A2(b) gives the following chain of equalities.
+\begin{align*}
+&\E(Y_{it}\mid\alpha,H_{t-1},D_{1:t}=\mathbf d_{1:t})\\
+&\quad=\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d),D_{1:t}=\mathbf d_{1:t}\}\\
+&\quad=\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d)\}
+\end{align*}
+The right side equals $e^{\alpha_i+\gamma_t+\tau_0d_{it}+\kappa_0\bar d_{it}}\Lambda_{it}(\mathbf d;\phi_0)$
+by A1. Since $\F_{t-1}=\sigma(\alpha,H_{t-1},D_{1:t})$, this gives $\E(Y_{it}\mid\F_{t-1})=\mu_{it}$. Next,
+$r_{it}=m_{it}(\theta_0)/m_{i,t+1}(\theta_0)$ depends on $D_{i,t+1}$, $\bar D_{i,t+1}$ and
+$\Lambda_{i,t+1}$, all $\F_t$-measurable, and $r_{it}\mu_{i,t+1}=\mu_{it}$. Hence
+$\E(u_{it}\mid\F_{t-1})=\E\{r_{it}\E(Y_{i,t+1}\mid\F_t)\mid\F_{t-1}\}-\mu_{it}=\mu_{it}-\mu_{it}=0$.
+\end{proof}
+
+\begin{proof}[Proof of Lemma~\ref{lem:mds}]
+Since $r_{it}\mu_{i,t+1}=\mu_{it}$, $u_{it}(\theta_0)=r_{it}\varepsilon_{i,t+1}-\varepsilon_{it}$. Summing
+$z_{it}u_{it}$ over $t=1,\dots,T-1$ and collecting the coefficient of each $\varepsilon_{is}$ gives
+$g_g(\theta_0)=\sum_{s=1}^T\sum_{i\in g}a_{is}\varepsilon_{is}$ with $a_{is}$ as stated. Both
+$z_{i,s-1}r_{i,s-1}$ and $z_{is}$ are $\F_{s-1}$-measurable. By Lemma~\ref{lem:moment},
+$\E(\varepsilon_{is}\mid\F_{s-1})=0$, so $\E(\xi_{gs}\mid\F_{s-1})=0$ and $\xi_{gs}$ is $\F_s$-measurable.
+For $s<s'$ and any clusters $g,h$,
+$\E(\xi_{gs}\xi_{hs'}{}^{\top})=\E\{\xi_{gs}\E(\xi_{hs'}{}^{\top}\mid\F_{s'-1})\}=0$. This gives the first
+claim with $g=h$. For $g\ne h$ and $s=s'$,
+$\E(\xi_{gs}\xi_{hs}{}^{\top})=\sum_{i\in g,j\in h}\E\{a_{is}a_{js}{}^{\top}\E(\varepsilon_{is}\varepsilon_{js}\mid\F_{s-1})\}=0$,
+because under A4 $\varepsilon_{is}$ and $\varepsilon_{js}$ are conditionally independent with
+conditional mean zero.
+\end{proof}
+
+\begin{lemma}[Local law of large numbers]
+\label{lem:lln}
+Assume A4$'$ and let $L=(\rho+1)(T+1)+1$. If $f_g$ is a measurable function of the primitives of
+the clusters within distance $L$ of $g$ in $\mathcal C$ and $\sup_g\E\|f_g\|^2\le C$, then
+$G^{-1}\sum_g(f_g-\E f_g)\to_p0$. Each of the variables listed in (L) is of this form, so A4$'$
+and A6(ii)--(iii) imply (L).
+\end{lemma}
+
+\begin{proof}
+If the distance between $g$ and $h$ exceeds $2L$, then $f_g$ and $f_h$ are functions of
+disjoint sets of primitives, which are independent by A4$'$(i), so $\cov(f_g,f_h)=0$. Let $B$
+bound the number of clusters within distance $2L$ of any cluster; $B\le\sum_{k=0}^{2L}\Delta^k$
+with $\Delta$ the maximal degree. Then
+$\E\|G^{-1}\sum_g(f_g-\E f_g)\|^2\le G^{-2}\sum_g\sum_{h:\,d(g,h)\le2L}(\E\|f_g\|^2\E\|f_h\|^2)^{1/2}\le BC/G\to0$.
+
+For locality, by A4$'$(ii) and induction on $t$, $(Y_{gt},D_{g,t+1})$ depends only on primitives of
+clusters within distance $(\rho+1)(t+1)$ of $g$; the induction starts from pre-sample outcomes,
+which are cluster primitives, and $D=0$ before week 1. The instruments $z_{it}$ use outcomes and
+policies of $g$ and of adjacent clusters (through $N_{it}$ and $\bar D_{it}$), so $g_g(\theta)$ and
+its derivatives depend on primitives within distance $L$. For the conditional variance, A4$'$
+implies that, given $\F_{s-1}$, $Y_{gs}$ is a function of the week-$s$ innovation of $g$, which is
+independent of $\F_{s-1}$, and of $\F_{s-1}$-measurable local quantities. Hence
+$\E(\xi_{gs}\xi_{gs}{}^{\top}\mid\F_{s-1})$ is obtained by integrating out that innovation and is a
+function of local primitives. The second moments needed for the variance bound follow from
+A6(ii) and the Cauchy--Schwarz inequality. Combined with the limits in A6(iii), this gives (L).
+A4$'$ implies A4 by the same conditional representation, because the week-$t$ innovations are
+independent across clusters and of $\F_{t-1}$.
+\end{proof}
+
+\begin{lemma}[Block central limit theorem]
+\label{lem:clt}
+Let $\xi_{gs}\in\mathbb R^q$ be $\F_s$-measurable with $\E(\xi_{gs}\mid\F_{s-1})=0$, conditionally
+independent across $g$ given $\F_{s-1}$, for $s=1,\dots,T$. Suppose that
+$V_s=G^{-1}\sum_g\E(\xi_{gs}\xi_{gs}{}^{\top}\mid\F_{s-1})\to_p\Sigma_s$, a non-random matrix, and that
+$G^{-1-\delta/2}\sum_g\E(\|\xi_{gs}\|^{2+\delta}\mid\F_{s-1})\to_p0$ for some $\delta\in(0,1]$. Then
+$X=G^{-1/2}\sum_g\sum_s\xi_{gs}\to_dN(0,\sum_s\Sigma_s)$.
+\end{lemma}
+
+\begin{proof}
+Fix $\lambda\in\mathbb R^q$, let $X_s=G^{-1/2}\sum_g\xi_{gs}$, $\zeta_g=\lambda^{\top}\xi_{gs}/\sqrt G$,
+$\sigma_g{}^2=\E(\zeta_g{}^2\mid\F_{s-1})$ and $c_s=\exp(-\lambda^{\top}\Sigma_s\lambda/2)$.
+
+\emph{Step 1 (within a block).} Let $\varphi_s=\E\{\exp(i\lambda^{\top}X_s)\mid\F_{s-1}\}$. By conditional
+independence, $\varphi_s=\prod_g\E(e^{i\zeta_g}\mid\F_{s-1})$. Using $|e^{ix}-1-ix+x^2/2|\le\min(|x|^3/6,x^2)\le|x|^{2+\delta}$
+and $\E(\zeta_g\mid\F_{s-1})=0$, we obtain
+$|\E(e^{i\zeta_g}\mid\F_{s-1})-(1-\sigma_g{}^2/2)|\le\E(|\zeta_g|^{2+\delta}\mid\F_{s-1})$. By Lyapunov's
+inequality,
+$\max_g\sigma_g{}^2\le\{\sum_g\E(|\zeta_g|^{2+\delta}\mid\F_{s-1})\}^{2/(2+\delta)}\to_p0$.
+So with probability tending to one all $\sigma_g{}^2\le1$, and all factors then have modulus at
+most one. On that event, $|\prod a_g-\prod b_g|\le\sum|a_g-b_g|$ for $|a_g|,|b_g|\le1$ gives
+\begin{align*}
+\Bigl|\varphi_s-\prod_g(1-\sigma_g{}^2/2)\Bigr|
+&\le\sum_g\E(|\zeta_g|^{2+\delta}\mid\F_{s-1})\\
+&\le\frac{\|\lambda\|^{2+\delta}}{G^{1+\delta/2}}\sum_g\E(\|\xi_{gs}\|^{2+\delta}\mid\F_{s-1})\to_p0 .
+\end{align*}
+Using $|e^{-x}-(1-x)|\le x^2/2$ for $x\ge0$, we also have
+$|\prod_g(1-\sigma_g{}^2/2)-\prod_g e^{-\sigma_g{}^2/2}|\le\sum_g\sigma_g{}^4/8\le\max_g\sigma_g{}^2\sum_g\sigma_g{}^2/8\to_p0$,
+because $\sum_g\sigma_g{}^2=\lambda^{\top}V_s\lambda=O_p(1)$. Finally
+$\prod_ge^{-\sigma_g{}^2/2}=\exp(-\lambda^{\top}V_s\lambda/2)\to_pc_s$. Hence $\varphi_s-c_s\to_p0$, and,
+since $|\varphi_s-c_s|\le2$, $\E|\varphi_s-c_s|\to0$.
+
+\emph{Step 2 (across blocks).} Let $Q_k=\exp(i\lambda^{\top}\sum_{s\le k}X_s)$, which is
+$\F_k$-measurable with $|Q_k|=1$. Then
+$\E Q_k=\E(Q_{k-1}\varphi_k)=c_k\E Q_{k-1}+\E\{Q_{k-1}(\varphi_k-c_k)\}$, and the last term is bounded
+by $\E|\varphi_k-c_k|\to0$. Because $c_k$ is non-random, induction gives
+$\E Q_T\to\prod_sc_s=\exp(-\lambda^{\top}\sum_s\Sigma_s\lambda/2)$, and the result follows from L\'evy's
+continuity theorem and the Cram\'er--Wold device.
+\end{proof}
+
+\noindent The limits $\Sigma_s$ must be non-random. With feedback, this holds under (L) because
+$V_s$ averages over many clusters. It would fail if all clusters responded to a common random
+national signal, which is excluded by A4$'$.
+
+\begin{lemma}[Estimated instruments]
+\label{lem:generated}
+Let $z_{it}=z_{it}(\eta)$ be $\F_{t-1}$-measurable for each fixed $\eta$, twice continuously
+differentiable in $\eta$, with the bounds in A6(ii). Let $\sqrt G(\hat\eta-\eta^*)=O_p(1)$. Then
+$G^{-1/2}\sum_gg_g(\theta_0;\hat\eta)=G^{-1/2}\sum_gg_g(\theta_0;\eta^*)+o_p(1)$, and the conclusions of
+Theorem~\ref{thm:asy} hold with $z(\hat\eta)$ and the same $V$ as with $z(\eta^*)$.
+\end{lemma}
+
+\begin{proof}
+By the mean-value theorem, the difference is
+\begin{equation*}
+\Bigl\{G^{-1}\sum_g\sum_{i\in g,t}u_{it}(\theta_0)\,\partial z_{it}(\bar\eta)/\partial\eta^{\top}\Bigr\}\sqrt G(\hat\eta-\eta^*).
+\end{equation*}
+At $\eta^*$, the bracket has mean zero because $\partial z_{it}(\eta^*)/\partial\eta$ is
+$\F_{t-1}$-measurable and $\E(u_{it}\mid\F_{t-1})=0$. It is $o_p(1)$ by (L). Replacing $\eta^*$ by $\bar\eta$
+changes the bracket by at most $\|\bar\eta-\eta^*\|\,G^{-1}\sum_g\sup_\eta\|\partial^2z/\partial\eta\partial\eta^{\top}\|\,|u|=o_p(1)$.
+The Jacobian and $\Omega$ estimators converge to the same limits by continuity in $\eta$.
+\end{proof}
+
+\subsection{A.3 Proof of Proposition~\ref{prop:ascertainment}}
+
+\begin{proof}
+Write $Y_{it}=c_ic_tI_{it}$. Because the map between $Y$ and $I$ is one-to-one with fixed
+constants, both generate the same filtration, and
+$\E(Y_{it}\mid\F_{t-1})=c_ic_te^{\alpha_i+\gamma_t+\tau_0D_{it}+\kappa_0\bar D_{it}}\Lambda^I_{it}$. The
+reported pressure is
+\begin{align*}
+\Lambda^Y_{it}={}&c_i\sum_sw_sc_{t-s}I_{i,t-s}\\
+&+\phi_0\sum_sw_s\sum_jW_{ij}c_jc_{t-s}I_{j,t-s}+c_ic_{t-1}\omega_i{}^I .
+\end{align*}
+If $\phi_0=0$ or $c_j=c_i$ whenever $W_{ij}>0$, then $c_j$ may be replaced by $c_i$.
+The ratio $\Lambda^Y_{it}/(c_ic_{t-1}\Lambda^I_{it})$ is then a weighted average, with non-negative weights summing to
+one, of $\{c_{t-s}/c_{t-1}\}_{s=1}{}^S$ and of $1$ (the background term).
+For part (a), if $c_{t-s}=c_{t-1}$ for all $s$, the ratio is one, so
+$\E(Y_{it}\mid\F_{t-1})=e^{\alpha_i+\gamma_t+\log(c_t/c_{t-1})+\tau_0D_{it}+\kappa_0\bar D_{it}}\Lambda^Y_{it}$,
+which is A1 for $Y$ with shifted week effects. For part (b), in general the logarithm of the weighted
+average lies between the smallest and largest of $\log(c_{t-s}/c_{t-1})$ and $0$, which gives the
+bound.
+\end{proof}
+
+\subsection{A.4 Proofs for Section~\ref{ss:ident}}
+
+\begin{proof}[Proof of Theorem~\ref{thm:ident}]
+(a) $\E\{z_{it}u_{it}(\theta_0)\}=\E\{z_{it}\E(u_{it}\mid\F_{t-1})\}=0$ by Lemma~\ref{lem:moment}, so
+$\bar g(\theta_0)=0$. By \eqref{eq:jac},
+$\E\{z_{it}\partial u_{it}(\theta_0)/\partial\theta^{\top}\}=\E[z_{it}r_{it}\E(Y_{i,t+1}\mid\F_t)\{-e_t{}^{\top},(x_{it}-x_{i,t+1})^{\top}\}]$
+because $z_{it}$, $r_{it}$ and $x_{i,t+1}$ are $\F_t$-measurable, and $r_{it}\mu_{i,t+1}=\mu_{it}$. Dominated
+convergence (A6(ii)) allows differentiation under the limit, which gives the stated $\Gamma$. If
+$\operatorname{rank}\Gamma=p$, a first-order expansion gives
+$\|\bar g(\theta)\|\ge\sigma_{\min}(\Gamma)\|\theta-\theta_0\|/2>0$ for $0<\|\theta-\theta_0\|$ small, so
+$\theta_0$ is an isolated zero. If the rank is constant at $r<p$ near $\theta_0$, the constant-rank
+theorem shows that $\{\theta:\bar g(\theta)=0\}$ contains a manifold of dimension $p-r$ through
+$\theta_0$, so $\theta_0$ is not locally identified; this is the moment analogue of Theorem 1 of
+\citet{rothenberg1971identification}.
+
+(b) Under absorbing adoption $D_{it}-D_{i,t+1}=-\Sw_{i,t+1}$. With $(\kappa,\phi)$ at their true values, we obtain the following conditional expectation.
+\[
+\E\{Y_{i,t+1}q_{it}(\tau)\mid\F_t\}=\mu_{it}e^{\delta_{0t}}\{1+\Sw_{i,t+1}(e^{\tau_0-\tau}-1)\}.
+\]
+The population week moment $\E\sum_is_{it}u_{it}=0$ therefore gives
+$e^{\delta_t(\tau)}=e^{\delta_{0t}}\{M_t+C_t(\tau)\}/M_t$, where
+$C_t(\tau)=\lim G^{-1}\E\sum_is_{it}\mu_{it}\Sw_{i,t+1}(e^{\tau_0-\tau}-1)$ and $M_t>0$ by A5. Units with
+$D_{it}=1$ are not switchers, so the profiled $\tau$ moment is
+\[
+h(\tau)=\sum_t\Bigl\{\frac{M_t}{M_t+C_t(\tau)}A_t-A_t\Bigr\}=-\sum_t\frac{A_tC_t(\tau)}{M_t+C_t(\tau)} .
+\]
+Here $M_t+C_t(\tau)=\lim G^{-1}\E\sum_is_{it}\mu_{it}\{1-\Sw_{i,t+1}+\Sw_{i,t+1}e^{\tau_0-\tau}\}>0$, and
+$C\mapsto C/(M+C)$ is strictly increasing. $C_t$ is strictly decreasing in $\tau$ when $K_t>0$.
+So each summand with $A_t>0$ and $K_t>0$ is strictly increasing and the others are constant.
+Since $C_t(\tau_0)=0$, $\tau_0$ is the unique root.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:sources}]
+(a) $\tau$ enters $u_{it}$ only through $e^{\tau(D_{it}-D_{i,t+1})}$. (b) The $\tau$ entry of
+$x_{it}-x_{i,t+1}$ is $D_{it}-D_{i,t+1}=-\Sw_{i,t+1}$; substitute in Theorem~\ref{thm:ident}(a).
+(c) $u_{it}=r_{it}\varepsilon_{i,t+1}-\varepsilon_{it}$. The term $z_{it}D_{i,t+1}r_{it}$ is $\F_t$-measurable,
+so $\E(z_{it}D_{i,t+1}r_{it}\varepsilon_{i,t+1})=0$. Moreover
+$\E(z_{it}D_{i,t+1}\varepsilon_{it})=\E\{z_{it}\E(D_{i,t+1}\varepsilon_{it}\mid\F_{t-1})\}=\E\{z_{it}\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})\}$,
+because $\E(\varepsilon_{it}\mid\F_{t-1})=0$.
+\end{proof}
+
+\subsection{A.5 Proofs for Section~\ref{ss:estimation}}
+
+\begin{proof}[Proof of Theorem~\ref{thm:asy}]
+(a) Let $\hat Q(\theta)=\hat g(\theta)^{\top}\hat W\hat g(\theta)$ and $Q(\theta)=\bar g(\theta)^{\top}W\bar g(\theta)$.
+By (L), $\hat g(\theta)-\bar g(\theta)\to_p0$ for each $\theta$. Also
+$\|\hat g(\theta)-\hat g(\theta')\|\le B_G\|\theta-\theta'\|$ with
+$B_G=G^{-1}\sum_g\sup_\theta\|\partial g_g/\partial\theta^{\top}\|=O_p(1)$ by A6(ii) and Markov's inequality.
+Corollary 2.2 of \citet{newey1991uniform} gives $\sup_\Theta\|\hat g-\bar g\|\to_p0$, so
+$\sup_\Theta|\hat Q-Q|\to_p0$. $Q$ is continuous and uniquely minimised at $\theta_0$ (A6(iv)), and
+Theorem 2.1 of \citet{newey1994large} gives $\hat\theta\to_p\theta_0$. In the just-identified case,
+$\hat\theta$ is the root with $\hat Q(\hat\theta)=0$, which exists with probability tending to one by the
+argument in (b).
+
+(b) Because $\theta_0$ is interior, with probability tending to one
+$\hat\Gamma(\hat\theta)^{\top}\hat W\hat g(\hat\theta)=0$, where $\hat\Gamma(\theta)=\partial\hat g(\theta)/\partial\theta^{\top}$.
+A row-wise mean-value expansion gives $\hat g(\hat\theta)=\hat g(\theta_0)+\hat\Gamma(\bar\theta)(\hat\theta-\theta_0)$.
+By the second-derivative envelope in A6(ii), (L) and the same uniform argument,
+$\sup_\Theta\|\hat\Gamma(\theta)-\bar\Gamma(\theta)\|\to_p0$, so $\hat\Gamma(\hat\theta)$ and $\hat\Gamma(\bar\theta)$ both
+converge to $\Gamma$. Hence
+$\sqrt G(\hat\theta-\theta_0)=-(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}W\sqrt G\hat g(\theta_0)+o_p(1)$. By
+Lemma~\ref{lem:mds}, $\sqrt G\hat g(\theta_0)=G^{-1/2}\sum_g\sum_s\xi_{gs}$, with $\xi_{gs}$ conditionally
+independent across clusters given $\F_{s-1}$ by A4. Lemma~\ref{lem:clt}, with the conditions
+verified in A.1, gives $\sqrt G\hat g(\theta_0)\to_dN(0,\Omega)$ with
+$\Omega=\sum_s\Sigma_s=\lim G^{-1}\sum_g\E(g_gg_g{}^{\top})$ (Lemma~\ref{lem:mds}). The influence-function
+representation and $V$ follow.
+
+(c) $\hat\Gamma(\hat\theta)\to_p\Gamma$ was shown in (b). Write
+$d_g=\sup_\theta\|\partial g_g/\partial\theta^{\top}\|$. Then
+\begin{align*}
+\Bigl\|\hat\Omega-G^{-1}\sum_gg_g(\theta_0)g_g(\theta_0)^{\top}\Bigr\|
+&\le2\|\hat\theta-\theta_0\|\,G^{-1}\sum_g\|g_g(\theta_0)\|d_g\\
+&\quad+\|\hat\theta-\theta_0\|^2\,G^{-1}\sum_gd_g{}^2=o_p(1),
+\end{align*}
+because the averages are $O_p(1)$ by Cauchy--Schwarz and A6(ii). By (L) and Lemma~\ref{lem:mds},
+$G^{-1}\sum_gg_g(\theta_0)g_g(\theta_0)^{\top}\to_p\Omega$. The cross products $g_gg_h{}^{\top}$, $g\ne h$, are
+excluded from $\hat\Omega$, and this is justified because their means are zero
+(Lemma~\ref{lem:mds}); the dependence between clusters affects only the rate of the law of large
+numbers, which Lemma~\ref{lem:lln} controls. The factor $G/(G-1)$ tends to one.
+\end{proof}
+
+\noindent The small-sample factor $G/(G-1)$ and the $t_{G-1}$ reference distribution are
+heuristics with no higher-order justification here; they follow the recommendations of
+\citet{cameron2015practitioner} and \citet{hansen2019clustered}, and their performance is
+assessed by simulation.
+
+\begin{proof}[Proof of Corollary~\ref{cor:J}]
+By (b) and (c), $\tilde\Omega\to_p\Omega$ when the first step is consistent. With $W=\Omega^{-1}$,
+$\sqrt G\Omega^{-1/2}\hat g(\hat\theta)=\{I-P\}\Omega^{-1/2}\sqrt G\hat g(\theta_0)+o_p(1)$, where $P$ is the
+orthogonal projection onto the column space of $\Omega^{-1/2}\Gamma$, of rank $p$. Hence
+$J\to_d\chi^2_{q-p}$ \citep{hansen1982gmm}.
+\end{proof}
+
+\subsection{A.6 Proofs for Section~\ref{ss:bias}}
+
+\begin{proof}[Proof of Theorem~\ref{thm:bias}]
+(a) With $\kappa_0=\phi_0=0$, $\log\mu_{it}=\alpha_i+\gamma_t+\tau_0D_{it}+\log\Lambda_{it}$. So
+$y_{it}=\alpha_i+\gamma_t+\tau_0D_{it}-b_{it}+\eta_{it}$ identically. Two-way demeaning in a balanced
+panel removes $\alpha_i$ and $\gamma_t$, which gives the exact identity. For the limit, decompose
+$\ddot D_{it}=D_{it}-\bar D_{i\cdot}-\bar D_{\cdot t}+\bar D_{\cdot\cdot}$. The terms
+$\sum D_{it}\eta_{it}$ and $\sum_t\bar D_{\cdot t}\sum_i\eta_{it}$ have mean zero because $D_{it}$ and
+$\bar D_{\cdot t}$ are $\F_{t-1}$-measurable, and divided by $N$ they are $o_p(1)$ by (L). The same
+holds for $\bar D_{\cdot\cdot}\sum\eta_{it}$, since $|\bar D_{\cdot\cdot}|\le1$ and
+$N^{-1}\sum\eta_{it}\to_p0$. Finally
+$\sum_i\bar D_{i\cdot}\sum_t\eta_{it}=T^{-1}\sum_i\sum_{s,t}D_{is}\eta_{it}$, where the terms with $t\ge s$
+have mean zero because $D_{is}$ is $\F_{s-1}$-measurable. Hence
+$N^{-1}\sum\ddot D_{it}\eta_{it}\to_p-T^{-1}\lim N^{-1}\E\sum_i\sum_{t<s}D_{is}\eta_{it}$. Together with
+$N^{-1}\sum\ddot D_{it}b_{it}\to_p\lim N^{-1}\E\sum\ddot D_{it}b_{it}$ and
+$N^{-1}\sum\ddot D_{it}{}^2\to_pd^2$ (both by (L)), this gives $B_J+B_F$.
+
+For the bound, $M_{i,s-1}=\sum_{t<s}\eta_{it}$ is a martingale with
+$\E M_{i,s-1}{}^2\le(s-1)\bar\sigma_\eta{}^2$, and $|D_{is}|\le1$. Hence
+$|\E\sum_{t<s}D_{is}\eta_{it}|=|\E D_{is}M_{i,s-1}|\le\bar\sigma_\eta(s-1)^{1/2}$, and
+comparing the sum with the integral of $x^{1/2}$ over $[0,T]$ gives $\sum_{s=1}^T(s-1)^{1/2}\le2T^{3/2}/3$. If instead
+$\sum_s\sum_{t<s}|\E D_{is}\eta_{it}|\le CT$ (adoption responds mainly to recent shocks), then
+$|B_F|\le C/d^2$. The expansion of $b_{it}$ is a second-order delta-method approximation. With
+$\operatorname{var}(Y_{it}\mid\F_{t-1})=\mu_{it}+\mu_{it}{}^2/k$,
+$\E\{\log(Y_{it}+c)\mid\F_{t-1}\}\approx\log(\mu_{it}+c)-\operatorname{var}/\{2(\mu_{it}+c)^2\}$. Expanding in
+$1/\mu_{it}$ gives $\log\mu_{it}+(c-1/2+c/k)/\mu_{it}-1/(2k)+O(\mu_{it}{}^{-2})$, which was checked
+symbolically (Web Appendix B, S4). The constant $-1/(2k)$ is absorbed by the fixed effects.
+
+(b) The Poisson fixed-effects score for unit $i$, after concentrating out $\alpha_i$, is
+$\sum_sx_{is}\{Y_{is}-m_{is}\sum_rY_{ir}/\sum_rm_{ir}\}=\sum_s(x_{is}-\bar x^m_i)Y_{is}$. At $\beta_0$,
+$\sum_s(x_{is}-\bar x^m_i)\mu_{is}=e^{\alpha_i}\{\sum_sx_{is}m_{is}-\bar x^m_i\sum_sm_{is}\}=0$. Also
+$\E(x_{is}\varepsilon_{is})=0$ because $x_{is}$ is $\F_{s-1}$-measurable, which leaves
+$-\sum_s\E(\bar x^m_i\varepsilon_{is})$. The Chen--Stein identity $\E\{(Y-\mu)f(Y)\}=\mu\E\{f(Y+1)-f(Y)\}$
+for $Y\sim\text{Poisson}(\mu)$ \citep{chen1975poisson}, applied conditionally on $\F_{s-1}$ and
+$R_{is}$, gives the representation. For $T=2$, conditioning on $Y_{i1}+Y_{i2}$ shows that the score
+for the week-2 effect of group $d$ is
+$\sum_i\ind(D_{i2}=d)(Y_{i2}\Lambda_{i1}-Y_{i1}e^{h}\Lambda_{i2})/(\Lambda_{i1}+e^h\Lambda_{i2})$. Taking the
+conditional expectation of $Y_{i2}$ given $\F_1$, which contains $Y_{i1}$, $\Lambda_{i2}$ and $D_{i2}$,
+yields \eqref{eq:t2fe}. At $h=h_0+\tau_0d$, the left side of \eqref{eq:t2fe} equals
+$-e^h\E[\ind(D_{i2}=d)\cov\{f_h(Y_{i1}),Y_{i1}\mid\alpha_i,\Lambda_{i1},D_{i2}\}]$ with
+$f_h(y)=(y+\omega_i)/\{\Lambda_{i1}+e^h(y+\omega_i)\}$ strictly increasing, which is strictly negative
+when $Y_{i1}$ is non-degenerate. Under randomisation $D_{i2}$ is independent of $Y_{i1}$, but $f_h$
+depends on $h$, so the two group-specific distortions differ.
+
+(c) $\log(Y_{it}+1)=\alpha_i+\gamma_t+\tau_0D_{it}+\log\Lambda_{it}-b^{(1)}_{it}+\eta^{(1)}_{it}$; apply
+two-way demeaning as in (a).
+
+(d) Write $\Lambda^0_{it}=L_{it}+\omega_i$. With $\kappa=\phi=0$,
+$u_{it}(\delta,\tau)=Y_{i,t+1}e^{-\delta_t+\tau(D_{it}-D_{i,t+1})}\Lambda^0_{it}/\Lambda^0_{i,t+1}-Y_{it}$. Taking
+$\E(\cdot\mid\F_t)$ and using A1 at $\theta_0$,
+$\E(Y_{i,t+1}\mid\F_t)e^{-\delta_t+\tau(D_{it}-D_{i,t+1})}\Lambda^0_{it}/\Lambda^0_{i,t+1}=\mu_{it}R_{it}(\delta,\tau)$
+with $\Lambda_{it}(\phi_0)/\Lambda^0_{it}=1+\phi_0\tilde N_{it}$. Then
+$\E(z_{it}u_{it})=\E\{z_{it}\mu_{it}(R_{it}-1)\}$ because $\E(Y_{it}\mid\F_{t-1})=\mu_{it}$. At
+$\kappa_0=\phi_0=0$, $(\delta_{0},\tau_0)$ solves the equations. Linearising $R-1\approx\log R$ around
+this point gives the weighted, just-identified instrumental-variable normal equations for the
+regression of $\kappa_0\Delta\bar D+\phi_0\Delta\tilde N$ on week indicators and $\Delta D$. The implicit
+function theorem then makes $\tilde\tau-\tau_0$ equal to that coefficient up to
+$O(\kappa_0{}^2+\phi_0{}^2)$.
+\end{proof}
+
+\subsection{A.7 Proof of Proposition~\ref{prop:hetero}}
+
+\begin{proof}
+Include $\tau_i$ in the unit heterogeneity, so that $\F_t$ contains $(\alpha_i,\tau_i)$; Lemma~\ref{lem:moment}
+then holds with $\mu_{it}=e^{\alpha_i+\gamma_t+\tau_iD_{it}+\kappa_0\bar D_{it}}\Lambda_{it}(\phi_0)$. As in the
+proof of Theorem~\ref{thm:ident}(b), $h(\tau)=-\sum_tA_tC_t(\tau)/\{M_t+C_t(\tau)\}$ with
+$C_t(\tau)=\lim G^{-1}\E\sum_is_{it}\mu_{it}\Sw_{i,t+1}(e^{\tau_i-\tau}-1)$, which is strictly decreasing in
+$\tau$ when $K_t>0$. Hence $h$ is strictly increasing. If $\tau$ is below every $\tau_i$ in the stated
+support, all $C_t>0$ and $h<0$; if it is above, all $C_t<0$ and $h>0$. Note that $M_t+C_t>0$
+because treated units and switchers are disjoint, so $A_t\le M_t-K_t$. Continuity and the
+intermediate value theorem give a unique root inside the convex hull. To first order,
+$C_t(\tau)\approx H_t-\tau K_t$ with $H_t=\lim G^{-1}\E\sum_is_{it}\mu_{it}\Sw_{i,t+1}\tau_i$, and
+$C_t/(M_t+C_t)\approx C_t/M_t$. Solving $\sum_t(A_t/M_t)(H_t-\tau K_t)=0$ gives the stated weighted
+average, with weights $(A_t/M_t)s_{it}\mu_{it}\Sw_{i,t+1}\ge0$.
+\end{proof}
+
+\subsection{A.8 Proof of Theorem~\ref{thm:psi}}
+
+\begin{proof}
+(a) Let $m^0_{it}=\E\{Y_{it}(\mathbf 0)\mid\alpha,Y_{\le0}\}$. Pre-sample outcomes do not depend on the policy
+(A2(a)), so $m^0_{it}=Y_{it}$ for $t\le0$. For $t\ge1$, A1 with $\mathbf d=\mathbf 0$ and the tower
+property give
+$m^0_{it}=e^{\alpha_i+\gamma_t}\{\sum_sw_sm^0_{i,t-s}+\phi_0\sum_sw_s\sum_jW_{ij}m^0_{j,t-s}+\omega_i\}$.
+For $\nu$, $c_{it}(\theta_0)$ is $\F_{t-1}$-measurable and well defined by A5, so Lemma~\ref{lem:moment}
+gives $\E(\nu_{it}\mid\F_{t-1})=c_{it}\mu_{it}=e^{\alpha_i+\gamma_t}\Lambda_{it}(\nu;\phi_0)$. Because
+$\Lambda_{it}(\nu;\phi_0)$ is affine in past $\nu$ and $\sigma(\alpha,Y_{\le0})\subseteq\F_{t-1}$, the
+conditional means $\E(\nu_{it}\mid\alpha,Y_{\le0})$ satisfy the same recursion with the same initial
+values. Induction on $t$ gives equality, and summing over $\mathcal P$ gives
+$\E\psi^\dagger_{\mathcal P}=\psi_{\mathcal P}$.
+
+(b) $\nu_{it}(\theta)$ depends on $\theta$ only through $\beta$ and is continuously differentiable.
+By the mean-value theorem,
+$(\hat\psi_{\mathcal P}-\psi^\dagger_{\mathcal P})/G=\{G^{-1}\sum_{\mathcal P}\partial\nu_{it}(\bar\theta)/\partial\theta^{\top}\}(\hat\theta-\theta_0)$.
+The bracket converges in probability to $\Psi$ by the assumed dominance, (L) and the consistency
+of $\hat\theta$. The result follows from Theorem~\ref{thm:asy}(b) and Slutsky's lemma.
+\end{proof}
+
+\section{Web Appendix B: Numerical checks}
+\label{app:numeric}
+
+The script \texttt{numeric\_checks.py} (supplementary code) verifies each derivation; seeds are
+fixed. All symbolic checks pass. They cover the quasi-difference identity of Lemma~\ref{lem:mds} (S1), the
+Jacobian \eqref{eq:jac} (S2), the closed-form profiling \eqref{eq:profile} (S3), the expansion of
+$b_{it}$ (S4), the identity $r_{it}{}^2\mu_{i,t+1}=r_{it}\mu_{it}$ behind the working variance in
+Remark~\ref{rem:optimal} (S5), the first-order heterogeneity weights (S7), and the $T=2$ expected
+score \eqref{eq:t2fe} (S8). The expansion of $b_{it}$ is accurate for $\mu_{it}\ge5$; at $\mu_{it}=2$,
+$k=10$, $c=0.5$ the exact value of $\E\log(Y+c)-\log\mu$ is $-0.00556$ against $-0.025$ from the
+expansion.
+
+The Monte Carlo check of Theorem~\ref{thm:asy} used $R=1000$ replications, $T=10$,
+$\tau_0=\log0.8$, $\kappa_0=-0.1$, $\phi_0=0.4$ and feedback adoption, with nominal 95\% $t_{G-1}$
+intervals and the $G/(G-1)$ factor. With $G=100$ clusters of 5 units, the biases of $\hat\tau$,
+$\hat\kappa$ and $\hat\phi$ were 0.0009 (MCSE 0.0023), 0.0006 (0.0032) and 0.0021 (0.0021); the
+empirical standard deviations were 0.0733, 0.1025 and 0.0668 against mean standard errors of
+0.0741, 0.1022 and 0.0674; and coverage was 0.967 (0.0056), 0.955 (0.0066) and 0.953 (0.0067).
+With $G=50$ clusters of 10 units, the biases were 0.0015 (0.0023), $-0.0028$ (0.0032) and 0.0011
+(0.0022); the empirical standard deviations 0.0740, 0.1010 and 0.0690 against mean standard errors
+of 0.0723, 0.0998 and 0.0673; and coverage 0.952 (0.0068), 0.957 (0.0064) and 0.947 (0.0071). In
+both designs the correlation between $\hat\tau-\tau_0$ and its linearisation was 0.9998.
+
+For Theorem~\ref{thm:bias}(a),(c), with $N=2000$, $T=10$, $k=10$, $R=200$ and
+$\tau_0=\log0.8$, the two-step log-$R$ estimator ($c=0.5$) had bias $-0.2310$ (MCSE 0.0007) under
+feedback adoption, composed of a small-count part $B_J=-0.0334$ and a feedback part
+$B_F=-0.1976$, and bias 0.0071 (0.0008) under random adoption, with $B_J=0.0088$ and
+$B_F=-0.0017$; the decomposition identity held to machine precision. Two-way fixed effects on
+$\log(Y+1)$ had bias 0.6989 (0.0025) under feedback adoption, of which 0.9687 is the contribution
+of the omitted log infection pressure, and $-0.1366$ (0.0040) under random adoption, with an
+omitted-pressure contribution of $-0.1573$.
+
+For Lemma~\ref{lem:mds} ($G=40$ clusters of 5 units, $T=8$, 4000 replications), cumulative cases
+of neighbouring clusters were correlated (0.0771 under feedback adoption, MCSE 0.0022), but the
+cross-cluster products of moment contributions had mean zero. The largest $|z|$-statistic for
+the policy rows was 0.311. The ratio of the Monte Carlo variance of $\sqrt G\hat g(\theta_0)$ to the mean of
+$\hat\Omega$ lay in $[0.9694,1.0264]$ under feedback adoption. The lead moment of Proposition~\ref{prop:sources}(c) had $z=-214.48$ under
+feedback adoption and $z=-1.12$ under random adoption. For $T=2$ and $\tau_0=-0.2231$, solving \eqref{eq:t2fe}
+numerically gave the Poisson fixed-effects pseudo-true values $-0.5240$ under threshold adoption
+(bias $-0.3009$) and $-0.2272$ under random adoption (bias $-0.004$). Simulation means over
+$20\times200{,}000$ units were $-0.5233$ and $-0.2266$ (MCSE 0.0004). For Theorem~\ref{thm:psi}(a), the cumulative relative difference
+between $\E\nu$ and $\E Y(\mathbf 0)$ was 0.00229 (largest weekly $|z|=1.86$), against $-0.8449$
+for naive rescaling.
+
+\section{Web Appendix C: Supplementary simulation results}
+\label{app:supp}
+\webfloats
+
+This appendix collects the simulation results referred to in Section~\ref{ss:simresults} as Web
+Tables and Web Figures. Web Table~\ref{tab:sim-m0-full} gives the full performance measures of M0
+for $\tau$ in all 25 scenarios. Web Table~\ref{tab:sim-core-spill} and Web
+Figures~\ref{fig:core-phi} and \ref{fig:core-kappa} report the spillover parameters in the core
+scenarios. Web Table~\ref{tab:sim-null} and Web Figure~\ref{fig:null} report type I error, Web
+Table~\ref{tab:sim-roots} the root diagnostics, Web Table~\ref{tab:sim-misspec} and Web
+Figure~\ref{fig:misspec} the misspecification block, and Web Table~\ref{tab:sim-psi} inference for
+cases averted. All results use $R=8000$ replications per scenario.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_04_core_phi.png}
+\caption{Spillover-scale parameter $\phi$, laid out as Figure~\ref{fig:core-tau}, with bias in
+panel (a) and interval coverage in panel (b). The true value is 0.4 with spillover and 0 without;
+coverage of M0-G and M0-GI is computed over interior selections. Error bars are $\pm2$ Monte Carlo
+standard errors, and M0-GI is the post hoc variant.}
+\label{fig:core-phi}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_05_core_kappa.png}
+\caption{Neighbour-policy effect $\kappa$, laid out as Figure~\ref{fig:core-tau}, with bias in
+panel (a) and interval coverage in panel (b), and $\pm2$ Monte Carlo standard errors.}
+\label{fig:core-kappa}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_06_null_typeI.png}
+\caption{Type I error in the null block (scenarios 17--20), measured as the rejection rate of $H_0\colon\tau=0$ by
+the 5\%-level $t_{G-1}$ test, by scenario and method. The horizontal line marks the nominal level, and
+error bars are $\pm2$ Monte Carlo standard errors.}
+\label{fig:null}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_07_misspec.png}
+\caption{Misspecification block (scenarios X1--X5). (a) Bias of $\hat\tau$ by method, with $\pm2$
+Monte Carlo standard errors. (b) Scenario X5, with effects growing with time since adoption, shows mean M0-ET
+event-time estimates ($\pm2$ Monte Carlo standard errors) against the generating effects and the
+constant-effect M0 estimate.}
+\label{fig:misspec}
+\end{figure}
+
+\input{tables/table_9_m0_full}
+
+\input{tables/table_2_core_spill}
+
+\input{tables/table_3_null}
+
+\input{tables/table_6_roots}
+
+\input{tables/table_4_misspec}
+
+\input{tables/table_5_psi}
+
+\subsubsection{Validation of the root-selection rules on independent designs}
+\label{app:rsel}
+
+\input{tables/table_10_rsel}
+
+The rules M0-G and M0-GI were studied in the no-spillover block, and M0-GI was designed after
+interim results of that block were available. To assess them on designs that did not inform their
+construction, nine scenarios with a separate seed base were run with $R=2000$ replications each
+(Table~\ref{tab:rsel}). The designs vary the true coupling over $\phi_0\in\{0,0.05,0.10,0.15\}$,
+the reference value of the $\phi$-instrument over $\bar\phi\in\{0.25,0.5,1\}$, the number of
+clusters over $G\in\{20,50,100\}$ and the adoption rule. All other settings are those of the main
+study.
+
+At the boundary ($\phi_0=0$) the local solver fails as before (coverage 0.361) and M0-GI restores
+most of the nominal coverage (0.888), which reproduces the pattern of the no-spillover block on
+independent data. Close to the boundary but not on it the picture reverses. At $\phi_0=0.05$,
+M0 has coverage between 0.957 and 0.967 at all three reference values, while M0-GI has 0.912 to
+0.929; it selects $\phi=0$ in 56\% to 79\% of replications, and the resulting negative bias in
+$\hat\tau$ ($-0.014$ to $-0.020$) outweighs the correction. At $\phi_0=0.10$ the two rules give
+coverage within 0.014 of each other, and at $\phi_0=0.15$ they coincide.
+
+The rules are therefore not a uniform improvement on M0. They help when the profile has multiple
+roots, which in these designs happens when $\phi_0$ is at or very near the boundary; they cost
+coverage when the true coupling is small but positive; and they are irrelevant when it is
+moderate. Their selection rate at $\phi=0$ is the quantity that separates these cases: 56\% to 79\%
+at $\phi_0=0.05$ against 0\% at $\phi_0=0.15$. A practical rule is to report the profile and to
+apply a global selection only when the profile has more than one root, not as a default. None of
+the rules was pre-specified in this validation; it is a check that the rule proposed in the
+previous subsection does not extend beyond the design that motivated it.

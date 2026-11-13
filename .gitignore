@@ -1,0 +1,14 @@
+*.aux
+*.log
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 217 MB public-domain source file; re-download with
+#   curl -L -o experiment/data/raw/cdc_masks/rows.csv https://data.cdc.gov/api/views/62d6-pm5i/rows.csv
+experiment/data/raw/cdc_masks/rows.csv
