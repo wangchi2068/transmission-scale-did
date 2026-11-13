@@ -150,12 +150,12 @@ Hence $\E(\xi_{gs}\mid\F_{s-1})=0$ and $\E(g_gg_g{}^{\top})=\sum_{s}\E(\xi_{gs}\
 also A4 holds, then $\E\{g_g(\theta_0)g_h(\theta_0)^{\top}\}=0$ for $g\ne h$.
 \end{lemma}
 
-Lemma~\ref{lem:mds} is the key to inference under contagion. Neighbouring clusters have
-correlated outcomes, because each one's cases seed the other's epidemic; this correlation is
-visible in the numerical checks of Web Appendix B. Their moment contributions are nevertheless
+Lemma~\ref{lem:mds} is the key to inference under lagged contagion. Neighbouring clusters can have
+correlated outcomes because each one's cases seed the other's epidemic; this correlation is
+visible in the numerical checks of Web Appendix B. Under A4, their moment contributions are nevertheless
 uncorrelated, because each contribution is a sum of innovations weighted by predetermined
-quantities. The ordinary cluster-robust variance therefore remains valid and no spatial HAC
-correction is needed for $\hat\theta$.
+quantities. The ordinary cluster-robust variance is therefore valid under A4, without a spatial HAC
+correction for $\hat\theta$; same-week cross-cluster transmission is excluded by that assumption.
 
 \subsection{Identification}
 \label{ss:ident}
@@ -300,32 +300,28 @@ the information set.
 
 Second, a weekly panel can only be internally consistent if contagion is lagged at least one
 period, because the renewal equation used to define the estimand, equation~\eqref{eq:mean}, is
-itself written in completed weeks. With same-week transmission the model is
-misspecified for any lag structure, and the question is not whether the estimator is consistent but
-how the misspecification interacts with the variance. Two consequences follow. The moments are no
-longer martingale differences, so a fraction of the cross-cluster covariance survives; the
-cluster-robust sandwich, which sets those terms to zero, then has a negative bias. The direction is
-clear and the magnitude is not: the omitted covariance is proportional to the share of transmission
-that crosses a cluster boundary within a week, which the data do not identify. In the application
-about 30\% of transmission occurs within a week and most of it stays inside a cluster, since
-between-county transmission inside a state is absorbed by the neighbour term only across states.
+written in completed weeks. Same-week transmission therefore changes the conditional mean implied
+by that model and may also change the covariance structure of the quasi-difference. The resulting
+moments need not be martingale differences, so neither the consistency argument nor the conventional
+cluster-robust sandwich follows without additional conditions. The direction and magnitude of
+parameter and variance distortions are not determined by the weekly model alone. In the application,
+about 30\% of transmission is assigned to the same week under the assumed generation-interval
+conversion; its implications for estimation require a data-generating design that includes such
+transmission.
 
-Third, the residual dependence is weak and sparse, and the moment-relevance condition in Lemma 2
-requires only that the contribution of a cluster be uncorrelated with those of clusters at
-distance beyond the radius that the instrument spans. A dependence confined to adjacent clusters
-in one week does not violate that condition; what it does is make the variance estimate downward
-biased in the direction of the omitted term. A conservative reading is that the reported standard
-errors are a lower bound, and that the over-identification test, which is sensitive to precisely
-this kind of second-order dependence, rejects for that reason as well as for the ones discussed in
-Section~\ref{s:application}.
+Third, dependence created by same-week transmission can link innovations across clusters before
+the next period's information set is observed. This is distinct from the lagged cross-cluster
+transmission allowed by A4 and Lemma~\ref{lem:mds}; the existing conditions do not establish that
+the resulting moment contributions remain uncorrelated beyond the instrument radius. A spatial
+correction such as Conley\citep{conley1999gmm} addresses covariance under appropriate dependence
+conditions, but it does not by itself repair a misspecified conditional mean or restore the
+martingale-difference property. The simulations reported in this paper do not include same-week
+transmission, so they do not quantify these effects.
 
-Fourth, the remedies are either to shorten the observation window below the generation interval,
-which is rarely possible with surveillance data, or to add a spatial autocorrelation correction
-\citep{conley1999gmm} on top of the cluster-robust one, at the cost of a bandwidth choice. For the
-designs studied here the omitted covariance is confined to adjacent clusters, so a Conley-type
-correction would add at most the terms of the adjacent-pair block; the simulation does not
-contain same-week transmission, so this is a statement about the direction of the bias rather than
-an estimate of it.
+Fourth, weekly aggregation may be inadequate when a substantial share of transmission occurs within
+a week. Shortening the observation interval or specifying a within-week renewal process would change
+the data model; variance corrections alone cannot resolve that mean specification. Any proposed
+correction should be evaluated under a design that generates and aggregates within-week transmission.
 
 \subsection{What standard estimators estimate under feedback}
 \label{ss:bias}
@@ -485,7 +481,7 @@ linear in past $\nu$ and Theorem~\ref{thm:psi}(a) holds only approximately.
 Lemma~\ref{lem:mds} implies that moment contributions of adjacent clusters are uncorrelated,
 which can be checked directly. The J test of Corollary~\ref{cor:J} checks the multiplicative
 renewal structure against extra predetermined instruments. A sensitivity analysis lagging $D$ by
-one week addresses anticipation. Sequential ignorability (A2(b)) and parallel untreated
+one week checks sensitivity to policy-timing alignment. Sequential ignorability (A2(b)) and parallel untreated
 log-transmission paths after adoption are not testable.
 \end{remark}
 
@@ -529,13 +525,18 @@ exists; both are reported for the application in Section~\ref{s:application}.
 
 For applied work the rules amount to the following sequence, which we recommend reporting in
 full. (1) Fit M0 from a fixed starting value and record the local solution. (2) Evaluate the
-profiled $\phi$-equation on a grid over $[0,3]$ with steps of 0.05 and refine every sign change;
-the code uses 61 points, and a finer grid than 0.05 did not change the candidate roots in the
-designs we examined. (3) If the profile has a single sign change, report M0 with its cluster-robust
-interval, together with the profile as a diagnostic figure. (4) If there are several sign changes,
-report every candidate root and the value of $Q$ at each, and report the rule's selection as
-conditional on that choice; when the selected candidate is on the boundary, state that no
-interval for $\phi$ is available. (5) Report the over-identification statistic $J$ in every case,
-because it has power against some forms of misspecification but, as the simulation shows, little
-power against a spurious root. A score test of $H_0:\phi_0=0$ would be a natural pre-test for
-step (3); we have not derived it, and the profile itself plays that role here.
+profiled $\phi$-equation on the implementation grid
+\[
+\begin{aligned}
+\phi\in\{&0,0.02,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5,0.6,\\
+        &0.7,0.8,1,1.25,1.5,2,2.5,3\},
+\end{aligned}
+\]
+refine every adjacent sign change, and include $\phi=0$ as a boundary candidate. (3) If the
+profile has a single interior sign change, report M0 with its cluster-robust interval, together
+with the profile as a diagnostic figure. (4) If there are several sign changes, report every
+candidate root and the value of $Q$ at each, and report the rule's selection as conditional on that
+choice; when the selected candidate is on the boundary, state that no interval for $\phi$ is
+available. (5) Report the over-identification statistic $J$ in every case, because it has power
+against some forms of misspecification but, as the simulation shows, little power against a spurious
+root.

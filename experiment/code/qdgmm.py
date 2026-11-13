@@ -308,6 +308,18 @@ def spec_m0_oi(panel: dict, phi_bar: float = 0.5) -> QDSpec:
 # M0-G: global root search over the parameter space phi in [0, PHI_MAX] (A5/A6) with root selection
 # ------------------------------------------------------------------------------------------------
 PHI_GRID = (0.0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0)
+ROOT_DEDUP_ATOL = 1e-8
+ROOT_DEDUP_RTOL = 1e-7
+
+
+def _append_unique_root(candidates, beta) -> bool:
+    """Append an interior solution unless its full parameter vector matches an existing root."""
+    beta = np.asarray(beta, float)
+    for _, existing in candidates:
+        if np.allclose(existing, beta, rtol=ROOT_DEDUP_RTOL, atol=ROOT_DEDUP_ATOL):
+            return False
+    candidates.append(("interior", beta))
+    return True
 
 
 def _solve_given_phi(mod: QDModel, phi: float, x0):
@@ -384,7 +396,7 @@ def fit_global(panel: dict, phi_bar: float = 0.5, grid=PHI_GRID, selection: str 
             xs = np.r_[(1 - w) * b0 + w * b1, (1 - w) * p0 + w * p1]
             xr, okr, res = mod.solve(xs)
             if okr and xr[-1] >= 0:
-                cands.append(("interior", xr))
+                _append_unique_root(cands, xr)
     b0, ok0, F0 = prof[0][1], prof[0][2], prof[0][3]
     if ok0:
         cands.append(("boundary", np.r_[b0, 0.0]))

@@ -4,8 +4,9 @@
 For panels of reported cases we have proposed parallel trends in log transmission, a
 quasi-differenced GMM estimator that removes unit effects without requiring strictly exogenous
 adoption, and an estimator of cases averted that propagates the counterfactual through the renewal
-equation and the network. Under adoption feedback, spillover, overdispersion and small counts the
-simulation study supports the first two, and the three recommendations below follow from it.
+equation and the network. Under adoption feedback, spillover and overdispersion in the positive-
+spillover core scenarios, the simulation supports the first two; the boundary/no-spillover
+scenarios require explicit root handling, and the three recommendations below follow from it.
 
 \textbf{Report the profile with the estimate.} The estimating equations are nonlinear in
 $\phi$, and a local solver can settle on a root that is not the consistent one without any
@@ -26,10 +27,11 @@ directly also sidesteps the sensitivity of log-count regressions to the handling
 
 \textbf{Match the inferential target to the level at which the policy is set.} When the order is
 imposed above the unit, interior units have no variation that separates the own effect from the
-spillover effect, and the coefficient attached to the total exposure is the one the panel
-identifies. The application shows how much this matters and how little it costs: the two
-components are estimated with wide intervals, their sum with a narrower one, and a re-indexing of
-the same moments delivers the sum directly as a coefficient.
+spillover effect. Under the specified model, their sum $\tau+\kappa$ is the state-level policy
+estimand; its interpretation and causal meaning remain conditional on that model and the identifying
+assumptions. In the application the estimate is $-0.466$ (95\% interval $-1.091$ to $0.159$), which
+contains zero, and the working model is rejected. Re-indexing the moments gives this estimand as a
+coefficient, but in this application the interval for the sum is wider than the interval for either component; the re-indexing only changes the coefficient used to report the policy-level target.
 
 \textbf{Where the method needs care.} Near $\phi_0=0$ the neighbour term carries no identifying
 information and the parameter sits on the boundary of its space
@@ -46,24 +48,19 @@ subsequent inference \citep{roth2022pretest}, and sensitivity analysis for depar
 trends \citep{rambachan2023credible} can be adapted to the transmission scale.
 \textbf{Scope of the evidence.} The simulation uses one family of data-generating mechanisms,
 with two generation-interval lags, a nearest-neighbour graph, 50 clusters and one adoption rule.
-Few clusters, longer generation intervals and other network shapes are outside its range; for few
-clusters the small-sample corrections of cluster-robust inference become relevant
-\citep{imbens2016robust} and should be added. About 30\% of COVID-19 transmission occurs within the
-same week and cannot enter a model with lags of one week or more, which leaves a second-order
-autocorrelated remainder; Section~\ref{ss:weekwithin} traces what this does to the variance. These
+The state-order application has 49 state clusters, about 24 of which contain a county that switches exposure during the window; cluster sizes are highly unequal. The reported intervals use conventional state-clustered inference, and the simulations do not calibrate coverage for this few-treated-cluster pattern. Few total clusters, longer generation intervals and other network shapes are also outside the simulation range; for few clusters the small-sample corrections of cluster-robust inference become relevant
+\citep{imbens2016robust} and should be added. About 30\% of COVID-19 transmission is assigned to the same week under the assumed generation-interval conversion and cannot enter a model with lags of one week or more; Section~\ref{ss:weekwithin} explains why this may alter both the conditional mean and the covariance argument, and why the existing simulations do not quantify its effect. These
 are properties of the designs, and the diagnostic of the first recommendation is what makes them
 visible in a given application.
 
 \textbf{Reading the application.} The order is set at state level while the unit is the county, so
-for 61.9\% of counties the own and the neighbours' order are the same variable; the panel
-identifies the total effect of a state order on an interior county, $\hat\tau+\hat\kappa=-0.466$
-(95\% interval $-1.091$ to $0.159$), and places little information on the two components. The
-event-time estimates are negative in every bin, the profile that scenario X5 associates with
-effects that build up after adoption and that a change in ascertainment also produces; with the
-over-identification test rejecting the working model, the interval reported here describes what
-this panel supports rather than estimating the effect of mask orders. The cases-averted recursion
-is informative over the first weeks, where susceptible depletion is negligible, and its 26-week
-value shows why a depletion term is needed beyond that horizon.
+for 61.9\% of counties the own and the neighbours' order are the same variable; under the specified
+model the policy-level estimand is $\hat\tau+\hat\kappa=-0.466$ (95\% interval $-1.091$ to $0.159$),
+and the data contain little information on the two components. The event-time estimates are negative
+in every bin, the profile that scenario X5 associates with effects that build up after adoption and
+that a change in ascertainment also produces; with the over-identification test rejecting the working
+model, the interval reported here describes what this panel supports rather than estimating the
+effect of mask orders. The cases-averted recursion illustrates how the fitted counterfactual propagates over the first weeks. In this application, however, its standard error already exceeds the estimate at four weeks, the working model is rejected, and the policy-level target is model-conditional; the reported standard error targets the realised-path quantity $\psi^\dagger$, while inference for the population target $\psi$ would require an unproved cluster-graph HAC contribution. Simulation coverage also falls below nominal in several settings, while the long-horizon recursion explodes without depletion. It therefore does not support a causal evaluation here.
 
 Three extensions follow naturally. Sharper instruments, either those that attain the efficiency
 bound for sequential moment restrictions
