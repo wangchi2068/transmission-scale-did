@@ -1,192 +1,81 @@
 \section{Simulation Study}
 \label{s:simulation}
 
-The design follows the ADEMP structure of \citet{morris2019ademp}. Aims, data-generating
-mechanisms, estimands, methods, performance measures and success criteria were written down
-before any full run. Departures from that protocol are listed at the end of the design description, before the results.
+The design follows the ADEMP structure of \citet{morris2019ademp}; aims, data-generating
+mechanisms, estimands, methods, performance measures and success criteria were written down before
+any full run, and the departures are listed at the end of this section.
 
 \subsection{Design}
 
-\subsubsection{Aims}
-The study had four aims. The first was to assess the finite-sample bias, standard errors
-and coverage of M0 for $(\tau,\kappa,\phi)$ under adoption feedback, adoption related to unit
-effects, contagion, overdispersion and small counts (Theorem~\ref{thm:asy}). The second was to
-assess inference for cases averted (Theorem~\ref{thm:psi}), and the third to quantify the bias of
-the standard estimators and compare it with Theorem~\ref{thm:bias}. The fourth was to assess the
-$J$ test and the robustness of M0 when the working model is wrong.
+All scenarios share one generator. Counties are placed uniformly in the unit square and linked to
+their six nearest neighbours; the graph is symmetrised, and its row-normalised adjacency matrix
+supplies $W$. Fifty spatially contiguous strips of counties play the role of states. Unit effects
+carry a state component, a county component and a term proportional to the state's adoption
+propensity, which makes adoption and transmission level correlated. Outcomes follow
+\eqref{eq:mean} with $S=2$, generation-interval weights $(0.85,0.15)$, background input
+proportional to population and negative binomial innovations of shape $k=10$, or Poisson
+innovations as the limit $k=\infty$. Week-effect levels are calibrated so that median county-week
+counts fall between 5 and 50. Random adoption assigns each state a week uniformly on
+$\{2,\dots,T+2\}$, leaving some states untreated inside the window. Feedback adoption lets a state
+adopt once its lagged incidence crosses a threshold that rises with its propensity, and a county of
+an adopting state follows when its own lagged incidence crosses a second threshold. In both designs
+adoption is absorbing.
 
-\subsubsection{Data-generating mechanisms}
-All scenarios use one generator. Counties are placed
-uniformly in the unit square and linked to their six nearest neighbours; the graph is
-symmetrised and $W$ is its row-normalised adjacency matrix. Counties are grouped into $G=50$
-spatially contiguous strips that play the role of states. Unit effects combine a state
-component, a county component and a term proportional to the state's adoption propensity, so
-that adoption is related to transmission levels. Outcomes follow the mean \eqref{eq:mean} with
-$S=2$ lags, generation-interval weights $(0.85,0.15)$, background input proportional to
-population, and negative binomial innovations with shape $k=10$, or Poisson innovations
-($k=\infty$). The week-effect level is calibrated so that median county-week counts lie between 5
-and 50. Under random adoption, each state's adoption week is uniform on $\{2,\dots,T+2\}$, so
-that some states remain untreated within the window. Under feedback adoption, a state adopts
-when its lagged incidence first exceeds a threshold that depends on its adoption propensity, and
-a county of an adopting state starts when its own lagged incidence exceeds a second threshold.
-Adoption is absorbing.
+Twenty-five scenarios form three blocks (Table~\ref{tab:sim-core-tau}). The core block crosses
+$N\in\{500,2000\}$, $T\in\{12,26\}$, the two adoption rules and spillover,
+$(\phi_0,\kappa_0)=(0.4,-0.1)$ or $(0,0)$, at $\tau_0=\log0.8$ (1--16). The null block fixes
+$\tau_0=0$ and crosses the adoption rule with $k\in\{10,\infty\}$ (17--20). The misspecification
+block (21--25) breaks one assumption at a time: a generation interval of $(0.7,0.3)$ against the
+$(0.85,0.15)$ used in estimation (X1); a reporting probability that falls by 15\% once the state
+adopts (X2); unit-specific effects, $\tau_i\sim N(\log0.8,0.1^2)$ (X3); susceptible depletion with
+attack rates up to 20\% (X4); and effects that grow from $-0.1$ to $-0.3$ with time since adoption
+(X5).
 
-The 25 scenarios form three blocks. The core block crosses $N\in\{500,2000\}$, $T\in\{12,26\}$,
-random or feedback adoption, and spillover $(\phi_0,\kappa_0)=(0.4,-0.1)$ or none, $(0,0)$, with
-$\tau_0=\log0.8$ (scenarios 1--16). The null block (scenarios 17--20) sets $\tau_0=0$, $N=500$,
-$T=12$ with spillover, and crosses the adoption rule with $k\in\{10,\infty\}$. The
-misspecification block (scenarios 21--25) uses $N=2000$, $T=26$, feedback adoption and spillover,
-and violates one assumption at a time. In X1 the true generation interval is $(0.7,0.3)$ but
-$(0.85,0.15)$ is used. In X2 reports are a binomial thinning of infections with a reporting
-probability that falls by 15\% after the state adopts. In X3 the effects are unit-specific,
-$\tau_i\sim N(\log 0.8,0.1^2)$. In X4 the mean is multiplied by the susceptible fraction, with
-cumulative attack rates up to about 20\%. In X5 effects grow with time since adoption from $-0.1$
-to $-0.3$.
+Estimands are the generating values of $\tau$, $\kappa$ and $\phi$. In X3 the target for $\tau$ is
+additionally the replication-specific mean of $\tau_i$ among switchers; in X5 the targets are the
+event-time effects. For cases averted, inference addresses the realised-path quantity
+$\psi^\dagger$ of Theorem~\ref{thm:psi}, with the population $\psi$ approximated from 5000 paired
+policy and no-policy paths generated under common random numbers. Every method sees the same data
+sets. M0 is accompanied by M0-G, the post hoc M0-GI, M0-OI, M0-ET and M0$'$. The comparators are
+Poisson fixed effects with offset $\log\Lambda_{it}(\phi)$ (M1) and its split-panel jackknife
+correction (M1-BC); the two-step log-transmission regression of Theorem~\ref{thm:bias}(a), with
+weekly reproduction numbers estimated as in \citet{cori2013epiestim} (M2); two-way fixed effects on
+$\log(Y+1)$ (M3); pooled renewal Poisson quasi-likelihood (M4); and an infeasible Oracle that
+retains the true unit effects. Intervals are cluster-robust throughout, with $t_{G-1}$ critical
+values. Failures are recorded per method and never replaced. For each scenario and method we report
+bias, empirical and model standard errors and their ratio, root mean squared error, coverage, size
+and power for $H_0\colon\tau=0$, size of the $J$ test and the convergence rate, each with a Monte
+Carlo standard error, over $R=8000$ replications.
 
-\subsubsection{Estimands}
-The targets are the generating values of $\tau$, $\kappa$ and $\phi$. In
-X3 the target of $\tau$ is also compared with the replication-specific mean of $\tau_i$ among
-switchers and with the first-order pseudo-true value of Proposition~\ref{prop:hetero}; in X5 the
-targets are the event-time effects. For cases averted, the inferential target in each replication
-is $\psi^\dagger$, computed from the recursion \eqref{eq:nu} at the true parameter for the treated
-unit-weeks and for all unit-weeks after adoption (network). The population quantity $\psi$
-of \eqref{eq:psi} is approximated in each scenario from 5000 pairs of policy and no-policy
-paths generated with common random numbers.
-
-\subsubsection{Methods}
-All methods are applied to the same data sets. The proposed estimator M0 is run together with
-its variants M0-G, M0-GI (post hoc), M0-OI, M0-ET and M0$'$ (Section~\ref{ss:computation}).
-M1 is Poisson fixed effects with offset $\log\Lambda_{it}(\phi)$ and free $(\kappa,\phi)$
-\citep{hausman1984count,wooldridge1999distribution}, and M1-BC is its split-panel jackknife
-correction \citep{dhaene2015splitpanel,fernandezval2016individual}. M2 is the two-step log-$R$
-difference-in-differences of Theorem~\ref{thm:bias}(a), with weekly reproduction numbers estimated
-by the method of \citet{cori2013epiestim}. M3 is two-way fixed effects on $\log(Y+1)$, and M4 is
-pooled renewal Poisson quasi-likelihood without unit effects. The infeasible Oracle is Poisson
-quasi-likelihood with the true unit effects. All intervals are cluster-robust with $t_{G-1}$
-critical values. Failures are recorded per method and are not replaced.
-
-\subsubsection{Performance measures}
-For each scenario and method we computed bias, empirical
-standard error, mean model standard error and its relative error, and root mean squared error.
-We also computed coverage of nominal 95\% intervals, the rejection rates of $H_0\colon\tau=0$ at
-the 5\% level and of the $J$ test, and the convergence rate. Each measure is reported with its
-Monte Carlo standard error (MCSE). Each scenario used $R=8000$ replications with seeds that depend on the scenario and
-replication number.
-
-\subsubsection{Pre-specified criteria}
-M0 was to be considered supported if, in the feedback
-scenarios, its bias for $\tau$, $\kappa$ and $\phi$ was within 2 MCSE of zero and its coverage
-was in $[93\%,97\%]$, while M2 and M3 had biases larger than 2 MCSE or coverage below 90\%. If M1
-and M1-BC had negligible bias and correct coverage in every feedback scenario, the contribution
-would be limited to the transmission-scale framework, spillover parameters, inference under
-contagion and cases averted.
-
-\subsubsection{Departures from the protocol}
-The spread of the unit effects was reduced by a factor of 4 to keep counts at $T=26$ within
-realistic ranges. M0-G was added before any full run, after a pilot showed multiple roots; M0-GI
-was added after interim results and is labelled post hoc wherever it appears. The optional
-working-optimal estimator and a group-time average treatment effect estimator were not run.
+The pre-specified success criterion was a bias within 2 MCSE of zero for $\tau$, $\kappa$ and
+$\phi$ together with coverage in $[93\%,97\%]$ in the feedback scenarios, and, on the comparator
+side, a bias beyond 2 MCSE or coverage below 90\% for M2 and M3. Two protocol departures are worth
+recording. The spread of the unit effects was reduced by a factor of 4, which keeps $T=26$ counts
+within a realistic range. M0-G was added before any full run, after a pilot exposed multiple roots,
+and M0-GI after interim results had been inspected; the latter is labelled post hoc wherever it
+appears.
 
 \subsection{Results}
 \label{ss:simresults}
 
-\subsubsection{Contagion present}
-Table~\ref{tab:sim-core-tau} and Figure~\ref{fig:core-tau} show
-the results for $\tau$ in the core scenarios. In the eight scenarios with spillover, M0 had bias
-between $-0.002$ and $0.001$ and coverage between 94.5\% and 95.4\%, under both random and
-feedback adoption. Model standard errors matched the empirical standard errors, and their relative
-error lay between $-3.5\%$ and $0.9\%$ across $\tau$, $\kappa$ and $\phi$ in all scenarios with
-spillover in the core and null blocks (for $\tau$, see Web Table~\ref{tab:sim-m0-full}). Power against
-$\tau_0=\log0.8$ was between 77.1\% and 100\%. The spillover parameters were also recovered
-(Web Table~\ref{tab:sim-core-spill} and Web Figures~\ref{fig:core-phi} and \ref{fig:core-kappa}).
-With $R=8000$, the strict criterion $|\text{bias}|\le2$~MCSE detects very small biases. For
-$\tau$ it failed only in scenario 1 (bias $-0.0017$, 2.18 MCSE); for $\kappa$ only in scenario 9
-(2.26 MCSE). For $\phi$ it failed in scenarios 1, 2, 3, 9, 10 and 17--20, with the largest bias
-0.0035 (5.43 MCSE, scenario 9). Coverage for all three parameters was within the pre-specified
-interval. The finite-sample bias of $\hat\phi$ is therefore small but detectable, and the
-criterion is met only in a qualified sense. Saying that the bias is small relative to $\phi_0$
-holds only when $\phi_0=0.4$: expressed as a fraction of the true value it is at most 0.9\%, but
-the absolute bias is the quantity that matters when the true coupling is near zero (next
-subsection).
+\emph{With contagion.} In the eight core scenarios with spillover, M0 recovers $\tau$. Its bias lies
+within 2 MCSE of zero, between $-0.002$ and $0.001$, and its coverage between 94.5\% and 95.4\%
+under both adoption rules (Table~\ref{tab:sim-core-tau}, Figure~\ref{fig:core-tau}). Model standard
+errors track the empirical ones, with relative errors from $-3.5\%$ to $0.9\%$ across the three
+parameters, and power against $\tau_0=\log0.8$ runs from 77.1\% to 100\%. The spillover parameters
+are recovered as well (Web Table~\ref{tab:sim-core-spill}). One qualification deserves mention. At
+$R=8000$ the 2 MCSE criterion is sharp enough to detect a bias in $\hat\phi$ of 0.0035, which is at
+most 0.9\% of $\phi_0$ when $\phi_0=0.4$.
 
-The standard estimators did not meet the criterion. In the spillover scenarios, M1 had bias
-between $-0.027$ and $-0.017$ and coverage between 78.1\% and 88.2\%, under random as well as
-feedback adoption, as Theorem~\ref{thm:bias}(b) predicts. The split-panel correction M1-BC did
-not remove the problem. It converged in only 14.7\% and 23.9\% of replications in scenarios 2
-and 4, and its coverage ranged from 25.7\% to 82.7\%. M2 had bias between $-0.110$ and $0.013$,
-M3 between $-0.563$ and $-0.030$, and M4 between $0.008$ and $0.139$. Ignoring spillover (M0$'$)
-gave bias between $-0.248$ and $-0.114$ and coverage of at most 22.4\%, in line with
-Theorem~\ref{thm:bias}(d). The Oracle, which knows the unit effects, had coverage between
-91.3\% and 94.8\%. The condition for limiting the contribution was not met.
-
-\subsubsection{Type I error}
-Under the null (Web Table~\ref{tab:sim-null} and Web
-Figure~\ref{fig:null}), M0 rejected in 4.7\% to 5.2\% of replications, M0-OI in 5.7\% to 6.4\%
-and the first event-time bin of M0-ET in 3.9\% to 4.9\%. M1 rejected in 6.3\% to 9.7\%, M1-BC in
-14.7\% to 28.6\%, M2 in 76.1\% to 100\% and M3 in 11.9\% to 61.9\%. M4 ranged from 4.6\% to 100\%,
-depending on the adoption rule. The $J$ test of M0-OI had size between 4.4\% and 4.9\%.
-
-\subsubsection{No contagion and multiple roots}
-When $\phi_0=\kappa_0=0$ the true value lies on the boundary of the parameter space, and this is
-the case in which the estimating equations need care rather than the case in which the method has
-no answer. Table~\ref{tab:sim-core-tau} and Web Table~\ref{tab:sim-m0gi} report it in the same
-format as the rest of the study. A local solver from a fixed start reaches a root of the
-just-identified equations that is not the consistent one in about half of the replications; the
-bias of $M_0$ for $\tau$ ranged from 0.132 to 0.469 and its coverage from 0.6\% to 38.8\%, the
-bias of $\hat\phi$ from 0.232 to 0.888 and that of $\hat\kappa$ from $-0.457$ to $-0.150$.
-
-The root diagnostics identify the mechanism (Figure~\ref{fig:roots} and Web
-Table~\ref{tab:sim-roots}). In 47.2\% to 51.7\% of replications the profiled equations had more
-than one interior root, and a diagnostic run showed that the spurious root moves with the reference
-value $\bar\phi$ of the $\phi$-instrument, which is what makes the profile informative. The $J$
-test detects the problem in 6.4\% to 27.2\% of replications, so it complements the profile but does
-not replace it.
-
-Two consequences follow for reporting, and both are available from objects the analysis already
-produces. First, the profile over $\phi$ separates the single-root case, in which $M_0$ needs no
-decision, from the multi-root case, in which the choice must be made explicitly. Second, a global
-search over the candidate roots places the estimate on the boundary in 28.6\% to 44.8\% of
-replications when selecting with the over-identified criterion of $M_0$-G, and in 63.7\% to 80.9\%
-with the criterion of $M_0$-GI, which brings bias down to 0.000 to 0.052 and coverage to 87.5\% to
-95.2\%. Because the boundary is the right answer when $\phi_0=0$, a high boundary rate is a
-diagnosis rather than a defect. In every scenario with spillover, none of the 8000 replications had
-more than one root, so $M_0$, $M_0$-G and $M_0$-GI coincide to all reported digits
-(Table~\ref{tab:sim-core-tau}); the rules are used only where the local solver needs them. Web
-Appendix~\ref{app:rsel} reports the rules on nine further designs, including $\phi_0$ between zero
-and 0.4, which locates where selection on the boundary starts to cost coverage.
-
-In this block $M_0'$, which fixes $\phi=0$, is correctly specified; its bias stayed within
-$[-0.000,0.002]$ with coverage of 94.7\% to 95.5\%, which confirms that the moment conditions
-identify $\tau$ at the boundary and isolates the multiplicity of roots as the source of the
-difficulty. $M_1$ showed biases from $-0.048$ to $-0.008$ with 51.3\% to 91.1\% coverage.
-
-\subsubsection{Misspecification}
-Web Table~\ref{tab:sim-misspec} and Web
-Figure~\ref{fig:misspec} report the misspecification block. With a wrong generation interval
-(X1), the bias of $\hat\tau$ was 0.010 with coverage 94.6\%; the error was absorbed mainly by
-$\hat\phi$ (bias 0.516), and the $J$ test rejected in 100\% of replications. When reporting fell
-after adoption (X2), $\hat\tau$ had bias $-0.057$ and coverage 59.4\%, $\hat\kappa$ had bias
-$-0.294$, and $J$ again rejected in every replication; M1 ($-0.099$) and M2 ($-0.094$) were more
-biased. With heterogeneous effects (X3), the bias of $\hat\tau$ was 0.005, both against the
-switcher mean and against the first-order value of Proposition~\ref{prop:hetero}, with coverage
-94.0\%. Susceptible depletion (X4) left $\hat\tau$ unbiased (bias $-0.000$, coverage 95.2\%).
-With dynamic effects (X5), the constant-effect estimator had bias 0.219 relative to
-$\tau_0=\log0.8$ and coverage 0\%, so that its mean lay outside the range of the true event-time effects, as
-Remark~\ref{rem:dynamic} warns. The $J$ test had no power against this departure (4.7\%), but the
-event-time specification M0-ET recovered every event-time effect (bias $-0.000$, coverage 95.3\%
-to 95.8\%).
-
-\subsubsection{Cases averted}
-Web Table~\ref{tab:sim-psi} reports $\hat\psi$ for the treated
-unit-weeks. With spillover, the median relative bias was between $-0.004$ and $0.006$, and
-coverage of $\psi^\dagger$ ranged from 85.7\% to 95.4\%; it was below 93\% in scenarios 1, 2, 4
-and 10 (92.4\%, 85.7\%, 91.9\% and 90.1\%). The three largest shortfalls occurred with $T=26$,
-where the recursion compounds over more weeks. Coverage of the population quantity $\psi$ was lower, between 72.1\% and 92.5\%, as
-expected from Remark~\ref{rem:psi}. Without spillover, $\hat\psi$ inherited the bias of M0, with
-median relative bias up to 2.474 (scenario 14). Under misspecification the median relative bias
-was 3.386 (X1), 1004.524 (X2, coverage 50.8\%), 0.779 (X3) and $-0.994$ (X5, coverage 0\%);
-under depletion (X4) coverage of the population $\psi$ fell to 53.5\%. Cases averted are thus far
-more sensitive to misspecification than $\tau$.
+The comparators do not meet the criterion. M1 carries a bias between $-0.027$ and $-0.017$ and
+coverage from 78.1\% to 88.2\% under both rules, the direction Theorem~\ref{thm:bias}(b) predicts.
+Its split-panel correction fares no better: M1-BC converges in 14.7\% and 23.9\% of replications in
+two scenarios and reaches coverage between 25.7\% and 82.7\%. M2, M3 and M4 accumulate biases of
+the same order as the effect itself, and imposing no spillover (M0$'$) yields bias from $-0.248$ to
+$-0.114$ with coverage of at most 22.4\%, in line with Theorem~\ref{thm:bias}(d). The Oracle, which
+observes the unit effects, holds coverage between 92.0\% and 94.8\% here but falls to 80.2\% and
+80.5\% in the two hardest no-contagion scenarios, which is where the pre-specified condition for
+limiting the contribution fails.
 
 \begin{figure}[!t]
 \centering
@@ -198,15 +87,87 @@ post hoc root-selection variant, evaluated on the same data sets.}
 \label{fig:core-tau}
 \end{figure}
 
+\emph{Size.} Under the null, M0 and the $J$ test of M0-OI keep their level, with rejection rates of
+4.7\% to 5.2\% and 4.4\% to 4.9\%; M1 is close, at 6.3\% to 9.7\%. The remaining comparators
+reject far too often: 14.7\% to 28.6\% for M1-BC, 76.1\% to 100\% for M2 and 11.9\% to 61.9\% for
+M3 (Web Table~\ref{tab:sim-null}).
+
+\emph{Without contagion.} When $\phi_0=\kappa_0=0$ the true value sits on the boundary of the
+parameter space. A local solver started from a fixed value lands on the inconsistent root in about
+half the replications, with bias of $\hat\tau$ between 0.132 and 0.469 and coverage from 0.6\% to
+38.8\%. The profiled equations admit more than one interior root in 47.2\% to 51.7\% of
+replications, and a diagnostic run traces the spurious root to the reference value $\bar\phi$ of the
+$\phi$-instrument, which is precisely what the profile exposes
+(Figure~\ref{fig:roots}). Global root selection recovers the consistent root. With the $M_0$-G
+criterion the boundary is selected in 28.6\% to 44.8\% of replications, with $M_0$-GI in 63.7\% to
+80.9\%, and the resulting bias lies between 0.000 and 0.052 with coverage of 87.5\% to 95.2\%
+(Web Table~\ref{tab:sim-m0gi}).
+
+Root selection is not the whole account, and the Oracle makes the remainder visible. Using the true
+parameter and choosing no root, it still loses coverage, down to 80.2\% and 80.5\% in the two
+$T=26$ random-adoption scenarios. Replays there produce a symmetric, heavy-tailed Student statistic
+(kurtosis 6.7), and re-estimating $\phi$ in place of fixing it removes the excess, so the weekly
+noise in the lagged pressure reaches the Wald statistic through $\phi$. In every scenario with
+spillover, meanwhile, none of the 8000 replications has more than one root, and M0, M0-G and M0-GI
+agree to all reported digits. M0$'$, which is correctly specified at the boundary, keeps its bias
+within $[-0.000,0.002]$ and coverage between 94.7\% and 95.5\%, which isolates the multiplicity of
+roots as the source of the difficulty.
+
+\emph{Misspecification.} The estimator is insensitive to three of the five departures. A wrong
+generation interval (X1) leaves $\hat\tau$ nearly unbiased, at 0.010 with coverage 94.6\%, the error
+being absorbed by $\hat\phi$; heterogeneous effects (X3) leave it unbiased against both targets; and
+depletion (X4) leaves it unbiased at coverage 95.2\%. Two departures bite. A fall in reporting after
+adoption (X2) biases $\hat\tau$ to $-0.057$ and drops coverage to 59.4\%. Dynamic effects (X5) are
+the sharper case: the constant-effect estimand carries bias 0.219 and coverage of 0\%, while the
+event-time specification M0-ET recovers every bin at coverage between 95.3\% and 95.8\%, as
+Remark~\ref{rem:dynamic} anticipates (Web Table~\ref{tab:sim-misspec}). Cases averted inherit the
+behaviour of M0, with median relative bias within $\pm0.006$ and coverage of $\psi^\dagger$ between
+85.7\% and 95.4\% under spillover, and lower coverage for the population target and under
+misspecification (Web Table~\ref{tab:sim-psi}).
+
+\subsubsection{Same-week transmission}
+\label{ss:sameweek}
+
+The pre-specified data-generating processes carry no transmission inside a week, so A4 holds
+exactly in every scenario. To price the omission when it does not hold, we ran a matched pair of
+designs on the core scenario with $N=500$, $T=12$, feedback adoption,
+$(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$ and $R=1000$ replications, sharing seeds across arms.
+Both arms use the same weekly skeleton, adoption rule and estimator; they differ only in the share
+of transmission that occurs inside the recipient's week. The benchmark arm carries a same-week
+share of zero and reproduces the weekly model exactly. The same-week arm adds, within each week,
+daily production of new cases together with within-week re-infection of the same unit, at a rate
+calibrated to a same-week share of 30\%, and aggregates the daily counts to weeks as surveillance
+data would be. The estimator sees only the weekly aggregates and is otherwise unchanged.
+
+The benchmark arm reproduces the main study, with bias of $\hat\tau$ at 0.001 and coverage at
+0.948. Under 30\% same-week transmission the bias of $\hat\tau$ is $-0.033$ (MCSE 0.001) and its
+coverage 0.890; the bias of $\hat\kappa$ is $-0.021$ (MCSE 0.002) with coverage 0.939; and the
+policy-level total $\hat\tau+\hat\kappa$ carries bias $-0.053$ (MCSE 0.002) at coverage 0.783. Paired
+differences computed replication by replication are $-0.033$ (MCSE 0.002) for $\tau$, $-0.020$
+(MCSE 0.004) for $\kappa$ and $-0.053$ (MCSE 0.003) for the sum. The sum is biased by about a sixth
+of its true value, twice the bias of either component.
+
+The variance estimator is not where the failure originates. Model standard errors track empirical
+standard deviations in both arms, and coverage falls because of the bias rather than because the
+standard errors are too small. The $J$ test is silent: rejection rates are 4.9\% in the benchmark
+arm and 4.8\% with same-week transmission (difference $-0.001$, MCSE 0.010), so the same-week share
+is a quantity to measure rather than one to test for. Shortening the window does not help either.
+Re-estimating on weeks 4 to 12, which removes any effect of the initial condition, leaves bias at
+$-0.037$ (MCSE 0.002) with coverage 0.913, against 0.019 (MCSE 0.006) and 0.961 in the benchmark,
+at three times the standard error. A weekly estimator therefore carries a bias of roughly a tenth
+of the true effect or more when the same-week share is large, and none of the diagnostics reported
+here reveals it. The application accordingly treats the same-week share as a measured input: at
+30\%, the reported policy effects may carry a bias of that order.
+
 \input{tables/table_1_core_tau}
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_02_roots.png}
 \caption{Root diagnostics of the profiled QD-GMM equations by scenario, from the M0-G grid
-search over $\phi\in[0,3]$. Panels show the share of replications with more than one interior root, share in
-which the boundary $\phi=0$ is selected, and share in which M0-G differs from M0. Error bars show
-$\pm2$ Monte Carlo standard errors. $R=8000$ replications per scenario.}
+search over $\phi\in[0,3]$. Panels show the share of replications with more than one
+interior root, the share in which the boundary $\phi=0$ is selected, and the share in which M0-G
+differs from M0. Error bars show $\pm2$ Monte Carlo standard errors; $R=8000$ per scenario.}
 \label{fig:roots}
 \end{figure}
 
@@ -215,11 +176,12 @@ $\pm2$ Monte Carlo standard errors. $R=8000$ replications per scenario.}
 \subsubsection{Validation on independent designs}
 \label{ss:rsel_body}
 
-To check that the rules do not extend beyond the design that
-motivated them, nine scenarios with a separate seed base and $R=2000$ replications each were run
-over $\phi_0\in\{0,0.05,0.10,0.15\}$, $\bar\phi\in\{0.25,0.5,1\}$ and $G\in\{20,50,100\}$
-(Web Table~\ref{tab:rsel}). At $\phi_0=0$ the rule restores coverage (0.888 against 0.361 for
-M0). With the coupling small but positive ($\phi_0=0.05$) it costs coverage (0.912 to 0.929
-against 0.957 to 0.967) because it selects the boundary in 56\% to 79\% of replications, and at
-$\phi_0\ge0.10$ the two rules agree. Global root selection is therefore a remedy when the
-profile has several roots, not a default; Web Appendix~\ref{app:rsel} gives the full table.
+The selection rules were studied in the block where they were needed, so nine further designs with
+a separate seed base and $R=2000$ replications each check that they do not extend beyond it, over
+$\phi_0\in\{0,0.05,0.10,0.15\}$, $\bar\phi\in\{0.25,0.5,1\}$ and $G\in\{20,50,100\}$ (Web
+Table~\ref{tab:rsel}). At $\phi_0=0$ the rule restores coverage, 0.888 against 0.361 of the normal
+interval. At $\phi_0=0.05$ it costs coverage, 0.921 to 0.935 against 0.960 to 0.970, because it
+selects the boundary in 56\% to 79\% of replications. At $\phi_0=0.10$ the two rules differ by at
+most 0.021 under feedback adoption and by 0.067 under random adoption, and at $\phi_0=0.15$ they
+differ by 0.001. Global root selection is a remedy when the profile has several roots, not a
+default; Web Appendix~\ref{app:rsel} reports the full table.

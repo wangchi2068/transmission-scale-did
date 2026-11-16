@@ -1,0 +1,640 @@
+{
+ "created_utc": "2026-11-16T01:45:37Z",
+ "command": "python -I verification/application/m0et_revised.py experiment/code",
+ "runtime_sec": 0.8,
+ "data": {
+  "panel": "experiment/data/processed/panel.npz",
+  "n_units": 3091,
+  "G": 49,
+  "T": 26,
+  "S": 2
+ },
+ "spec": {
+  "old": "spec_m0_et: tau_e0 = {D_it = 1, ev_i = 0} pools 435 pre-exposed and 136 first-week switchers",
+  "new": "spec_m0_et2: pre-exposed units (Dall[:2] = 1) removed; tau_e0 = {D_it = 1, ev_i = 0} among the remaining 136 units; tau_e1..e6 and kappa unchanged",
+  "pre_exposed_path": "all 435 pre-exposed units are treated in every window week, so a tau_pre bin inside the full panel has an identically zero Jacobian column (collinear with the quasi-difference intercept) and M0-ET does not identify; removal is the identified option"
+ },
+ "sample_counts": {
+  "n_units_full_sample": 3091,
+  "n_units_m0et2": 2656,
+  "n_states": 49,
+  "n_never_treated_window": 800,
+  "n_ever_treated_window": 2291,
+  "n_presample_exposed": 435,
+  "n_presample_exposed_ever_window": 435,
+  "n_presample_exposed_not_window": 0,
+  "n_switch_window_week0_not_presample": 136,
+  "n_switch_window_week_ge1": 1720,
+  "presample_weeks": 2,
+  "week0_treated_window": 571,
+  "n_states_m0et2": 37,
+  "switch_units_by_week": {
+   "2": 58,
+   "3": 17,
+   "4": 175,
+   "5": 421,
+   "6": 377,
+   "7": 173,
+   "8": 185,
+   "9": 139,
+   "19": 11,
+   "20": 11,
+   "21": 7,
+   "23": 6,
+   "24": 159,
+   "25": 29
+  },
+  "states_fully_dropped": [
+   9,
+   10,
+   11,
+   17,
+   23,
+   24,
+   25,
+   26,
+   34,
+   36,
+   42,
+   44
+  ],
+  "states_partially_present": [
+   35
+  ]
+ },
+ "data_replacement": {
+  "rowwise": "removed units are neighbours with L = 0 (their pre-sample Y is outside the kept columns) and with their pre-sample policy dropped from the neighbour sums: Db here is A.make_panel's W_subset @ D_subset (W restricted to the kept columns), i.e. W_kept,kept @ D_kept. Zeroing the pre-sample rows of D_all keeps W_kept,kept @ D_pre instead and differs (check_Dpre_zeroed_rowwise)",
+  "columnwise": "removed units are neighbours only: contribute W@L (L = 0 for them) and W@D, not their own Y",
+  "Dpre_zeroed_equals_rowwise": false
+ },
+ "runs": {
+  "old_full_sample": {
+   "table": {
+    "ok": true,
+    "bins": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6"
+    ],
+    "fields": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6",
+     "kappa",
+     "phi"
+    ],
+    "est": {
+     "tau_e0": -0.2323004227943288,
+     "tau_e1": -0.4158559109726237,
+     "tau_e2": -0.4109385516758334,
+     "tau_e3": -0.5034244241941219,
+     "tau_e4": -0.33360780099303394,
+     "tau_e5": -0.5768824130959455,
+     "tau_e6": -0.5568019212394827,
+     "kappa": -0.5069768650280742,
+     "phi": 0.7709995071674899
+    },
+    "se": {
+     "tau_e0": 0.268826088902201,
+     "tau_e1": 0.31262438413668614,
+     "tau_e2": 0.370898411828918,
+     "tau_e3": 0.38715609590586997,
+     "tau_e4": 0.40881004993155096,
+     "tau_e5": 0.4925235294207124,
+     "tau_e6": 0.5461247045910164,
+     "kappa": 0.3146056762570887,
+     "phi": 0.08603558537706639
+    },
+    "n_cells": {
+     "tau_e0": 2291.0,
+     "tau_e1": 2281.0,
+     "tau_e2": 2129.0,
+     "tau_e3": 2129.0,
+     "tau_e4": 2129.0,
+     "tau_e5": 2129.0,
+     "tau_e6": 32536.0
+    },
+    "joint_wald": {
+     "W": 21.134571458809944,
+     "q": 7,
+     "F": 2.6418214323512434,
+     "df1": 7,
+     "df2": 42,
+     "p_F": 0.023411004066776625,
+     "p_chi2": 0.0035760006452634735
+    },
+    "average": {
+     "average_e0_to_e5": {
+      "est": -0.41216825395431456,
+      "se": 0.3689073517326512,
+      "lo": -1.153906197691091,
+      "hi": 0.3295696897824618,
+      "weights": "equal over single-week bins, open-ended last bin excluded"
+     }
+    }
+   },
+   "ok": true,
+   "cond": 667.2852084357002,
+   "time_sec": 0.2242978999997831,
+   "n_units": 3091,
+   "G": 49,
+   "tcrit": 2.010634757624232
+  },
+  "new_rowwise": {
+   "table": {
+    "ok": true,
+    "bins": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6"
+    ],
+    "fields": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6",
+     "kappa",
+     "phi"
+    ],
+    "est": {
+     "tau_e0": -0.34342957728793816,
+     "tau_e1": -0.6193916406391293,
+     "tau_e2": -0.6724758478205305,
+     "tau_e3": -0.8225472514656843,
+     "tau_e4": -0.680278528963111,
+     "tau_e5": -0.9243932695857544,
+     "tau_e6": -0.9229564408223202,
+     "kappa": -0.5794211483249436,
+     "phi": 0.7566895761322973
+    },
+    "se": {
+     "tau_e0": 0.3413396347960979,
+     "tau_e1": 0.43209396108465725,
+     "tau_e2": 0.5206772969871726,
+     "tau_e3": 0.5718250856656105,
+     "tau_e4": 0.6112528300230577,
+     "tau_e5": 0.6851310184345054,
+     "tau_e6": 0.7354775790565907,
+     "kappa": 0.40644858145875384,
+     "phi": 0.0942403532104266
+    },
+    "n_cells": {
+     "tau_e0": 1856.0,
+     "tau_e1": 1846.0,
+     "tau_e2": 1694.0,
+     "tau_e3": 1694.0,
+     "tau_e4": 1694.0,
+     "tau_e5": 1694.0,
+     "tau_e6": 23836.0
+    },
+    "joint_wald": {
+     "W": 17.546472108788095,
+     "q": 7,
+     "F": 2.088865727236678,
+     "df1": 7,
+     "df2": 30,
+     "p_F": 0.07590475275991275,
+     "p_chi2": 0.014192702676106186
+    },
+    "average": {
+     "average_e0_to_e5": {
+      "est": -0.6770860192936913,
+      "se": 0.5212381604175175,
+      "lo": -1.7342060055185442,
+      "hi": 0.38003396693116154,
+      "weights": "equal over single-week bins, open-ended last bin excluded"
+     }
+    }
+   },
+   "ok": true,
+   "cond": 571.8658006391848,
+   "time_sec": 0.14264520000006087,
+   "n_units": 2656,
+   "G": 37,
+   "tcrit": 2.0280940009804502
+  },
+  "new_columnwise": {
+   "table": {
+    "ok": true,
+    "bins": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6"
+    ],
+    "fields": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6",
+     "kappa",
+     "phi"
+    ],
+    "est": {
+     "tau_e0": -0.37010565893597597,
+     "tau_e1": -0.6430613571031357,
+     "tau_e2": -0.6994172438558802,
+     "tau_e3": -0.8496901919133415,
+     "tau_e4": -0.706275894967242,
+     "tau_e5": -0.9482925718902872,
+     "tau_e6": -0.9490496993458166,
+     "kappa": -0.5554575911485478,
+     "phi": 0.7595255796128063
+    },
+    "se": {
+     "tau_e0": 0.3438921999324228,
+     "tau_e1": 0.4344151602439558,
+     "tau_e2": 0.525570043217662,
+     "tau_e3": 0.5772780554198434,
+     "tau_e4": 0.6134020591581988,
+     "tau_e5": 0.6910579491431841,
+     "tau_e6": 0.7421507607400737,
+     "kappa": 0.42557648636557727,
+     "phi": 0.09418964707374966
+    },
+    "n_cells": {
+     "tau_e0": 1856.0,
+     "tau_e1": 1846.0,
+     "tau_e2": 1694.0,
+     "tau_e3": 1694.0,
+     "tau_e4": 1694.0,
+     "tau_e5": 1694.0,
+     "tau_e6": 23836.0
+    },
+    "joint_wald": {
+     "W": 17.7226143197065,
+     "q": 7,
+     "F": 2.109835038060298,
+     "df1": 7,
+     "df2": 30,
+     "p_F": 0.07324210586853047,
+     "p_chi2": 0.01328620245378573
+    },
+    "average": {
+     "average_e0_to_e5": {
+      "est": -0.7028071531109772,
+      "se": 0.5253385890035726,
+      "lo": -1.768243193952657,
+      "hi": 0.3626288877307027,
+      "weights": "equal over single-week bins, open-ended last bin excluded"
+     }
+    }
+   },
+   "ok": true,
+   "cond": 509.73647262493415,
+   "time_sec": 0.15636720000020432,
+   "n_units": 2656,
+   "G": 37,
+   "tcrit": 2.0280940009804502
+  },
+  "check_Dpre_zeroed_rowwise": {
+   "table": {
+    "ok": true,
+    "bins": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6"
+    ],
+    "fields": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6",
+     "kappa",
+     "phi"
+    ],
+    "est": {
+     "tau_e0": -0.3601236436666492,
+     "tau_e1": -0.6332015845164337,
+     "tau_e2": -0.6896326559393477,
+     "tau_e3": -0.8401050479874576,
+     "tau_e4": -0.6968437775076749,
+     "tau_e5": -0.9389775532275402,
+     "tau_e6": -0.9398269173935251,
+     "kappa": -0.5687707209942603,
+     "phi": 0.7592800590517246
+    },
+    "se": {
+     "tau_e0": 0.3596879359731777,
+     "tau_e1": 0.45080106313027773,
+     "tau_e2": 0.5413060942440476,
+     "tau_e3": 0.5928427773992844,
+     "tau_e4": 0.6313357533434565,
+     "tau_e5": 0.704887041917119,
+     "tau_e6": 0.7551194990595955,
+     "kappa": 0.40621407930378084,
+     "phi": 0.0942732816139574
+    },
+    "n_cells": {
+     "tau_e0": 1856.0,
+     "tau_e1": 1846.0,
+     "tau_e2": 1694.0,
+     "tau_e3": 1694.0,
+     "tau_e4": 1694.0,
+     "tau_e5": 1694.0,
+     "tau_e6": 23836.0
+    },
+    "joint_wald": {
+     "W": 17.26748232768236,
+     "q": 7,
+     "F": 2.055652658057424,
+     "df1": 7,
+     "df2": 30,
+     "p_F": 0.08032179276607608,
+     "p_chi2": 0.015750481058967078
+    },
+    "average": {
+     "average_e0_to_e5": {
+      "est": -0.6931473771408505,
+      "se": 0.5413390048121797,
+      "lo": -1.791033765297159,
+      "hi": 0.40473901101545806,
+      "weights": "equal over single-week bins, open-ended last bin excluded"
+     }
+    }
+   },
+   "ok": true,
+   "cond": 569.3640483494227,
+   "time_sec": 0.13836720000017522,
+   "n_units": 2656,
+   "G": 37,
+   "tcrit": 2.0280940009804502
+  },
+  "old_bins_within_kept_panel": {
+   "table": {
+    "ok": true,
+    "bins": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6"
+    ],
+    "fields": [
+     "tau_e0",
+     "tau_e1",
+     "tau_e2",
+     "tau_e3",
+     "tau_e4",
+     "tau_e5",
+     "tau_e6",
+     "kappa",
+     "phi"
+    ],
+    "est": {
+     "tau_e0": -0.34342957728793816,
+     "tau_e1": -0.6193916406391293,
+     "tau_e2": -0.6724758478205305,
+     "tau_e3": -0.8225472514656843,
+     "tau_e4": -0.680278528963111,
+     "tau_e5": -0.9243932695857544,
+     "tau_e6": -0.9229564408223202,
+     "kappa": -0.5794211483249436,
+     "phi": 0.7566895761322973
+    },
+    "se": {
+     "tau_e0": 0.3413396347960979,
+     "tau_e1": 0.43209396108465725,
+     "tau_e2": 0.5206772969871726,
+     "tau_e3": 0.5718250856656105,
+     "tau_e4": 0.6112528300230577,
+     "tau_e5": 0.6851310184345054,
+     "tau_e6": 0.7354775790565907,
+     "kappa": 0.40644858145875384,
+     "phi": 0.0942403532104266
+    },
+    "n_cells": {
+     "tau_e0": 1856.0,
+     "tau_e1": 1846.0,
+     "tau_e2": 1694.0,
+     "tau_e3": 1694.0,
+     "tau_e4": 1694.0,
+     "tau_e5": 1694.0,
+     "tau_e6": 23836.0
+    },
+    "joint_wald": {
+     "W": 17.546472108788095,
+     "q": 7,
+     "F": 2.088865727236678,
+     "df1": 7,
+     "df2": 30,
+     "p_F": 0.07590475275991275,
+     "p_chi2": 0.014192702676106186
+    },
+    "average": {
+     "average_e0_to_e5": {
+      "est": -0.6770860192936913,
+      "se": 0.5212381604175175,
+      "lo": -1.7342060055185442,
+      "hi": 0.38003396693116154,
+      "weights": "equal over single-week bins, open-ended last bin excluded"
+     }
+    }
+   },
+   "ok": true,
+   "cond": 571.8658006391848,
+   "time_sec": 0.12126350000016828,
+   "n_units": 2656,
+   "G": 37,
+   "tcrit": 2.0280940009804502
+  }
+ },
+ "comparison_rowwise": {
+  "F_old": 2.6418214323512434,
+  "F_new": 2.088865727236678,
+  "p_F_old": 0.023411004066776625,
+  "p_F_new": 0.07590475275991275,
+  "W_old": 21.134571458809944,
+  "W_new": 17.546472108788095,
+  "df_old": [
+   7,
+   42
+  ],
+  "df_new": [
+   7,
+   30
+  ],
+  "p_chi2_old": 0.0035760006452634735,
+  "p_chi2_new": 0.014192702676106186,
+  "tau_e0_cells_old": 2291.0,
+  "tau_e0_cells_new": 1856.0,
+  "tau_e0_est_old": -0.2323004227943288,
+  "tau_e0_est_new": -0.34342957728793816,
+  "tau_e0_se_old": 0.268826088902201,
+  "tau_e0_se_new": 0.3413396347960979,
+  "other_bins_est_old": {
+   "tau_e1": -0.4158559109726237,
+   "tau_e2": -0.4109385516758334,
+   "tau_e3": -0.5034244241941219,
+   "tau_e4": -0.33360780099303394,
+   "tau_e5": -0.5768824130959455,
+   "tau_e6": -0.5568019212394827
+  },
+  "other_bins_est_new": {
+   "tau_e1": -0.6193916406391293,
+   "tau_e2": -0.6724758478205305,
+   "tau_e3": -0.8225472514656843,
+   "tau_e4": -0.680278528963111,
+   "tau_e5": -0.9243932695857544,
+   "tau_e6": -0.9229564408223202
+  },
+  "other_bins_delta": {
+   "tau_e1": -0.20353572966650563,
+   "tau_e2": -0.2615372961446971,
+   "tau_e3": -0.3191228272715624,
+   "tau_e4": -0.3466707279700771,
+   "tau_e5": -0.34751085648980895,
+   "tau_e6": -0.3661545195828375
+  },
+  "kappa_phi_old": {
+   "kappa": -0.5069768650280742,
+   "phi": 0.7709995071674899
+  },
+  "kappa_phi_new": {
+   "kappa": -0.5794211483249436,
+   "phi": 0.7566895761322973
+  }
+ },
+ "comparison_within_kept_sample": {
+  "F_old": 2.088865727236678,
+  "F_new": 2.088865727236678,
+  "p_F_old": 0.07590475275991275,
+  "p_F_new": 0.07590475275991275,
+  "W_old": 17.546472108788095,
+  "W_new": 17.546472108788095,
+  "df_old": [
+   7,
+   30
+  ],
+  "df_new": [
+   7,
+   30
+  ],
+  "p_chi2_old": 0.014192702676106186,
+  "p_chi2_new": 0.014192702676106186,
+  "tau_e0_cells_old": 1856.0,
+  "tau_e0_cells_new": 1856.0,
+  "tau_e0_est_old": -0.34342957728793816,
+  "tau_e0_est_new": -0.34342957728793816,
+  "tau_e0_se_old": 0.3413396347960979,
+  "tau_e0_se_new": 0.3413396347960979,
+  "other_bins_est_old": {
+   "tau_e1": -0.6193916406391293,
+   "tau_e2": -0.6724758478205305,
+   "tau_e3": -0.8225472514656843,
+   "tau_e4": -0.680278528963111,
+   "tau_e5": -0.9243932695857544,
+   "tau_e6": -0.9229564408223202
+  },
+  "other_bins_est_new": {
+   "tau_e1": -0.6193916406391293,
+   "tau_e2": -0.6724758478205305,
+   "tau_e3": -0.8225472514656843,
+   "tau_e4": -0.680278528963111,
+   "tau_e5": -0.9243932695857544,
+   "tau_e6": -0.9229564408223202
+  },
+  "other_bins_delta": {
+   "tau_e1": 0.0,
+   "tau_e2": 0.0,
+   "tau_e3": 0.0,
+   "tau_e4": 0.0,
+   "tau_e5": 0.0,
+   "tau_e6": 0.0
+  },
+  "kappa_phi_old": {
+   "kappa": -0.5794211483249436,
+   "phi": 0.7566895761322973
+  },
+  "kappa_phi_new": {
+   "kappa": -0.5794211483249436,
+   "phi": 0.7566895761322973
+  }
+ },
+ "comparison_rowwise_vs_columnwise": {
+  "F_old": 2.6418214323512434,
+  "F_new": 2.109835038060298,
+  "p_F_old": 0.023411004066776625,
+  "p_F_new": 0.07324210586853047,
+  "W_old": 21.134571458809944,
+  "W_new": 17.7226143197065,
+  "df_old": [
+   7,
+   42
+  ],
+  "df_new": [
+   7,
+   30
+  ],
+  "p_chi2_old": 0.0035760006452634735,
+  "p_chi2_new": 0.01328620245378573,
+  "tau_e0_cells_old": 2291.0,
+  "tau_e0_cells_new": 1856.0,
+  "tau_e0_est_old": -0.2323004227943288,
+  "tau_e0_est_new": -0.37010565893597597,
+  "tau_e0_se_old": 0.268826088902201,
+  "tau_e0_se_new": 0.3438921999324228,
+  "other_bins_est_old": {
+   "tau_e1": -0.4158559109726237,
+   "tau_e2": -0.4109385516758334,
+   "tau_e3": -0.5034244241941219,
+   "tau_e4": -0.33360780099303394,
+   "tau_e5": -0.5768824130959455,
+   "tau_e6": -0.5568019212394827
+  },
+  "other_bins_est_new": {
+   "tau_e1": -0.6430613571031357,
+   "tau_e2": -0.6994172438558802,
+   "tau_e3": -0.8496901919133415,
+   "tau_e4": -0.706275894967242,
+   "tau_e5": -0.9482925718902872,
+   "tau_e6": -0.9490496993458166
+  },
+  "other_bins_delta": {
+   "tau_e1": -0.22720544613051202,
+   "tau_e2": -0.28847869218004685,
+   "tau_e3": -0.3462657677192196,
+   "tau_e4": -0.372668093974208,
+   "tau_e5": -0.3714101587943417,
+   "tau_e6": -0.39224777810633393
+  },
+  "kappa_phi_old": {
+   "kappa": -0.5069768650280742,
+   "phi": 0.7709995071674899
+  },
+  "kappa_phi_new": {
+   "kappa": -0.5554575911485478,
+   "phi": 0.7595255796128063
+  }
+ }
+}

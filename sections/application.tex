@@ -1,154 +1,75 @@
 \section{Application: State Mask Orders and County COVID-19 Transmission}
 \label{s:application}
 
-\subsection{Data and specification}
+We apply the design to state mask orders in the United States in the second half of 2020, a setting
+in which case growth has been studied with state and county panels
+\citep{lyu2020masks,guy2021masks,vandyke2020kansas,chernozhukov2021masks,sun2025didnetwork} and in
+which the order is issued above the unit, so that the spillover parameter carries a policy meaning.
+The panel has 3091 counties or merged reporting units of the contiguous United States and the
+District of Columbia over 26 weeks, from 2020-06-01 to 2020-11-23, with two earlier weeks used only
+to build lags; the 49 clusters are the 48 contiguous states and the District of Columbia. The
+outcome is weekly newly reported cases from the Johns Hopkins CSSE repository
+\citep{dong2020dashboard}, and $D_{it}=1$ when a state public mask order was in force on at least
+four days of the week \citep{cdc2021maskorders}. County opt-outs permitted under state law, notably
+in Kansas, are not coded, so $D$ overstates exposure there. Exposure is not strictly absorbing, a
+feature the estimator accommodates by construction. Median weekly counts are 27 cases per county, 7.4\% of county-weeks
+report none, an order is in force in 56.8\% of county-weeks, and 1720 units change exposure status
+between adjacent weeks (1768 entries, 82 exits) against 571 exposed in the first week and 11,528,182
+reported cases in the window. The network is the row-normalised 2010 Census adjacency matrix; commuting flows from the American
+Community Survey enter as a sensitivity analysis. Discretising the
+generation-time distribution of \citet{ferretti2020quantifying} yields weekly weights
+$w\approx(0.964,0.036)$ and assigns roughly 0.30 of transmission to the same week, a component that a
+weekly lagged specification cannot represent; Section~\ref{ss:sameweek} quantifies the cost.
 
-We illustrate the method with public mask orders in the United States in the second half of 2020.
-The effect of these orders on case growth has been studied with state and county panels
-\citep{lyu2020masks,guy2021masks,vandyke2020kansas,chernozhukov2021masks,sun2025didnetwork}. The
-design is a county panel of weekly reported cases. The analysis was specified before estimation,
-and we report it following the relevant items of the STROBE checklist for observational studies.
+We applied the estimators of Sections~\ref{ss:estimation}--\ref{ss:computation} to the panel, with
+$\bar\phi=0.5$ and inference clustered by state with $t_{48}$ critical values. About 24 of the 49
+clusters contain a county that switches exposure inside the window, and cluster sizes are highly
+unequal; the reported intervals are therefore read in conjunction with the small-sample
+corrections of \citet{imbens2016robust}. The sensitivity analyses vary the generation interval, the network, the
+timing of the order (shifted by one week, as a timing-alignment check), the background input
+($\omega$ times $0.25$ and $4$) and the reference value, and exclude Kansas and Texas, whose orders
+carried county exemptions. A conventional lead-indicator regression is reported for comparison
+only, since under feedback its moment is not zero even when the model is correct
+(Proposition~\ref{prop:sources}(c)). Cases averted are summed over all counties over horizons of 4,
+8, 13 and 26 weeks.
 
-\subsubsection{Setting and units}
-The estimation window has 26 weeks, from the week starting
-2020-06-01 to the week starting 2020-11-23, with two earlier weeks used only to build lags. Units
-are the 3091 counties, or merged county reporting units, of the contiguous United States and the
-District of Columbia, grouped into 49 clusters, namely the 48 contiguous states and the District of
-Columbia. Alaska, Hawaii and the territories are excluded.
+The estimates are in Table~\ref{tab:app} and Figure~\ref{fig:app}. M0 reports $\hat\tau=0.040$
+(95\% interval $-0.217$ to $0.296$) for a county's own order, $\hat\kappa=-0.506$ ($-1.018$ to
+$0.006$) for the share of neighbours under an order and $\hat\phi=0.772$ (0.590 to 0.954) for the
+weight of imported pressure; the profile over $\phi$ has a single interior crossing at a distance
+from the boundary, which is the region the simulation supports, and M0-G and M0-GI select the same
+root. A fit takes 0.05 seconds on this panel and the global search 0.73 seconds. The two policy
+coefficients are weakly separated because of the level at which the order operates: for the 61.9\%
+of counties whose neighbours all lie in their own state, $D_{it}=\bar D_{it}$ in every week, so the
+own and the neighbours' order enter with the same regressor, and only the 1177 border counties
+contribute variation that separates them. Corr$(\hat\tau,\hat\kappa)$ is $0.238$. For an interior
+county the model therefore implies a single policy-level effect, $\hat\tau+\hat\kappa=-0.466$
+(95\% interval $-1.091$ to $0.159$, from the joint covariance, $t=-1.50$ on 48 degrees of freedom),
+and this is the estimand the data can speak to. Re-indexing the moments as
+$\tau_{\rm tot}D_{it}+\kappa(\bar D_{it}-D_{it})$ returns the same number as a coefficient, 0.311
+standard error, which is how we recommend reporting it when the policy sits above the unit. The
+over-identification test rejects the working model ($J=17.873$ on 2 degrees of freedom,
+$p=0.0001$), and M0-OI gives $\hat\tau=-0.025$ ($-0.249$ to $0.199$) and $\hat\kappa=-0.517$
+($-0.983$ to $-0.050$).
 
-\subsubsection{Outcome and exposure}
-The outcome $Y_{it}$ is the weekly number of newly reported
-confirmed cases, the difference of cumulative counts from the Johns Hopkins University CSSE
-repository \citep{dong2020dashboard}, with negative revisions truncated at zero. The exposure
-$D_{it}$ equals 1 if a state or territorial public mask order was in force on at least four of the
-seven days of the week, according to the county-by-day dataset of the Public Health Law Program
-of the Centers for Disease Control and Prevention \citep{cdc2021maskorders}. County opt-outs that
-were permitted under state law, notably in Kansas, are not coded in that dataset, so $D$
-overstates exposure in such states. The exposure is not strictly absorbing; the estimator does
-not require it to be.
-
-\subsubsection{Network, generation interval and background input}
-The main network is the
-row-normalised 2010 Census county adjacency matrix; a sensitivity analysis uses county-to-county
-commuting flows from the American Community Survey 2011--2015. Weekly renewal weights are obtained
-by discretising the generation-time distribution of \citet{ferretti2020quantifying} under a
-uniform infection day within the week, keeping lags 1 and 2. This gives
-$w\approx(0.964,0.036)$; about 0.30 of the transmission is assigned to the same week under this
-conversion and cannot be represented in a weekly lagged model. Omitting this component changes the
-weekly conditional mean and may also change the covariance structure of the quasi-difference, so the
-standard moment and inference arguments require additional justification. A sensitivity analysis uses the serial interval of \citet{nishiura2020serial},
-giving $w\approx(0.913,0.087)$, and a grid of values of the lag-1 weight $w_1\in\{0.6,0.7,0.8,0.9,1.0\}$ with $w_2=1-w_1$. The background input is
-$\omega_i$ = population$/10^5$.
-
-\subsubsection{Statistical methods}
-The main analysis is M0 with $\bar\phi=0.5$, inference
-clustered by state with $t_{48}$ critical values (2.0106). About 24 of the 49 state clusters contain at least one county that switches exposure during the window, and state cluster sizes are highly unequal; the reported intervals use conventional state-clustered inference, which was not calibrated in the simulations for this treated-cluster pattern. We also report M0-G, the post hoc
-M0-GI, M0-OI with its $J$ test, M0-ET, M0$'$ and the comparators M1--M4 of
-Section~\ref{s:simulation}. The pre-specified sensitivity analyses vary the generation interval,
-the network, policy timing (shifted by one week as a timing-alignment sensitivity), the
-background input ($\omega\times0.25$ and $\omega\times4$) and the reference value $\bar\phi$, and
-exclude Kansas and Texas, whose orders had county exemptions. A conventional lead-indicator
-regression is reported for comparison only, because under adoption feedback the lead moment is not
-zero even when the model is correct (Proposition~\ref{prop:sources}(c)). Cases averted are
-reported cumulatively over the first $h\in\{4,8,13,26\}$ weeks, summed over all counties.
-
-\subsection{Results}
-
-\subsubsection{Descriptive data}
-The median weekly count was 27 cases per county and the mean 143.446;
-7.4\% of county-weeks had no reported case. A mask order was in force in 56.8\% of county-weeks.
-2291 units were exposed at some time in the window, 571 at its start, and 1768 units changed
-exposure status within the window. The analysis units reported 11528182 cases in the window.
-
-\subsubsection{Main estimates}
-Table~\ref{tab:app} and Figure~\ref{fig:app} summarise the estimates.
-M0 gave $\hat\tau=0.040$ (95\% confidence interval $-0.217$ to $0.296$) for a county's own order,
-$\hat\kappa=-0.506$ ($-1.018$ to $0.006$) for the share of neighbours under an order, and
-$\hat\phi=0.772$ (0.590 to 0.954) for the weight of imported infection pressure. The profiled $\phi$-moment had a single interior zero crossing on the grid (Figure~\ref{fig:app}(b)); in this specification, M0-G and M0-GI both selected the M0 root. The global search also considers the boundary candidate $\phi=0$, so the single interior crossing alone does not determine the selected root. The estimate of $\phi$ is far from the boundary, the case in which
-the simulation supports M0.
-
-Fitting the model is cheap on this panel: one M0 fit on the 3091 counties and 26 weeks takes 0.05
-seconds, and the global root search M0-GI takes 0.73 seconds, because the week effects are
-profiled out analytically and only a three-dimensional system has to be solved.
-
-The two policy coefficients are weakly separated on this panel, and the reason is the level at
-which the policy operates. The order is imposed by the state, whereas the unit is the county. A
-county whose neighbours all lie in the same state as itself therefore has
-$D_{it}=\bar D_{it}$ in every week, so its own order and its neighbours' order enter the model with
-the same regressor. This holds for 61.9\% of counties (the interior counties) and for 83.3\% of
-county-weeks in the sample; only the 1177 counties on a state border contribute variation that
-separates $\tau$ from $\kappa$. The two coefficients have large standard errors and positive sampling covariance
-($\text{corr}(\hat\tau,\hat\kappa)=0.238$). For an interior county, $\tau+\kappa$ is the
-state-order effect implied by the specified model, and hence the estimand aligned to the policy
-level. In the fitted parameterisation, its estimate is $\hat\tau+\hat\kappa=-0.466$ (95\% interval
-$-1.091$ to $0.159$, from the joint covariance matrix, $t=-1.50$ on 48 degrees of freedom). The
-interval contains zero; this model-conditional estimate is not evidence of a causal effect,
-especially given rejection of the working model below. The data do not support interpreting
-$\hat\tau$ alone as the effect of a county's own order or $\hat\kappa$ alone as the effect of
-neighbours' orders.
-
-This structure suggests a different parameterisation for panels in which the policy is set at a
-higher level than the unit. Writing the index as
-$\tau_{\rm tot}D_{it}+\kappa(\bar D_{it}-D_{it})$ with $\tau_{\rm tot}=\tau+\kappa$, the first
-coefficient is the model-conditional effect of a state order on an interior county and the second
-the additional effect of neighbours' orders that differ from the unit's. Fitting that
-parameterisation on the same panel returns $\hat\tau_{\rm tot}=-0.466$ with standard error 0.311,
-identical to the joint estimate above, and an estimate of $\kappa$ unchanged to three decimals. The
-moment conditions are the same, re-indexed, so the two parameterisations are algebraically
-equivalent; the advantage is that the policy-level estimand is a coefficient rather than a linear
-combination, and its interval is read from the output instead of being reconstructed from the
-covariance matrix. We report the original parameterisation, in which the coefficients carry their
-conventional interpretation, and give the policy-level total effect in the text.
-
-The over-identification test rejected the working model ($J=17.873$, 2 degrees of freedom,
-$p=0.0001$). M0-OI, which uses the additional instruments, gave $\hat\tau=-0.025$ ($-0.249$ to
-$0.199$) and $\hat\kappa=-0.517$ ($-0.983$ to $-0.050$). The event-time specification M0-ET gave
-negative estimates in every bin, from $-0.232$ (standard error 0.269) in the week of adoption to
-$-0.577$ (0.493) five weeks later and $-0.557$ (0.546) for six or more weeks; the joint Wald test
-that all seven bins are zero gave $F=2.642$ on 7 and 42 degrees of freedom ($p=0.0234$). The
-average of the first six bins, which was not pre-specified and is descriptive, was $-0.412$
-($-1.154$ to $0.330$). The constant-effect estimate near zero and the negative event-time
-profile are the pattern that Remark~\ref{rem:dynamic} and scenario X5 associate with effects that
-grow after adoption. They are also compatible with a change in ascertainment after adoption,
-which in scenario X2 the $J$ test detected; in X2 the estimator itself was biased and under-covered,
-so the event-time profile cannot settle the question either. The rejection of the working model
-means that the intervals above are not guaranteed to have nominal coverage. The data therefore
-do not separate these explanations, and the application is presented as a demonstration of the
-estimator on real data rather than as an estimate of the effect of mask orders. The lead
-regression gave $-0.332$ (standard error 0.259, $t=-1.283$), which under feedback does not test
-for pre-trends (Proposition~\ref{prop:sources}(c)).
-
-The comparators gave $\hat\tau$ between $-0.084$ (M2) and $0.087$ (M3). M1 gave $-0.024$ ($-0.109$
-to $0.061$) with a much smaller $\hat\kappa$ than M0, and the pooled model M4 estimated almost no
-contagion between counties ($\hat\phi=0.027$). Imposing $\kappa=\phi=0$ (M0$'$) gave an interval
-from $-2.088$ to $2.130$.
-
-\subsubsection{Sensitivity analyses}
-Across the pre-specified sensitivity analyses, $\hat\tau$ from M0
-ranged from $-0.177$ (policy shifted by one week) to $0.120$ ($w_1=1.0$), and every interval contained
-zero. The estimate of $\phi$ depended strongly on the generation interval, from 0.198 at
-$w_1=0.6$ to 0.971 at $w_1=1.0$, and on the network (0.240 with commuting flows). Excluding
-Kansas and Texas (2732 units in 47 clusters) gave $\hat\tau=-0.035$ ($-0.285$ to $0.214$). The pre-specified global
-search M0-G departed from M0 in five analyses. It selected the boundary $\phi=0$ with the policy
-lagged one week ($\hat\tau=-2.178$) and with $\omega\times4$ ($\hat\tau=-1.274$), and roots with
-$\hat\phi\le0.010$ for $w_1\in\{0.6,0.7,0.9\}$, with wide intervals for $\tau$. The post hoc
-M0-GI selected the M0 root in every analysis.
-
-\subsubsection{Cases averted}
-Over the horizons at which susceptible depletion is still negligible, the estimated cumulative
-cases averted are $3.41\times10^{5}$ (standard error $3.97\times10^{5}$) over 4 weeks and
-$5.62\times10^{6}$ ($1.03\times10^{7}$) over 8 weeks, against $7.67\times10^{6}$ observed cases in
-treated county-weeks. Beyond that horizon, propagating the counterfactual renewal recursion without
-a depletion term compounds the estimated effect, so that the variance grows without bound and the
-26-week estimate ($7.17\times10^{10}$, standard error $5.16\times10^{11}$) exceeds the population of
-the country; the horizon-by-horizon estimates are not tabulated. Because the standard error exceeds the point estimate already at 4 weeks, because the working
-model is rejected, and because the policy-level estimate above is model-conditional, the
-cases-averted recursion is not informative for causal evaluation on this data set. The standard
-error is for the realised-path quantity $\psi^\dagger$; inference for the population target
-$\psi$ would also require the cluster-graph HAC contribution from neighbouring process noise,
-which is not established here. It shows how the
-counterfactual propagates in a finite panel and indicates that long-horizon applications require a
-depletion bound (Remark~\ref{rem:psi}).
+For the event-time specification, 435 of the 571 units exposed in the first week had been exposed
+before the window opened and stay treated throughout, so their adoption week is unobserved and a bin
+for them is collinear with the week effects; we exclude those units for this specification, leaving
+2656 in 37 clusters. The estimate is negative in every bin, from $-0.343$ (standard error 0.341) in
+the week of adoption to $-0.924$ (0.685) five weeks later and $-0.923$ (0.735) thereafter, and the
+joint test of all seven bins gives $F=2.089$ on 7 and 30 degrees of freedom ($p=0.076$), or
+$p=0.014$ in its chi-square form. The profile of negative estimates is the one that
+Remark~\ref{rem:dynamic} and scenario X5 associate with effects that build up after adoption, and a
+change in ascertainment produces it as well (X2), so the panel does not separate the two readings;
+the rejection of the working model says that the intervals describe what this panel supports rather
+than a causal effect of mask orders. Across the sensitivity analyses $\hat\tau$ ranges from $-0.177$
+(shifting the order by one week) to $0.120$ ($w_1=1.0$), and the global search departs from M0 in
+five of them, selecting the boundary with the order lagged and with $\omega\times4$ and roots with
+$\hat\phi\le0.010$ for three values of $w_1$ (Web Table~\ref{tab:app-all}). The cases-averted
+recursion, finally, shows how the fitted counterfactual propagates over the first weeks: the
+standard error exceeds the point estimate by four weeks, the long-horizon recursion grows without a
+depletion bound, and the reported standard error targets the realised-path quantity of
+Theorem~\ref{thm:psi} rather than the population total.
 
 \begin{figure}[!t]
 \centering
@@ -156,8 +77,8 @@ depletion bound (Remark~\ref{rem:psi}).
 \caption{Application to county COVID-19 cases and state mask orders. (a) Estimates of $\tau$ with
 95\% confidence intervals ($t_{G-1}$, $G=49$) across methods and pre-specified sensitivity
 analyses. Open arrowheads mark intervals clipped at the axis limits. (b) Profiled
-$\phi$-moment of the main specification over the $\phi$ grid, whose zero crossings are the roots of the estimating
-equations, and the M0-G selection criterion $Q$ along the profile.}
+$\phi$-moment of the main specification over the $\phi$ grid, whose zero crossings are the roots of
+the estimating equations, and the M0-G selection criterion $Q$ along the profile.}
 \label{fig:app}
 \end{figure}
 

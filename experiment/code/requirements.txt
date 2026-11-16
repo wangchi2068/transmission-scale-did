@@ -1,0 +1,6 @@
+# Python 3.11; versions used for the results reported in the paper (2026-11)
+numpy==2.4.6
+scipy==1.17.1
+pandas==3.1.1
+matplotlib==3.11.2
+pytest==9.2.0

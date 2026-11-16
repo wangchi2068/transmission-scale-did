@@ -1,0 +1,35 @@
+{
+ "g": 1.744,
+ "pretest": [
+  {
+   "g": 1.0,
+   "ratio": 0.9490581954886036,
+   "ratio_mcse": 0.004899620956999987,
+   "treated_ratio": 0.7273070713385399,
+   "treated_ratio_mcse": 0.0045146579866738494
+  },
+  {
+   "g": 1.5,
+   "ratio": 1.067915446272038,
+   "ratio_mcse": 0.005540107133194004,
+   "treated_ratio": 0.8259680123685541,
+   "treated_ratio_mcse": 0.004240271274906882
+  },
+  {
+   "g": 2.0,
+   "ratio": 1.2242730980808605,
+   "ratio_mcse": 0.005790164839039923,
+   "treated_ratio": 0.9044838547229824,
+   "treated_ratio_mcse": 0.0044026050163421615
+  },
+  {
+   "g": 3.0,
+   "ratio": 1.693314510506637,
+   "ratio_mcse": 0.011787326566239266,
+   "treated_ratio": 1.015332204465572,
+   "treated_ratio_mcse": 0.006310637360545561
+  }
+ ],
+ "n_reps": 40,
+ "note": "g from the panel check: mean of (mean ratio - 1) and (treated-share ratio - 1) = 0"
+}

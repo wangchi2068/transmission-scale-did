@@ -1,73 +1,55 @@
 \section{Discussion}
 \label{s:discussion}
 
-For panels of reported cases we have proposed parallel trends in log transmission, a
-quasi-differenced GMM estimator that removes unit effects without requiring strictly exogenous
-adoption, and an estimator of cases averted that propagates the counterfactual through the renewal
-equation and the network. Under adoption feedback, spillover and overdispersion in the positive-
-spillover core scenarios, the simulation supports the first two; the boundary/no-spillover
-scenarios require explicit root handling, and the three recommendations below follow from it.
+This paper has proposed a difference-in-differences design on the transmission scale, in which
+parallel trends are placed on the log reproduction number of a renewal model whose infection
+pressure is imported from neighbouring units, and a quasi-differenced GMM estimator that removes
+unrestricted unit effects without requiring strictly exogenous adoption. Relative to previous work
+the contribution is that adoption which responds to the epidemic and contagion between clusters are
+handled by the same predetermined moments, so the inference remains the standard cluster-robust
+sandwich while neighbouring clusters exchange infections. This is accomplished by building the
+instruments from the observed past and by writing the policy spillover as the neighbours' share
+under the policy, which connects the panel difference-in-differences literature with the sequential
+moment estimators for counts. In the positive-spillover scenarios, with adoption feedback,
+overdispersion and small counts present, the estimator recovers the direct effect and the spillover
+parameters, and the comparators of Section~\ref{s:simulation} do not. The design is cheapest on
+long panels of many clusters, and it reports the policy-level effect as a coefficient when the
+policy is set above the unit, as in the mask-order application.
 
-\textbf{Report the profile with the estimate.} The estimating equations are nonlinear in
-$\phi$, and a local solver can settle on a root that is not the consistent one without any
-warning. Reporting the profiled $\phi$-moment over a grid, together with the selection criterion
-$Q$ and the over-identification statistic $J$, makes the multiplicity visible and turns root choice
-into a reported analytical decision rather than a silent one. The specification test has power
-against a wrong generation interval and against a change in ascertainment after adoption, which are
-the two misspecifications most likely in surveillance data.
+Three parts of the design carry the argument and each has a counterpart in what the estimator
+reports. The quasi-difference makes the unit effect cancel, so unrestricted heterogeneity in the
+level of transmission costs nothing; what identification rests on is parallel trends in log
+transmission and sequential exogeneity of adoption given the observed past, the latter being
+untestable with the moments used for estimation and not addressed by the conventional lead placebo
+under feedback (Proposition~\ref{prop:sources}(c)). The martingale representation of
+Lemma~\ref{lem:mds} makes cluster-robust inference valid under lagged contagion, and the profile
+over $\phi$ makes the nonlinearity visible: when the profile has one root no decision is needed,
+and when it has several the choice is reported instead of being made silently. The boundary region
+is where the profile does most of its work. Near $\phi_0=0$ the neighbour term carries no
+identifying information, the equations can have several roots, and the selection rules recover the
+consistent one; the simulation also shows that Wald intervals remain unreliable there even at the
+correct root, so intervals robust to weak identification \citep{andrews2012identification} are the
+natural companion to the profile in that region rather than a refinement.
 
-\textbf{Use the event-time specification when effects may build up.} In scenario X5 the
-constant-effect estimate fell outside the range of the true effects while the event-time version
-recovered every bin, the same pattern that motivates recent work on event studies with
-heterogeneous effects \citep{sun2021event,borusyak2024imputation}. The constant effect still has an
-interpretation as a non-negative weighted average of heterogeneous effects
-(Proposition~\ref{prop:hetero}), which scenario X3 confirms. Estimating the multiplicative mean
-directly also sidesteps the sensitivity of log-count regressions to the handling of zeros
-\citep{santossilva2006log,chen2024logs}.
+Two limitations delimit the range of the design, and both are measurable before the estimator is
+applied. The first is the observation unit. The renewal equation is written in completed weeks, so
+transmission that occurs inside a week cannot enter the model; Section~\ref{ss:sameweek} shows that
+when 30\% of transmission is inside the week the policy-level sum carries a bias of roughly a sixth
+of the effect, the $J$ test does not detect it, and a shorter window does not remove it. The
+same-week share is therefore the first quantity to assemble from the generation interval, and when
+it is large the estimator needs a sub-weekly generating mechanism. The second is the cluster
+structure. The application has 49 state clusters, about 24 of which contain a county that switches
+exposure in the window, and the simulations use equal-sized clusters; the small-sample corrections
+of cluster-robust inference \citep{imbens2016robust} and, beyond them, randomization inference are
+the appropriate companions when the number of treated clusters is small.
 
-\textbf{Match the inferential target to the level at which the policy is set.} When the order is
-imposed above the unit, interior units have no variation that separates the own effect from the
-spillover effect. Under the specified model, their sum $\tau+\kappa$ is the state-level policy
-estimand; its interpretation and causal meaning remain conditional on that model and the identifying
-assumptions. In the application the estimate is $-0.466$ (95\% interval $-1.091$ to $0.159$), which
-contains zero, and the working model is rejected. Re-indexing the moments gives this estimand as a
-coefficient, but in this application the interval for the sum is wider than the interval for either component; the re-indexing only changes the coefficient used to report the policy-level target.
-
-\textbf{Where the method needs care.} Near $\phi_0=0$ the neighbour term carries no identifying
-information and the parameter sits on the boundary of its space
-\citep{self1987boundary,andrews1999boundary}, so the equations can have several roots; the profile
-of Section~\ref{ss:computation} aside, this is the one region in which the estimator requires a
-deliberate choice, and Section~\ref{ss:computation} sets out the sequence we recommend for it. Weak
-identification near the boundary also makes Wald intervals unreliable even at the correct root,
-which points to inference robust to weak identification as the natural next step
-\citep{stock2000weak,andrews2019weak}. Identification itself rests on parallel trends in log
-transmission and on sequential exogeneity of adoption given the observed past; the latter cannot be
-tested with the moments used for estimation, and the conventional lead placebo is not a valid check
-under feedback (Proposition~\ref{prop:sources}(c)); pre-tests of parallel trends also distort
-subsequent inference \citep{roth2022pretest}, and sensitivity analysis for departures from parallel
-trends \citep{rambachan2023credible} can be adapted to the transmission scale.
-\textbf{Scope of the evidence.} The simulation uses one family of data-generating mechanisms,
-with two generation-interval lags, a nearest-neighbour graph, 50 clusters and one adoption rule.
-The state-order application has 49 state clusters, about 24 of which contain a county that switches exposure during the window; cluster sizes are highly unequal. The reported intervals use conventional state-clustered inference, and the simulations do not calibrate coverage for this few-treated-cluster pattern. Few total clusters, longer generation intervals and other network shapes are also outside the simulation range; for few clusters the small-sample corrections of cluster-robust inference become relevant
-\citep{imbens2016robust} and should be added. About 30\% of COVID-19 transmission is assigned to the same week under the assumed generation-interval conversion and cannot enter a model with lags of one week or more; Section~\ref{ss:weekwithin} explains why this may alter both the conditional mean and the covariance argument, and why the existing simulations do not quantify its effect. These
-are properties of the designs, and the diagnostic of the first recommendation is what makes them
-visible in a given application.
-
-\textbf{Reading the application.} The order is set at state level while the unit is the county, so
-for 61.9\% of counties the own and the neighbours' order are the same variable; under the specified
-model the policy-level estimand is $\hat\tau+\hat\kappa=-0.466$ (95\% interval $-1.091$ to $0.159$),
-and the data contain little information on the two components. The event-time estimates are negative
-in every bin, the profile that scenario X5 associates with effects that build up after adoption and
-that a change in ascertainment also produces; with the over-identification test rejecting the working
-model, the interval reported here describes what this panel supports rather than estimating the
-effect of mask orders. The cases-averted recursion illustrates how the fitted counterfactual propagates over the first weeks. In this application, however, its standard error already exceeds the estimate at four weeks, the working model is rejected, and the policy-level target is model-conditional; the reported standard error targets the realised-path quantity $\psi^\dagger$, while inference for the population target $\psi$ would require an unproved cluster-graph HAC contribution. Simulation coverage also falls below nominal in several settings, while the long-horizon recursion explodes without depletion. It therefore does not support a causal evaluation here.
-
-Three extensions follow naturally. Sharper instruments, either those that attain the efficiency
-bound for sequential moment restrictions
-\citep{chamberlain1992sequential,chamberlain2022feedback} or those that exploit the full count
-likelihood \citep{bonhomme2025feedback}, would tighten intervals without changing the design.
-Group-time and dynamic causal effects defined on the transmission scale
-\citep{bojinov2021panel} would extend the event-time analysis used here. Estimating the generation
-interval and the reporting process jointly with the policy effect, building on frequentist renewal
-estimators \citep{goldwasser2026rt}, would remove two assumptions the design maintains as known;
-a bias correction for $\hat\phi$ would improve both the interior case and the boundary one.
+Four directions follow. Sharper instruments, either those that attain the efficiency bound for
+sequential moment restrictions \citep{chamberlain1992sequential,chamberlain2022feedback} or those
+that exploit the full count likelihood \citep{bonhomme2025feedback}, would tighten intervals without
+changing the design; a sub-weekly mechanism of the kind used in Section~\ref{ss:sameweek} would turn
+the measured same-week share into an estimator that allows for it; estimating the generation interval
+and the reporting process jointly with the policy effect \citep{goldwasser2026rt} would remove two
+inputs the design currently treats as known; and group-time and dynamic effects defined on the
+transmission scale \citep{bojinov2021panel} would extend the event-time analysis. Each of these
+keeps the identifying logic of the moments and changes one input, which is the sense in which the
+design is a platform rather than a single estimator.

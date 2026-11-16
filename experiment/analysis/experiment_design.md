@@ -6,20 +6,20 @@ diagnostics (pilot outputs are in `logs/` and are labelled "not paper numbers").
 
 ## 1. Aims, DGM, estimands, methods, performance (as specified)
 
-* **Aims / DGM**: 25 scenarios exactly as in the spec table (`src/scenarios.py::build_scenarios`): core
+* **Aims / DGM**: 25 scenarios exactly as in the spec table (`../code/scenarios.py::build_scenarios`): core
   block 1–16 (adoption feedback/random × spillover yes/no × N ∈ {500, 2000} × T ∈ {12, 26}), null block
   17–20 (τ = 0, k ∈ {10, ∞}), misspecification block 21–25 (X1 wrong generation interval, X2 reporting drop
   after adoption, X3 heterogeneous τ_i, X4 susceptible depletion, X5 dynamic effects). Generator:
-  `src/dgp.py` (multiplicative renewal with network pressure, S = 2 lags, negative-binomial innovations
+  `../code/dgp.py` (multiplicative renewal with network pressure, S = 2 lags, negative-binomial innovations
   with size k (Poisson for k = ∞); geometry fixed per N: uniform points, symmetrised 6-nearest-neighbour
-  graph, G = 50 strip "states"; adoption calibration ḡ in `calibration.json` from `src/calibrate.py`).
+  graph, G = 50 strip "states"; adoption calibration ḡ in `calibration.json` from `../code/calibrate.py`).
 * **Estimands**: τ, κ, φ (generating values); event-time effects for X5; for X3 the per-replication switcher
   mean of τ_i and the first-order pseudo-true value of Proposition 3 (`aggregate.x3_targets`); ψ† per
   replication (true θ₀ in the ν recursion); population ψ from 5,000 common-random-number pairs per scenario.
 * **Methods**: M0, M0-ET (E = 6), M0-OI (two-step GMM + Hansen J), M0′, M1, M1-BC, M2, M3, M4, Oracle,
-  all hand-written in NumPy/SciPy (`src/qdgmm.py`, `src/comparators.py`). Failures are recorded per method
+  all hand-written in NumPy/SciPy (`../code/qdgmm.py`, `../code/comparators.py`). Failures are recorded per method
   (`ok`, `reason`) and never replaced by another method; convergence rates are reported with denominators.
-* **Performance** (`src/aggregate.py`): bias, empSE, model SE, relative SE error, RMSE, coverage of
+* **Performance** (`../code/aggregate.py`): bias, empSE, model SE, relative SE error, RMSE, coverage of
   t_{G−1} intervals, CI width, rejection rate of H₀: θ = 0, convergence rate, each with MCSE (Morris, White
   & Crowther 2019); results JSON in the 03-results-protocol schema plus `metrics.csv`.
 * **Random numbers**: seed = 20261112 + 10⁵·scenario + rep; two generator streams `default_rng([seed, 0])`
@@ -40,9 +40,9 @@ diagnostics (pilot outputs are in `logs/` and are labelled "not paper numbers").
 
 | # | item | spec | implementation | reason / evidence |
 |---|---|---|---|---|
-| 7 | additional estimator **M0-GI** (post hoc) | — | M0-G with a different selection criterion: same candidate roots (grid φ ∈ [0, 3], sign-change refinement, boundary φ = 0), but Q is built from the M0 moments plus the φ-instrument evaluated at other reference values, N/Λ(0.05) and N/Λ(2.0) (`qdgmm.fit_global(selection="inv")`, `qdgmm.spec_selection_inv`). Run by `src/simulate_supp.py` on the *same seeds and data sets* as the main run (rows `sim/rows_m0gi.jsonl`, merged by (sid, rep) in `src/aggregate.py`, data fingerprint checked); measures use the replications it reached (`scenarios[sid].supp_R`) | interim R = 200 results showed M0 and the pre-specified M0-G under-covering τ in every no-spillover core scenario (M0 cov. 0–38 %, M0-G 46–78 %). Diagnosis (`scratch/diag/phibar_spill.py`): no code defect; with φ0 = 0 the M0 equations have a spurious root that tracks φ̄ (global identification at the boundary, flagged as unproven in theory). Instruments at other reference values are valid at the true root for any reference value but not at a φ̄-dependent spurious root. A 40-rep diagnostic (`scratch/diag/selection_variants.py`) motivated the choice. **M0 remains the pre-specified primary estimator and M0-G the pre-specified remedy; both are reported unchanged. M0-GI is reported separately and labelled post hoc everywhere (Table 8, figures 1–2, application table).** |
+| 7 | additional estimator **M0-GI** (post hoc) | — | M0-G with a different selection criterion: same candidate roots (grid φ ∈ [0, 3], sign-change refinement, boundary φ = 0), but Q is built from the M0 moments plus the φ-instrument evaluated at other reference values, N/Λ(0.05) and N/Λ(2.0) (`qdgmm.fit_global(selection="inv")`, `qdgmm.spec_selection_inv`). Run by `../code/simulate_supp.py` on the *same seeds and data sets* as the main run (rows `sim/rows_m0gi.jsonl`, merged by (sid, rep) in `../code/aggregate.py`, data fingerprint checked); measures use the replications it reached (`scenarios[sid].supp_R`) | interim R = 200 results showed M0 and the pre-specified M0-G under-covering τ in every no-spillover core scenario (M0 cov. 0–38 %, M0-G 46–78 %). Diagnosis (a local diagnostic script, not distributed): no code defect; with φ0 = 0 the M0 equations have a spurious root that tracks φ̄ (global identification at the boundary, flagged as unproven in theory). Instruments at other reference values are valid at the true root for any reference value but not at a φ̄-dependent spurious root. A 40-rep diagnostic (local, not distributed) motivated the choice. **M0 remains the pre-specified primary estimator and M0-G the pre-specified remedy; both are reported unchanged. M0-GI is reported separately and labelled post hoc everywhere (Table 8, figures 1–2, application table).** |
 
-## 3. Application (`src/application.py`, data in `data_contract.md`)
+## 3. Application (`../code/application.py`, data in `data_contract.md`)
 
 Main specification: M0 with Ferretti generation interval, adjacency network, ω = pop/10⁵, φ̄ = 0.5, all
 comparators (M0-G, M0-OI with J, M0′, M0-ET, M1, M1-BC, M2, M3, M4), φ-profile, ψ for M0 and M0-G.
@@ -63,7 +63,7 @@ Implementation choices fixed here (not results):
 * **Figures**: Times New Roman is obtained by `fetch_fonts.sh` (Microsoft core-fonts installer, verified by
   sha256, unpacked with 7-Zip, never executed) because the style kit refuses substitutes.
 
-## 4. Compute plan (`src/benchmark.py` → `run_plan.json`)
+## 4. Compute plan (`../code/benchmark.py` → `run_plan.json`)
 
 Benchmark on the 4-core build pod (5 timed reps + 20 ψ pairs per scenario, 4 concurrent workers):
 ≈ 17 core-seconds per replication of all 25 scenarios, ≈ 1,700 core-seconds for the 25 × 5,000 ψ pairs,
@@ -78,10 +78,10 @@ stopped early therefore leaves a balanced design. Resume: rerun the same command
 
 ## 5. Verification done in this step
 
-* `python3 -m pytest` (tests/): cross-implementation equality with `theory/numeric_checks.py`, reproduction of
-  the stored numeric checks N1, N2, N3, N5, N6, N9 and closed forms (Poisson FE = unconditional dummy MLE,
-  TWFE = dummy regression, Cori formula, perf() formulas, generation-interval limits), resume/truncation
-  handling, seeds, the results schema and tables on a tiny run, the application data contract.
+* `python -I ../theory/numeric_checks.py`: reproduces the Web Appendix B checks (S1, S3, S4, S5, S7, S8)
+  that are distributed with the paper. The development-time pytest suite that cross-checked these against
+  the implementation was not part of the distribution; the checks retained here are self-contained and
+  deterministic.
 * Smoke run (`smoke/`, not paper numbers): kill −9 of the whole process group during the simulation,
   truncated line, resume, aggregate/tables/figures with partial scenarios; resumed vs uninterrupted runs
   agree to 3e-15 relative.

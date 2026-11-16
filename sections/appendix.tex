@@ -10,7 +10,7 @@ Throughout, $T$, $S$ and the cluster sizes are bounded, $G\to\infty$, and $C$ de
 finite constant. $\|\cdot\|$ is the Euclidean or Frobenius norm.
 
 \begin{description}
-\item[A6(i)] $\Theta=\Delta\times\mathcal B$ is compact, $\mathcal B\subset\mathbb R^2\times[0,\bar\phi]$,
+\item[A6(i)] $\Theta=\Delta\times\mathcal B$ is compact, $\mathcal B\subset\mathbb R^2\times[0,\bar\Phi]$,
 and $\theta_0$ is an interior point.
 \item[A6(ii)] For all $i,t$: $\E\sup_\theta\|z_{it}\|^4|Y_{i,t+1}r_{it}(\theta)|^4\le C$,
 $\E\|z_{it}\|^4Y_{it}{}^4\le C$, $\E\sup_\theta\|z_{it}\,\partial u_{it}(\theta)/\partial\theta^{\top}\|^2\le C$ and
@@ -298,7 +298,8 @@ $\E M_{i,s-1}{}^2\le(s-1)\bar\sigma_\eta{}^2$, and $|D_{is}|\le1$. Hence
 $|\E\sum_{t<s}D_{is}\eta_{it}|=|\E D_{is}M_{i,s-1}|\le\bar\sigma_\eta(s-1)^{1/2}$, and
 comparing the sum with the integral of $x^{1/2}$ over $[0,T]$ gives $\sum_{s=1}^T(s-1)^{1/2}\le2T^{3/2}/3$. If instead
 $\sum_s\sum_{t<s}|\E D_{is}\eta_{it}|\le CT$ (adoption responds mainly to recent shocks), then
-$|B_F|\le C/d^2$. The expansion of $b_{it}$ is a second-order delta-method approximation. With
+$|B_F|\le C/d^2$. The first bound grows with $T$ and yields no rate at which $B_F$ decays; no lower
+bound on $|B_F|$ is established in either case. The expansion of $b_{it}$ is a second-order delta-method approximation. With
 $\operatorname{var}(Y_{it}\mid\F_{t-1})=\mu_{it}+\mu_{it}{}^2/k$,
 $\E\{\log(Y_{it}+c)\mid\F_{t-1}\}\approx\log(\mu_{it}+c)-\operatorname{var}/\{2(\mu_{it}+c)^2\}$. Expanding in
 $1/\mu_{it}$ gives $\log\mu_{it}+(c-1/2+c/k)/\mu_{it}-1/(2k)+O(\mu_{it}{}^{-2})$, which was checked
@@ -373,15 +374,19 @@ The bracket converges in probability to $\Psi$ by the assumed dominance, (L) and
 of $\hat\theta$. The result follows from Theorem~\ref{thm:asy}(b) and Slutsky's lemma.
 \end{proof}
 
+\input{sections/appendix_moved}
+
 \section{Web Appendix B: Numerical checks}
 \label{app:numeric}
 
-The script \texttt{numeric\_checks.py} (supplementary code) verifies each derivation; seeds are
-fixed. All symbolic checks pass. They cover the quasi-difference identity of Lemma~\ref{lem:mds} (S1), the
-Jacobian \eqref{eq:jac} (S2), the closed-form profiling \eqref{eq:profile} (S3), the expansion of
-$b_{it}$ (S4), the identity $r_{it}{}^2\mu_{i,t+1}=r_{it}\mu_{it}$ behind the working variance in
-Remark~\ref{rem:optimal} (S5), the first-order heterogeneity weights (S7), and the $T=2$ expected
-score \eqref{eq:t2fe} (S8). The expansion of $b_{it}$ is accurate for $\mu_{it}\ge5$; at $\mu_{it}=2$,
+The script \texttt{numeric\_checks.py} (supplementary code, \texttt{experiment/theory/}) verifies the
+numerically checkable steps; seeds are fixed and the script is self-contained. It covers the
+quasi-difference identity of Lemma~\ref{lem:mds} (S1), the closed-form profiling \eqref{eq:profile}
+(S3), the expansion of $b_{it}$ (S4), the working-variance identity $r_{it}{}^2\mu_{i,t+1}=r_{it}\mu_{it}$
+behind Remark~\ref{rem:optimal} (S5), the non-negative heterogeneity weights of
+Proposition~\ref{prop:hetero} (S7), and equation \eqref{eq:t2fe} for $T=2$ (S8); the Jacobian
+\eqref{eq:jac} (S2) and the symbols of the proofs are checked analytically rather than numerically.
+All checks pass. The expansion of $b_{it}$ is accurate for $\mu_{it}\ge5$; at $\mu_{it}=2$,
 $k=10$, $c=0.5$ the exact value of $\E\log(Y+c)-\log\mu$ is $-0.00556$ against $-0.025$ from the
 expansion.
 
@@ -487,18 +492,26 @@ constant-effect M0 estimate.}
 The rules M0-G and M0-GI were studied in the no-spillover block, and M0-GI was designed after
 interim results of that block were available. To assess them on designs that did not inform their
 construction, nine scenarios with a separate seed base were run with $R=2000$ replications each
-(Table~\ref{tab:rsel}). The designs vary the true coupling over $\phi_0\in\{0,0.05,0.10,0.15\}$,
+(Web Table~\ref{tab:rsel}). The designs vary the true coupling over $\phi_0\in\{0,0.05,0.10,0.15\}$,
 the reference value of the $\phi$-instrument over $\bar\phi\in\{0.25,0.5,1\}$, the number of
 clusters over $G\in\{20,50,100\}$ and the adoption rule. All other settings are those of the main
 study.
 
-At the boundary ($\phi_0=0$) the local solver fails as before (coverage 0.361) and M0-GI restores
-most of the nominal coverage (0.888), which reproduces the pattern of the no-spillover block on
-independent data. Close to the boundary but not on it the picture reverses. At $\phi_0=0.05$,
-M0 has coverage between 0.957 and 0.967 at all three reference values, while M0-GI has 0.912 to
-0.929; it selects $\phi=0$ in 56\% to 79\% of replications, and the resulting negative bias in
-$\hat\tau$ ($-0.014$ to $-0.020$) outweighs the correction. At $\phi_0=0.10$ the two rules give
-coverage within 0.014 of each other, and at $\phi_0=0.15$ they coincide.
+At the boundary ($\phi_0=0$) the local solver fails as before (coverage 0.361 of the $t_{G-1}$
+interval, or 0.377 with normal critical values) and M0-GI restores most of the nominal coverage
+(0.888), which reproduces the pattern of the no-spillover block on independent data. Close to the
+boundary but not on it the picture reverses. At $\phi_0=0.05$, M0 has coverage between 0.957 and
+0.968 at all three reference values, while M0-GI has 0.921 to 0.935; it selects $\phi=0$ in 56\% to
+79\% of replications, and the resulting negative bias in $\hat\tau$ ($-0.014$ to $-0.020$)
+outweighs the correction. At $\phi_0=0.10$ the two rules differ by at most 0.021 under feedback
+adoption, but the random-adoption cell gives 0.965 for M0 against 0.898 for M0-GI; at
+$\phi_0=0.15$ they differ by 0.001.
+
+The bottom of the profile is not only a root-selection problem. In the boundary cells even the
+oracle estimator, which is evaluated at the true parameter, under-covers at $T=26$ with random
+adoption, so the Wald interval itself is unreliable when $\phi_0$ is at or near zero. The
+selection rules can recover the consistent root; they cannot repair that. The $G=20$ and $G=100$
+rows also double $N$, so they do not isolate the effect of the number of clusters.
 
 The rules are therefore not a uniform improvement on M0. They help when the profile has multiple
 roots, which in these designs happens when $\phi_0$ is at or very near the boundary; they cost
@@ -508,3 +521,39 @@ at $\phi_0=0.05$ against 0\% at $\phi_0=0.15$. A practical rule is to report the
 apply a global selection only when the profile has more than one root, not as a default. None of
 the rules was pre-specified in this validation; it is a check that the rule proposed in the
 previous subsection does not extend beyond the design that motivated it.
+
+
+\input{tables/table_7b_application_sensitivity}
+\webfloats
+
+\section{Web Appendix D: Data sources and cleaning}
+\label{app:data}
+
+The application uses six public files (five data files and the ACS commuting table). Each is stored with a SHA-256 checksum in
+\texttt{experiment/data/checksums.tsv} and is read by \texttt{experiment/code/data\_prep.py}.
+
+\begin{enumerate}
+\item \emph{Cases.} Weekly cumulative confirmed COVID-19 counts for US counties from the Johns
+Hopkins University CSSE time series \citep{dong2020dashboard}. Weekly incidence is the difference of
+the cumulative series at consecutive week starts, with negative values from revisions set to zero.
+\item \emph{Exposure.} State and territorial public mask orders from the CDC Public Health Law
+Program county-by-day file \citep{cdc2021maskorders}. $D_{it}=1$ when an order was in force on at
+least four of the seven days of the week. County-level opt-outs permitted under state law, such as
+in Kansas, are not recorded in that file and are not coded; $D$ therefore overstates exposure in
+those states, and the analysis excluding Kansas and Texas is reported for that reason.
+\item \emph{Units.} Counties and merged county reporting units of the contiguous United States and
+the District of Columbia, 3091 in total; Alaska, Hawaii and the territories are excluded. The 49
+clusters are the 48 contiguous states and the District of Columbia.
+\item \emph{Network.} The 2010 Census county adjacency file, symmetrised and row normalised; a
+sensitivity analysis replaces it with county-to-county commuting flows from the American Community
+Survey 2011--2015, symmetrised and row normalised.
+\item \emph{Population.} The county population field of the JHU CSSE files, used for the background input
+$\omega_i=$ population$/10^5$ and not elsewhere.
+\item \emph{Generation interval.} The weekly renewal weights are obtained by discretising the
+generation-time distribution of \citet{ferretti2020quantifying} under a uniform infection day
+within the week, as described in Section~\ref{s:application}.
+\end{enumerate}
+
+Weeks are assigned by their starting Monday. The estimation window starts 2020-06-01, with the two
+preceding weeks used only to build the lagged pressure. No unit is dropped on the basis of missing
+outcome data; counties without reported cases in a week enter with a zero count.

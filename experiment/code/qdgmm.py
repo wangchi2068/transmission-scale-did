@@ -29,6 +29,7 @@ class QDSpec:
     lin_inst: Optional[Dict[str, np.ndarray]] = None # name -> T x N instrument (default: the regressor)
     extra_inst: List[np.ndarray] = field(default_factory=list)  # (T-1) x N raw extra instruments (times s)
     extra_names: List[str] = field(default_factory=list)
+    G: Optional[int] = None                          # clusters of the panel the spec was built on
 
     @property
     def names(self) -> List[str]:
@@ -281,7 +282,44 @@ def event_bins(panel: dict, E: int = 6, min_cells: int = 1):
 def spec_m0_et(panel: dict, E: int = 6, phi_bar: float = 0.5) -> QDSpec:
     lin = event_bins(panel, E)
     lin["kappa"] = panel["Db"]
-    return QDSpec(lin=lin, phi_free=True, phi_bar=phi_bar)
+    return QDSpec(lin=lin, phi_free=True, phi_bar=phi_bar, G=int(panel["G"]))
+
+
+def pre_exposed(panel: dict) -> np.ndarray:
+    """Units already under an absorbing policy in the pre-sample weeks (any Dall[0..S-1] = 1, given as panel["Dpre"]).
+    Their ev = 0 only because panel["ev"] is computed inside the window, so without a flag they are
+    pooled with units that switch on in the first window week."""
+    Dpre = np.asarray(panel.get("Dpre", np.zeros((0, panel["D"].shape[1]))), float)
+    return Dpre.any(0)
+
+
+def attach_presample(panel: dict, Dpre: np.ndarray) -> dict:
+    """Return panel with the pre-sample policy path Dpre (S x N) attached as panel["Dpre"]."""
+    out = dict(panel)
+    out["Dpre"] = np.asarray(Dpre, float)
+    return out
+
+
+def spec_m0_et2(panel: dict, E: int = 6, phi_bar: float = 0.5) -> QDSpec:
+    """M0-ET excluding the pre-exposed units (those already under the policy in the pre-sample weeks).
+
+    Requires panel["Dpre"] (S x N pre-sample path, see attach_presample). Raises KeyError if any
+    pre-exposed unit is in the panel: their ev = 0 only because ev is computed inside the window and their
+    regressors do not move while treated, so inside this panel they are collinear with an intercept-like
+    block and no event-time coefficient is identified; the sample is cut instead of pooled or split.
+
+    Units with any Dall[:S] = 1 leave the sample (application.make_panel(..., drop_presample=True)); the
+    neighbour share Db = W D is formed in the full sample first, so the removed units still enter their
+    neighbours' Db. Bins as in spec_m0_et: tau_e0 = switches on in window week 0, tau_e1..E-1, open-ended
+    tau_eE, plus kappa. The spec records its own cluster count (G) for the Wald test."""
+    if "Dpre" not in panel:
+        raise KeyError("spec_m0_et2 needs panel['Dpre'] (pre-sample policy path); use attach_presample(panel, Dpre)")
+    if pre_exposed(panel).any():
+        raise ValueError("spec_m0_et2: panel still contains pre-exposed units; build the panel without them "
+                         "(application.make_panel(..., drop_presample=True))")
+    lin = event_bins(panel, E)
+    lin["kappa"] = panel["Db"]
+    return QDSpec(lin=lin, phi_free=True, phi_bar=phi_bar, G=int(panel["G"]))
 
 
 def spec_m0_oi(panel: dict, phi_bar: float = 0.5) -> QDSpec:

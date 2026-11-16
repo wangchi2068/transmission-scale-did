@@ -131,15 +131,20 @@ def verify(d: dict) -> dict:
     return chk
 
 
-def make_panel(d, w, W, D_all=None, omega_mult=1.0, units=None):
+def make_panel(d, w, W, D_all=None, omega_mult=1.0, units=None, drop_presample=False):
     D_all = d["D"] if D_all is None else D_all
     Yall, cl, pop = d["Y"], d["cl"], d["pop"]
+    if drop_presample:      # M0-ET2: remove units already under the policy in the pre-sample weeks
+        keep = ~D_all[:S].any(0)
+        units = keep if units is None else units[keep[units]]
     if units is not None:
+        W = W[:, units]     # neighbour shares keep every unit's policy, including dropped ones
         Yall, D_all, pop = Yall[:, units], D_all[:, units], pop[units]
-        W = row_normalise(W[units][:, units])
+        W = row_normalise(W[units])
         cl = np.unique(cl[units], return_inverse=True)[1]
     omega = omega_mult * pop / 1e5
-    return dgp.build_panel(Yall, D_all, W, omega, cl, w=w, S=S), Yall
+    panel = dgp.build_panel(Yall, D_all, W, omega, cl, w=w, S=S)
+    return qdgmm.attach_presample(panel, D_all[:S]), Yall   # Dpre: pre-sample policy path for spec_m0_et2
 
 
 # ------------------------------------------------------------------------------------------------
@@ -153,7 +158,7 @@ def _f(x):
     return x if np.isfinite(x) else None
 
 
-def ci_row(analysis, method, res, tc, names=("tau", "kappa", "phi"), figure=False, extra=None):
+def ci_row(analysis, method, res, tc, names=("tau", "kappa", "phi"), figure=False, extra=None, panel=None, spec=None):
     r = dict(analysis=analysis, method=method, ok=bool(res.get("ok")), figure=figure)
     est, se = res.get("est", {}), res.get("se", {})
     for n in names:
@@ -161,6 +166,20 @@ def ci_row(analysis, method, res, tc, names=("tau", "kappa", "phi"), figure=Fals
         r[n], r[n + "_se"] = e, s
         r[n + "_lo"] = None if e is None or s is None else e - tc * s
         r[n + "_hi"] = None if e is None or s is None else e + tc * s
+    if panel is not None and spec is not None and res.get("ok") and {"tau", "kappa"} <= set(est):
+        # total effect tau+kappa from the joint covariance (Reviewer M3: report the policy-level target)
+        try:
+            mod = qdgmm.QDModel(panel, spec)
+            inf = mod.inference(np.array([est[n] for n in spec.names]))
+            if inf is not None:
+                i, j = list(spec.names).index("tau"), list(spec.names).index("kappa")
+                V = inf["Vb"]
+                tot = est["tau"] + est["kappa"]
+                s_tot = float(np.sqrt(V[i, i] + V[j, j] + 2 * V[i, j]))
+                r.update(tau_plus_kappa=float(tot), tau_plus_kappa_se=s_tot,
+                         tau_plus_kappa_lo=float(tot - tc * s_tot), tau_plus_kappa_hi=float(tot + tc * s_tot))
+        except Exception:  # noqa: BLE001 - the column stays empty if the covariance is unavailable
+            pass
     if extra:
         r.update(extra)
     return r
@@ -234,6 +253,56 @@ def psi_block(Yall, panel, res, label):
     return out
 
 
+def event_time_block(res, spet, tc):
+    """Event-time bins (tau_e*), equal-weight average over the single-week bins (open-ended last bin excluded)
+    with its t_{G-1} interval, and the cluster-robust Wald test of H0: all event-time effects = 0
+    (F form, (G-1) denominator; chi-square form reported alongside)."""
+    G = int(spet.G)   # clusters of the panel the spec was built on (the M0-ET2 panel drops some states)
+    names = [n for n in spet.names if n.startswith("tau_e")]
+    out = dict(ok=res.get("ok"), bins=names, G=G,
+               est={n: _f(res.get("est", {}).get(n)) for n in spet.names},
+               se={n: _f(res.get("se", {}).get(n)) for n in spet.names},
+               n_cells={n: float(spet.lin[n].sum()) for n in names})
+    if not (res.get("ok") and res.get("Vb") is not None):
+        return out
+    ix = [spet.names.index(n) for n in names]
+    Vb = np.asarray(res["Vb"])
+    bvec = np.array([res["est"][n] for n in names])
+    a_w = np.zeros(len(names))
+    a_w[:-1] = 1.0 / (len(names) - 1)
+    Ve = Vb[np.ix_(ix, ix)]
+    avg, avg_se = float(a_w @ bvec), float(np.sqrt(a_w @ Ve @ a_w))
+    W = float(bvec @ np.linalg.solve(Ve, bvec))
+    q = len(names)
+    Fst = W / q * (G - q) / (G - 1)
+    out["average_e0_to_e%d" % (len(names) - 2)] = dict(
+        est=avg, se=avg_se, lo=avg - tc * avg_se, hi=avg + tc * avg_se,
+        weights="equal over single-week bins, open-ended last bin excluded")
+    out["joint_wald"] = dict(W=W, q=q, F=float(Fst), df1=q, df2=int(G - q),
+                             p_F=float(stats.f.sf(Fst, q, G - q)), p_chi2=float(stats.chi2.sf(W, q)))
+    return out
+
+
+def unit_counts(d, panel):
+    """Sample composition of the application panel by treatment timing (counts of units)."""
+    D, ev = panel["D"], panel["ev"]
+    pre = qdgmm.pre_exposed(panel)
+    ever = D.any(0)
+    Dpre = np.asarray(panel["Dpre"])
+    return dict(
+        n_units_full_sample=int(D.shape[1]),
+        n_units_m0et2=int((~pre).sum()), n_states=int(d["states"].size),
+        n_never_treated_window=int((~ever).sum()),
+        n_ever_treated_window=int(ever.sum()),
+        n_presample_exposed=int(pre.sum()),
+        n_presample_exposed_ever_window=int((pre & ever).sum()),
+        n_presample_exposed_not_window=int((pre & ~ever).sum()),
+        n_switch_window_week0_not_presample=int((~pre & (ev == 0)).sum()),
+        n_switch_window_week_ge1=int((ev >= 1).sum()),
+        presample_weeks=int(Dpre.shape[0]),
+        week0_treated_window=int(D[0].sum()))
+
+
 def lead_indicator(D):
     """1{policy switches on next week} (the week before adoption); last window week has no lead -> 0."""
     L = np.zeros_like(D)
@@ -276,6 +345,11 @@ def main(argv=None):
     main_res["M0p"] = timed(qdgmm.fit, panel, qdgmm.spec_m0prime(panel))
     spet = qdgmm.spec_m0_et(panel)
     met = timed(qdgmm.fit, panel, spet)
+    # M0-ET2 (revision): pre-sample-exposed units (Dall[:S] = 1, ev = 0 only inside the window) form their
+    # own bin tau_pre instead of being pooled into tau_e0; spec_m0_et and event_time are kept unchanged.
+    panel2, Yall2 = make_panel(d, w_main, d["W_adj"], drop_presample=True)
+    spet2 = qdgmm.spec_m0_et2(panel2)
+    met2 = timed(qdgmm.fit, panel2, spet2)
     m1 = timed(cmp.poisson_fe, panel)
     main_res["M1"] = m1
     main_res["M1_BC"] = timed(cmp.poisson_fe_bc, panel, m1)
@@ -287,40 +361,26 @@ def main(argv=None):
                                                          v.get("time_sec", 0)), flush=True)
     analyses["main"] = {k: slim(v) for k, v in main_res.items()}
     analyses["main"]["M0_ET"] = slim(met)
+    analyses["main"]["M0_ET2"] = slim(met2)
     for k in ("M0", "M0_G", "M0_GI", "M0_OI", "M0p", "M1", "M1_BC", "M2", "M3", "M4"):
         names = ("tau",) if k in ("M2", "M3") else ("tau", "kappa", "phi")
         if k == "M0p":
             names = ("tau",)
         extra = {"at_boundary": main_res[k].get("at_boundary")} if k in ("M0_G", "M0_GI") else None
-        table.append(ci_row("main", k, main_res[k], tc, names, figure=True, extra=extra))
+        panel_k, spec_k = (panel, qdgmm.spec_m0(panel)) if k in ("M0", "M0_G", "M0_GI") else (None, None)
+        table.append(ci_row("main", k, main_res[k], tc, names, figure=True, extra=extra,
+                            panel=panel_k, spec=spec_k))
     J = {k: _f(main_res["M0_OI"].get(k)) for k in ("J", "J_df", "J_p")}
     profile = phi_profile(panel)
     profile.update(roots=mg.get("roots"), chosen=mg.get("chosen"), at_boundary=mg.get("at_boundary"))
-    event_time = dict(ok=met.get("ok"), bins=[n for n in spet.names if n.startswith("tau_e")],
-                      est={n: _f(met.get("est", {}).get(n)) for n in spet.names},
-                      se={n: _f(met.get("se", {}).get(n)) for n in spet.names},
-                      n_cells={n: float(spet.lin[n].sum()) for n in spet.names if n.startswith("tau_e")})
-    # Summary of the event-time path (added in run-sim-application; descriptive, not pre-specified):
-    # equal-weight average over the single-week bins e0..e(E-1) (the open-ended last bin excluded), its t_{G-1}
-    # interval, and the cluster-robust Wald test of H0: all event-time effects = 0 (F form, (G-1) denominator).
-    if met.get("ok") and met.get("Vb") is not None:
-        enames = [n for n in spet.names if n.startswith("tau_e")]
-        ix = [spet.names.index(n) for n in enames]
-        Vb = np.asarray(met["Vb"])
-        bvec = np.array([met["est"][n] for n in enames])
-        a_w = np.zeros(len(enames))
-        a_w[:-1] = 1.0 / (len(enames) - 1)
-        Ve = Vb[np.ix_(ix, ix)]
-        avg, avg_se = float(a_w @ bvec), float(np.sqrt(a_w @ Ve @ a_w))
-        Gc = G
-        W = float(bvec @ np.linalg.solve(Ve, bvec))
-        q = len(enames)
-        Fst = W / q * (Gc - q) / (Gc - 1)
-        event_time["average_e0_to_e%d" % (len(enames) - 2)] = dict(
-            est=avg, se=avg_se, lo=avg - tc * avg_se, hi=avg + tc * avg_se,
-            weights="equal over single-week bins, open-ended last bin excluded")
-        event_time["joint_wald"] = dict(W=W, q=q, F=float(Fst), df1=q, df2=int(Gc - q),
-                                        p_F=float(stats.f.sf(Fst, q, Gc - q)), p_chi2=float(stats.chi2.sf(W, q)))
+    event_time = event_time_block(met, spet, tc)
+    event_time2 = event_time_block(met2, spet2, qdgmm.tcrit(int(panel2["G"])))
+    event_time2["spec"] = ("pre-exposed units (Dall[:S] = 1) removed from the sample; tau_e0 = switches on in "
+                           "window week 0; bins tau_e1..tau_e6 and kappa as in M0-ET")
+    event_time2["sample_counts"] = unit_counts(d, panel)
+    print("[app] main M0_ET2 ok=%s fields=%s (%.1fs)" % (met2.get("ok"), spet2.names, met2.get("time_sec", 0)),
+          flush=True)
+
     for lab, res in (("M0", m0), ("M0_G", mg), ("M0_GI", mgi)):
         psi[lab] = json.loads(json.dumps(timed(psi_block, Yall, panel, res, lab), default=float))
     desc = dgp.panel_descriptives(panel)
@@ -352,9 +412,12 @@ def main(argv=None):
         analyses[name] = {"M0": slim(r0), "M0_G": slim(rg), "M0_GI": slim(rgi), "n_units": int(pnl["Y"].shape[1]),
                           "G": int(pnl["G"])}
         tcs = qdgmm.tcrit(int(pnl["G"]))
-        table.append(ci_row(name, "M0", r0, tcs, figure=fig))
-        table.append(ci_row(name, "M0_G", rg, tcs, figure=False, extra={"at_boundary": rg.get("at_boundary")}))
-        table.append(ci_row(name, "M0_GI", rgi, tcs, figure=False, extra={"at_boundary": rgi.get("at_boundary")}))
+        tab_spec = qdgmm.spec_m0(pnl, phi_bar)
+        table.append(ci_row(name, "M0", r0, tcs, figure=fig, panel=pnl, spec=tab_spec))
+        table.append(ci_row(name, "M0_G", rg, tcs, figure=False, extra={"at_boundary": rg.get("at_boundary")},
+                            panel=pnl, spec=tab_spec))
+        table.append(ci_row(name, "M0_GI", rgi, tcs, figure=False, extra={"at_boundary": rgi.get("at_boundary")},
+                            panel=pnl, spec=tab_spec))
         print("[app] %-12s M0 tau=%s phi=%s | M0-G tau=%s phi=%s (%s) | M0-GI tau=%s (%s)" % (
             name, _f(r0.get("est", {}).get("tau")), _f(r0.get("est", {}).get("phi")),
             _f(rg.get("est", {}).get("tau")), _f(rg.get("est", {}).get("phi")), rg.get("chosen"),
@@ -376,7 +439,8 @@ def main(argv=None):
         n_units=N, G=G, T=int(panel["Y"].shape[0]), S=S, first_week=str(d["week_start"][S]),
         last_week=str(d["week_start"][-1]), ci="95%% t_{G-1}, G = %d" % G, tcrit=tc,
         data_checks=checks, descriptives=desc, gi=gis, omega="pop/1e5", phi_bar=0.5,
-        table=table, analyses=analyses, profile=profile, J=J, psi=psi, event_time=event_time, lead_placebo=lead,
+        table=table, analyses=analyses, profile=profile, J=J, psi=psi, event_time=event_time,
+        event_time2=event_time2, lead_placebo=lead,
         kansas_subset="not run: the CDC file codes state orders only; Kansas county opt-outs are not coded",
         notes=notes, git_sha=_git_sha())
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
