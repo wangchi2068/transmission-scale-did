@@ -245,6 +245,7 @@ def fit_two_step(panel: dict, spec: QDSpec, first: dict) -> dict:
         V = np.linalg.inv(Gam.T @ Wm @ Gam) / G
     except np.linalg.LinAlgError:
         return out
+    V = V * (float(G) / float(G - 1))
     Vb = V[Tm1:, Tm1:]
     se = np.sqrt(np.clip(np.diag(Vb), 0, None))
     out.update(ok=bool(sol.success and np.isfinite(Jstat)), J=Jstat, J_p=float(stats.chi2.sf(Jstat, n_extra)),
