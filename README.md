@@ -92,8 +92,8 @@ xelatex -interaction=nonstopmode supporting_information.tex
 2026-11-17 又按第三轮意见及 *Biometrics* 冲刺要求完成全面优化：
 
 - **少簇与数值修正**：新增 Web Appendix E（应用少簇推断：删除一州刀切、Mammen/Webb6 得分野聚类 bootstrap-t 与 999/999 收敛的非线性成对集群矩 bootstrap-t，见 `verification/application/wild_bootstrap.py`）；修正 Theorem 3(b) 反馈条件均值偏移与 Lemma 5 逐行中值标记、Proposition 3 有界/无界支撑表述及 `numeric_checks.py` S1/S3/S5/S7/S8（8/8 通过）；明确 Scenario 16 未加权 Oracle 覆盖率下降系单簇集中度所致（中位 21.5%，95 分位 58.5%），同周实验明确区分非线性再感染份额（14.5%）与合计份额（34%）。
-- **结构拆包与合规（≤ 25 页）**：将 Web Appendix A–E 拆为独立 `supporting_information.tex`（30 页），主稿启用 `endfloat` 将图表移至文献之后并通过 `\externaldocument[][nocite]` 实现 `xr` 双向交叉引用；精简正文 1–5 节与 Back Matter 后，计入 *Biometrics* 限页的正文+声明+References 为 24 印刷页（严格 ≤ 25 页，零 `Overfull \vbox/\hbox`、零未定义引用）。
-- **参考文献核验**：为全部 7 篇 2021–2026 年 arXiv 预印本补齐已核验的 `eprint` 与 `journal` 条目，`bibtex` 零警告。
+- **结构拆包与合规（≤ 25 页）**：将 Web Appendix A–E 拆为独立 `supporting_information.tex`（31 页），主稿启用 `endfloat` 将图表移至文献之后并通过 `\externaldocument[][nocite]` 实现 `xr` 双向交叉引用；精简正文 1–5 节与 Back Matter 后，计入 *Biometrics* 限页的正文+声明+References 恰好为 25 印刷页（严格 ≤ 25 页，零 `Overfull \vbox/\hbox`、零未定义引用）。
+- **实证与动态推断响应**：直接直面动态效应下汇聚常数估计量（$\hat\tau=+0.056$）与事件时间所有分箱全负（$-0.34$ 至 $-0.92$）的背离，将其归因于动态加权偏倚（Remark 2, X5）；主表以政策总和 $\tau+\kappa=-0.466$ 为首列并直接列出成对集群矩 Bootstrap 区间（$[-1.330, 0.397]$）；彻底删除 26 周 717 亿避免病例的无耗竭指数爆炸数值，收束至 4 周短期；修正情景 14/16 Oracle 笔误与表 3 表注，补齐 Feng & Bilinski 2024 medRxiv DOI 及前沿文献。
 
 ## 投稿前仍需处理
 

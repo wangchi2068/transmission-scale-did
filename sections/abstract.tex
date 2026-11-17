@@ -9,13 +9,13 @@ effects and uses instruments built only from the past, so adoption that responds
 allowed. Under stated cross-cluster dependence conditions, which exclude unmodelled same-week
 cross-cluster transmission, the conventional cluster-robust sandwich applies without spatial
 adjustment. Week effects are profiled out analytically. In pre-specified simulations, the direct
-effect has bias between $-0.002$ and $0.001$ and interval coverage of 94.5\% to 95.4\% in the
-positive-spillover scenarios under adoption feedback, overdispersion and small counts. These results
-do not extend to the boundary case of no contagion, where the equations can have several roots and
-inference is unreliable. In an application to state mask orders and county
-COVID-19 cases, the model-conditional total effect of a state order, $-0.466$ (95\% interval
-$-1.091$ to $0.159$), is the estimand matched to the policy level, but the working model is rejected
-and the application is a demonstration rather than a causal estimate.
+effect has bias between $-0.002$ and $0.001$ and interval coverage of 94.5\% to 95.4\% in
+positive-spillover scenarios under adoption feedback, overdispersion and small counts. When contagion
+is absent, equations can have multiple roots and boundary inference requires selection. In an
+application to US state mask orders and county COVID-19 cases, event-time estimates are negative across
+all lags ($-0.34$ to $-0.92$) and the policy-level total effect is $-0.466$ (95\% interval $-1.091$ to
+$0.159$; pairs bootstrap $-1.330$ to $0.397$), whereas pooled constant-effect estimates suffer from
+dynamic weighting bias; over-identification rejects the working model.
 \end{abstract}
 \begin{keywords}
 Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.

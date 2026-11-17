@@ -89,11 +89,12 @@ so the error in the log reproduction number of week $t$ is bounded by the larges
 in ascertainment within the generation window.
 \end{proposition}
 
-Proposition~\ref{prop:ascertainment} shows smooth testing trends do not bias $\tau$ provided
-$\omega^Y_{it}$ scales with $c_ic_{t-1}$ and neighbours share reporting factors when $\phi_0>0$ (a
-constant per connected component of $W$); fixed $\omega_i$ approximates this when $\omega_i\ll L_{it}$.
-Under binomial thinning, reported pressure proxies $c_ic_{t-1}\Lambda^I_{it}$ noisily, leaving A1
-approximate (addressed via sensitivity checks).
+Proposition~\ref{prop:ascertainment} assumes deterministic reporting (A7) without reporting delays,
+and requires $c_i=c_j$ across connected neighbours when $\phi_0>0$. Smooth testing trends do not
+bias $\tau$ provided $\omega^Y_{it}$ scales with $c_ic_{t-1}$ and unit reporting factors agree across
+connected neighbours (a constant per connected component of $W$); fixed $\omega_i$ approximates this
+when $\omega_i\ll L_{it}$. Under binomial thinning, reported pressure proxies $c_ic_{t-1}\Lambda^I_{it}$
+noisily, leaving A1 approximate (addressed via sensitivity checks).
 
 \subsection{Quasi-differenced moments}
 \label{ss:moments}
@@ -113,7 +114,10 @@ $\E|Y_{i,t+1}r_{it}(\theta_0)|<\infty$.
 \end{lemma}
 
 The unit effect $e^{\alpha_i}$ cancels because $r_{it}$ is a ratio of means, so $\alpha_i$ is
-neither estimated nor needed. Let $z_{it}$ be a $q$-vector of instruments that are
+neither estimated nor needed. The forward quasi-difference for multiplicative panel models with
+sequentially exogenous regressors originates in \citet{wooldridge1997multiplicative} and
+\citet{windmeijer2000moment}; our contribution is embedding this in a spatio-temporal renewal mean
+with spatial contagion and policy interference. Let $z_{it}$ be a $q$-vector of instruments that are
 $\F_{t-1}$-measurable. Cluster contributions and the sample moment are
 \[
 g_g(\theta)=\sum_{i:g(i)=g}\sum_{t=1}^{T-1} z_{it}u_{it}(\theta),\qquad
@@ -183,11 +187,20 @@ $\E\{z_{it}D_{i,t+1}u_{it}(\theta_0)\}=-\E\{z_{it}\cov(D_{i,t+1},\varepsilon_{it
 \end{proposition}
 
 Treated stayers inform $\tau$ only indirectly via common week effects, whereas switchers directly
-identify $\tau$. Part (c) shows that conventional lead-placebo tests are \emph{invalid under
-feedback}: if adoption follows elevated cases, $\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})>0$
-renders the lead moment negative even under exact specification. Leads require adoption fixed $\ge 2$
-weeks ahead; under feedback, specification testing uses the over-identification $J$ test of
-Corollary~\ref{cor:J}.
+identify $\tau$, with first-order weights proportional to expected cases at switching
+$s_{it}\mu_{it}\Sw_{i,t+1}$ (Proposition~\ref{prop:hetero}), so large outbreaks carry more weight.
+While time-invariant heterogeneous unit effects $\tau_i$ yield non-negative weights
+(Proposition~\ref{prop:hetero}), this does not extend to dynamic effects: when effects build up after
+adoption, treated stayers do not cancel $\tau$, and pooled constant-effect M0 places negative weights
+on already-treated units and can lie outside the range of true effects \citep[Remark~\ref{rem:dynamic};][]{goodmanbacon2021did,sun2021estimating}.
+We therefore recommend the event-time specification M0-ET under dynamic adoption.
+While Theorem~\ref{thm:ident}(b) and Proposition~\ref{prop:sources} assume absorbing adoption to
+establish strict monotonicity and switcher weighting, the quasi-difference moment conditions and
+asymptotic normality (Theorems~\ref{thm:ident}(a) and \ref{thm:asy}) hold for arbitrary binary paths.
+Part (c) shows that conventional lead-placebo tests are \emph{invalid under feedback}: if adoption
+follows elevated cases, $\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})>0$ renders the lead moment
+negative even under exact specification. Leads require adoption fixed $\ge 2$ weeks ahead; under
+feedback, specification testing uses the over-identification $J$ test of Corollary~\ref{cor:J}.
 
 \subsection{Estimation and inference}
 \label{ss:estimation}

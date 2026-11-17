@@ -1,64 +1,56 @@
 \section{Application: State Mask Orders and County COVID-19 Transmission}
 \label{s:application}
 
-We apply the design to state mask orders in the United States during the second half of 2020, where
-county-level case growth has been widely studied
+We apply the design to state public mask mandates across US counties in the second half of 2020,
+where county-level case growth has been extensively studied
 \citep{lyu2020masks,guy2021masks,vandyke2020kansas,chernozhukov2021masks,sun2025didnetwork} and
-policy is enacted above the county unit so $\kappa$ carries a policy interpretation. The panel
-covers 3091 counties or merged reporting units across the 49 contiguous state clusters (48 states
-plus D.C.) over 26 weeks (2020-06-01 to 2020-11-23, plus two pre-window lag weeks). Weekly newly
-reported cases come from Johns Hopkins CSSE \citep{dong2020dashboard}, and $D_{it}=1$ if a state
-public mask mandate held for at least four days of week $t$ \citep{cdc2021maskorders}; county
-opt-outs (notably in Kansas) are uncoded, overstating local exposure. Exposure is non-absorbing,
-which QD-GMM accommodates by construction. Median weekly counts are 27 cases (7.4\% zeros), orders
-cover 56.8\% of county-weeks, and 1720 units switch status inside the window (1768 entries across
-1720 units; 89 exits across 82 units), alongside 571 week-1 exposed units and 11,528,182 total
-cases. The primary network $W$ uses row-normalised 2010 Census adjacency, with American Community
-Survey commuting flows in sensitivity checks. Discretising \citet{ferretti2020quantifying} yields
-weekly weights $w\approx(0.964,0.036)$ and places roughly 0.30 of transmission within the same
-week, whose cost is quantified in Section~\ref{ss:sameweek}.
+policy is set above the county unit so $\kappa$ carries policy meaning. The panel covers 3091
+contiguous counties in 49 state clusters over 26 weeks (2020-06-01 to 2020-11-23, plus two lag
+weeks). Weekly new cases come from Johns Hopkins CSSE \citep{dong2020dashboard}, and $D_{it}=1$ if a
+mandate held for $\ge 4$ days of week $t$ \citep{cdc2021maskorders}; county exemptions (e.g.\ Kansas)
+are uncoded. Exposure is non-absorbing (89 exits across 82 units), which the moment conditions
+accommodate; censoring or dropping exiting units leaves estimates within 0.003. Median weekly counts
+are 27 cases (7.4\% zeros), orders cover 56.8\% of county-weeks, 1720 units switch exposure (1768
+entries, 89 exits), 571 units are exposed in week 1, and 11,528,182 cases are reported. Network $W$
+uses row-normalised 2010 Census adjacency, with ACS commuting flows in sensitivity runs. Discretising
+\citet{ferretti2020quantifying} yields weights $w\approx(0.964,0.036)$ and assigns $\approx 0.30$ of
+transmission within the same week (Section~\ref{ss:sameweek}).
 
 We ran the estimators of Sections~\ref{ss:estimation}--\ref{ss:computation} with $\bar\phi=0.5$ and
-state-clustered $t_{48}$ critical values. Only 24 of the 49 clusters contain switching counties and
-cluster sizes vary sharply, so asymptotic intervals are read alongside \citet{imbens2016robust}
-few-cluster checks. Sensitivity analyses vary the generation interval, network $W$, mandate timing
-(one-week shift), background $\omega$ ($\times 0.25$, $\times 4$), $\bar\phi$, and exclusion of
-Kansas and Texas (county exemptions). A comparison lead-indicator regression gives $\hat\ell=-0.332$
-(SE 0.259), which under feedback is not a valid pre-trends test (Proposition~\ref{prop:sources}(c)).
-Cases averted are summed over 4, 8, 13 and 26 weeks.
+state-clustered $t_{48}$ critical values. Only 24 of 49 clusters contain switching counties, so
+asymptotic intervals are read alongside few-cluster checks (Web Appendix~\ref{app:fewcluster}).
+Sensitivity analyses vary generation interval, network $W$, timing (one-week shift), background
+$\omega$ ($\times 0.25$, $\times 4$), $\bar\phi$, and exclusion of Kansas and Texas. A comparison lead
+regression gives $\hat\ell=-0.332$ (SE 0.259), which under feedback is invalid for pre-trends
+(Proposition~\ref{prop:sources}(c)). Cases averted are evaluated over a 4-week short horizon.
 
 Table~\ref{tab:app} and Figure~\ref{fig:app} report the estimates. M0 yields $\hat\tau=0.040$ (95\%
-CI $-0.217$ to $0.296$), $\hat\kappa=-0.506$ ($-1.018$ to $0.006$) and $\hat\phi=0.772$ ($0.590$ to
-$0.954$); the $\phi$-profile crosses zero cleanly away from the boundary, so M0-G and M0-GI agree
-with M0 (0.05 s per fit; 0.73 s for global search). Own and neighbour policy terms are weakly
-separated because state mandates set $D_{it}=\bar D_{it}$ for the 61.9\% of interior counties
-whose neighbours all lie in-state (varying within state across only 88 counties / 366 county-weeks
-in three states), leaving identification of $\tau-\kappa$ to the 1177 border counties ($\text{Corr}(\hat\tau,\hat\kappa)=0.238$). Consequently, the identifiable policy-level contrast is
-the interior total $\hat\tau+\hat\kappa=-0.466$ (95\% CI $-1.091$ to $0.159$; $t=-1.50$, df $=48$),
-or equivalently the re-indexed coefficient on $D_{it}$ in $\tau_{\rm tot}D_{it}+\kappa(\bar D_{it}-D_{it})$
-(SE 0.311). However, over-identification rejects the weekly working model ($J=17.873$, df $=2$,
-$p=0.0001$), with M0-OI giving $\hat\tau=-0.025$ ($-0.251$ to $0.201$) and $\hat\kappa=-0.517$
-($-0.988$ to $-0.046$).
+CI $-0.217$ to $0.296$), $\hat\kappa=-0.506$ ($-1.018$ to $0.006$) and $\hat\phi=0.772$ (0.590 to
+0.954); the profile crosses zero cleanly, so M0-G and M0-GI agree with M0 (0.05 s per fit; 0.73 s for
+global search). Because state mandates set $D_{it}=\bar D_{it}$ for the 61.9\% of interior counties
+(varying in-state across only 88 counties in three states), identification of $\tau-\kappa$ rests on the
+1177 border counties ($\text{Corr}(\hat\tau,\hat\kappa)=0.238$). The identifiable policy-level
+contrast is the interior total $\hat\tau+\hat\kappa=-0.466$ (95\% CI $-1.091$ to $0.159$; $t=-1.50$,
+df $=48$; SE 0.311 in $\tau_{\rm tot}D+\kappa(\bar D-D)$). With only 24 switching clusters, score wild
+bootstrap-$t$ critical values are 1.94 ($\tau$), 1.77 ($\kappa$), 1.93 ($\phi$) and 1.72
+($\tau+\kappa$, CI $-0.999$ to $0.067$); pairs cluster bootstrap-$t$ accounting for Jacobian variability
+gives 2.78 for $\tau+\kappa$ (CI $[-1.330, 0.397]$; 1.59 for $\tau$, 2.22 for $\kappa$, 2.44 for $\phi$).
+Jackknife SEs exceed sandwich SEs by 13\%--30\%. Over-identification rejects the working model
+($J=17.873$, df $=2$, $p=0.0001$), with M0-OI giving $\hat\tau=-0.025$ ($-0.251$ to $0.201$) and
+$\hat\kappa=-0.517$ ($-0.988$ to $-0.046$).
 
-Because only 24 clusters switch, Web Appendix~\ref{app:fewcluster} checks few-cluster inference via
-999-draw Mammen score wild cluster bootstrap-$t$ on cluster influence vectors and nonlinear pairs
-cluster bootstrap-$t$ on the 49 cluster moment vectors. With fixed Jacobian, score wild critical
-values are 1.94 ($\tau$), 1.77 ($\kappa$), 1.93 ($\phi$) and 1.72 ($\tau+\kappa$; CI $-0.999$ to
-$0.067$). Incorporating Jacobian variability via pairs bootstrap-$t$ raises critical values to 2.22
-($\kappa$), 2.44 ($\phi$) and 2.78 ($\tau+\kappa$, CI $-1.330$ to $0.397$; 1.59 for $\tau$); every
-variant includes zero. Delete-one-state jackknife SEs exceed sandwich SEs by 13\% to 30\%, reflecting
-influence of large states (up to 254 of 3091 counties).
-
-For event-time analysis (M0-ET), excluding 435 pre-window permanently exposed units leaves 2656
-counties across 37 clusters. Estimates are negative in all bins, falling from $-0.343$ (SE 0.341)
-at adoption to $-0.924$ (0.685) at lag 5 and $-0.923$ (0.735) thereafter, with joint test
-$F=2.089$ (df $=7,30$, $p=0.076$; $\chi^2$ $p=0.014$). This declining trajectory resembles both
-lagged policy build-up (Remark~\ref{rem:dynamic}, X5) and post-adoption ascertainment shifts (X2),
-which the weekly panel cannot separate, and the working-model rejection bars a causal reading.
-Sensitivity runs retain the negative sign and wide intervals, with alternative profile roots
-catalogued in Web Table~\ref{tab:app-all}. Counterfactual cases averted grow from $3.41\times 10^5$
-(SE $3.97\times 10^5$) at 4 weeks to an unrestrained $7.17\times 10^{10}$ (SE $5.16\times 10^{11}$)
-at 26 weeks without susceptible depletion, targeting realised $\psi^\dagger$ (Theorem~\ref{thm:psi}).
+For event-time analysis (M0-ET2), excluding 435 pre-window exposed units leaves 2656 counties across 37
+clusters ($W$ row-normalised on the subnetwork). Estimates are negative in all bins, falling from
+$-0.343$ (SE 0.341) at adoption to $-0.924$ (0.685) at lag 5 and $-0.923$ (0.735) thereafter (single-week
+mean $-0.677$, SE 0.521; joint test $F=2.089$, df $=7,30$, $p=0.076$; $\chi^2$ $p=0.014$). Fitting
+pooled constant M0 on this identical 2656-unit sample yields $\hat\tau=0.056$ (SE 0.181, Table~\ref{tab:app}),
+strictly outside the range of all seven negative bin estimates. This divergence is dynamic weighting bias
+(Remark~\ref{rem:dynamic}, X5), where already-treated units receive negative weights and contaminate the
+comparison. Across sensitivity runs, $\hat\tau+\hat\kappa$ under M0 remains negative ($-0.366$ to
+$-0.764$), though $\hat\tau$ is positive in four runs, and M0-G boundary selections reverse sign in three
+runs (Web Table~\ref{tab:app-all}). Unscaled $\hat\phi=0.772$ likely absorbs common regional shocks. Over 4
+weeks, realised cases averted target $\psi^\dagger$ at $3.41\times 10^5$ (SE $3.97\times 10^5$;
+Theorem~\ref{thm:psi}); without depletion, longer-horizon recursions explode exponentially.
 
 \begin{figure}[!t]
 \centering

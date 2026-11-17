@@ -5,22 +5,24 @@
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{llrrrrr}
+\begin{tabular}{llrrrr}
 \toprule
-analysis & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $\hat\ell$ (95\% CI) \\
+analysis & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) \\
 \midrule
-main & M0 & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) & -- \\
-main & M0-G & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) & -- \\
-main & M0-GI & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) & -- \\
-main & M0-OI & -- & -0.025 (-0.251, 0.201) & -0.517 (-0.988, -0.046) & 0.590 (0.474, 0.706) & -- \\
-main & M0$'$ & -- & 0.021 (-2.088, 2.130) & -- & -- & -- \\
-main & M1 & -- & -0.024 (-0.109, 0.061) & -0.069 (-0.163, 0.025) & 0.567 (0.355, 0.779) & -- \\
-main & M1-BC & -- & -0.025 (-0.111, 0.060) & -0.006 (-0.100, 0.088) & 0.073 (-0.139, 0.286) & -- \\
-main & M2 & -- & -0.084 (-0.205, 0.036) & -- & -- & -- \\
-main & M3 & -- & 0.087 (-0.188, 0.361) & -- & -- & -- \\
-main & M4 & -- & 0.004 (-0.030, 0.038) & 0.004 (-0.034, 0.043) & 0.027 (0.020, 0.035) & -- \\
+main & M0 & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) \\
+main & M0-G & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) \\
+main & M0-GI & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) \\
+main & M0-OI & -- & -0.025 (-0.251, 0.201) & -0.517 (-0.988, -0.046) & 0.590 (0.474, 0.706) \\
+main & M0$'$ & -- & 0.021 (-2.088, 2.130) & -- & -- \\
+main & M1 & -- & -0.024 (-0.109, 0.061) & -0.069 (-0.163, 0.025) & 0.567 (0.355, 0.779) \\
+main & M1-BC & -- & -0.025 (-0.111, 0.060) & -0.006 (-0.100, 0.088) & 0.073 (-0.139, 0.286) \\
+main & M2 & -- & -0.084 (-0.205, 0.036) & -- & -- \\
+main & M3 & -- & 0.087 (-0.188, 0.361) & -- & -- \\
+main & M4 & -- & 0.004 (-0.030, 0.038) & 0.004 (-0.034, 0.043) & 0.027 (0.020, 0.035) \\
+main (ET sample) & M0 (2656 units) & -0.391 (-1.226, 0.443) & 0.056 (-0.311, 0.423) & -0.447 (-1.050, 0.156) & 0.751 (0.552, 0.950) \\
+main (ET sample) & M0-ET2 (mean $e_0$--$e_5$) & -- & -0.677 (-1.734, 0.380) & -0.579 (-1.408, 0.250) & 0.757 (0.565, 0.949) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize US county-week COVID-19 cases, 3091 units in 49 state clusters, 26 weeks (2020-06-01 to 2020-11-23); $D$ = state public mask order. 95\% intervals: cluster (state) sandwich with $t_{G-1}$ critical values. The first column is the model-conditional total effect of a state order on an interior county, $\tau+\kappa$, taken from the joint covariance; about 62\% of counties are interior, so for them the two coefficients load on the same regressor. The lead\_placebo row reports $\hat\ell$, the coefficient on a lead indicator from a specification that also contains $D_{it}$ and $\bar D_{it}$; Proposition~\ref{prop:sources}(c) shows that it is not a test of pre-trends under feedback. Data sources, checksums and the mask-order coding are given in Web Appendix D. }
+\par\smallskip\parbox{\linewidth}{\scriptsize US county-week COVID-19 cases, 3091 units in 49 state clusters, 26 weeks (2020-06-01 to 2020-11-23); $D$ = state public mask order. 95\% intervals: cluster (state) sandwich with $t_{G-1}$ critical values ($t_{48}=2.01$). For the policy-level total effect on interior counties, $\tau+\kappa$, the few-cluster pairs bootstrap-$t$ interval (critical value 2.78, Web Appendix E) is $[-1.330, 0.397]$. For the 62\% of counties that are interior, $D=\bar D$, so $\tau$ and $\kappa$ enter through the same regressor and $\tau+\kappa$ is the identifiable policy-level total. On the 2656-unit sample excluding pre-window exposed units (37 clusters), pooled M0 yields $\hat\tau=0.056$ while the dynamic event-time model M0-ET2 yields negative estimates across all seven bins ($-0.343$ to $-0.924$, mean $-0.677$, joint $F=2.089$, $p=0.076$), illustrating dynamic weighting bias in pooled constant estimators (Remark~\ref{rem:dynamic}, X5). Data sources and coding are in Web Appendix D.}
 \end{table}

@@ -18,14 +18,17 @@ under lagged cross-cluster contagion, while profiling over $\phi$ reveals root m
 $\phi_0=0$: global search recovers the consistent root there, though weak-identification-robust
 intervals \citep{andrews2012identification} remain advisable near the boundary.
 
-Applicability turns on two empirical diagnostics plus cluster structure. First, the $\phi$-profile
-tests whether local and imported pressures vary independently once own and neighbour policies are
-projected out. Second, the weekly model excludes within-week renewal; in our stress test
-($w_0=0.3$, 14.5\% nonlinear within-week re-infection share), policy-level sums carry roughly
-one-sixth bias undetected by the $J$ test or shorter windows (Section~\ref{ss:sameweek}),
-signalling when a sub-weekly specification is required. Finally, as in our 49-state application
-with 24 switching clusters and unequal cluster sizes, small-sample corrections
-\citep{imbens2016robust} and cluster-bootstrap checks complement asymptotic inference. Future work
+Applicability turns on two empirical diagnostics plus cluster structure. First, the functional form
+of parallel trends on $\log R$ \citep{roth2023parallel} separates local from imported pressure
+\citep{elenev2025staggered}, which contrasts with unconfoundedness formulations \citep{callaway2023pandemic};
+the $\phi$-profile tests whether these pressures vary independently once policies are projected out.
+Second, the weekly model excludes within-week renewal; in our stress test ($w_0=0.3$, 14.5\% nonlinear
+within-week re-infection share), policy-level sums carry roughly one-sixth bias undetected by the $J$
+test (Section~\ref{ss:sameweek}), signalling when a sub-weekly specification is required. Finally,
+as in our 49-state application with 24 switching clusters and unequal cluster sizes, few-cluster corrections
+\citep{conley2011inference,imbens2016robust} and cluster-bootstrap checks \citep{mackinnon2017wild,mackinnon2018wild}
+complement asymptotic inference. Under dynamic effects, pooled constant estimators suffer from weighting
+bias \citep{goodmanbacon2021did,sun2021estimating}, making event-time paths the preferred summary. Future work
 could pursue sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback}
 or likelihood-based feedback models \citep{bonhomme2025feedback}, weak-identification intervals
 \citep{andrews2012identification}, sub-weekly estimating equations, and joint estimation of

@@ -311,8 +311,11 @@ $\E M_{i,s-1}{}^2\le(s-1)\bar\sigma_\eta{}^2$, and $|D_{is}|\le1$. Hence
 $|\E\sum_{t<s}D_{is}\eta_{it}|=|\E D_{is}M_{i,s-1}|\le\bar\sigma_\eta(s-1)^{1/2}$, and
 comparing the sum with the integral of $x^{1/2}$ over $[0,T]$ gives $\sum_{s=1}^T(s-1)^{1/2}\le2T^{3/2}/3$. If instead
 $\sum_s\sum_{t<s}|\E D_{is}\eta_{it}|\le CT$ (adoption responds mainly to recent shocks), then
-$|B_F|\le C/d^2$. The first bound grows with $T$ and yields no rate at which $B_F$ decays; no lower
-bound on $|B_F|$ is established in either case. The expansion of $b_{it}$ is a second-order delta-method approximation. With
+$|B_F|\le C/d^2$. Because $d^2=\lim N^{-1}\E\sum_{i,t}\ddot D_{it}{}^2$ sums over all $t$, in panels
+where within-unit treatment variation per period is non-vanishing $d^2$ scales linearly with $T$.
+Consequently, the general bound $2\bar\sigma_\eta T^{1/2}/(3d^2)$ is $O(T^{-1/2})$, and under the
+recent-shocks condition $C/d^2$ is $O(T^{-1})$, which is the Nickell \citep{nickell1981biases} rate.
+The expansion of $b_{it}$ is a second-order delta-method approximation. With
 $\operatorname{var}(Y_{it}\mid\F_{t-1})=\mu_{it}+\mu_{it}{}^2/k$,
 $\E\{\log(Y_{it}+c)\mid\F_{t-1}\}\approx\log(\mu_{it}+c)-\operatorname{var}/\{2(\mu_{it}+c)^2\}$. Expanding in
 $1/\mu_{it}$ gives $\log\mu_{it}+(c-1/2+c/k)/\mu_{it}-1/(2k)+O(\mu_{it}{}^{-2})$, which was checked
@@ -413,9 +416,9 @@ solving all $T-1$ week-effect moments (S3), the expansion of $b_{it}$ (S4), the 
 and Poisson conditional variance behind Remark~\ref{rem:optimal} (S5), the heterogeneous-effect root and non-negative weights of
 Proposition~\ref{prop:hetero} (S7), and equation \eqref{eq:t2fe} for $T=2$ under both randomised and threshold feedback adoption (S8); the Jacobian
 \eqref{eq:jac} (S2) and the symbols of the proofs are checked analytically rather than numerically.
-All eight checks pass. The expansion of $b_{it}$ is accurate for $\mu_{it}\ge5$; at $\mu_{it}=2$,
-$k=10$, $c=0.5$ the exact value of $\E\log(Y+c)-\log\mu$ is $-0.00556$ against $-0.025$ from the
-expansion.
+All eight checks pass. The expansion of $b_{it}$ is accurate to order of magnitude for small $\mu$
+(relative error 28\% at $\mu_{it}=5$; at $\mu_{it}=2$, $k=10$, $c=0.5$ the exact value of
+$\E\log(Y+c)-\log\mu$ is $-0.00556$ against $-0.025$ from the expansion).
 
 The Monte Carlo check of Theorem~\ref{thm:asy} used $R=1000$ replications, $T=10$,
 $\tau_0=\log0.8$, $\kappa_0=-0.1$, $\phi_0=0.4$ and feedback adoption, with nominal 95\% $t_{G-1}$
@@ -576,10 +579,12 @@ The application uses six public files (five data files and the ACS commuting tab
 Hopkins University CSSE time series \citep{dong2020dashboard}. Weekly incidence is the difference of
 the cumulative series at consecutive week starts, with negative values from revisions set to zero.
 \item \emph{Exposure.} State and territorial public mask orders from the CDC Public Health Law
-Program county-by-day file \citep{cdc2021maskorders}. $D_{it}=1$ when an order was in force on at
-least four of the seven days of the week. County-level opt-outs permitted under state law, such as
-in Kansas, are not recorded in that file and are not coded; $D$ therefore overstates exposure in
-those states, and the analysis excluding Kansas and Texas is reported for that reason.
+Program county-by-day file \citep{cdc2021maskorders}. The raw file (217 MB) can be downloaded via
+\texttt{experiment/data/fetch\_cdc\_masks.py} matching the SHA-256 checksum in \texttt{checksums.tsv}.
+$D_{it}=1$ when an order was in force on at least four of the seven days of the week. County-level
+opt-outs permitted under state law, such as in Kansas, are not recorded in that file and are not coded;
+$D$ therefore overstates exposure in those states, and the analysis excluding Kansas and Texas is reported
+for that reason. Merged reporting units in Utah and Missouri follow JHU CSSE conventions (\texttt{data\_contract.md}).
 \item \emph{Units.} Counties and merged county reporting units of the contiguous United States and
 the District of Columbia, 3091 in total; Alaska, Hawaii and the territories are excluded. The 49
 clusters are the 48 contiguous states and the District of Columbia.

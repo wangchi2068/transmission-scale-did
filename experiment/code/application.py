@@ -138,7 +138,7 @@ def make_panel(d, w, W, D_all=None, omega_mult=1.0, units=None, drop_presample=F
         keep = ~D_all[:S].any(0)
         units = keep if units is None else units[keep[units]]
     if units is not None:
-        W = W[:, units]     # neighbour shares keep every unit's policy, including dropped ones
+        W = W[:, units]     # subnetwork adjacency restricted to kept units; row-normalised after subsetting
         Yall, D_all, pop = Yall[:, units], D_all[:, units], pop[units]
         W = row_normalise(W[units])
         cl = np.unique(cl[units], return_inverse=True)[1]

@@ -48,15 +48,17 @@ reached on identical data) were added.
 to $0.001$ (within 2 MCSE of zero in seven scenarios, and $-2.18$ MCSE at $-0.0017$ in scenario 1),
 with coverage 94.5\% to 95.4\% under both adoption rules (Table~\ref{tab:sim-core-tau},
 Figure~\ref{fig:core-tau}). Model SEs match empirical SDs within $-2.2\%$ to $0.9\%$ across all
-three parameters ($-3.5\%$ to $0.9\%$ including the null block), power against $\tau_0=\log0.8$
-ranges from 77.1\% to 100\%, and $(\kappa,\phi)$ are equally well recovered (Web
-Table~\ref{tab:sim-core-spill}; at $R=8000$, 2 MCSE detects $\phi$-biases of 0.0035, under 0.9\%
-of $\phi_0=0.4$). By contrast, M1 shows bias $-0.027$ to $-0.017$ and coverage 78.1\% to 88.2\%
-(matching Theorem~\ref{thm:bias}(b)); M1-BC fails to converge in up to 85.3\% of runs (14.7\% and
-23.9\% in two scenarios, coverage 25.7\% to 82.7\%); M2, M3 and M4 carry biases comparable to
-$\tau_0$; and M0$'$ (imposing $\kappa=\phi=0$) yields bias $-0.248$ to $-0.114$ and coverage at most
+three parameters ($-3.5\%$ to $0.9\%$ including the null block), and power against $\tau_0=\log0.8$
+ranges from 77.1\% to 100\%. For $\phi$ and $\kappa$, biases are likewise small (below 0.9\% of
+$\phi_0$), though the strict 2 MCSE criterion flags minor biases in $\hat\phi$ for scenarios 1, 2, 3,
+9, 10 and in $\hat\kappa$ for scenario 9 (Web Table~\ref{tab:sim-core-spill}). By contrast, M1 shows
+bias $-0.027$ to $-0.017$ and coverage 78.1\% to 88.2\% (Theorem~\ref{thm:bias}(b)); M1-BC fails to
+converge in up to 85.3\% of runs (14.7\% and 23.9\% in two scenarios, coverage 25.7\% to 82.7\%); M2
+bias spans $-0.110$ to $0.013$ (coverage up to 94.0\% at $T=26$), while M4 bias spans $0.008$ to
+$0.139$; and M0$'$ (imposing $\kappa=\phi=0$) yields bias $-0.248$ to $-0.114$ with coverage at most
 22.4\% (Theorem~\ref{thm:bias}(d)). Infeasible Oracle retains 92.0\% to 94.8\% coverage under
-spillover (except 91.3\% in scenario 12) but degrades sharply without it.
+spillover (except 91.3\% in scenario 12), but falls to 80.5\% and 80.2\% in the two $T=26$
+random-adoption no-spillover cells (scenarios 14 and 16).
 
 \begin{figure}[!t]
 \centering
@@ -68,29 +70,34 @@ data sets.}
 \end{figure}
 
 \emph{Size and boundary.} Under $\tau_0=0$, M0 and the $J$ test of M0-OI preserve nominal size
-(4.7\%--5.2\% and 4.4\%--4.9\%); M1 is close, whereas M1-BC, M2 and M3 severely over-reject (Web
-Table~\ref{tab:sim-null}). When $\phi_0=\kappa_0=0$, multiple interior roots appear in 47.2\% to
-51.7\% of runs (tracing a spurious root near $\bar\phi$), trapping local M0 at bias 0.132 to 0.469
-and coverage 0.6\% to 38.8\% (Figure~\ref{fig:roots}). Global search recovers consistency: M0-G
-selects the $\phi=0$ boundary in 28.6\% to 44.8\% of runs and M0-GI in 63.7\% to 80.9\%, reducing
-bias to 0.000--0.052 and raising coverage to 87.5\%--95.2\% (Table~\ref{tab:sim-m0gi}). Here
-scale weighting also separates M0$'$ from Oracle: without inverse-scale weights $s_{it}$, Oracle's
-coverage drops to 80.2\% and 80.5\% in the $T=26$ random-adoption no-spillover scenarios (12 and
-16) because a single untreated cluster concentrates a median 21.5\% and up to 58.5\% (95th
-percentile) of total cases, breaking its cluster-robust SE (mean SE 0.035 vs empirical SD 0.066).
-Weighted M0$'$ holds $[-0.000,0.002]$ bias and 94.7\%--95.5\% coverage, and M0-GI attains 95.0\%
-in scenarios 14 and 16. Under positive spillover ($\phi_0=0.4$), all 8000 replications have a
+(4.7\%--5.2\% and 4.4\%--4.9\%); M1 shows moderate over-rejection (6.3\% to 9.7\%), whereas M1-BC,
+M2 and M3 severely over-reject (Web Table~\ref{tab:sim-null}). When $\phi_0=\kappa_0=0$, multiple
+interior roots appear in 47.2\% to 51.7\% of runs (tracing a spurious root near $\bar\phi$), trapping
+local M0 at bias 0.132 to 0.469 and coverage 0.6\% to 38.8\% (Figure~\ref{fig:roots}). Global root
+selection addresses the inconsistent root: pre-specified M0-G selects the boundary in 28.6\% to
+44.8\% of runs (coverage 52.9\%--71.0\%), while post hoc M0-GI selects the boundary in 63.7\% to
+80.9\%, reducing bias to 0.000--0.052 and raising coverage to 87.5\%--95.2\% (Table~\ref{tab:sim-m0gi}).
+On independent designs (Section~\ref{ss:rsel_body}), however, M0-GI over-selects the boundary at
+$\phi_0=0.05$, costing 3 to 4 percentage points of coverage. Here scale weighting also separates
+M0$'$ from Oracle: without inverse-scale weights $s_{it}$, Oracle's coverage drops to 80.5\% and
+80.2\% in scenarios 14 and 16 because a single untreated cluster concentrates a median 21.5\% and up
+to 58.5\% (95th percentile) of total cases, breaking its cluster-robust SE (mean SE 0.035 vs empirical
+SD 0.066). Weighted M0$'$ holds $[-0.000,0.002]$ bias and 94.7\%--95.5\% coverage, and M0-GI attains
+95.0\% in scenarios 14 and 16. Under positive spillover ($\phi_0=0.4$), all 8000 replications have a
 unique root and M0, M0-G and M0-GI agree identically; near $\phi_0=0$, Wald intervals remain
 fragile under flat or multi-root profiles.
 
-\emph{Misspecification and cases averted.} Wrong generation weights (X1) leave $\hat\tau$ nearly
-unbiased (0.010, coverage 94.6\%, absorbed by $\hat\phi$), while heterogeneous effects (X3) and
-depletion (X4, 95.2\% coverage) cause negligible distortion. Conversely, a 15\% reporting drop (X2)
-biases $\hat\tau$ to $-0.057$ (59.4\% coverage), and dynamic build-up (X5) yields bias 0.219 (0\%
-coverage) for constant M0 but 95.3\%--95.8\% bin coverage for M0-ET (Remark~\ref{rem:dynamic}; Web
-Table~\ref{tab:sim-misspec}). Under spillover, realised cases averted $\psi^\dagger$ achieve median
-relative bias within $\pm0.006$ and coverage 85.7\% to 95.4\% (dropping to 85.7\% at $N=500,T=26$
-as $\nu_{it}$ compounds exponentially; Web Table~\ref{tab:sim-psi}).
+\emph{Misspecification and cases averted.} Under misspecification (Table~\ref{tab:sim-misspec}), wrong
+generation weights (X1) leave $\hat\tau$ nearly unbiased (0.010, coverage 94.6\%), but severely
+distort the spillover parameters: $\hat\phi$ carries bias $+0.516$ (0\% coverage), absorbing the lag
+mismatch, and $\hat\kappa$ coverage drops to 80.2\%. A 15\% post-adoption reporting drop (X2) biases
+$\hat\tau$ to $-0.057$ (59.4\% coverage) and $\hat\kappa$ to $-0.294$ (0\% coverage), inducing a
+substantial $-0.35$ bias in the policy-level total $\tau+\kappa$. Heterogeneous unit effects (X3) and
+depletion (X4, 95.2\% coverage) cause negligible distortion in $\tau$. Dynamic build-up (X5) causes
+pooled constant M0 to break down completely with bias 0.219 (0\% coverage), while event-time M0-ET
+recovers every bin at 95.3\%--95.8\% coverage (Remark~\ref{rem:dynamic}; Web Table~\ref{tab:sim-misspec}).
+Under spillover, realised cases averted $\psi^\dagger$ achieve median relative bias within $\pm0.006$
+(coverage 85.7\%--95.4\%; Web Table~\ref{tab:sim-psi}).
 
 \subsubsection{Same-week transmission}
 \label{ss:sameweek}

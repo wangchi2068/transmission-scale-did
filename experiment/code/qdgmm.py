@@ -310,8 +310,8 @@ def spec_m0_et2(panel: dict, E: int = 6, phi_bar: float = 0.5) -> QDSpec:
     block and no event-time coefficient is identified; the sample is cut instead of pooled or split.
 
     Units with any Dall[:S] = 1 leave the sample (application.make_panel(..., drop_presample=True)); the
-    neighbour share Db = W D is formed in the full sample first, so the removed units still enter their
-    neighbours' Db. Bins as in spec_m0_et: tau_e0 = switches on in window week 0, tau_e1..E-1, open-ended
+    adjacency matrix W is restricted to the retained units and row-normalised, so neighbour shares reflect
+    policy within the kept subnetwork. Bins as in spec_m0_et: tau_e0 = switches on in window week 0, tau_e1..E-1, open-ended
     tau_eE, plus kappa. The spec records its own cluster count (G) for the Wald test."""
     if "Dpre" not in panel:
         raise KeyError("spec_m0_et2 needs panel['Dpre'] (pre-sample policy path); use attach_presample(panel, Dpre)")

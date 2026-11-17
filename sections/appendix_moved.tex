@@ -73,12 +73,14 @@ Part (a) separates two mechanisms. The Jensen term $B_J$ is the small-count prob
 estimated reproduction numbers and does not vanish as $T$ grows. The feedback term $B_F$ arises
 because the unit mean of $D$ uses future adoption, which responds to current shocks. This is the
 mechanism behind the fixed-$T$ bias of within estimators in dynamic panels
-\citep{nickell1981biases}. The bound in (a) is an upper bound that grows with $T$; it does not
-establish a rate at which $B_F$ decays, and we derive no such rate. Under the additional condition
-that the cross-product sum is $O(T)$ rather than $O(T^{3/2})$, the bound becomes $C/d^2$ and
-$B_F$ need not vanish as $T$ grows.
+\citep{nickell1981biases}. Because $d^2=\lim N^{-1}\E\sum_{i,t}\ddot D_{it}{}^2$ sums across all
+$t=1,\dots,T$, in designs with non-vanishing within-unit treatment variation per period $d^2$ scales
+linearly with $T$. The general bound in (a) is therefore $O(T^{-1/2})$, and under the recent-shocks
+condition with cross-product sum $O(T)$, the bound $C/d^2$ is $O(T^{-1})$, matching the Nickell
+rate.
 Part (b) shows that the Poisson fixed-effects estimator is inconsistent for fixed $T$ even with
-randomised adoption, through the lagged-outcome offset.
+randomised adoption, through the lagged-outcome offset; this fixed-$T$ inconsistency under feedback
+is a known property of dynamic count panels \citep{blundell2002count}.
 Split-panel jackknife corrections \citep{dhaene2015splitpanel} assume stationarity, which week
 effects and staggered adoption violate, so the corrected estimator is assessed only by
 simulation.
