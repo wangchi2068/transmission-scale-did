@@ -19,7 +19,7 @@ machine use `python -I` so that a local file cannot shadow an import.
 | `data_prep.py` | raw files → `data/processed/panel.npz` (run with `python -I`) |
 | `application.py` | application: main analysis, comparators, M0-ET and the revised M0-ET, sensitivities → `application/application_results.json` |
 | `benchmark.py` | timing/memory per scenario → `run_plan.json` |
-| `calibrate.py`, `pilot_alpha_tails.py` | pilot calibration (`calibration.json`) and the ALPHA_SCALE evidence (`../logs/`) |
+| `calibrate.py` | pilot calibration (`calibration.json`) |
 | `../theory/numeric_checks.py` | numerical checks of the derivations in Web Appendix B (`python -I ../theory/numeric_checks.py`) |
 
 There is no `run_all.sh`, `src/` package or `tests/` directory in this distribution. The stages are

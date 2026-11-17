@@ -5,7 +5,7 @@
 | `tau_kappa.py` / `tau_kappa.json` | 州级政策的 tau 与 kappa 共线性、tau+kappa 合并效应 |
 | `total_ci.py`、`timing.py` | tau+kappa 区间、单次拟合耗时 |
 | `m0et_revised.py` / `m0et_revised.json` | **M0-ET 事件时间分箱修正**（窗口前已暴露单位） |
-| `STROBE_checklist.md`、`robust_inference_plan.md` | 写作侧的清单与稳健推断计划 |
+| `STROBE_checklist.md` | 写作侧 STROBE 观察性研究核对清单 |
 
 ## M0-ET 修正（m0et_revised.json）
 

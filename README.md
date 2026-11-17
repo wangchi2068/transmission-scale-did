@@ -63,11 +63,10 @@ xelatex -interaction=nonstopmode supporting_information.tex
 | `experiment/theory/numeric_checks.py` | Web Appendix B 的 S1、S3、S4、S5、S7、S8 数值核验，8/8 通过 |
 | `verification/root_selection/build_rsel_table.py` | 由 `full.jsonl` 重算 Web Table 7（t 临界值、Multi 列） |
 | `experiment/code/make_tables.py` | 由 `analysis/results.json` 生成正文与应用表 |
-| `scripts/regen_app_table.py` | 由应用重跑结果重建 Table 3 |
-| `scripts/split_app_table.py` | 主分析表与敏感性表（Web Table 8）分别生成 |
+| `scripts/split_app_table.py` | 由 `results.json` 分别生成 Table 3 与敏感性附表（Web Table 8） |
 | `scripts/scan_control_chars.py` | 扫描源文件里被 shell 转义破坏的控制字符 |
-| `scripts/qa_checks.py` | running head 长度、摘要词数、表注指向 |
-| `scripts/section_pages.py` | 报告各节在 PDF 中的起始页 |
+| `scripts/qa_checks.py` | running head 长度、摘要词数、PDF 未解析引用扫描 |
+| `scripts/section_pages.py` | 报告各节起始页与 *Biometrics* 计页总数 |
 
 ## 版本说明
 
@@ -81,7 +80,7 @@ xelatex -interaction=nonstopmode supporting_information.tex
 
 **新增证据**
 - 同周传播匹配实验（`verification/same_week/`），写入正文 3.2.1 节。
-- 边界推断诊断（`verification/root_selection/boundary_inference.md`），Oracle 重尾诊断写入正文 3.2 节。
+- 边界推断诊断（Oracle 重尾与簇内病例集中度分析）写入正文 3.2 节。
 - Web Table 7 按 t_{G−1} 重算并补 Multi 列；Table 3 以 τ+κ 为首列。
 
 **结构**
