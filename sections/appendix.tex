@@ -561,3 +561,36 @@ within the week, as described in Section~\ref{s:application}.
 Weeks are assigned by their starting Monday. The estimation window starts 2020-06-01, with the two
 preceding weeks used only to build the lagged pressure. No unit is dropped on the basis of missing
 outcome data; counties without reported cases in a week enter with a zero count.
+
+
+\section{Web Appendix E: Few-cluster inference for the application}
+\label{app:fewcluster}
+
+The application has 49 state clusters, about 24 of which contain a county that switches exposure,
+and the cluster sizes range from 1 to 254 counties. The $t_{48}$ intervals of Table~\ref{tab:app}
+treat the clusters as asymptotically many. This appendix reports two checks for that assumption,
+both implemented in \texttt{verification/application/wild\_bootstrap.py}.
+
+\emph{Delete-one-state jackknife.} Each state is removed in turn, the adjacency matrix is rebuilt on
+the remaining counties with row normalisation, the lagged pressure is recomputed, and M0 is refitted
+from the full-sample estimate as the starting value. All 49 refits converge to the interior root with
+$\hat\phi$ between 0.70 and 0.79. The jackknife standard error, $\sqrt{(G-1)G^{-1}\sum_g(\tilde\theta_{(g)}-\bar{\tilde\theta})^2}$
+with $\tilde\theta_{(g)}$ the deviation of the $g$-th delete-one estimate from the full-sample one, is
+0.166 for $\tau$, 0.289 for $\kappa$ and 0.105 for $\phi$, against sandwich standard errors of
+0.128, 0.255 and 0.091. The jackknife is larger because removing Texas alone takes 254 of the 3091
+counties, so a delete-one draw is not a small perturbation of the cluster population.
+
+\emph{Wild cluster bootstrap-t.} For $b=1,\dots,999$ a Rademacher weight $w_g\in\{-1,+1\}$ is drawn
+for each state, and the draw of the estimate is $\Delta_b=\sum_g w_g\tilde\theta_{(g)}/G$. The
+studentised statistic $\Delta_b/\hat\sigma_{\Delta}$ uses the variance of the weighted deviations,
+and the critical value is the 0.95 quantile of its absolute value. The critical values are 1.967 for
+$\tau$, 1.915 for $\kappa$ and 1.792 for $\phi$, all below the $t_{48}$ value of 2.011, so the
+conventional interval is mildly conservative for this panel rather than anti-conservative. For the
+policy-level sum the critical value is 1.735 and the interval is $-1.006$ to $0.073$, which contains
+zero as the $t_{48}$ interval does.
+
+The bootstrap treats the delete-one deviations as the sampling units; it does not model the
+state-size heterogeneity beyond the weights that the deviations already carry, and it is not
+validated by a simulation with known coverage. It is reported as a check that the conclusion about
+the policy-level sum is insensitive to the number of clusters, not as a replacement for the
+$t_{48}$ intervals.

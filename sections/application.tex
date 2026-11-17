@@ -53,6 +53,8 @@ over-identification test rejects the working model ($J=17.873$ on 2 degrees of f
 $p=0.0001$), and M0-OI gives $\hat\tau=-0.025$ ($-0.251$ to $0.201$) and $\hat\kappa=-0.517$
 ($-0.988$ to $-0.046$).
 
+The intervals above treat the 49 state clusters as asymptotically many. As a check for the few-cluster structure, we resampled states and refitted the model 999 times with a wild cluster bootstrap-t and Rademacher weights (Web Appendix~\ref{app:fewcluster}). The bootstrap critical values for the 95\% interval are 1.97 for $\tau$, 1.91 for $\kappa$ and 1.79 for $\phi$, below the $t_{48}$ value of 2.01, and the interval for the policy-level sum is $-1.006$ to $0.073$, which contains zero as before. The delete-one-state jackknife standard error is about 25\% larger than the sandwich standard error; the two answer different questions, the sandwich being the variability under resampling of clusters from the population and the jackknife the sensitivity of the estimate to dropping one state, the largest of which contributes 254 of the 3091 counties.
+
 For the event-time specification, 435 of the 571 units exposed in the first week had been exposed
 before the window opened and stay treated throughout, so their adoption week is unobserved and a bin
 for them is collinear with the week effects; we exclude those units for this specification, leaving
@@ -62,14 +64,13 @@ joint test of all seven bins gives $F=2.089$ on 7 and 30 degrees of freedom ($p=
 $p=0.014$ in its chi-square form. The profile of negative estimates is the one that
 Remark~\ref{rem:dynamic} and scenario X5 associate with effects that build up after adoption, and a
 change in ascertainment produces it as well (X2), so the panel does not separate the two readings;
-the rejection of the working model says that the intervals describe what this panel supports rather
-than a causal effect of mask orders. Across the sensitivity analyses $\hat\tau$ ranges from $-0.177$
-(shifting the order by one week) to $0.120$ ($w_1=1.0$), and the global search departs from M0 in
-five of them, selecting the boundary with the order lagged and with $\omega\times4$ and roots with
-$\hat\phi\le0.010$ for three values of $w_1$ (Web Table~\ref{tab:app-all}). The cases-averted
-recursion, finally, shows how the fitted counterfactual propagates over the first weeks: the
-standard error exceeds the point estimate by four weeks, the long-horizon recursion grows without a
-depletion bound, and the reported standard error targets the realised-path quantity of
+the test rejects the weekly working model, so we do not read the coefficient as the causal effect of
+mask orders. This is not evidence that the orders had no effect; it says that this panel, at this
+observation scale and under these identification restrictions, does not support that conclusion. Across the pre-specified sensitivity analyses the estimate keeps its sign and its wide interval,
+and where the global search selects a different root the profile reports the alternative with its
+criterion value (Web Table~\ref{tab:app-all}). The cases-averted recursion shows how the fitted
+counterfactual propagates over the first weeks; its standard error exceeds the point estimate by four
+weeks, and the reported standard error targets the realised-path quantity of
 Theorem~\ref{thm:psi} rather than the population total.
 
 \begin{figure}[!t]

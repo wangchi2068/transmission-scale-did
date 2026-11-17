@@ -47,24 +47,32 @@ data in which treatment responds to past outcomes, and
 \citet{bonvini2022mobility,holtz2020interdependence} examine the feedback between epidemic outcomes
 and policy without a renewal structure.
 
-This paper connects these two devices and proposes a difference-in-differences design on the
-transmission scale. Parallel trends are imposed on the log reproduction number of a renewal model
-in which a unit's infection pressure comprises a local part and a part imported from neighbours
-through a known network. The policy operates on the unit and on its neighbours, and adoption may
-depend on the entire observed past of all units, though not on current shocks. A quasi-differenced
-moment eliminates the unit effect, which delivers consistency for a fixed number of weeks under
-adoption feedback, and the week effects profile out in closed form, reducing the problem to a
-three-dimensional root search. Under stated cross-cluster dependence conditions, which exclude
-unmodelled same-week cross-cluster transmission, the moment contributions form a martingale
-difference array across weeks even though neighbouring clusters exchange infections; the ordinary
-cluster-robust sandwich therefore applies without a spatial correction. The same moments yield the
-pseudo-true values of the estimators in current use, separating the small-count and feedback
-components of two-step regressions and showing why Poisson fixed effects are inconsistent even under
-randomised adoption. When effects are heterogeneous, the constant-effect estimand assigns
-non-negative weights; when they build up after adoption, an event-time specification recovers them
-bin by bin. A further estimand counts the cases averted, propagating the counterfactual through the
-renewal equation and the network so that an infection prevented in one week also removes the
-infections it would have caused later and elsewhere.
+This paper asks a narrower question than how to estimate a reproduction-number curve and then
+regress it on policy. It asks when a panel of reported cases identifies a policy effect on the
+transmission scale directly, and what has to be true for that identification to hold. We put the
+local infection pressure and the imported pressure from neighbouring units into the renewal
+equation, quasi-difference the moment to remove county fixed effects, and build instruments from
+the observed past so that adoption may react to earlier cases. Two failure modes are then kept
+apart. In the first, the moments cannot reliably tell candidate parameter values apart within the
+sample, which the profile exposes and the selection rules address. In the second, the observation
+scale makes the working model itself false, and no estimator of that model carries a causal reading.
+The county mask-order application illustrates the distinction: a number can be computed, and it does
+not follow that the panel supports a causal interpretation of it.
+
+The contribution relative to existing work is therefore not the change of outcome variable. It is
+the set of conditions under which the feedback-allowing network moment is valid, the parameters it
+separates, and the diagnostics that say when it does not. Under stated cross-cluster dependence
+conditions, which exclude unmodelled same-week cross-cluster transmission, the moment contributions
+form a martingale difference array across weeks even though neighbouring clusters exchange
+infections, so the ordinary cluster-robust sandwich applies without a spatial correction, and the
+week effects profile out in closed form. The same moments yield the pseudo-true values of the
+estimators in current use, separating the small-count and feedback components of two-step
+regressions and showing why Poisson fixed effects are inconsistent even under randomised adoption.
+When effects are heterogeneous the constant-effect estimand assigns non-negative weights, and when
+they build up after adoption an event-time specification recovers them bin by bin. A further
+estimand counts the cases averted, propagating the counterfactual through the renewal equation and
+the network so that an infection prevented in one week also removes the infections it would have
+caused later and elsewhere.
 
 The simulation study fixes its design and success criteria before execution. It measures the
 estimator against those in current use under adoption feedback, spillover, overdispersion and small
@@ -75,4 +83,4 @@ suppressed. An application to state mask orders and county COVID-19 cases in the
 Section~\ref{s:methods} sets out the model, assumptions, estimator and theory;
 Section~\ref{s:simulation} reports the simulation; Section~\ref{s:application} the application; and
 Section~\ref{s:discussion} delineates the range of the design. Proofs, numerical checks,
-supplementary results and the data appendix appear in Web Appendices~A--D.
+supplementary results, the data appendix and the few-cluster check appear in Web Appendices~A--E.

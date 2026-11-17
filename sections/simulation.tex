@@ -165,8 +165,10 @@ $-0.037$ (MCSE 0.002) with coverage 0.913, against 0.019 (MCSE 0.006) and 0.961 
 the two arms also switch exposure in different fractions of units over that sub-window, 0.301 and
 0.665, so this comparison is indicative rather than a controlled contrast. A weekly estimator therefore carries a bias of roughly a tenth
 of the true effect or more when the same-week share is large, and none of the diagnostics reported
-here reveals it. The application accordingly treats the same-week share as a measured input: at
-30\%, the reported policy effects may carry a bias of that order.
+here reveals it. The 30\% calibration is a stress test rather than a threshold of the design:
+the share to compare against is the one implied by the generation interval in a given application,
+and when that share is substantial the estimate needs the sub-weekly treatment of Section~
+\ref{ss:weekwithin}.
 
 \input{tables/table_1_core_tau}
 

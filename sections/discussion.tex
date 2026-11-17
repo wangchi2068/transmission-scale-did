@@ -31,14 +31,18 @@ consistent one; the simulation also shows that Wald intervals remain unreliable 
 correct root, so intervals robust to weak identification \citep{andrews2012identification} are the
 natural companion to the profile in that region rather than a refinement.
 
-Two limitations delimit the range of the design, and both are measurable before the estimator is
-applied. The first is the observation unit. The renewal equation is written in completed weeks, so
-transmission that occurs inside a week cannot enter the model; Section~\ref{ss:sameweek} shows that
-when 30\% of transmission is inside the week the policy-level sum carries a bias of roughly a sixth
-of the effect, the $J$ test does not detect it, and a shorter window does not remove it. The
-same-week share is therefore the first quantity to assemble from the generation interval, and when
-it is large the estimator needs a sub-weekly generating mechanism. The second is the cluster
-structure. The application has 49 state clusters, about 24 of which contain a county that switches
+The range of the design is governed by two quantities that can be measured before the estimator is
+applied, and neither is the coupling coefficient itself. The first is whether the data separate
+local from imported infection pressure on the transmission scale: a positive coupling is not enough,
+because it has to carry independent variation once the neighbour term and the policy share are
+projected out, which is what the profile over $\phi$ shows for a given panel. The second is how
+sensitive the weekly aggregation is to transmission inside the week. The renewal equation is written
+in completed weeks, so transmission that occurs inside a week cannot enter the model;
+Section~\ref{ss:sameweek} shows that in a stress-test design with 30\% of transmission inside the
+week the policy-level sum carries a bias of roughly a sixth of the effect, the $J$ test does not
+detect it, and a shorter window does not remove it. That figure is a calibration, not a threshold:
+the share to compare against is the one implied by the generation interval in a given application,
+and when it is substantial the estimator needs a sub-weekly generating mechanism. A third, less tractable obstacle is the cluster structure. The application has 49 state clusters, about 24 of which contain a county that switches
 exposure in the window, and the simulations use equal-sized clusters; the small-sample corrections
 of cluster-robust inference \citep{imbens2016robust} and, beyond them, randomization inference are
 the appropriate companions when the number of treated clusters is small.
