@@ -2,6 +2,7 @@
 % Included from sections/appendix.tex after Web Appendix A.8.
 
 \subsection{A.9 What standard estimators estimate under feedback}
+\setreflabel{A.9}
 \label{ss:bias}
 
 Parts (a)--(c) take $\kappa_0=\phi_0=0$ and the pressure $\Lambda_{it}=L_{it}+\omega_i$ as
@@ -167,6 +168,7 @@ log-transmission paths after adoption are not testable.
 \end{remark}
 
 \subsection{A.12 Transmission within a week and assumption A4}
+\setreflabel{A.12}
 \label{ss:weekwithin}
 
 A4 states that, conditionally on the history, outcomes are independent across clusters within a
@@ -188,8 +190,9 @@ moments need not be martingale differences, so neither the consistency argument 
 cluster-robust sandwich follows without additional conditions. The direction and magnitude of
 parameter and variance distortions are not determined by the weekly model alone. In the application,
 about 30\% of transmission is assigned to the same week under the assumed generation-interval
-conversion. A matched simulation reported in Section~\ref{ss:sameweek} generates such data and
-aggregates it to weeks; there the weekly estimator is biased by roughly 15\% of the true effect,
+conversion. A matched simulation reported in Section~\ref{ss:sameweek} generates within-week
+own-unit renewal ($w_0=0.3$, 14.5\% nonlinear within-week re-infection share) and aggregates it to
+weeks; there the weekly estimator is biased by roughly 15\% of the true effect,
 coverage falls to 0.89 for $\tau$ and 0.78 for $\tau+\kappa$, and the $J$ test does not detect
 the misspecification.
 

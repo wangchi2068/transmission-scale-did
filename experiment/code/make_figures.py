@@ -214,6 +214,19 @@ def fig_application(res):
     if not app or not app.get("table"):
         return None
     rows = [r for r in app["table"] if r.get("tau") is not None and r.get("figure", True)]
+    # Prepend the policy-level total tau+kappa for the main M0 specification so Figure 3(a) shows
+    # the estimand matched to the state-level order alongside direct tau estimates.
+    m0_main = next((r for r in rows if r["analysis"] == "main" and r["method"] == "M0"), None)
+    if m0_main and m0_main.get("tau_plus_kappa") is not None:
+        tot_row = dict(
+            analysis="main (tau+kappa)",
+            method="M0",
+            tau=m0_main["tau_plus_kappa"],
+            tau_lo=m0_main["tau_plus_kappa_lo"],
+            tau_hi=m0_main["tau_plus_kappa_hi"],
+            _is_total=True,
+        )
+        rows = [tot_row] + rows
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 0.35 * len(rows) + 1.4), constrained_layout=True,
                              gridspec_kw=dict(width_ratios=[1.4, 1]))
     ax = axes[0]
@@ -231,20 +244,21 @@ def fig_application(res):
     for yy, r in zip(y, rows):
         m = r["method"]
         lo, hi = r.get("tau_lo"), r.get("tau_hi")
-        c = COL.get(m, PALETTE["neutral_mid"])
+        c = PALETTE["neutral_black"] if r.get("_is_total") else COL.get(m, PALETTE["neutral_mid"])
+        mk = "D" if r.get("_is_total") else MARK.get(m, "o")
         if lo is not None and hi is not None:
-            ax.plot([max(lo, xl), min(hi, xh)], [yy, yy], color=c, lw=1.0)
+            ax.plot([max(lo, xl), min(hi, xh)], [yy, yy], color=c, lw=1.3 if r.get("_is_total") else 1.0)
             if lo < xl:
                 ax.plot(xl, yy, "<", color=c, ms=4, mfc="none")
             if hi > xh:
                 ax.plot(xh, yy, ">", color=c, ms=4, mfc="none")
-        ax.plot(r["tau"], yy, MARK.get(m, "o"), color=c, ms=4)
+        ax.plot(r["tau"], yy, mk, color=c, ms=4.5 if r.get("_is_total") else 4)
     ax.set_xlim(xl, xh)
     ax.axvline(0, color=PALETTE["neutral_dark"], lw=0.6)
     ax.set_yticks(y)
     ax.set_yticklabels(["%s: %s" % (LAB.get(r["method"], r["method"]), r["analysis"].replace("_", " "))
                         for r in rows], fontsize=7)
-    ax.set_xlabel("(a) tau (log rate ratio), 95% CI")
+    ax.set_xlabel("(a) Estimate (log rate ratio), 95% CI")
     ax = axes[1]
     prof = app.get("profile") or {}
     if prof.get("phi"):

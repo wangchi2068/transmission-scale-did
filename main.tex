@@ -1,11 +1,10 @@
 % =================================================================
 % Manuscript prepared with the official Biometrics class (biom.cls,
 % referee option as required for submission) and biom.bst.
-% Compile with XeLaTeX (see compile.sh): fontspec selects Times New Roman.
+% Compile with XeLaTeX: fontspec selects Times New Roman.
 % =================================================================
-% The referee option loads endfloat; floats are kept in the text so that each figure and table
-% appears near its first citation and References is the final block.
-\PassOptionsToPackage{disable}{endfloat}
+% Under the referee option, endfloat places Tables and Figures after References
+% (excluded from the Biometrics 25-page main-text + references limit).
 \documentclass[useAMS,usenatbib,referee]{biom}
 \usepackage{iftex}
 \ifXeTeX\else
@@ -43,6 +42,8 @@
 \setlength{\paperwidth}{8.5in}
 \setlength{\paperheight}{11in}
 \usepackage[hidelinks,unicode=true]{hyperref}
+\usepackage{xr}
+\externaldocument[][nocite]{supporting_information}
 \urlstyle{same}
 \usepackage{caption}
 \usepackage{placeins}
@@ -98,6 +99,9 @@
 \@ifundefined{corollary}{\newtheorem{corollary}{Corollary}}{}
 \@ifundefined{remark}{\newtheorem{remark}{Remark}}{}
 \@ifundefined{proposition}{\newtheorem{proposition}{Proposition}}{}
+% Helper to set \@currentlabel for unnumbered/starred appendix sections and subsections
+% (biom.cls sets secnumdepth=0 inside \appendix and prepends "Appendix " to \section).
+\newcommand{\setreflabel}[1]{\protected@edef\@currentlabel{#1}}
 \makeatother
 \providecommand{\E}{\mathbb{E}}
 \providecommand{\F}{\mathcal{F}}
@@ -122,10 +126,8 @@
 \input{sections/application}
 \input{sections/discussion}
 \input{sections/backmatter}
-\input{sections/appendix}
 
-% Drain every queued float, then start References on a new page.
-\FloatBarrier
+% References (included in the 25-page Biometrics count; endfloat places Tables and Figures after References).
 \clearpage
 \bibliographystyle{biom}
 \bibliography{bibliography}

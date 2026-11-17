@@ -1,0 +1,116 @@
+% =================================================================
+% Web-based Supporting Information (Web Appendices A-E) for Biometrics
+% Compile after main.tex so cross-references resolve via xr.
+% =================================================================
+\PassOptionsToPackage{disable}{endfloat}
+\documentclass[useAMS,usenatbib,referee]{biom}
+\usepackage{iftex}
+\ifXeTeX\else
+  \PackageError{supporting_information}{XeLaTeX is required}{Run xelatex; Times New Roman is loaded through fontspec.}
+\fi
+\usepackage{fontspec}
+\IfFontExistsTF{Times New Roman}{
+  \setmainfont{Times New Roman}
+}{
+  \IfFileExists{fonts/times.ttf}{
+    \setmainfont{Times New Roman}[Path=fonts/,Extension=.ttf,UprightFont=times,BoldFont=timesbd,ItalicFont=timesi,BoldItalicFont=timesbi]
+  }{
+    \PackageError{supporting_information}{Times New Roman is not available}{Install Times New Roman or place times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf in fonts/.}
+  }
+}
+\usepackage{amsmath,amssymb}
+\usepackage[math-style=TeX,bold-style=TeX]{unicode-math}
+\setmathfont{Latin Modern Math}
+\setmathfont{XITS Math}[range={\mathcal,\mathscr}]
+\usepackage{graphicx}
+\usepackage{etoolbox}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xurl}
+\setlength{\paperwidth}{8.5in}
+\setlength{\paperheight}{11in}
+\usepackage[hidelinks,unicode=true]{hyperref}
+\usepackage{xr}
+\externaldocument[][nocite]{main}
+\urlstyle{same}
+\usepackage{caption}
+\usepackage{placeins}
+\captionsetup{
+  font=small,
+  labelfont=normalfont,
+  textfont=normalfont,
+  labelsep=period,
+  justification=justified,
+  singlelinecheck=true,
+  skip=6pt
+}
+\setlength{\textfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setcounter{topnumber}{5}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{8}
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.70}
+
+\makeatletter
+\def\ps@headings{\let\@mkboth\markboth
+ \def\@oddhead{\Large\hfill{\small\it\@shorttitle}\hfill\hspace{1.5em}%
+   \rm\@ddell\hbox to 0pt{\small\thepage\hss}}
+ \def\@oddfoot{}%
+ \def\@evenhead{\Large\@ddell\hbox to
+ 0pt{\small\thepage\hss}\hspace{1.5em}\hfill\small{\it Biometrics Supporting Information}\hfill}
+ \def\@evenfoot{}%
+ \def\sectionmark##1{\markboth{##1}{}}
+ \def\subsectionmark##1{\markright{##1}}}
+\makeatother
+\pagestyle{headings}
+\setlength{\emergencystretch}{2em}
+\addtolength{\topmargin}{-11pt}
+\setlength{\headheight}{25pt}
+
+\makeatletter
+\newcommand{\webfloats}{%
+  \patchcmd{\fnum@figure}{Figure}{Web Figure}{}{}%
+  \patchcmd{\fnum@table}{Table}{Web Table}{}{}}
+\@ifundefined{theorem}{\newtheorem{theorem}{Theorem}}{}
+\@ifundefined{lemma}{\newtheorem{lemma}{Lemma}}{}
+\@ifundefined{corollary}{\newtheorem{corollary}{Corollary}}{}
+\@ifundefined{remark}{\newtheorem{remark}{Remark}}{}
+\@ifundefined{proposition}{\newtheorem{proposition}{Proposition}}{}
+\newcommand{\setreflabel}[1]{\protected@edef\@currentlabel{#1}}
+\makeatother
+\providecommand{\E}{\mathbb{E}}
+\providecommand{\F}{\mathcal{F}}
+\providecommand{\ind}{\mathbf{1}}
+\providecommand{\Sw}{\mathrm{Sw}}
+\providecommand{\cov}{\operatorname{Cov}}
+\providecommand{\plim}{\operatorname*{plim}}
+
+\title[Supporting Information: DiD on the transmission scale]{Web-based Supporting Information for ``Difference-in-differences on the transmission scale: sequential moment estimation of policy effects on the reproduction number under feedback and spatial contagion''}
+
+\begin{document}
+\normalfont\mdseries
+\noindent{\bf\large Web-based Supporting Information for ``Difference-in-differences on the transmission scale: sequential moment estimation of policy effects on the reproduction number under feedback and spatial contagion''}
+\par\medskip
+\noindent\rule{\linewidth}{0.4pt}
+\par\medskip
+
+% Continue theorem-like numbering from the main manuscript
+\setcounter{theorem}{2}
+\setcounter{proposition}{2}
+\setcounter{remark}{1}
+\setcounter{corollary}{1}
+
+\input{sections/appendix}
+
+\FloatBarrier
+\clearpage
+\bibliographystyle{biom}
+\bibliography{bibliography}
+
+\end{document}

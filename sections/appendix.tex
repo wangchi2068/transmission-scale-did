@@ -1,7 +1,8 @@
 \appendix
 \setcounter{lemma}{2}
 
-\section{Web Appendix A: Regularity conditions and proofs}
+\section*{Web Appendix A: Regularity conditions and proofs}
+\setreflabel{A}
 \label{app:proofs}
 
 \subsection{A.1 Regularity conditions}
@@ -10,6 +11,16 @@ Throughout, $T$, $S$ and the cluster sizes are bounded, $G\to\infty$, and $C$ de
 finite constant. $\|\cdot\|$ is the Euclidean or Frobenius norm.
 
 \begin{description}
+\item[A4$'$ (local dependence).] Let $\mathcal C$ be the graph on clusters in which $g$ and $h$
+are adjacent if $W_{ij}>0$ for some $i\in g$, $j\in h$, or if the policy rule of $g$ uses data
+from $h$; its maximal degree is bounded. (i) The cluster primitives (unit effects and pre-sample
+outcomes, weekly outcome innovations, weekly policy randomisation) are independent across
+clusters, and the week-$t$ outcome innovations are independent of all primitives dated before
+week $t$ and of the week-$t$ policy randomisation. (ii) $D_{gt}$ is a measurable function of the
+week-$t$ policy randomisation of $g$ and of the histories before week $t$ of clusters within
+distance $\rho$ of $g$ in $\mathcal C$; $Y_{gt}$ is a measurable function of the week-$t$ innovation
+and unit effects of $g$ and of the outcomes before week $t$ and the week-$t$ policies of $g$ and
+of the clusters adjacent to $g$.
 \item[A6(i)] $\Theta=\Delta\times\mathcal B$ is compact, $\mathcal B\subset\mathbb R^2\times[0,\bar\Phi]$,
 and $\theta_0$ is an interior point.
 \item[A6(ii)] For all $i,t$: $\E\sup_\theta\|z_{it}\|^4|Y_{i,t+1}r_{it}(\theta)|^4\le C$,
@@ -152,13 +163,15 @@ Theorem~\ref{thm:asy} hold with $z(\hat\eta)$ and the same $V$ as with $z(\eta^*
 \end{lemma}
 
 \begin{proof}
-By the mean-value theorem, the difference is
+Applying the mean-value theorem row-wise to $z_{it}(\eta)$ around $\eta^*$ gives
 \begin{equation*}
-\Bigl\{G^{-1}\sum_g\sum_{i\in g,t}u_{it}(\theta_0)\,\partial z_{it}(\bar\eta)/\partial\eta^{\top}\Bigr\}\sqrt G(\hat\eta-\eta^*).
+\Bigl\{G^{-1}\sum_g\sum_{i\in g,t}u_{it}(\theta_0)\,\partial z_{it}(\bar\eta)/\partial\eta^{\top}\Bigr\}\sqrt G(\hat\eta-\eta^*),
 \end{equation*}
+where $\partial z_{it}(\bar\eta)/\partial\eta^{\top}$ denotes the matrix whose $k$th row is evaluated
+at an intermediate point $\bar\eta^{(k)}$ between $\eta^*$ and $\hat\eta$.
 At $\eta^*$, the bracket has mean zero because $\partial z_{it}(\eta^*)/\partial\eta$ is
-$\F_{t-1}$-measurable and $\E(u_{it}\mid\F_{t-1})=0$. It is $o_p(1)$ by (L). Replacing $\eta^*$ by $\bar\eta$
-changes the bracket by at most $\|\bar\eta-\eta^*\|\,G^{-1}\sum_g\sup_\eta\|\partial^2z/\partial\eta\partial\eta^{\top}\|\,|u|=o_p(1)$.
+$\F_{t-1}$-measurable and $\E(u_{it}\mid\F_{t-1})=0$. It is $o_p(1)$ by (L). Replacing $\eta^*$ by the row-wise intermediate points
+changes each row of the bracket by at most $\|\hat\eta-\eta^*\|\,G^{-1}\sum_g\sup_\eta\|\partial^2z/\partial\eta\partial\eta^{\top}\|\,|u|=o_p(1)$.
 The Jacobian and $\Omega$ estimators converge to the same limits by continuity in $\eta$.
 \end{proof}
 
@@ -315,11 +328,20 @@ $R_{is}$, gives the representation. For $T=2$, conditioning on $Y_{i1}+Y_{i2}$ s
 for the week-2 effect of group $d$ is
 $\sum_i\ind(D_{i2}=d)(Y_{i2}\Lambda_{i1}-Y_{i1}e^{h}\Lambda_{i2})/(\Lambda_{i1}+e^h\Lambda_{i2})$. Taking the
 conditional expectation of $Y_{i2}$ given $\F_1$, which contains $Y_{i1}$, $\Lambda_{i2}$ and $D_{i2}$,
-yields \eqref{eq:t2fe}. At $h=h_0+\tau_0d$, the left side of \eqref{eq:t2fe} equals
-$-e^h\E[\ind(D_{i2}=d)\cov\{f_h(Y_{i1}),Y_{i1}\mid\alpha_i,\Lambda_{i1},D_{i2}\}]$ with
-$f_h(y)=(y+\omega_i)/\{\Lambda_{i1}+e^h(y+\omega_i)\}$ strictly increasing, which is strictly negative
-when $Y_{i1}$ is non-degenerate. Under randomisation $D_{i2}$ is independent of $Y_{i1}$, but $f_h$
-depends on $h$, so the two group-specific distortions differ.
+yields \eqref{eq:t2fe}. Setting $\mu_{i1}=\Lambda_{i1}e^{\alpha_i}$ and
+$f_h(y)=(y+\omega_i)/\{\Lambda_{i1}+e^h(y+\omega_i)\}$ (strictly increasing in $y$), at
+$h=h_0+\tau_0 d$ the left side of \eqref{eq:t2fe} equals
+$-e^h\E\{\ind(D_{i2}=d)f_h(Y_{i1})(Y_{i1}-\mu_{i1})\}$. Conditioning on $(\alpha_i,\Lambda_{i1},D_{i2})$
+decomposes the inner conditional expectation into
+$\cov\{f_h(Y_{i1}),Y_{i1}\mid\alpha_i,\Lambda_{i1},D_{i2}\}
++\E\{f_h(Y_{i1})\mid\alpha_i,\Lambda_{i1},D_{i2}\}\{\E(Y_{i1}\mid\alpha_i,\Lambda_{i1},D_{i2})-\mu_{i1}\}$.
+Under randomisation, $D_{i2}$ is independent of $Y_{i1}$ given $(\alpha_i,\Lambda_{i1})$, so the
+second term vanishes and the left side is strictly negative for both $d\in\{0,1\}$ when $Y_{i1}$ is
+non-degenerate; because $f_h$ depends on $h$, the two group-specific distortions differ and
+$\tilde h_1-\tilde h_0\ne\tau_0$. Under feedback adoption (when $D_{i2}$ increases with $Y_{i1}$),
+the second term reinforces the negative sign for $d=1$ (pushing $\tilde h_1<h_0+\tau_0$) while
+taking the opposite sign for $d=0$ (and can make the left side positive, pushing $\tilde h_0>h_0$),
+which widens the downward distortion in $\tilde h_1-\tilde h_0$.
 
 (c) $\log(Y_{it}+1)=\alpha_i+\gamma_t+\tau_0D_{it}+\log\Lambda_{it}-b^{(1)}_{it}+\eta^{(1)}_{it}$; apply
 two-way demeaning as in (a).
@@ -344,10 +366,14 @@ Include $\tau_i$ in the unit heterogeneity, so that $\F_t$ contains $(\alpha_i,\
 then holds with $\mu_{it}=e^{\alpha_i+\gamma_t+\tau_iD_{it}+\kappa_0\bar D_{it}}\Lambda_{it}(\phi_0)$. As in the
 proof of Theorem~\ref{thm:ident}(b), $h(\tau)=-\sum_tA_tC_t(\tau)/\{M_t+C_t(\tau)\}$ with
 $C_t(\tau)=\lim G^{-1}\E\sum_is_{it}\mu_{it}\Sw_{i,t+1}(e^{\tau_i-\tau}-1)$, which is strictly decreasing in
-$\tau$ when $K_t>0$. Hence $h$ is strictly increasing. If $\tau$ is below every $\tau_i$ in the stated
-support, all $C_t>0$ and $h<0$; if it is above, all $C_t<0$ and $h>0$. Note that $M_t+C_t>0$
-because treated units and switchers are disjoint, so $A_t\le M_t-K_t$. Continuity and the
-intermediate value theorem give a unique root inside the convex hull. To first order,
+$\tau$ when $K_t>0$. Hence $h$ is strictly increasing. Note that $M_t+C_t(\tau)>0$
+because treated units and switchers are disjoint, so $A_t\le M_t-K_t$. If $\tau_i$ has bounded
+support $[a,b]$, then $h(\tau)<0$ for $\tau<a$ and $h(\tau)>0$ for $\tau>b$; if the support is
+unbounded (e.g.\ Gaussian as in scenario X3) and $\E(s_{it}\mu_{it}\Sw_{i,t+1}e^{\tau_i})<\infty$,
+dominated and monotone convergence give $\lim_{\tau\to-\infty}C_t(\tau)=+\infty$ and
+$\lim_{\tau\to+\infty}C_t(\tau)=-K_t$ whenever $K_t>0$, so $\lim_{\tau\to-\infty}h(\tau)=-\sum_tA_t<0$
+and $\lim_{\tau\to+\infty}h(\tau)=\sum_t A_tK_t/(M_t-K_t)>0$ (with $M_t>K_t$ when $A_t>0$). Continuity and the
+intermediate value theorem give a unique root inside the closed convex hull of the support. To first order,
 $C_t(\tau)\approx H_t-\tau K_t$ with $H_t=\lim G^{-1}\E\sum_is_{it}\mu_{it}\Sw_{i,t+1}\tau_i$, and
 $C_t/(M_t+C_t)\approx C_t/M_t$. Solving $\sum_t(A_t/M_t)(H_t-\tau K_t)=0$ gives the stated weighted
 average, with weights $(A_t/M_t)s_{it}\mu_{it}\Sw_{i,t+1}\ge0$.
@@ -376,17 +402,18 @@ of $\hat\theta$. The result follows from Theorem~\ref{thm:asy}(b) and Slutsky's 
 
 \input{sections/appendix_moved}
 
-\section{Web Appendix B: Numerical checks}
+\section*{Web Appendix B: Numerical checks}
+\setreflabel{B}
 \label{app:numeric}
 
 The script \texttt{numeric\_checks.py} (supplementary code, \texttt{experiment/theory/}) verifies the
 numerically checkable steps; seeds are fixed and the script is self-contained. It covers the
-quasi-difference identity of Lemma~\ref{lem:mds} (S1), the closed-form profiling \eqref{eq:profile}
-(S3), the expansion of $b_{it}$ (S4), the working-variance identity $r_{it}{}^2\mu_{i,t+1}=r_{it}\mu_{it}$
-behind Remark~\ref{rem:optimal} (S5), the non-negative heterogeneity weights of
-Proposition~\ref{prop:hetero} (S7), and equation \eqref{eq:t2fe} for $T=2$ (S8); the Jacobian
+martingale decomposition identity of Lemma~\ref{lem:mds} (S1), the closed-form profiling \eqref{eq:profile}
+solving all $T-1$ week-effect moments (S3), the expansion of $b_{it}$ (S4), the working-variance identity $r_{it}{}^2\mu_{i,t+1}=r_{it}\mu_{it}$
+and Poisson conditional variance behind Remark~\ref{rem:optimal} (S5), the heterogeneous-effect root and non-negative weights of
+Proposition~\ref{prop:hetero} (S7), and equation \eqref{eq:t2fe} for $T=2$ under both randomised and threshold feedback adoption (S8); the Jacobian
 \eqref{eq:jac} (S2) and the symbols of the proofs are checked analytically rather than numerically.
-All checks pass. The expansion of $b_{it}$ is accurate for $\mu_{it}\ge5$; at $\mu_{it}=2$,
+All eight checks pass. The expansion of $b_{it}$ is accurate for $\mu_{it}\ge5$; at $\mu_{it}=2$,
 $k=10$, $c=0.5$ the exact value of $\E\log(Y+c)-\log\mu$ is $-0.00556$ against $-0.025$ from the
 expansion.
 
@@ -422,18 +449,25 @@ $20\times200{,}000$ units were $-0.5233$ and $-0.2266$ (MCSE 0.0004). For Theore
 between $\E\nu$ and $\E Y(\mathbf 0)$ was 0.00229 (largest weekly $|z|=1.86$), against $-0.8449$
 for naive rescaling.
 
-\section{Web Appendix C: Supplementary simulation results}
+\section*{Web Appendix C: Supplementary simulation results}
+\setreflabel{C}
 \label{app:supp}
 \webfloats
 
 This appendix collects the simulation results referred to in Section~\ref{ss:simresults} as Web
-Tables and Web Figures. Web Table~\ref{tab:sim-m0-full} gives the full performance measures of M0
+Tables and Web Figures. The global root search M0-G evaluates the profiled $\phi$-equation on the
+19-point grid
+$\phi\in\{0,0.02,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5,0.6,0.7,0.8,1,1.25,1.5,2,2.5,3\}$.
+Web Table~\ref{tab:sim-m0-full} gives the full performance measures of M0
 for $\tau$ in all 25 scenarios. Web Table~\ref{tab:sim-core-spill} and Web
 Figures~\ref{fig:core-phi} and \ref{fig:core-kappa} report the spillover parameters in the core
 scenarios. Web Table~\ref{tab:sim-null} and Web Figure~\ref{fig:null} report type I error, Web
 Table~\ref{tab:sim-roots} the root diagnostics, Web Table~\ref{tab:sim-misspec} and Web
 Figure~\ref{fig:misspec} the misspecification block, and Web Table~\ref{tab:sim-psi} inference for
-cases averted. All results use $R=8000$ replications per scenario.
+cases averted. All results use $R=8000$ replications per scenario. In the matched same-week
+transmission experiment of Section~\ref{ss:sameweek} ($R=1000$), re-estimating on window weeks 4
+to 12 leaves bias at $-0.037$ (MCSE 0.002) with coverage 0.913, against 0.019 (MCSE 0.006) and
+0.961 in the benchmark arm (switching fractions 0.301 and 0.665 over that sub-window).
 
 \begin{figure}[!t]
 \centering
@@ -455,7 +489,7 @@ panel (a) and interval coverage in panel (b), and $\pm2$ Monte Carlo standard er
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_06_null_typeI.png}
+\includegraphics[width=0.93\linewidth]{figures/fig_06_null_typeI.png}
 \caption{Type I error in the null block (scenarios 17--20), measured as the rejection rate of $H_0\colon\tau=0$ by
 the 5\%-level $t_{G-1}$ test, by scenario and method. The horizontal line marks the nominal level, and
 error bars are $\pm2$ Monte Carlo standard errors.}
@@ -464,7 +498,7 @@ error bars are $\pm2$ Monte Carlo standard errors.}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_07_misspec.png}
+\includegraphics[width=0.93\linewidth]{figures/fig_07_misspec.png}
 \caption{Misspecification block (scenarios X1--X5). (a) Bias of $\hat\tau$ by method, with $\pm2$
 Monte Carlo standard errors. (b) Scenario X5, with effects growing with time since adoption, shows mean M0-ET
 event-time estimates ($\pm2$ Monte Carlo standard errors) against the generating effects and the
@@ -485,6 +519,7 @@ constant-effect M0 estimate.}
 \input{tables/table_5_psi}
 
 \subsubsection{Validation of the root-selection rules on independent designs}
+\setreflabel{C.1}
 \label{app:rsel}
 
 \input{tables/table_10_rsel}
@@ -507,11 +542,14 @@ outweighs the correction. At $\phi_0=0.10$ the two rules differ by at most 0.013
 adoption, but the random-adoption cell gives 0.965 for M0 against 0.898 for M0-GI; at
 $\phi_0=0.15$ they differ by 0.001.
 
-The bottom of the profile is not only a root-selection problem. In the boundary cells even the
-oracle estimator, which is evaluated at the true parameter, under-covers at $T=26$ with random
-adoption, so the Wald interval itself is unreliable when $\phi_0$ is at or near zero. The
-selection rules can recover the consistent root; they cannot repair that. The $G=20$ and $G=100$
-rows also double $N$, so they do not isolate the effect of the number of clusters.
+The bottom of the profile is not only a root-selection problem. In the boundary cells the
+unweighted Poisson QMLE oracle (which fixes only $\alpha_i$ and estimates $(\gamma,\tau,\kappa,\phi)$)
+under-covers at $T=26$ with random adoption due to extreme single-cluster count concentration, and
+even for QD-GMM, Wald intervals near $\phi_0=0$ remain sensitive to flat profiles and boundary
+curvature. The selection rules can recover the consistent root; they cannot repair boundary
+non-normality, and because M0-GI also overrides single-root profiles whenever $\phi=0$ yields a
+lower $Q$, it loses coverage at $\phi_0=0.05$. The $G=20$ and $G=100$ rows also double $N$, so they
+do not isolate the effect of the number of clusters.
 
 The rules are therefore not a uniform improvement on M0. They help when the profile has multiple
 roots, which in these designs happens when $\phi_0$ is at or very near the boundary; they cost
@@ -524,13 +562,10 @@ previous subsection does not extend beyond the design that motivated it.
 
 
 \input{tables/table_7b_application_sensitivity}
-\webfloats
 
-\section{Web Appendix D: Data sources and cleaning}
-\begingroup
-\renewcommand{\thesection}{D}
+\section*{Web Appendix D: Data sources and cleaning}
+\setreflabel{D}
 \label{app:data}
-\endgroup
 
 
 The application uses six public files (five data files and the ACS commuting table). Each is stored with a SHA-256 checksum in
@@ -563,34 +598,45 @@ preceding weeks used only to build the lagged pressure. No unit is dropped on th
 outcome data; counties without reported cases in a week enter with a zero count.
 
 
-\section{Web Appendix E: Few-cluster inference for the application}
+\section*{Web Appendix E: Few-cluster inference for the application}
+\setreflabel{E}
 \label{app:fewcluster}
 
-The application has 49 state clusters, about 24 of which contain a county that switches exposure,
+The application has 49 state clusters, 24 of which contain a county that switches exposure,
 and the cluster sizes range from 1 to 254 counties. The $t_{48}$ intervals of Table~\ref{tab:app}
-treat the clusters as asymptotically many. This appendix reports two checks for that assumption,
-both implemented in \texttt{verification/application/wild\_bootstrap.py}.
+treat the clusters as asymptotically many. This appendix reports three checks for that assumption,
+implemented in \texttt{verification/application/wild\_bootstrap.py}.
 
 \emph{Delete-one-state jackknife.} Each state is removed in turn, the adjacency matrix is rebuilt on
 the remaining counties with row normalisation, the lagged pressure is recomputed, and M0 is refitted
-from the full-sample estimate as the starting value. All 49 refits converge to the interior root with
-$\hat\phi$ between 0.70 and 0.79. The jackknife standard error, $\sqrt{(G-1)G^{-1}\sum_g(\tilde\theta_{(g)}-\bar{\tilde\theta})^2}$
+from the full-sample estimate as the starting value. All 49 refits converge to the interior root.
+The jackknife standard error, $\sqrt{(G-1)G^{-1}\sum_g(\tilde\theta_{(g)}-\bar{\tilde\theta})^2}$
 with $\tilde\theta_{(g)}$ the deviation of the $g$-th delete-one estimate from the full-sample one, is
 0.166 for $\tau$, 0.289 for $\kappa$ and 0.105 for $\phi$, against sandwich standard errors of
 0.128, 0.255 and 0.091. The jackknife is larger because removing Texas alone takes 254 of the 3091
 counties, so a delete-one draw is not a small perturbation of the cluster population.
 
-\emph{Wild cluster bootstrap-t.} For $b=1,\dots,999$ a Rademacher weight $w_g\in\{-1,+1\}$ is drawn
-for each state, and the draw of the estimate is $\Delta_b=\sum_g w_g\tilde\theta_{(g)}/G$. The
-studentised statistic $\Delta_b/\hat\sigma_{\Delta}$ uses the variance of the weighted deviations,
-and the critical value is the 0.95 quantile of its absolute value. The critical values are 1.967 for
-$\tau$, 1.915 for $\kappa$ and 1.792 for $\phi$, all below the $t_{48}$ value of 2.011, so the
-conventional interval is mildly conservative for this panel rather than anti-conservative. For the
-policy-level sum the critical value is 1.735 and the interval is $-1.006$ to $0.073$, which contains
-zero as the $t_{48}$ interval does.
+\emph{Score wild cluster bootstrap-t.} Following \citet{kline2012score}, for $b=1,\dots,999$ we draw
+independent Mammen two-point weights $w_g$ (mean $0$, variance $1$, $w_g^2\ne 1$) for the 49
+cluster influence vectors $\hat\varphi_g=-\hat\Gamma^{-1}g_g(\hat\theta)$ from the full-sample
+sandwich, compute $\Delta_b=G^{-1}\sum_g w_g\hat\varphi_g$ and its recentered bootstrap variance
+$\{G(G-1)\}^{-1}\sum_g(w_g\hat\varphi_g-\Delta_b)^2$, and form the 0.95 quantile of the studentised
+statistic. The resulting critical values are 1.941 for $\tau$, 1.775 for $\kappa$, 1.925 for
+$\phi$ and 1.716 for $\tau+\kappa$ (giving policy-level interval $-0.999$ to $0.067$; Webb 6-point
+weights give 2.006, 1.766, 1.900 and 1.657). Because this linearised score check holds
+$\hat\Gamma$ fixed, it omits cluster-level Jacobian variability.
 
-The bootstrap treats the delete-one deviations as the sampling units; it does not model the
-state-size heterogeneity beyond the weights that the deviations already carry, and it is not
-validated by a simulation with known coverage. It is reported as a check that the conclusion about
-the policy-level sum is insensitive to the number of clusters, not as a replacement for the
+\emph{Pairs cluster bootstrap-t on cluster moments.} Because Lemma~\ref{lem:mds} renders the
+cluster moment contributions $g_g(\theta_0)$ mutually uncorrelated across states under A4, we draw
+$B=999$ multinomial cluster weight vectors $m\sim\mathrm{Multinomial}(49;1/49,\dots,1/49)$,
+re-solve $\sum_g m_g g_g(\hat\theta^*_b)=0$ (preserving the county network $W$ and lagged pressures),
+and recompute the cluster-weighted sandwich $\hat V^*_b$ in every draw (999/999 converge). Including
+both score and Jacobian variability across unequal states yields critical values of 1.594 for
+$\tau$, 2.220 for $\kappa$, 2.439 for $\phi$ and 2.778 for $\tau+\kappa$; the policy-level
+interval widens to $-1.330$ to $0.397$, reinforcing the conclusion that the panel cannot rule out
+either zero or a sizable reduction.
+
+None of these checks models the cluster-size heterogeneity beyond the cluster weights themselves,
+and they are not validated by coverage simulations; they are reported to assess the sensitivity of
+the policy-level conclusion to the 49-cluster structure rather than as replacements for the
 $t_{48}$ intervals.

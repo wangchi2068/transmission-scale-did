@@ -7,17 +7,11 @@ Units $i=1,\dots,N$ (counties) are partitioned into $G$ clusters (states); $g(i)
 cluster of unit $i$ and the cluster sizes $n_g$ are bounded. Weeks are indexed by
 $t=1-S,\dots,T$; weeks $1,\dots,T$ form the estimation window and the $S$ earlier weeks are
 used only to build lags. $Y_{it}$ denotes reported new cases and $D_{it}\in\{0,1\}$ the policy,
-with $D_{it}=0$ for $t\le 0$. The matrix $W=(W_{ij})$ is a known, non-negative, row-normalised
+with $D_{it}=0$ for $t\le 0$ (when units are already exposed before week $1$, as in Section~\ref{s:application}, the potential outcomes and expectations below condition on $(Y_{\le 0},D_{\le 0})$, and $\mathbf 0$ represents lifting the policy from week $1$ onward). The matrix $W=(W_{ij})$ is a known, non-negative, row-normalised
 spatial weight matrix with zero diagonal, and $\bar D_{it}=\sum_j W_{ij}D_{jt}$ is the share of
 neighbours under the policy. With known weekly generation-interval weights $w_1,\dots,w_S\ge 0$,
 $\sum_s w_s=1$ \citep{wallinga2007generation}, we write
-\begin{gather*}
-L_{it}=\sum_{s=1}^{S} w_s Y_{i,t-s},\qquad
-N_{it}=\sum_{s=1}^{S} w_s \sum_{j} W_{ij}Y_{j,t-s},\\
-\Lambda_{it}(\phi)=L_{it}+\phi N_{it}+\omega_i ,
-\end{gather*}
-for the local, imported and total infection pressure; $\omega_i>0$ is a small known background
-importation term. For $\theta=(\gamma_2,\dots,\gamma_T,\tau,\kappa,\phi)$, with $\gamma_1=0$, let
+$\Lambda_{it}(\phi)=L_{it}+\phi N_{it}+\omega_i$ for local ($L_{it}=\sum_{s=1}^{S} w_s Y_{i,t-s}$), imported ($N_{it}=\sum_{s=1}^{S} w_s \sum_{j} W_{ij}Y_{j,t-s}$) and total infection pressure, where $\omega_i>0$ is a small known background importation term. For $\theta=(\gamma_2,\dots,\gamma_T,\tau,\kappa,\phi)$ with $\gamma_1=0$, let
 \begin{equation}
 m_{it}(\theta)=\exp(\gamma_t+\tau D_{it}+\kappa\bar D_{it})\,\Lambda_{it}(\phi).
 \label{eq:mean}
@@ -62,18 +56,9 @@ $\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d),D_{1:t}=\mathbf d_{1:t}\}=\E
 \item[A3 (consistency).] $Y_{it}=Y_{it}(D)$.
 \item[A4 (conditional independence across clusters).] For every $t$, conditionally on $\F_{t-1}$,
 the cluster vectors $(Y_{it})_{i:g(i)=g}$, $g=1,\dots,G$, are independent. This rules out
-infection that crosses a cluster boundary within the same week. Section~\ref{ss:weekwithin}
-discusses what the assumption buys and what happens without it.
-\item[A4$'$ (local dependence).] Let $\mathcal C$ be the graph on clusters in which $g$ and $h$
-are adjacent if $W_{ij}>0$ for some $i\in g$, $j\in h$, or if the policy rule of $g$ uses data
-from $h$; its maximal degree is bounded. (i) The cluster primitives (unit effects and pre-sample
-outcomes, weekly outcome innovations, weekly policy randomisation) are independent across
-clusters, and the week-$t$ outcome innovations are independent of all primitives dated before
-week $t$ and of the week-$t$ policy randomisation. (ii) $D_{gt}$ is a
-measurable function of the week-$t$ policy randomisation of $g$ and of the histories before week
-$t$ of clusters within distance $\rho$ of $g$ in $\mathcal C$; $Y_{gt}$ is a measurable function of
-the week-$t$ innovation and unit effects of $g$ and of the outcomes before week $t$ and the
-week-$t$ policies of $g$ and of the clusters adjacent to $g$.
+infection that crosses a cluster boundary within the same week (Web Appendix~\ref{ss:weekwithin}).
+Under a bounded-degree local-dependence structure A4$'$ stated in Web Appendix~\ref{app:proofs}
+(Section~A.1), A4 holds and implies the laws of large numbers (L).
 \item[A5 (positive pressure).] $\Lambda_{it}(\phi)\ge c>0$ for all $i$, $t$ and
 $\phi\in[0,\bar\Phi]$, where $\bar\Phi$ bounds the parameter space for $\phi$ and is distinct from
 the instrument reference value $\bar\phi$ defined in Section~\ref{ss:estimation}.
@@ -84,17 +69,13 @@ $\Omega$ positive definite; $\bar g(\theta)=0$ only at $\theta_0$; $\Gamma$ of f
 $c_i>0$ is a unit reporting factor and $c_t>0$ a week reporting factor.
 \end{description}
 
-Assumption A1 states that, in the absence of any policy, $\log R_{it}(\mathbf 0)=\alpha_i+\gamma_t$.
-Untreated transmission paths are therefore parallel on the log scale, while levels may differ arbitrarily
-and may be related to adoption. The conditional variance is unrestricted, so overdispersion and
-clustering of cases are allowed. Assumption A2(b) is a mean version of sequential randomisation
-\citep{robins2000msm}. Policies may depend on $\alpha$ and on the entire past of all units, which
-is the feedback that motivates this paper, but not on the shocks of the week they apply to.
-A4 allows arbitrary dependence within clusters and dependence across clusters through past
-outcomes (contagion); it rules out common unmodelled shocks to neighbouring clusters within a
-week beyond those absorbed by $\gamma_t$. A4$'$ implies A4 and is only used to verify the laws
-of large numbers. It fails when policies respond to national aggregates, in which case the laws
-of large numbers become high-level conditions. A5 holds by construction when $\omega_i\ge c$.
+A1 imposes parallel log-scale untreated paths ($\log R_{it}(\mathbf 0)=\alpha_i+\gamma_t$) while allowing
+arbitrary unit levels $\alpha_i$ related to adoption and unrestricted overdispersion or clustering.
+A2(b) is mean sequential randomisation \citep{robins2000msm}, permitting policies to depend on
+$\alpha$ and full past histories $\F_{t-1}$ (feedback) though not contemporaneous shocks. A4 permits
+within-cluster correlation and lagged cross-cluster contagion, ruling out only unmodelled same-week
+cross-cluster shocks; A4$'$ fails under reactions to national aggregates, making (L) high-level.
+A5 holds whenever $\omega_i\ge c$.
 
 \begin{proposition}[Ascertainment]
 \label{prop:ascertainment}
@@ -108,11 +89,11 @@ so the error in the log reproduction number of week $t$ is bounded by the larges
 in ascertainment within the generation window.
 \end{proposition}
 
-Proposition~\ref{prop:ascertainment} is why time-varying testing intensity does not bias $\tau$
-as long as it is common across units and smooth relative to the generation interval. When
-reports are a binomial thinning of infections, the reported pressure is a noisy proxy for
-$c_ic_{t-1}\Lambda^I_{it}$, and A1 holds for reported data only approximately; we treat this
-case as a sensitivity analysis, not as a theorem.
+Proposition~\ref{prop:ascertainment} shows smooth testing trends do not bias $\tau$ provided
+$\omega^Y_{it}$ scales with $c_ic_{t-1}$ and neighbours share reporting factors when $\phi_0>0$ (a
+constant per connected component of $W$); fixed $\omega_i$ approximates this when $\omega_i\ll L_{it}$.
+Under binomial thinning, reported pressure proxies $c_ic_{t-1}\Lambda^I_{it}$ noisily, leaving A1
+approximate (addressed via sensitivity checks).
 
 \subsection{Quasi-differenced moments}
 \label{ss:moments}
@@ -142,22 +123,16 @@ Write $\varepsilon_{is}=Y_{is}-\mu_{is}$ and $r_{is}=r_{is}(\theta_0)$.
 
 \begin{lemma}[Martingale representation]
 \label{lem:mds}
-Under A1--A3, $g_g(\theta_0)=\sum_{s=1}^{T}\xi_{gs}$ with
-\begin{gather*}
-\xi_{gs}=\sum_{i:g(i)=g}a_{is}\varepsilon_{is},\\
-a_{is}=z_{i,s-1}r_{i,s-1}\ind(s\ge 2)-z_{is}\ind(s\le T-1),
-\end{gather*}
-where $a_{is}$ is $\F_{s-1}$-measurable.
+Under A1--A3, $g_g(\theta_0)=\sum_{s=1}^{T}\xi_{gs}$ with $\xi_{gs}=\sum_{i:g(i)=g}a_{is}\varepsilon_{is}$
+and $\F_{s-1}$-measurable $a_{is}=z_{i,s-1}r_{i,s-1}\ind(s\ge 2)-z_{is}\ind(s\le T-1)$.
 Hence $\E(\xi_{gs}\mid\F_{s-1})=0$ and $\E(g_gg_g{}^{\top})=\sum_{s}\E(\xi_{gs}\xi_{gs}{}^{\top})$. If
 also A4 holds, then $\E\{g_g(\theta_0)g_h(\theta_0)^{\top}\}=0$ for $g\ne h$.
 \end{lemma}
 
-Lemma~\ref{lem:mds} is the key to inference under lagged contagion. Neighbouring clusters can have
-correlated outcomes because each one's cases seed the other's epidemic; this correlation is
-visible in the numerical checks of Web Appendix B. Under A4, their moment contributions are nevertheless
-uncorrelated, because each contribution is a sum of innovations weighted by predetermined
-quantities. The ordinary cluster-robust variance is therefore valid under A4, without a spatial HAC
-correction for $\hat\theta$; same-week cross-cluster transmission is excluded by that assumption.
+Under A4, lagged contagion induces correlation in raw outcomes across neighbouring clusters (Web
+Appendix B), yet predetermined-weighted cluster score vectors $\xi_{gs}$ remain uncorrelated across
+clusters. Standard cluster-robust variance is therefore valid for $\hat\theta$ without spatial HAC
+correction.
 
 \subsection{Identification}
 \label{ss:ident}
@@ -207,14 +182,12 @@ $\F_{t-1}$-measurable $z_{it}$,
 $\E\{z_{it}D_{i,t+1}u_{it}(\theta_0)\}=-\E\{z_{it}\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})\}$.
 \end{proposition}
 
-Treated stayers carry no direct information on $\tau$; they enter only through the week effects,
-which are pinned down by all units. The effect is learned from the growth of cases in switchers
-relative to the common growth. Part (c) shows that the usual lead-placebo test is
-\emph{invalid under feedback}. When adoption responds to high current cases,
-$\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})>0$ and the lead moment is negative even though
-the model is correct. Leads are valid placebo instruments only when adoption dates are fixed at
-least two weeks in advance. Under feedback we instead test the model with the over-identification
-statistic of Corollary~\ref{cor:J}, using additional predetermined instruments.
+Treated stayers inform $\tau$ only indirectly via common week effects, whereas switchers directly
+identify $\tau$. Part (c) shows that conventional lead-placebo tests are \emph{invalid under
+feedback}: if adoption follows elevated cases, $\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})>0$
+renders the lead moment negative even under exact specification. Leads require adoption fixed $\ge 2$
+weeks ahead; under feedback, specification testing uses the over-identification $J$ test of
+Corollary~\ref{cor:J}.
 
 \subsection{Estimation and inference}
 \label{ss:estimation}
@@ -250,9 +223,7 @@ Let $\hat W\to_p W$ positive definite (with $W=I$ when $q=p$).
 (b) $\sqrt G(\hat\theta-\theta_0)=G^{-1/2}\sum_g\varphi_g+o_p(1)\to_d N(0,V)$ with influence function
 $\varphi_g=-(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}Wg_g(\theta_0)$ and
 $V=(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}W\Omega W\Gamma(\Gamma^{\top}W\Gamma)^{-1}$, where
-\[
-\Omega=\lim G^{-1}\sum_g\E\{g_g(\theta_0)g_g(\theta_0)^{\top}\}=\lim G^{-1}\sum_g\sum_s\E(\xi_{gs}\xi_{gs}{}^{\top}).
-\]
+$\Omega=\lim G^{-1}\sum_g\E\{g_g(\theta_0)g_g(\theta_0)^{\top}\}=\lim G^{-1}\sum_g\sum_s\E(\xi_{gs}\xi_{gs}{}^{\top})$.
 In the just-identified case $\varphi_g=-\Gamma^{-1}g_g(\theta_0)$ and $V=\Gamma^{-1}\Omega\Gamma^{-\top}$.
 (c) $\hat\Gamma\to_p\Gamma$ and $\hat\Omega\to_p\Omega$, so that $G\hat V\to_p V$.
 \end{theorem}
@@ -263,84 +234,56 @@ Under the conditions of Theorem~\ref{thm:asy} with $q>p$ and $\hat W=\tilde\Omeg
 at a consistent first-step estimator, $J=G\,\hat g(\hat\theta)^{\top}\hat W\hat g(\hat\theta)\to_d\chi^2_{q-p}$.
 \end{corollary}
 
-The central-limit step uses a martingale argument over the $T$ week blocks combined with a
-conditional Lindeberg argument across clusters within each block (Lemma~\ref{lem:clt}, Web Appendix A). It
-is self-contained, so we need not appeal to the nesting conditions of the general martingale
-central limit theorem \citep{hall1980martingale}. With independent clusters the result reduces to
-standard clustered-sample theory \citep{hansen2019clustered}. Instruments that depend on a
-first-step estimate, such as $\bar\phi=\hat\phi$ from a first pass or a predicted adoption hazard,
-do not change $V$ (Lemma~\ref{lem:generated}, Web Appendix A), because derivatives of predetermined instruments
-are orthogonal to $u_{it}(\theta_0)$.
+The central-limit step combines a martingale argument across the $T$ week blocks with a conditional
+Lindeberg step across clusters (Lemma~\ref{lem:clt}, Web Appendix~A), without appealing to general
+martingale nesting conditions \citep{hall1980martingale}, and reduces to standard clustered theory
+under independent clusters \citep{hansen2019clustered}. Estimated predetermined instruments such
+as $\bar\phi=\hat\phi$ leave $V$ unchanged (Lemma~\ref{lem:generated}, Web Appendix~A) because
+their derivatives are orthogonal to $u_{it}(\theta_0)$.
 
 \begin{remark}[Working-optimal instruments]
 \label{rem:optimal}
-Ignoring the correlation between $u_{it}$ and $u_{i,t+1}$ and using a Poisson working variance,
+Under a Poisson working variance ignoring serial correlation between $u_{it}$ and $u_{i,t+1}$,
 $\E\{\partial u_{it}/\partial\theta\mid\F_{t-1}\}=\mu_{it}\{-e_t,x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}$
-and $\operatorname{var}(u_{it}\mid\F_{t-1})=\mu_{it}\{1+\E(r_{it}\mid\F_{t-1})\}$, so the working-optimal
-instrument $\{x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}/\{1+\E(r_{it}\mid\F_{t-1})\}$ is free of
-$\alpha_i$. Its policy component is the predicted switching hazard, which can be estimated in a
-first step (Lemma~5). Fully efficient instruments for sequential moment restrictions require
-forward orthogonalisation \citep{chamberlain1992sequential,chamberlain2022feedback}, and we do not
-derive the efficiency bound. Under a full Poisson likelihood more feedback-robust moments exist
-\citep{bonhomme2025feedback}; under our conditional-mean model only quasi-differenced moments
-are used.
+and $\operatorname{var}(u_{it}\mid\F_{t-1})=\mu_{it}\{1+\E(r_{it}\mid\F_{t-1})\}$, yielding the
+$\alpha_i$-free working-optimal instrument $\{x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}/\{1+\E(r_{it}\mid\F_{t-1})\}$,
+whose policy component is the predicted switching hazard (Lemma~\ref{lem:generated}). Full
+efficiency requires forward orthogonalisation \citep{chamberlain1992sequential,chamberlain2022feedback};
+under a full Poisson likelihood additional feedback-robust moments exist \citep{bonhomme2025feedback}.
 \end{remark}
 
-Four results are used in the simulation and application but are developed in Web Appendix A, where they can be read alongside their proofs. The comparators of Section~\ref{s:simulation} have pseudo-true values that differ from $\theta_0$: the two-step log-transmission regression accumulates a small-count term and a feedback term, and the Poisson fixed-effects estimator is inconsistent at fixed $T$ because its offset is the lagged outcome (Web Appendix A.9). With time-invariant heterogeneous effects the constant-effect estimand is a convex combination of the unit effects, so no unit receives negative weight; when effects build up after adoption the event-time specification of Theorem~\ref{thm:asy} recovers them bin by bin (Web Appendix A.10). Cases averted are defined by a counterfactual that propagates through the renewal equation and the network; the recursion leaves a unit's series unchanged until a policy reaches it, directly or through its neighbours, so no counterfactual start date has to be chosen, and inference targets the realised-path quantity whose expectation is the population target (Web Appendix A.11). Assumption A4 is about the innovations rather than the outcomes: neighbouring clusters share history through $\bar D$ and $\Lambda$, and Lemma~\ref{lem:mds} weights each moment contribution by a $\F_{s-1}$-measurable factor, so what A4 excludes is infection that crosses a cluster boundary inside the observation week. Section~\ref{ss:sameweek} measures the cost of that exclusion (Web Appendix A.12).
+Four supporting theoretical results appear in Web Appendix~A.9--A.12: pseudo-true biases of standard
+comparators, proving fixed-$T$ inconsistency of two-step log-$R$, Poisson fixed effects (even
+under randomisation), $\log(Y+1)$ TWFE and no-spillover QD-GMM (Theorem~\ref{thm:bias});
+non-negative weighting under time-invariant unit heterogeneity $\tau_i$ (Proposition~\ref{prop:hetero})
+and event-time identification of dynamic effects (Remark~\ref{rem:dynamic}); recursive propagation
+of counterfactual cases averted $\psi_{\mathcal P}$ and inference for the realised-path target
+$\psi^\dagger_{\mathcal P}$ (Theorem~\ref{thm:psi}); and the consequences of within-week
+transmission when A4 or the weekly mean fails (Web Appendix~\ref{ss:weekwithin}).
 
 \subsection{Computation, variants and root selection}
 \label{ss:computation}
 
-The primary estimator, M0, uses the instruments of Section~\ref{ss:estimation} with the
-pre-specified reference value $\bar\phi=0.5$. It is computed by a local root search for $\beta$
-from a fixed starting value, with $\gamma$ profiled out by \eqref{eq:profile}. Three variants are
-used for checks and are fixed in advance. M0-OI adds two predetermined instruments,
-$s_{it}N_{i,t-1}/\Lambda_{i,t-1}(\bar\phi)$ and $s_{it}\log\{(Y_{i,t-1}+0.5)/(Y_{i,t-2}+0.5)\}$, and is
-estimated by two-step GMM; its role is to provide the $J$ statistic of Corollary~\ref{cor:J}.
-M0-ET replaces $\tau D_{it}$ by event-time effects $\tau_0,\dots,\tau_5$ and a pooled effect for
-six or more weeks since adoption, as recommended in Remark~\ref{rem:dynamic}. M0$'$ imposes
-$\kappa=\phi=0$ and corresponds to Theorem~\ref{thm:bias}(d).
+The primary estimator, M0, uses the instruments of Section~\ref{ss:estimation} with $\bar\phi=0.5$,
+solving the three-dimensional profiled system from a fixed starting value. Three pre-specified
+variants provide checks: M0-OI adds $s_{it}N_{i,t-1}/\Lambda_{i,t-1}(\bar\phi)$ and
+$s_{it}\log\{(Y_{i,t-1}+0.5)/(Y_{i,t-2}+0.5)\}$ in two-step GMM to compute Hansen's $J$; M0-ET
+replaces $\tau D_{it}$ with event-time effects $\tau_0,\dots,\tau_5$ and $\tau_{6+}$
+(Remark~\ref{rem:dynamic}); and M0$'$ imposes $\kappa=\phi=0$ (Theorem~\ref{thm:bias}(d)).
 
-Theorem~\ref{thm:ident} is a local result and A6 assumes that $\theta_0$ is interior. When
-contagion between units is absent ($\phi_0=0$), the true value is on the boundary of the
-parameter space. Estimating equations can then have several roots, of which at most one is
-consistent \citep{small2000multiple}, and boundary values change the limiting distribution of
-the estimator \citep{self1987boundary,andrews1999boundary}. We therefore pre-specified a
-global version, M0-G. For each $\phi$ on a grid in $[0,3]$, $(\gamma,\tau,\kappa)$ are profiled
-out and the remaining $\phi$-equation is evaluated. Every sign change on the grid is refined to
-a root, and the boundary point $\phi=0$ is added as a candidate. Among the candidates, M0-G
-selects the one with the smallest over-identified GMM criterion $Q$ computed with the M0-OI
-instruments, following the idea of choosing among roots with a goodness-of-fit criterion
-\citep{heyde1998multiple}. Inference is conditional on the selected candidate, and a boundary
-selection is reported as such, without a Wald interval for $\phi$.
-
-The simulation in Section~\ref{s:simulation} showed that this pre-specified rule is not
-sufficient. We therefore also report a variant designed after interim results had been seen,
-M0-GI, which is labelled post hoc wherever it appears. It uses the same candidates as M0-G,
-but $Q$ is built from the M0 moments together with the scale-weighted $\phi$-instrument evaluated at
-two other reference values, $s_{it}N_{it}/\Lambda_{it}(0.05)$ and $s_{it}N_{it}/\Lambda_{it}(2.0)$,
-with $s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$. The rationale
-follows from Lemma~\ref{lem:moment}: moments formed with any predetermined instrument have mean
-zero at $\theta_0$, whatever the reference value, whereas a spurious root that solves the
-$\bar\phi$-instrument equation need not solve the equations at other reference values. Because
-the selection rule was chosen after seeing results, its performance requires confirmation in
-designs that were not used to choose it. The profiled $\phi$-moment over the grid, together with $Q$, shows whether more than one root
-exists; both are reported for the application in Section~\ref{s:application}.
-
-For applied work the rules amount to the following sequence, which we recommend reporting in
-full. (1) Fit M0 from a fixed starting value and record the local solution. (2) Evaluate the
-profiled $\phi$-equation on the implementation grid
-\[
-\begin{aligned}
-\phi\in\{&0,0.02,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5,0.6,\\
-        &0.7,0.8,1,1.25,1.5,2,2.5,3\},
-\end{aligned}
-\]
-refine every adjacent sign change, and include $\phi=0$ as a boundary candidate. (3) If the
-profile has a single interior sign change, report M0 with its cluster-robust interval, together
-with the profile as a diagnostic figure. (4) If there are several sign changes, report every
-candidate root and the value of $Q$ at each, and report the rule's selection as conditional on that
-choice; when the selected candidate is on the boundary, state that no interval for $\phi$ is
-available. (5) Report the over-identification statistic $J$ in every case, because it has power
-against some forms of misspecification but, as the simulation shows, little power against a spurious
-root.
+Because Theorem~\ref{thm:ident} is local and $\phi_0=0$ lies on the boundary of $[0,\bar\Phi]$,
+no contagion can induce multiple roots of which at most one is consistent \citep{small2000multiple}
+and alter boundary asymptotics \citep{self1987boundary,andrews1999boundary}. We pre-specified a
+global search, M0-G: on a 19-point grid $\phi\in[0,3]$ (Web Appendix~\ref{app:supp}),
+$(\gamma,\tau,\kappa)$ are profiled out, adjacent sign changes in the $\phi$-equation are refined
+to roots, $\phi=0$ is added as a boundary candidate, and the candidate minimising the M0-OI
+criterion $Q$ is selected \citep{heyde1998multiple}, with conditional inference and no Wald
+interval for $\phi$ at the boundary. After interim boundary failures, we added a post-hoc variant
+M0-GI (always labelled post hoc), using the same candidates but replacing the M0-OI extras in $Q$
+with $s_{it}N_{it}/\Lambda_{it}(0.05)$ and $s_{it}N_{it}/\Lambda_{it}(2.0)$ ($s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$);
+by Lemma~\ref{lem:moment} valid roots satisfy the moment at any reference value, whereas a
+spurious $\bar\phi$-induced root need not. For applied work, we recommend: (1) fit M0; (2) inspect
+the profiled $\phi$-moment and $Q$ over the $[0,3]$ grid; (3) report M0 if there is a single
+interior crossing, or report all candidate roots and $Q$ values (noting conditional boundary
+inference with no $\phi$ interval if $\hat\phi=0$ is chosen); and (4) always report $J$ (noting
+its low power against spurious roots).

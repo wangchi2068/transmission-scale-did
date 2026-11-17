@@ -7,7 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "experiment" / "code"))
 import make_tables as MT  # noqa: E402
 
-app = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+_raw = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+app = _raw["application"] if isinstance(_raw, dict) and "application" in _raw and "table" not in _raw else _raw
 rows = app["table"]
 main_rows = [r for r in rows if r["analysis"] == "main"]
 sens_rows = [r for r in rows if r["analysis"] != "main"]
@@ -59,5 +60,5 @@ def build(rows, caption, label, note_extra=""):
           "tab:app"), encoding="utf-8")
 (ROOT / "tables" / "table_7b_application_sensitivity.tex").write_text(
     build(sens_rows, r"Pre-specified sensitivity analyses of the mask-order application. M0 is shown for every analysis and M0-G or the post hoc M0-GI where the selected root differs from M0.",
-          "tab:app-all", "The reference specification is in Table~\\ref{tab:app}."), encoding="utf-8")
+          "tab:app-all", "The reference specification is in Table~\\ref{tab:app}. Symmetric Wald intervals near $\\phi=0$ (such as M0-G in \\texttt{gi\\_w1\\_0.9}) can cross the zero boundary; boundary selections ($\\hat\\phi=0$) carry no Wald interval for $\\phi$.").replace(r"\begin{tabular}", r"\renewcommand{\arraystretch}{0.86}\begin{tabular}"), encoding="utf-8")
 print("main rows", len(main_rows), "sensitivity rows", len(sens_rows))

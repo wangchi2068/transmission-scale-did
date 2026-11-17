@@ -2,85 +2,58 @@
 \label{s:intro}
 
 Panels of reported cases by county or region are the standard data for evaluating non-pharmaceutical
-interventions, and the effects of mask orders, stay-at-home orders and closures during the COVID-19
-pandemic were estimated from such panels by event studies, two-way fixed-effects regressions of case
-growth or log cases, comparisons of counties with and without an order, and synthetic controls
-\citep{lyu2020masks,hsiang2020anticontagion,guy2021masks,chernozhukov2021masks,vandyke2020kansas,mitze2020masks}.
-Each of these designs imports the difference-in-differences logic of policy evaluation
-\citep{roth2023trending,callaway2021did}. Epidemic data strain that logic in three places at once,
-and the strain is structural rather than incidental: transmission generates the very dependence
-that the designs treat as noise. Weekly cases are realised from earlier cases through the
-generation interval
-\citep{wallinga2004different,fraser2007estimating,wallinga2007generation}, so parallel trends in
-counts or log counts need not hold even in the absence of any policy
-\citep{gauthier2021twfe,feng2024parallel}. Adoption responds to the epidemic, because orders follow
-rising incidence, so the treatment depends on past outcomes and unit fixed effects forfeit their
-usual justification \citep{imai2019fixed,nickell1981biases}. Units are also coupled: infections
-cross county borders, and a neighbour's order alters contact patterns
-\citep{hudgens2008interference,halloran2016dependent,aronow2017exposure}, with estimates of policy
-effects shifting when the spillovers are ignored \citep{enriquez2025spillovers}.
+interventions. During the COVID-19 pandemic, effects of mask orders, stay-at-home orders and
+closures were commonly estimated by event studies, two-way fixed-effects regressions of case growth
+or log cases, county comparisons and synthetic controls
+\citep{lyu2020masks,hsiang2020anticontagion,chernozhukov2021masks,mitze2020masks}, all importing
+the difference-in-differences logic of policy evaluation \citep{callaway2021did,roth2023trending}.
+Epidemic data strain that logic structurally in three places at once because transmission generates
+the dependence treated as noise. Weekly cases arise from earlier cases through the generation
+interval \citep{wallinga2004different,fraser2007estimating,wallinga2007generation}, so parallel
+trends in counts or log counts fail even without any policy \citep{gauthier2021twfe,feng2024parallel}.
+Adoption responds to rising incidence, so treatment depends on past outcomes and unit fixed
+effects lose their justification \citep{nickell1981biases,imai2019fixed}. Units are also coupled:
+infections cross borders and neighbours' orders alter contact patterns
+\citep{hudgens2008interference,halloran2016dependent,aronow2017exposure}, shifting policy
+estimates when spillovers are ignored \citep{enriquez2025spillovers}.
 
 Existing approaches cover parts of this ground. \citet{feng2024parallel} place parallel trends on
-the log effective reproduction number, defining it from cohort rather than instantaneous counts so
-that it aligns with the timing of an intervention, and adding a specification in log
-transmissibility that accommodates susceptible depletion. Their authors note that spillovers are
-not considered, and reproduction numbers estimated from reported counts inherit the small-count and
-generation-interval problems of that step \citep{gostic2020practical}. Semi-mechanistic renewal
-models estimate intervention effects within a generative model, in Bayesian
-\citep{flaxman2020npi,brauner2021npi,scott2021epidemia,bhatt2023semimech} or frequentist form
-\citep{bong2024frequentist,windmeijer2000moment}; identification comes from the model and from
-conditioning on the observed past \citep{bong2024augmented} rather than from comparisons that
-remove unobserved unit levels. In the same spirit, \citet{callaway2023pandemic} motivate
-unconfoundedness conditional on lagged cases with an SIR model, and \citet{chernozhukov2021masks}
-use a structural causal model for growth rates. Count models with neighbourhood terms, such as the
-endemic--epidemic framework \citep{held2005hhh,meyer2014powerlaw,lu2023hhh4} and spatio-temporal
-Poisson autoregressions \citep{alaimo2024poissonar}, describe coupling but are not constructed for
-identification under feedback. Quasi-differenced moment conditions eliminate multiplicative unit
-effects when regressors are merely predetermined
-\citep{chamberlain1992sequential,wooldridge1997multiplicative,blundell2002count}, and have been
-applied to a contagion-like count process outside epidemiology \citep{schweikert2021copycat}.
-Difference-in-differences with spillovers
-\citep{butts2021spatial,sun2025didnetwork,xu2023did,forastiere2021network} handles interference
-through exposure mappings on the outcome scale, without transmission dynamics or feedback from
-cases to adoption; \citet{papadogeorgou2022spatiotemporal} develop a framework for spatio-temporal
-data in which treatment responds to past outcomes, and
-\citet{bonvini2022mobility,holtz2020interdependence} examine the feedback between epidemic outcomes
-and policy without a renewal structure.
+cohort-based log effective reproduction numbers and log transmissibility, but omit spillovers and
+rely on first-step reproduction-number estimates that suffer from small-count and
+generation-interval biases \citep{gostic2020practical}. Semi-mechanistic renewal models in Bayesian
+\citep{flaxman2020npi,brauner2021npi,bhatt2023semimech} or frequentist form
+\citep{bong2024frequentist} identify effects via generative modelling and conditioning on the
+observed past \citep{bong2024augmented}, as do SIR-motivated unconfoundedness
+\citep{callaway2023pandemic} and structural growth models \citep{chernozhukov2021masks}, rather than
+eliminating unrestricted unit effects. Spatio-temporal count models
+\citep{held2005hhh,meyer2014powerlaw,alaimo2024poissonar} capture coupling without feedback
+identification. Quasi-differenced moments remove multiplicative unit effects under predetermined
+regressors \citep{chamberlain1992sequential,wooldridge1997multiplicative,windmeijer2000moment,blundell2002count},
+and have been used for contagion-like counts outside epidemiology \citep{schweikert2021copycat}.
+Network difference-in-differences \citep{butts2021spatial,sun2025didnetwork,forastiere2021network}
+models interference on the outcome scale without renewal dynamics or adoption feedback, while
+spatio-temporal feedback frameworks \citep{papadogeorgou2022spatiotemporal,bonvini2022mobility}
+lack a renewal structure.
 
-This paper asks a narrower question than how to estimate a reproduction-number curve and then
-regress it on policy. It asks when a panel of reported cases identifies a policy effect on the
-transmission scale directly, and what has to be true for that identification to hold. We put the
-local infection pressure and the imported pressure from neighbouring units into the renewal
-equation, quasi-difference the moment to remove county fixed effects, and build instruments from
-the observed past so that adoption may react to earlier cases. Two failure modes are then kept
-apart. In the first, the moments cannot reliably tell candidate parameter values apart within the
-sample, which the profile exposes and the selection rules address. In the second, the observation
-scale makes the working model itself false, and no estimator of that model carries a causal reading.
-The county mask-order application illustrates the distinction: a number can be computed, and it does
-not follow that the panel supports a causal interpretation of it.
+This paper asks when a panel of reported cases directly identifies policy effects on the
+transmission scale and what conditions that identification requires. We embed local and imported
+neighbour infection pressure inside a renewal equation, quasi-difference the conditional mean to
+eliminate county fixed effects, and construct instruments strictly from the observed past so that
+adoption may react to earlier incidence. Two failure modes are kept separate: in-sample root
+multiplicity (exposed by profiling and addressed by selection rules) and observation-scale
+misspecification that invalidates causal interpretation regardless of estimator, as demonstrated by
+our US county mask-order analysis.
 
-The contribution relative to existing work is therefore not the change of outcome variable. It is
-the set of conditions under which the feedback-allowing network moment is valid, the parameters it
-separates, and the diagnostics that say when it does not. Under stated cross-cluster dependence
-conditions, which exclude unmodelled same-week cross-cluster transmission, the moment contributions
-form a martingale difference array across weeks even though neighbouring clusters exchange
-infections, so the ordinary cluster-robust sandwich applies without a spatial correction, and the
-week effects profile out in closed form. The same moments yield the pseudo-true values of the
-estimators in current use, separating the small-count and feedback components of two-step
-regressions and showing why Poisson fixed effects are inconsistent even under randomised adoption.
-When effects are heterogeneous the constant-effect estimand assigns non-negative weights, and when
-they build up after adoption an event-time specification recovers them bin by bin. A further
-estimand counts the cases averted, propagating the counterfactual through the renewal equation and
-the network so that an infection prevented in one week also removes the infections it would have
-caused later and elsewhere.
-
-The simulation study fixes its design and success criteria before execution. It measures the
-estimator against those in current use under adoption feedback, spillover, overdispersion and small
-counts, and it characterises the estimating equations where contagion is absent, a boundary case in
-which the profile can admit several roots and the choice among them is reported rather than
-suppressed. An application to state mask orders and county COVID-19 cases in the United States in
-2020 exercises the design on a panel where the policy is set above the unit.
-Section~\ref{s:methods} sets out the model, assumptions, estimator and theory;
-Section~\ref{s:simulation} reports the simulation; Section~\ref{s:application} the application; and
-Section~\ref{s:discussion} delineates the range of the design. Proofs, numerical checks,
-supplementary results, the data appendix and the few-cluster check appear in Web Appendices~A--E.
+Our contribution is therefore the identification and diagnostic framework rather than merely a
+change of outcome scale. Under stated cross-cluster dependence conditions excluding unmodelled
+same-week cross-cluster transmission, moment contributions form a martingale difference array across
+weeks despite lagged inter-cluster contagion, so the ordinary cluster-robust sandwich applies
+without spatial correction and week effects profile out in closed form. The same framework yields
+pseudo-true bias decompositions for standard comparators (separating small-count Jensen bias from
+feedback bias in two-step log-$R$ regressions and proving fixed-$T$ inconsistency of Poisson fixed
+effects even under randomisation), guarantees non-negative weights under time-invariant effect
+heterogeneity, recovers dynamic effects via event-time bins, and propagates counterfactual cases
+averted through the renewal network. Section~\ref{s:methods} presents the model and theory;
+Section~\ref{s:simulation} reports the Monte Carlo study; Section~\ref{s:application} analyses state
+mask orders; and Section~\ref{s:discussion} delineates the design's scope. Proofs, numerical checks,
+supplementary tables and figures, data details and few-cluster checks appear in Web Appendices~A--E.
