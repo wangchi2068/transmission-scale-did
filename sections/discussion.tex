@@ -47,13 +47,12 @@ exposure in the window, and the simulations use equal-sized clusters; the small-
 of cluster-robust inference \citep{imbens2016robust} and, beyond them, randomization inference are
 the appropriate companions when the number of treated clusters is small.
 
-Four directions follow. Sharper instruments, either those that attain the efficiency bound for
+Two directions follow. Sharper instruments, either those that attain the efficiency bound for
 sequential moment restrictions \citep{chamberlain1992sequential,chamberlain2022feedback} or those
 that exploit the full count likelihood \citep{bonhomme2025feedback}, would tighten intervals without
-changing the design; a sub-weekly mechanism of the kind used in Section~\ref{ss:sameweek} would turn
-the measured same-week share into an estimator that allows for it; estimating the generation interval
-and the reporting process jointly with the policy effect \citep{goldwasser2026rt} would remove two
-inputs the design currently treats as known; and group-time and dynamic effects defined on the
-transmission scale \citep{bojinov2021panel} would extend the event-time analysis. Each of these
-keeps the identifying logic of the moments and changes one input, which is the sense in which the
-design is a platform rather than a single estimator.
+changing the design, and intervals that are robust to weak identification
+\citep{andrews2012identification} would extend the reported coverage to the boundary region the
+profile already flags. Beyond that, a sub-weekly generating mechanism of the kind used in
+Section~\ref{ss:sameweek} would turn the measured same-week share into an estimator that allows for
+it, and estimating the generation interval and the reporting process jointly with the policy effect
+\citep{goldwasser2026rt} would remove two inputs the design now treats as known.
