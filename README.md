@@ -1,6 +1,6 @@
 # 传播尺度双重差分（QD-GMM）
 
-论文、LaTeX 源码、实验代码与验证材料。英文稿 `main.pdf` 61 页（正文 24 页，Web Appendix A–D 自第 28 页起），中文阅读稿 `paper_zh/main.pdf` 21 页。
+论文、LaTeX 源码、实验代码与验证材料。英文稿 `main.pdf`：正文 26 个印刷页（含声明；按双倍行距折算约 34–41 页，超过 Biometrics 的 25 页上限，见下方说明），Web Appendix A–D 其后；中文阅读稿 `paper_zh/main.pdf` 21 页。
 
 ## 目录
 
@@ -69,7 +69,7 @@ QD-GMM_transmission_DiD_2026-11-13/
 
 **结构**
 - 方法节四小节（伪真值、异质与动态效应、避免病例数、周内传播与 A4）移入 Web Appendix A.9–A.12，正文保留一段概述。
-- 模拟、应用、讨论、引言的篇幅与语域按 Biometrics 同类论文重写，正文从 40 页降到 24 页。
+- 模拟、应用、讨论、引言的篇幅与语域按 Biometrics 同类论文重写，正文由压缩前的 40 页降到 26 页。
 - 新增 Web Appendix D（数据来源与清洗）；补利益冲突、资助、报告规范声明与 STROBE 清单。
 - 旧的 `paper.pdf`、`paper.html` 已删除，`main.pdf` 是唯一编译产物。
 

@@ -28,9 +28,9 @@ unequal; the reported intervals are therefore read in conjunction with the small
 corrections of \citet{imbens2016robust}. The sensitivity analyses vary the generation interval, the network, the
 timing of the order (shifted by one week, as a timing-alignment check), the background input
 ($\omega$ times $0.25$ and $4$) and the reference value, and exclude Kansas and Texas, whose orders
-carried county exemptions. A conventional lead-indicator regression is reported for comparison
-only, since under feedback its moment is not zero even when the model is correct
-(Proposition~\ref{prop:sources}(c)). Cases averted are summed over all counties over horizons of 4,
+carried county exemptions. A conventional lead-indicator regression is reported in Table~\ref{tab:app} for comparison only. It
+gives $\hat\ell=-0.332$ (standard error 0.259), and under feedback that coefficient is not a test of
+pre-trends even when the model is correct (Proposition~\ref{prop:sources}(c)). Cases averted are summed over all counties over horizons of 4,
 8, 13 and 26 weeks.
 
 The estimates are in Table~\ref{tab:app} and Figure~\ref{fig:app}. M0 reports $\hat\tau=0.040$
@@ -40,9 +40,10 @@ weight of imported pressure; the profile over $\phi$ has a single interior cross
 from the boundary, which is the region the simulation supports, and M0-G and M0-GI select the same
 root. A fit takes 0.05 seconds on this panel and the global search 0.73 seconds. The two policy
 coefficients are weakly separated because of the level at which the order operates: for the 61.9\%
-of counties whose neighbours all lie in their own state, $D_{it}=\bar D_{it}$ in every week, so the
-own and the neighbours' order enter with the same regressor, and only the 1177 border counties
-contribute variation that separates them. Corr$(\hat\tau,\hat\kappa)$ is $0.238$. For an interior
+of counties whose neighbours all lie in their own state, $D_{it}=\bar D_{it}$ in all but a few
+county-weeks (88 counties, 366 county-weeks, where a state's own coding is inconsistent within the
+week), so the own and the neighbours' order enter with the same regressor, and only the 1177 border
+counties contribute variation that separates them. Corr$(\hat\tau,\hat\kappa)$ is $0.238$. For an interior
 county the model therefore implies a single policy-level effect, $\hat\tau+\hat\kappa=-0.466$
 (95\% interval $-1.091$ to $0.159$, from the joint covariance, $t=-1.50$ on 48 degrees of freedom),
 and this is the estimand the data can speak to. Re-indexing the moments as

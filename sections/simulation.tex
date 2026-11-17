@@ -2,8 +2,9 @@
 \label{s:simulation}
 
 The design follows the ADEMP structure of \citet{morris2019ademp}; aims, data-generating
-mechanisms, estimands, methods, performance measures and success criteria were written down before
-any full run, and the departures are listed at the end of this section.
+mechanisms, estimands, methods, performance measures and success criteria were fixed in the design
+document before the full runs, and every departure from that document is listed at the end of this
+section.
 
 \subsection{Design}
 
@@ -49,11 +50,17 @@ Carlo standard error, over $R=8000$ replications.
 
 The pre-specified success criterion was a bias within 2 MCSE of zero for $\tau$, $\kappa$ and
 $\phi$ together with coverage in $[93\%,97\%]$ in the feedback scenarios, and, on the comparator
-side, a bias beyond 2 MCSE or coverage below 90\% for M2 and M3. Two protocol departures are worth
-recording. The spread of the unit effects was reduced by a factor of 4, which keeps $T=26$ counts
-within a realistic range. M0-G was added before any full run, after a pilot exposed multiple roots,
-and M0-GI after interim results had been inspected; the latter is labelled post hoc wherever it
-appears.
+side, a bias beyond 2 MCSE or coverage below 90\% for M2 and M3.
+
+Five departures from the design document are recorded, in the order in which they were made. The
+spread of the unit effects was reduced by a factor of 4, which keeps $T=26$ counts within a realistic
+range. The number of replications was raised from the 1000 of the design to 8000, because the 2 MCSE
+criterion at 1000 replications could not separate biases below about 0.01. An error in the offset
+used by M1 was corrected after the pilot, which also affects M1-BC. The set of Poisson
+fixed-effects options was reduced to the one reported here. M0-G was added before the full runs,
+after a pilot exposed multiple roots, and M0-GI was added after interim results had been inspected;
+M0-GI is labelled post hoc wherever it appears, and its performance is reported only for the
+replications it reached on the same data sets.
 
 \subsection{Results}
 \label{ss:simresults}
@@ -129,32 +136,34 @@ misspecification (Web Table~\ref{tab:sim-psi}).
 \label{ss:sameweek}
 
 The pre-specified data-generating processes carry no transmission inside a week, so A4 holds
-exactly in every scenario. To price the omission when it does not hold, we ran a matched pair of
-designs on the core scenario with $N=500$, $T=12$, feedback adoption,
-$(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$ and $R=1000$ replications, sharing seeds across arms.
-Both arms use the same weekly skeleton, adoption rule and estimator; they differ only in the share
-of transmission that occurs inside the recipient's week. The benchmark arm carries a same-week
-share of zero and reproduces the weekly model exactly. The same-week arm adds, within each week,
-daily production of new cases together with within-week re-infection of the same unit, at a rate
-calibrated to a same-week share of 30\%, and aggregates the daily counts to weeks as surveillance
-data would be. The estimator sees only the weekly aggregates and is otherwise unchanged.
+exactly in every scenario. To price the omission when it does not hold, we ran two designs on the
+core scenario with $N=500$, $T=12$, feedback adoption,
+$(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$ and $R=1000$ replications each, with seeds that
+depend only on the replication index. Both arms use the same weekly skeleton, adoption rule and
+estimator. The benchmark arm carries no within-week transmission and reproduces the weekly model
+exactly. The same-week arm adds, inside each week, daily production of new cases together with
+within-week re-infection of the same unit, and aggregates the daily counts to weeks as surveillance
+data would be; the estimator sees only the weekly aggregates and is otherwise unchanged. The
+calibration targets a within-week share of 30\%, and the realised share, computed from the renewal
+force, is 0.33 in this design. Because the daily arm consumes more random numbers, the two arms are
+not replicable pairs; their estimates are treated as two independent samples throughout.
 
 The benchmark arm reproduces the main study, with bias of $\hat\tau$ at 0.001 and coverage at
-0.948. Under 30\% same-week transmission the bias of $\hat\tau$ is $-0.033$ (MCSE 0.001) and its
+0.948. Under within-week transmission the bias of $\hat\tau$ is $-0.033$ (MCSE 0.001) and its
 coverage 0.890; the bias of $\hat\kappa$ is $-0.021$ (MCSE 0.002) with coverage 0.939; and the
-policy-level total $\hat\tau+\hat\kappa$ carries bias $-0.053$ (MCSE 0.002) at coverage 0.783. Paired
-differences computed replication by replication are $-0.033$ (MCSE 0.002) for $\tau$, $-0.020$
-(MCSE 0.004) for $\kappa$ and $-0.053$ (MCSE 0.003) for the sum. The sum is biased by about a sixth
-of its true value, twice the bias of either component.
+policy-level total $\hat\tau+\hat\kappa$ carries bias $-0.053$ (MCSE 0.002) at coverage 0.783. As a
+multiple of the true effect the sum is biased by about one sixth, 1.6 times the bias of $\tau$ and
+2.6 times that of $\kappa$.
 
 The variance estimator is not where the failure originates. Model standard errors track empirical
 standard deviations in both arms, and coverage falls because of the bias rather than because the
 standard errors are too small. The $J$ test is silent: rejection rates are 4.9\% in the benchmark
 arm and 4.8\% with same-week transmission (difference $-0.001$, MCSE 0.010), so the same-week share
 is a quantity to measure rather than one to test for. Shortening the window does not help either.
-Re-estimating on weeks 4 to 12, which removes any effect of the initial condition, leaves bias at
-$-0.037$ (MCSE 0.002) with coverage 0.913, against 0.019 (MCSE 0.006) and 0.961 in the benchmark,
-at three times the standard error. A weekly estimator therefore carries a bias of roughly a tenth
+Re-estimating on weeks 4 to 12, which drops the first three weeks from both arms, leaves bias at
+$-0.037$ (MCSE 0.002) with coverage 0.913, against 0.019 (MCSE 0.006) and 0.961 in the benchmark;
+the two arms also switch exposure in different fractions of units over that sub-window, 0.301 and
+0.665, so this comparison is indicative rather than a controlled contrast. A weekly estimator therefore carries a bias of roughly a tenth
 of the true effect or more when the same-week share is large, and none of the diagnostics reported
 here reveals it. The application accordingly treats the same-week share as a measured input: at
 30\%, the reported policy effects may carry a bias of that order.
@@ -179,9 +188,9 @@ differs from M0. Error bars show $\pm2$ Monte Carlo standard errors; $R=8000$ pe
 The selection rules were studied in the block where they were needed, so nine further designs with
 a separate seed base and $R=2000$ replications each check that they do not extend beyond it, over
 $\phi_0\in\{0,0.05,0.10,0.15\}$, $\bar\phi\in\{0.25,0.5,1\}$ and $G\in\{20,50,100\}$ (Web
-Table~\ref{tab:rsel}). At $\phi_0=0$ the rule restores coverage, 0.888 against 0.361 of the normal
-interval. At $\phi_0=0.05$ it costs coverage, 0.921 to 0.935 against 0.960 to 0.970, because it
-selects the boundary in 56\% to 79\% of replications. At $\phi_0=0.10$ the two rules differ by at
-most 0.021 under feedback adoption and by 0.067 under random adoption, and at $\phi_0=0.15$ they
-differ by 0.001. Global root selection is a remedy when the profile has several roots, not a
+Table~\ref{tab:rsel}). All coverages below are for the $t_{G-1}$ interval, as in Web Table~\ref{tab:rsel}. At
+$\phi_0=0$ the rule restores coverage, 0.893 against 0.377. At $\phi_0=0.05$ it costs coverage,
+0.921 to 0.935 against 0.960 to 0.970, because it selects the boundary in 56\% to 79\% of
+replications. At $\phi_0=0.10$ the two rules differ by 0.013 or less under feedback adoption and
+by 0.067 under random adoption, and at $\phi_0=0.15$ they differ by 0.001. Global root selection is a remedy when the profile has several roots, not a
 default; Web Appendix~\ref{app:rsel} reports the full table.

@@ -276,7 +276,7 @@ orthogonal projection onto the column space of $\Omega^{-1/2}\Gamma$, of rank $p
 $J\to_d\chi^2_{q-p}$ \citep{hansen1982gmm}.
 \end{proof}
 
-\subsection{A.6 Proofs for Section~\ref{ss:bias}}
+\subsection{A.6 Proofs for the pseudo-true values (Theorem~\ref{thm:bias})}
 
 \begin{proof}[Proof of Theorem~\ref{thm:bias}]
 (a) With $\kappa_0=\phi_0=0$, $\log\mu_{it}=\alpha_i+\gamma_t+\tau_0D_{it}+\log\Lambda_{it}$. So
@@ -497,13 +497,13 @@ the reference value of the $\phi$-instrument over $\bar\phi\in\{0.25,0.5,1\}$, t
 clusters over $G\in\{20,50,100\}$ and the adoption rule. All other settings are those of the main
 study.
 
-At the boundary ($\phi_0=0$) the local solver fails as before (coverage 0.361 of the $t_{G-1}$
-interval, or 0.377 with normal critical values) and M0-GI restores most of the nominal coverage
-(0.888), which reproduces the pattern of the no-spillover block on independent data. Close to the
-boundary but not on it the picture reverses. At $\phi_0=0.05$, M0 has coverage between 0.957 and
-0.968 at all three reference values, while M0-GI has 0.921 to 0.935; it selects $\phi=0$ in 56\% to
+At the boundary ($\phi_0=0$) the local solver fails as before, with coverage 0.377 of the $t_{G-1}$
+interval (0.361 with normal critical values), and M0-GI restores most of the nominal coverage,
+0.893, which reproduces the pattern of the no-spillover block on independent data. Close to the
+boundary but not on it the picture reverses. At $\phi_0=0.05$, M0 has coverage between 0.960 and
+0.970 at all three reference values, while M0-GI has 0.921 to 0.935; it selects $\phi=0$ in 56\% to
 79\% of replications, and the resulting negative bias in $\hat\tau$ ($-0.014$ to $-0.020$)
-outweighs the correction. At $\phi_0=0.10$ the two rules differ by at most 0.021 under feedback
+outweighs the correction. At $\phi_0=0.10$ the two rules differ by at most 0.013 under feedback
 adoption, but the random-adoption cell gives 0.965 for M0 against 0.898 for M0-GI; at
 $\phi_0=0.15$ they differ by 0.001.
 
@@ -527,7 +527,11 @@ previous subsection does not extend beyond the design that motivated it.
 \webfloats
 
 \section{Web Appendix D: Data sources and cleaning}
+\begingroup
+\renewcommand{\thesection}{D}
 \label{app:data}
+\endgroup
+
 
 The application uses six public files (five data files and the ACS commuting table). Each is stored with a SHA-256 checksum in
 \texttt{experiment/data/checksums.tsv} and is read by \texttt{experiment/code/data\_prep.py}.

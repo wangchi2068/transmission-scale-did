@@ -432,6 +432,11 @@ def main(argv=None):
         lead = dict(est=e, se=s, t=None if e is None or s is None else e / s,
                     note="conventional lead placebo; not a valid test under feedback (Proposition 2(c))")
         table.append(ci_row("lead_placebo", "M0", rl, tc, figure=False))
+        # the row must report the lead coefficient itself, not tau (Reviewer m3, round 2)
+        table[-1]["lead"] = e
+        table[-1]["lead_se"] = s
+        table[-1]["lead_lo"] = None if e is None or s is None else e - tc * s
+        table[-1]["lead_hi"] = None if e is None or s is None else e + tc * s
 
     out = dict(
         task="epi-novel-method", version=VERSION, created_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

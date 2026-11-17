@@ -323,7 +323,7 @@ def table_application(app):
         a = m0.get(r["analysis"])
         return a is None or a.get("tau") is None or r.get("tau") is None or abs(a["tau"] - r["tau"]) > 1e-6
     rows = [r for r in rows if r["method"] not in ("M0_G", "M0_GI") or r["analysis"] == "main" or differs(r)]
-    head = [r"analysis & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) \\"]
+    head = [r"analysis & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $\hat\ell$ (95\% CI) \\"]
     body = []
 
     def ci(e, key):
@@ -334,21 +334,27 @@ def table_application(app):
             return fmt(e[key])
         return "%s (%s, %s)" % (fmt(e[key]), fmt(lo), fmt(hi))
     for r in rows:
-        body.append("%s & %s & %s & %s & %s & %s \\\\" % (
+        if r.get("lead") is not None:
+            # the lead row reports the lead coefficient only
+            body.append("%s & %s & -- & -- & -- & -- & %s \\\\" % (
+                r["analysis"].replace("_", r"\_"), LABEL.get(r["method"], r["method"]), ci(r, "lead")))
+            continue
+        body.append("%s & %s & %s & %s & %s & %s & %s \\\\" % (
             r["analysis"].replace("_", r"\_"), LABEL.get(r["method"], r["method"]),
-            ci(r, "tau_plus_kappa"), ci(r, "tau"), ci(r, "kappa"), ci(r, "phi")))
+            ci(r, "tau_plus_kappa"), ci(r, "tau"), ci(r, "kappa"), ci(r, "phi"), ci(r, "lead")))
     note = ("US county-week COVID-19 cases, %s units in %s state clusters, %s weeks (%s to %s); $D$ = state "
             "public mask order. 95\\%% intervals: cluster (state) sandwich with $t_{G-1}$ critical values for "
             "all methods. The first column is the model-conditional total effect of a state order on an "
             "interior county, $\\tau+\\kappa$, taken from the joint covariance of $\\hat\\tau$ and $\\hat\\kappa$; "
             "about 62\\%% of counties are interior, so for them the two coefficients load on the same "
             "regressor. Sensitivity rows show M0, and M0-G / M0-GI (post hoc) only where they select a different "
-            "root than M0. The lead\\_placebo row reports the coefficient on a lead indicator, not the lead "
-            "regression of Section~\\ref{s:application}. Data sources, checksums and the mask-order "
-            "coding are given in Web Appendix~\\ref{app:data}."
+            "root than M0. The lead\\_placebo row reports $\\hat\\ell$, the coefficient on a lead indicator from a "
+            "specification that also contains $D_{it}$ and $\\bar D_{it}$; Proposition~\\ref{prop:sources}(c) shows "
+            "that this coefficient is not a test of pre-trends under feedback. Data sources, checksums and the "
+            "mask-order coding are given in Web Appendix D."
             % (app.get("n_units", "--"), app.get("G", "--"), app.get("T", "--"), app.get("first_week", "--"),
                app.get("last_week", "--")))
-    return tabular("llrrrr", head, body, note, r"Application: state mask orders and county COVID-19 transmission; point estimates with 95\% confidence intervals ($t_{G-1}$, $G = 49$ states).",
+    return tabular("llrrrrr", head, body, note, r"Application: state mask orders and county COVID-19 transmission; point estimates with 95\% confidence intervals ($t_{G-1}$, $G = 49$ states).",
                    "tab:app"), 1
 
 
