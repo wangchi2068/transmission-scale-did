@@ -168,7 +168,7 @@
       "display": "raw",
       "n_seeds": 600,
       "std_ddof": 1,
-      "note": "Monte Carlo measures; n_seeds = cal design (stress design R = 300) (revision analysis, post hoc)"
+      "note": "Monte Carlo measures; n_seeds = cal design (high-noise design R = 300) (revision analysis, post hoc)"
     },
     {
       "id": "tab:rev-gi",
