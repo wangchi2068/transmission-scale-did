@@ -1,0 +1,26 @@
+cal R 600 tpk bias 0.007 sd 0.156 se 0.142 cov t48 0.935 wild 0.925 pairs 0.933
+   tau    bias -0.003 sd 0.125 se 0.135 cov t48 0.985 wild 0.980 pairs 0.980
+   kappa  bias 0.009 sd 0.138 se 0.125 cov t48 0.945 wild 0.935 pairs 0.928
+   phi    bias 0.000 sd 0.033 se 0.032 cov t48 0.937 wild 0.925 pairs 0.938
+   ref J        q95 6.66 q99 8.92 max 12.45 app 17.87 exceed 0/600 rej5 0.07666666666666666
+   ref J_LM_oi  q95 6.66 q99 8.91 max 12.44 app 17.74 exceed 0/600 rej5 0.07666666666666666
+   ref J_LM_inv q95 5.73 q99 8.88 max 12.76 app 5.61 exceed 31/600 rej5 0.045
+   ref Q_G      q95 24.93 q99 30.32 max 35.13 app 40.64 exceed 0/600 rej5 None
+   ref Q_GI     q95 21.74 q99 28.56 max 32.83 app 27.62 exceed 8/600 rej5 None
+   A1 tpk cov 0.962 bias -0.001 | J_LM_oi q95 6.47 exceed 0 | J_LM_inv q95 5.43 rej5 0.038 exceed 23
+   A2 tpk cov 0.936 bias 0.001 | J_LM_oi q95 6.61 exceed 0 | J_LM_inv q95 5.92 rej5 0.049 exceed 33
+   A3 tpk cov 0.962 bias -0.001 | J_LM_oi q95 6.38 exceed 0 | J_LM_inv q95 5.47 rej5 0.038 exceed 22
+   root sel {'G': {'R': 600, 'share_root_differs_from_M0': 0.0, 'share_boundary': 0.0, 'share_multiple_roots': 0.9383333333333334, 'tpk_bias': 0.006653503478711896}, 'GI': {'R': 600, 'share_root_differs_from_M0': 0.0, 'share_boundary': 0.0, 'share_multiple_roots': 0.9383333333333334, 'tpk_bias': 0.006653503478711896}}
+stress R 300 tpk bias 0.015 sd 0.366 se 0.348 cov t48 0.950 wild 0.930 pairs 0.923
+   tau    bias 0.005 sd 0.266 se 0.302 cov t48 0.993 wild 0.983 pairs 0.983
+   kappa  bias 0.010 sd 0.285 se 0.277 cov t48 0.957 wild 0.947 pairs 0.933
+   phi    bias 0.001 sd 0.040 se 0.040 cov t48 0.947 wild 0.937 pairs 0.937
+   ref J        q95 6.17 q99 9.57 max 10.87 app 17.87 exceed 0/300 rej5 0.07
+   ref J_LM_oi  q95 6.19 q99 9.68 max 10.87 app 17.74 exceed 0/300 rej5 0.07
+   ref J_LM_inv q95 5.88 q99 7.49 max 8.74 app 5.61 exceed 20/300 rej5 0.05
+   ref Q_G      q95 28.14 q99 33.44 max 34.72 app 40.64 exceed 0/300 rej5 None
+   ref Q_GI     q95 19.94 q99 28.67 max 30.18 app 27.62 exceed 5/300 rej5 None
+   A1 tpk cov 0.993 bias 0.032 | J_LM_oi q95 6.11 exceed 0 | J_LM_inv q95 4.90 rej5 0.030 exceed 9
+   A2 tpk cov 0.981 bias 0.038 | J_LM_oi q95 6.37 exceed 0 | J_LM_inv q95 4.58 rej5 0.019 exceed 5
+   A3 tpk cov 0.993 bias 0.032 | J_LM_oi q95 6.12 exceed 0 | J_LM_inv q95 4.92 rej5 0.030 exceed 7
+   root sel {'G': {'R': 300, 'share_root_differs_from_M0': 0.0, 'share_boundary': 0.0, 'share_multiple_roots': 0.06, 'tpk_bias': 0.014652295095923211}, 'GI': {'R': 300, 'share_root_differs_from_M0': 0.0, 'share_boundary': 0.0, 'share_multiple_roots': 0.06, 'tpk_bias': 0.014652295095923211}}

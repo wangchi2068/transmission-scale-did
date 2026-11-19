@@ -2,6 +2,10 @@
 \usepackage[margin=2.4cm]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}[BoldFont={Latin Modern Math},BoldFeatures={FakeBold=1.5}]
+\usepackage{graphicx}
+\graphicspath{{../figures/}{../paper/figures/}}
 \usepackage{enumitem}
 \usepackage{natbib}
 \usepackage{xurl}
@@ -14,6 +18,7 @@
 \theoremstyle{definition}
 \newtheorem{remark}{注}
 \renewcommand{\proofname}{证明}
+\xeCJKDeclareCharClass{Default}{"2019}
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\ind}{\mathbf{1}}
@@ -21,24 +26,22 @@
 \DeclareMathOperator{\cov}{cov}
 \DeclareMathOperator*{\plim}{plim}
 
-\title{传播尺度的双重差分：疫情反馈与空间传染下再生数政策效应的序贯矩估计}
+\title{传播尺度的双重差分：反馈与空间传染下再生数政策效应的序贯矩估计}
 \author{}
-\date{}
+\date{中文阅读稿。图 1--3 取自英文稿；表与网络附录的编号均指英文稿及其网络支持材料。}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
 \noindent
-评估非药物干预时，最常用的数据是各地区报告的病例序列。在病例数上做双重差分，依赖三条与疫情数据不符的假设：
-传播是乘性的、自我激发的，政策随病例上升而实施，单元之间相互感染。本文把平行趋势放在更新模型的对数再生数上，
-模型中的感染压力有一部分经已知网络从邻近单元输入，再用准差分广义矩估计政策效应。准差分消去不受限制的单元效应，
-工具变量只由过去的信息构造，因此允许实施依赖既往疫情。在所给的跨集群依赖条件下（该条件排除未建模的同周跨集群传播），
-常规聚类稳健夹心方差直接适用，无需空间校正，周效应可解析消去。预设模拟中，有正溢出的情景在反馈实施、过度离散与小计数并存时，
-直接效应的偏倚在 $-0.002$ 到 $0.001$ 之间，区间覆盖率为 94.5\% 到 95.4\%。当无传染时方程可有多根，
-边界推断需配合选根。在州级口罩令与县级 COVID-19 病例的应用中，事件时间估计在所有滞后周上均为负（$-0.34$ 到 $-0.92$），
-政策层面总效应为 $-0.466$（95\% 区间 $-1.091$ 到 $0.159$；成对集群 bootstrap 区间 $[-1.330, 0.397]$），
-而汇聚常数效应估计受到动态加权偏倚扭曲；过度识别检验拒绝了工作模型。
+报告病例面板是评估非药物干预的标准数据，但病例数上的双重差分依赖三条疫情数据不满足的假设：传播自我激发，政策随病例上升而实施，单元之间相互感染。
+本文把平行趋势放在更新模型的对数再生数上，模型的感染压力有一部分从邻近单元输入，政策效应用准差分广义矩估计；准差分消去不受限制的单元效应，工具变量只用过去的信息构造，因而允许实施对疫情作出反应。
+排除同一周内的跨集群传播时，常规聚类稳健夹心方差无需空间校正即可使用，周效应有闭式剖面解。
+在包含实施反馈、溢出、过度离散与小计数的预设模拟中，直接效应的偏倚在 $-0.002$ 到 $0.001$ 之间，区间覆盖率为 94.5\% 到 95.4\%。
+设计同时提供三项诊断：揭示多根的剖面传染方程，对照校准参照分布解读的过度识别检验，以及无需选根的识别稳健置信集。
+在美国州级口罩令与县级 COVID-19 病例的应用中，这些诊断拒绝了周度工作模型：过度识别统计量高于全部校准抽样，加入区域周效应后依然如此。
+政策层面总效应 $-0.47$（95\% 区间 $-1.09$ 到 $0.16$）因此是周度拟合的概括量，不作因果解读。
 \end{abstract}
 
 \noindent\textbf{关键词：} 因果推断；双重差分；广义矩估计；传染病流行病学；干扰；更新方程
@@ -46,48 +49,27 @@
 \section{引言}
 \label{s:intro}
 
-按县或地区分组的报告病例面板是评估非药物干预最常用的数据。COVID-19 期间，研究者用事件研究、病例增长或对数病例的双向固定效应回归、
-有令与无令县的比较以及合成控制，从这类面板中估计口罩令、居家令和营业限制的效果
-\citep{lyu2020masks,hsiang2020anticontagion,guy2021masks,chernozhukov2021masks,vandyke2020kansas,mitze2020masks}。
-这些设计沿用了政策评估中的双重差分逻辑\citep{roth2023trending,callaway2021did}。
-疫情数据同时在三处使这一逻辑失效，而这种张力并非偶然：传播制造了设计当作噪声处理的依赖关系。
-一周内的病例由更早几周的病例经代际间隔生成\citep{wallinga2004different,fraser2007estimating,wallinga2007generation}，
-所以即使没有任何政策，病例数或对数病例数上的平行趋势一般也不成立\citep{gauthier2021twfe,feng2024parallel}。
-政策实施对疫情有反应，政府看到病例上升才行动，政策因此依赖过去的结局，单元固定效应失去惯常的正当性
-\citep{imai2019fixed,nickell1981biases}。单元之间相互耦合，感染越过县界，邻居的政策改变接触模式
-\citep{hudgens2008interference,halloran2016dependent,aronow2017exposure}，忽略溢出时政策效应的估计会随之变动\citep{enriquez2025spillovers}。
+按县或地区汇总的报告病例面板是评估非药物干预的标准数据。COVID-19 期间，口罩令、居家令和营业限制的效果通常用事件研究、病例增长或对数病例的双向固定效应回归、县际比较和合成控制来估计
+\citep{lyu2020masks,hsiang2020anticontagion,chernozhukov2021masks,mitze2020masks}，这些做法都沿用政策评估中的双重差分逻辑\citep{callaway2021did,roth2023trending,haber2021impact}。
+疫情数据在三处同时动摇这一逻辑：传播自我激发，实施随疫情反应，单元之间相互感染；现有方法各自只处理其中一部分。
+本文把平行趋势移到带输入感染压力的更新模型的对数再生数上，用前向准差分矩同时处理这三处问题，在保留常规聚类稳健推断的同时，给出判断周度工作模型何时失效的诊断。
+三处问题的来源如下。一周内的病例由更早几周的病例经代际间隔生成\citep{wallinga2004different,fraser2007estimating,wallinga2007generation}，因此即使没有任何政策，病例数或对数病例数上的平行趋势一般也不成立\citep{gauthier2021twfe,feng2024parallel}。
+政府看到发病上升才实施政策，处理因此依赖过去的结局，单元固定效应失去惯常的依据\citep{imai2019fixed,zhang2025timevarying}。
+单元之间相互耦合，感染越过边界，邻居的命令改变接触模式\citep{hudgens2008interference,halloran2016dependent,aronow2017exposure}，忽略溢出时政策效应的估计随之偏移\citep{enriquez2025spillovers}。
 
-现有方法覆盖了其中的一部分。\citet{feng2024parallel} 把平行趋势放在对数有效再生数上，用队列而非瞬时病例定义再生数以对齐干预时点，
-并加入允许耗竭的对数传播力规格；作者指出未考虑溢出，而从报告病例估计的再生数继承了这一步的小计数与代际间隔问题
-\citep{gostic2020practical}。半机理的更新方程模型在生成模型内部估计干预效应，有贝叶斯形式
-\citep{flaxman2020npi,brauner2021npi,scott2021epidemia,bhatt2023semimech}，也有频率学形式
-\citep{bong2024frequentist}，识别来自模型本身和对观测过去的条件化\citep{bong2024augmented}，
-而不是来自消去未观测单元水平的比较；与此同路，\citet{callaway2023pandemic} 用 SIR 模型为给定滞后病例下的无混杂性提供依据，
-\citet{chernozhukov2021masks} 用结构因果模型处理增长率。带邻域项的计数模型，如地方性—流行性框架
-\citep{held2005hhh,meyer2014powerlaw,lu2023hhh4}与时空泊松自回归\citep{alaimo2024poissonar}，刻画的正是耦合，
-但不是为反馈下的识别设计的。当回归元只是前定时，准差分矩条件可以消去乘性单元效应
-\citep{chamberlain1992sequential,wooldridge1997multiplicative,windmeijer2000moment,blundell2002count}，这类方法曾被用于非流行病领域的类传染计数过程
-\citep{schweikert2021copycat}。带溢出的双重差分\citep{butts2021spatial,sun2025didnetwork}
-通过暴露映射在结局尺度上处理干扰，没有传播动力学，也没有病例到实施的反馈；承认处理对过去结局作出反应的时空数据框架，以及疫情结局与政策之间反馈的分析，也还没有引入更新结构。
+\citet{feng2024parallel} 把平行趋势放在基于队列的对数有效再生数上，未纳入溢出，且依赖第一步估计的再生数，后者有小计数与代际间隔偏倚\citep{gostic2020practical}。
+贝叶斯形式\citep{flaxman2020npi,brauner2021npi,bhatt2023semimech}或频率学形式\citep{bong2024frequentist,bong2024augmented}的半机理更新模型、以 SIR 模型为依据的无混杂性\citep{callaway2023pandemic}以及结构增长模型\citep{chernozhukov2021masks}，都以观测到的过去为条件，没有消去不受限制的单元效应。
+时空计数模型\citep{held2005hhh,meyer2014powerlaw,alaimo2024poissonar}刻画了耦合，没有处理反馈实施。
+\citet{kosfeld2021spatial} 用带区域溢出的病例增长空间双重差分估计德国防控措施的效果，\citet{sun2025didnetwork} 把网络双重差分用于美国县级口罩令；与其他网络与干扰设计\citep{butts2021spatial,forastiere2021network,xu2023did}相同，两者都在结局尺度上工作，没有更新动力学，也没有反馈实施。
+前定回归元下的准差分矩可以消去乘性单元效应\citep{chamberlain1992sequential,wooldridge1997multiplicative,windmeijer2000moment,blundell2002count}，但尚未与更新传播和空间传染结合。
 
-本文问的问题比“先估出再生数曲线、再对其做政策回归”更窄：什么时候病例面板可以直接识别传播尺度上的政策效应，
-以及这种识别要求什么成立。我们把本地感染压力与从邻居输入的感染压力放进更新方程，对准差分后的矩消去县固定效应，
-并用观测到的过去构造工具，使实施可以对更早的病例作出反应。由此区分两种失效：其一，样本中的矩无法可靠区分候选参数值，
-剖面把这一点暴露出来，选根规则加以处理；其二，观测尺度使工作模型本身不成立，此时该模型的任何估计量都不具备因果解释。
-县级口罩令应用正说明这一区分：能算出一个数，不等于这个面板支持对该数的因果解读。
+本文把这些成分整合为一个设计，并为它配备诊断。平行趋势放在更新方程的对数再生数上，其感染压力包括从邻近单元输入的病例；前向准差分消去不受限制的单元效应；工具变量只由观测到的过去构造，允许实施对更早的发病作出反应；政策溢出通过处于政策下的邻居比例进入。
+由此得到三项结果。在所陈述的、排除未建模同周跨集群传播的跨集群条件下，即使存在滞后的集群间传染，矩贡献仍按周构成鞅差阵列，常规聚类稳健夹心方差无需空间校正即可使用，周效应有闭式剖面解。
+在包含反馈实施、溢出、过度离散与小计数的预设模拟中，估计量复原直接效应，偏倚在 $-0.002$ 到 $0.001$ 之间，覆盖率为 94.5\% 到 95.4\%，而常用的比较方法存在偏倚。
+设计还附带能够显示自身工作模型何时失效的诊断：剖面传染方程揭示多根，过度识别检验对照校准参照分布解读，识别稳健集无需选根。
 
-相对于已有工作，本文的贡献不在于更换结果变量，而在于允许反馈的网络矩在什么条件下有效、它区分哪些参数，
-以及当它失效时有哪些诊断。在所陈述的跨集群依赖条件下（排除未建模的同周跨集群传播），矩贡献即使相邻集群交换感染，
-仍按周构成鞅差阵列，常规聚类夹心方差因此无需空间校正即可适用，周效应也可闭式消去。同一组矩给出当前所用估计量的伪真值，
-把两步回归的偏倚分成小计数部分与反馈部分，并说明泊松固定效应即使面对随机化实施也不相合；效应异质时，
-常数效应估计目标给各效应非负权重；效应在实施后累积时，事件时间规格逐格复原它们。另一个估计目标计数避免病例数，
-它把反事实经更新方程和网络传播，使一周内被防住的一次感染同时去掉它此后在本地和别处会引发的感染，并针对实现路径上的量给出推断。
-
-模拟研究在运行前固定设计与成功判据。它在实施反馈、溢出、过度离散和小计数并存时，把估计量与现行方法比较，
-并刻画不存在传染这一边界情形下估计方程的性质：此时剖面可能有多根，选根在报告中显式给出而不是暗中作出。
-对 2020 年美国州级口罩令与县级 COVID-19 病例的应用，在一项政策设于分析单元之上的面板上展示了这一设计。
-第~\ref{s:methods} 节给出模型、假设、估计量与理论；第~\ref{s:simulation} 节报告模拟；第~\ref{s:application} 节是应用；
-第~\ref{s:discussion} 节讨论设计的适用范围。证明、数值核对、补充结果、数据附录与少簇推断检查见网络附录 A--E。
+在美国州级口罩令的应用中，这些诊断在全国周效应与区域周效应下都拒绝了周度工作模型，所报告的政策层面总效应因此是周度拟合的概括量，不作因果解读；诊断同时指出，同周传播是周度模型无法处理的情形。
+第~\ref{s:methods}--\ref{s:discussion} 节依次给出理论、模拟、应用与设计的适用范围；网络附录 A--F 给出证明、改写的比较量结果、数值核对、补充模拟、数据、少簇推断与应用诊断。
 
 \section{方法}
 \label{s:methods}
@@ -95,42 +77,32 @@
 \subsection{设定、潜在结局与估计目标}
 
 单元 $i=1,\dots,N$（县）划分为 $G$ 个集群（州），$g(i)$ 表示单元 $i$ 所在集群，集群规模 $n_g$ 有界。
-周 $t=1-S,\dots,T$：周 $1,\dots,T$ 是估计窗口，前 $S$ 周只用于构造滞后。$Y_{it}$ 为报告的新增病例，
-$D_{it}\in\{0,1\}$ 为政策，$t\le 0$ 时 $D_{it}=0$（若单元在窗口开启前已暴露，如第~\ref{s:application} 节应用情形，则后文潜在结局与期望均以 $(Y_{\le 0},D_{\le 0})$ 为条件，$\mathbf 0$ 表示自第 $1$ 周起撤除政策）。$W=(W_{ij})$ 是已知、非负、行归一化的空间权重矩阵，
-对角为零，$\bar D_{it}=\sum_j W_{ij}D_{jt}$ 为处于政策下的邻居比例。给定已知的周代际间隔权重
-$w_1,\dots,w_S\ge0$、$\sum_s w_s=1$\citep{wallinga2007generation}，记
-\begin{gather*}
-L_{it}=\sum_{s=1}^{S} w_s Y_{i,t-s},\qquad
-N_{it}=\sum_{s=1}^{S} w_s \sum_{j} W_{ij}Y_{j,t-s},\\
-\Lambda_{it}(\phi)=L_{it}+\phi N_{it}+\omega_i ,
-\end{gather*}
-分别为本地、输入与总的感染压力，$\omega_i>0$ 为很小的已知外部输入项。取
-$\theta=(\gamma_2,\dots,\gamma_T,\tau,\kappa,\phi)$，其中 $\gamma_1=0$，并令
+周记为 $t=1-S,\dots,T$，其中周 $1,\dots,T$ 是估计窗口，此前 $S$ 周只用于构造滞后。$Y_{it}$ 为报告的新增病例，$D_{it}\in\{0,1\}$ 为政策，$t\le 0$ 时 $D_{it}=0$。
+若单元在第 1 周之前已暴露（如第~\ref{s:application} 节），下文的潜在结局与期望均以 $(Y_{\le 0},D_{\le 0})$ 为条件，$\mathbf 0$ 表示自第 $1$ 周起撤除政策。
+$W=(W_{ij})$ 是已知、非负、行归一化且对角为零的空间权重矩阵，$\bar D_{it}=\sum_j W_{ij}D_{jt}$ 为处于政策下的邻居比例。
+给定已知的周代际间隔权重 $w_1,\dots,w_S\ge 0$，$\sum_s w_s=1$\citep{wallinga2007generation}，本地、输入与总感染压力分别记为 $L_{it}=\sum_{s=1}^{S} w_s Y_{i,t-s}$、$N_{it}=\sum_{s=1}^{S} w_s \sum_{j} W_{ij}Y_{j,t-s}$ 与 $\Lambda_{it}(\phi)=L_{it}+\phi N_{it}+\omega_i$，其中 $\omega_i>0$ 为很小的已知背景输入项。
+取 $\theta=(\gamma_2,\dots,\gamma_T,\tau,\kappa,\phi)$，$\gamma_1=0$，均值函数定义如下：
 \begin{equation}
 m_{it}(\theta)=\exp(\gamma_t+\tau D_{it}+\kappa\bar D_{it})\,\Lambda_{it}(\phi).
 \label{eq:mean}
 \end{equation}
 
-潜在结局 $Y_{it}(\mathbf d)$ 以整个政策路径 $\mathbf d=(\mathbf d_1,\dots,\mathbf d_T)$、
-$\mathbf d_t\in\{0,1\}^N$ 为索引，从而允许单元间的干扰\citep{hudgens2008interference}。
-$H_{t-1}(\mathbf d)$ 为截至第 $t-1$ 周所有单元结局的潜在历史，$\Lambda_{it}(\mathbf d;\phi)$ 由它算出。
-单元效应 $\alpha=(\alpha_1,\dots,\alpha_N)$ 不可观测。所用的信息流为
+潜在结局 $Y_{it}(\mathbf d)$ 以整个政策路径 $\mathbf d=(\mathbf d_1,\dots,\mathbf d_T)$、$\mathbf d_t\in\{0,1\}^N$ 为索引，从而允许单元间的干扰\citep{hudgens2008interference}。
+$H_{t-1}(\mathbf d)$ 为截至第 $t-1$ 周所有单元结局的潜在历史，$\Lambda_{it}(\mathbf d;\phi)$ 由它算出。单元效应 $\alpha=(\alpha_1,\dots,\alpha_N)$ 不可观测。所用的信息流如下：
 \[
-\F_t=\sigma\bigl(\alpha,\ Y_{js}\ (j\le N,\ s\le t),\ D_{js}\ (j\le N,\ s\le t+1)\bigr),
+\F_t=\sigma\bigl(\alpha,\ Y_{js}\ (j\le N,\ s\le t),\ D_{js}\ (j\le N,\ s\le t+1)\bigr).
 \]
-其中包含在第 $t$ 周末决定、用于第 $t+1$ 周的政策。工具变量是 $\F_{t-1}$ 可观测部分的函数。
+它包含在第 $t$ 周末决定、用于第 $t+1$ 周的政策。工具变量是 $\F_{t-1}$ 可观测部分的函数。
 
-目标参数由假设 A1 的传播模型定义。\emph{直接传播效应} $\tau$ 是单元条件再生数
+目标参数由下文假设 A1 的传播模型定义。\emph{直接传播效应} $\tau$ 是单元条件再生数
 $R_{it}(\mathbf d)=\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d)\}/\Lambda_{it}(\mathbf d;\phi_0)$
-在本单元有无政策两种情形下的对数比，历史上与邻居政策保持不变。
-\emph{政策溢出} $\kappa$ 是邻居处于政策下的比例对应的同类效应，
-\emph{传染耦合} $\phi$ 是邻居近期病例的相对传染力。对实施后的单元—周集合 $\mathcal P$，
-\emph{避免病例数}定义为
+在本单元有无政策两种情形下的对数比，历史与邻居政策保持不变。\emph{政策溢出} $\kappa$ 是处于政策下的邻居比例的相应效应，\emph{传染耦合} $\phi$ 是邻居近期病例的相对传染力。
+对实施后单元周的集合 $\mathcal P$，\emph{避免病例数}定义如下：
 \begin{equation}
 \psi_{\mathcal P}=\E\sum_{(i,t)\in\mathcal P}\{Y_{it}(\mathbf 0)-Y_{it}\},
 \label{eq:psi}
 \end{equation}
-其中 $\mathbf 0$ 为处处无政策的路径；$\psi_{\mathcal P}$ 包含经更新过程的传播以及跨单元的传播。
+其中 $\mathbf 0$ 为处处无政策的路径；$\psi_{\mathcal P}$ 包含经更新过程和跨单元的传播。
 
 \subsection{假设}
 
@@ -142,556 +114,493 @@ $\E\{Y_{it}(\mathbf d)\mid \alpha,H_{t-1}(\mathbf d)\}=\exp(\alpha_i+\gamma_{t}+
 $\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d),D_{1:t}=\mathbf d_{1:t}\}=\E\{Y_{it}(\mathbf d)\mid\alpha,H_{t-1}(\mathbf d)\}$。
 \item[A3（一致性）] $Y_{it}=Y_{it}(D)$。
 \item[A4（集群间条件独立）] 对每个 $t$，给定 $\F_{t-1}$，集群向量 $(Y_{it})_{i:g(i)=g}$，$g=1,\dots,G$，相互独立。
-这排除了同一周内跨越集群边界的感染。网络附录 A.12 讨论该假设的作用以及放松后的后果。
-\item[A4$'$（局部依赖）] 设 $\mathcal C$ 为集群图：$g$ 与 $h$ 相邻，若存在 $i\in g$、$j\in h$ 使 $W_{ij}>0$，
-或 $g$ 的政策规则使用了 $h$ 的数据；其最大度数有界。(i) 集群的基本元件（单元效应与样本前结局、
-每周结局新息、每周政策随机化）跨集群独立，第 $t$ 周的结局新息与所有早于第 $t$ 周的基本元件以及
-第 $t$ 周的政策随机化独立。(ii) $D_{gt}$ 是 $g$ 的第 $t$ 周政策随机化与 $\mathcal C$ 中距 $g$ 不超过 $\rho$
-的集群在 $t$ 周之前历史的可测函数；$Y_{gt}$ 是 $g$ 的第 $t$ 周新息与单元效应、以及 $t$ 周之前结局与
-$t$ 周 $g$ 及其相邻集群政策的可测函数。
-\item[A5（压力为正）] 对所有 $i$、$t$ 与 $\phi\in[0,\bar\Phi]$，$\Lambda_{it}(\phi)\ge c>0$。$\bar\Phi$ 是 $\phi$ 参数空间的上界，区别于第~\ref{ss:estimation} 节的工具参考值 $\bar\phi$。
-\item[A6（正则性）] 见附录 A.1：参数空间紧、$\theta_0$ 为内点；矩的控制条件；极限 $\bar g$、$\Gamma$、$\Omega$
-存在，$\Omega$ 正定；$\bar g(\theta)=0$ 仅在 $\theta_0$ 处成立；$\Gamma$ 满秩。
+这排除了同一周内跨越集群边界的感染（网络附录 A.12）。在网络附录 A（A.1 节）所述的有界度局部依赖结构 A4$'$ 下，A4 成立并蕴含大数定律 (L)。
+\item[A5（压力为正）] 对所有 $i$、$t$ 与 $\phi\in[0,\bar\Phi]$，$\Lambda_{it}(\phi)\ge c>0$。$\bar\Phi$ 是 $\phi$ 参数空间的上界，区别于第~\ref{ss:estimation} 节定义的工具参考值 $\bar\phi$。
+\item[A6（正则性）] 见网络附录 A.1：参数空间紧且 $\theta_0$ 为内点；矩的控制条件；下文定义的极限 $\bar g$、$\Gamma$、$\Omega$ 存在且 $\Omega$ 正定；$\bar g(\theta)=0$ 仅在 $\theta_0$ 处成立；$\Gamma$ 满秩。
 \item[A7（报告）] 报告病例为 $Y_{it}=c_ic_tI_{it}$，其中 $I_{it}$ 为感染数，$c_i>0$ 为单元报告因子，$c_t>0$ 为周报告因子。
 \end{description}
 
-\subsection{准差分矩}\label{ss:moments}
+A1 要求未处理路径在对数尺度上平行（$\log R_{it}(\mathbf 0)=\alpha_i+\gamma_t$），同时允许与实施相关的任意单元水平 $\alpha_i$，以及不受限制的过度离散和聚集。
+A2(b) 是均值形式的序贯随机化\citep{robins2000msm,blackwell2018make}，允许政策依赖 $\alpha$ 与完整的过去历史 $\F_{t-1}$（反馈），但不依赖同期冲击；邻居政策通过 $\kappa$ 进入，因此各州各自应对所产生的协调效应\citep{holtz2020interdependence}属于估计目标的一部分。
+A4 允许集群内相关和滞后的跨集群传染，只排除未建模的同周跨集群冲击；当各州对全国总量作出反应时 A4$'$ 不成立，(L) 由此成为高层条件。只要 $\omega_i\ge c$，A5 即成立。
 
-对 $t=1,\dots,T-1$，令 $r_{it}(\theta)=m_{it}(\theta)/m_{i,t+1}(\theta)$，并定义前向准差分
-\citep{chamberlain1992sequential,wooldridge1997multiplicative}
+\begin{proposition}[报告率]
+\label{prop:ascertainment}
+设 A1 对感染数成立，感染压力为 $\Lambda^{I}_{it}$，报告病例满足 A7。再设报告压力使用背景项 $\omega^{Y}_{it}=c_ic_{t-1}\omega^{I}_i$，且 $\phi_0=0$ 或在 $W_{ij}>0$ 时总有 $c_i=c_j$。
+(a) 若 $s=1,\dots,S$ 时 $c_{t-s}=c_{t-1}$，则报告病例满足 A1，$\alpha_i$、$\tau_0$、$\kappa_0$、$\phi_0$ 不变，$\gamma_t$ 换为 $\gamma_t+\log(c_t/c_{t-1})$。
+(b) 否则 $|\log\Lambda^{Y}_{it}-\log(c_ic_{t-1}\Lambda^{I}_{it})|\le\max_{1\le s\le S}|\log(c_{t-s}/c_{t-1})|$，第 $t$ 周对数再生数的误差不超过代际窗口内报告率的最大相对变化。
+\end{proposition}
+
+命题~\ref{prop:ascertainment} 假定报告是确定性的且没有延迟；在二项稀疏化下 A1 只近似成立，当 $\omega_i\ll L_{it}$ 时，固定的 $\omega_i$ 近似满足 $\omega^Y_{it}$ 所需的缩放。
+在美国县这样连通的邻接图上，所有邻居满足 $c_i=c_j$ 意味着全国统一的单元报告因子，因此 $\phi_0>0$ 时该命题涵盖检测量的时间趋势，不涵盖县间报告率差异，也不涵盖随政策改变的报告；后者的临界点见第~\ref{s:application} 节。
+
+\subsection{准差分矩}
+\label{ss:moments}
+
+对 $t=1,\dots,T-1$，令 $r_{it}(\theta)=m_{it}(\theta)/m_{i,t+1}(\theta)$。前向准差分\citep{chamberlain1992sequential,wooldridge1997multiplicative}定义如下：
 \begin{equation}
 u_{it}(\theta)=Y_{i,t+1}\,r_{it}(\theta)-Y_{it}.
 \label{eq:qd}
 \end{equation}
 
-\begin{lemma}[观测数据模型与矩]\label{lem:moment}
-在 A1--A3 下，对 $t\ge1$ 有 $\E(Y_{it}\mid\F_{t-1})=\mu_{it}:=e^{\alpha_i}m_{it}(\theta_0)$；
-若 $\E|Y_{i,t+1}r_{it}(\theta_0)|<\infty$，则准差分 \eqref{eq:qd} 对 $t=1,\dots,T-1$ 满足
-$\E\{u_{it}(\theta_0)\mid\F_{t-1}\}=0$。
+\begin{lemma}[观测数据模型与矩]
+\label{lem:moment}
+在 A1--A3 下，对 $t\ge 1$ 有 $\E(Y_{it}\mid\F_{t-1})=\mu_{it}:=e^{\alpha_i}m_{it}(\theta_0)$；若 $\E|Y_{i,t+1}r_{it}(\theta_0)|<\infty$，则准差分 \eqref{eq:qd} 对 $t=1,\dots,T-1$ 满足 $\E\{u_{it}(\theta_0)\mid\F_{t-1}\}=0$。
 \end{lemma}
 
-由于 $r_{it}$ 是均值的比值，$e^{\alpha_i}$ 被消去，$\alpha_i$ 既不需要估计也不需要知道。
-设 $z_{it}$ 为 $q$ 维 $\F_{t-1}$ 可测工具变量，记集群贡献与样本矩为
+由于 $r_{it}$ 是均值之比，单元效应 $e^{\alpha_i}$ 相消。面向序贯外生回归元乘性面板的前向准差分源自\citet{wooldridge1997multiplicative} 与\citet{windmeijer2000moment}；本文把它嵌入带空间传染与政策干扰的更新均值。
+设 $z_{it}$ 为 $q$ 维、$\F_{t-1}$ 可测的工具变量。集群贡献与样本矩如下：
 \[
 g_g(\theta)=\sum_{i:g(i)=g}\sum_{t=1}^{T-1} z_{it}u_{it}(\theta),\qquad
 \hat g(\theta)=G^{-1}\sum_{g=1}^{G}g_g(\theta).
 \]
-记 $\varepsilon_{is}=Y_{is}-\mu_{is}$、$r_{is}=r_{is}(\theta_0)$。
+记 $\varepsilon_{is}=Y_{is}-\mu_{is}$，$r_{is}=r_{is}(\theta_0)$。
 
-\begin{lemma}[鞅表示]\label{lem:mds}
-在 A1--A3 下，$g_g(\theta_0)=\sum_{s=1}^{T}\xi_{gs}$，其中
+\begin{lemma}[鞅表示]
+\label{lem:mds}
+在 A1--A3 下，$g_g(\theta_0)=\sum_{s=1}^{T}\xi_{gs}$，其中 $\xi_{gs}=\sum_{i:g(i)=g}a_{is}\varepsilon_{is}$，权重如下，且为 $\F_{s-1}$ 可测：
 \[
-\xi_{gs}=\sum_{i:g(i)=g}a_{is}\varepsilon_{is},\qquad
-a_{is}=z_{i,s-1}r_{i,s-1}\ind(s\ge 2)-z_{is}\ind(s\le T-1),
+a_{is}=z_{i,s-1}r_{i,s-1}\ind(s\ge 2)-z_{is}\ind(s\le T-1).
 \]
-且 $a_{is}$ 为 $\F_{s-1}$ 可测。于是 $\E(\xi_{gs}\mid\F_{s-1})=0$，
-$\E(g_gg_g^{\top})=\sum_s\E(\xi_{gs}\xi_{gs}^{\top})$。若再有 A4，则对 $g\ne h$ 有
-$\E\{g_g(\theta_0)g_h(\theta_0)^{\top}\}=0$。
+于是 $\E(\xi_{gs}\mid\F_{s-1})=0$，且
+\[
+\E(g_g{g_g}^{\top})=\sum_{s}\E(\xi_{gs}{\xi_{gs}}^{\top}).
+\]
+若 A4 也成立，则对 $g\ne h$ 有 $\E\{g_g(\theta_0)g_h(\theta_0)^{\top}\}=0$。
 \end{lemma}
 
-引理~\ref{lem:mds} 是传染下推断的关键。相邻集群的结局是相关的，因为一方的病例为另一方的疫情播下种子，
-这一相关在附录 B 的数值核对中清晰可见；但它们的矩贡献不相关，因为每个贡献都是新息经前定量加权后的和。
-常规的聚类稳健方差因此继续有效，$\hat\theta$ 不需要空间 HAC 校正。
+滞后传染使相邻集群的原始结局相关（网络附录 B），但在 A4 下集群得分向量仍不相关，因此聚类稳健方差无需空间 HAC 校正即可成立。
 
-\subsection{识别}\label{ss:ident}
+\subsection{识别}
+\label{ss:ident}
 
-令 $x_{it}(\phi)=(D_{it},\bar D_{it},N_{it}/\Lambda_{it}(\phi))^{\top}$，$e_t$ 为第 $t$ 个长度为 $T-1$ 的单位向量，
-把周效应用 $\delta_t=\gamma_{t+1}-\gamma_t$ 参数化，于是 $\theta=(\delta^{\top},\beta^{\top})^{\top}$，
-$\beta=(\tau,\kappa,\phi)^{\top}$，$p=T+2$。则
+令 $x_{it}(\phi)=(D_{it},\bar D_{it},N_{it}/\Lambda_{it}(\phi))^{\top}$，$e_t$ 为长度 $T-1$ 的第 $t$ 个单位向量；把周效应参数化为 $\delta_t=\gamma_{t+1}-\gamma_t$，于是 $\theta=(\delta^{\top},\beta^{\top})^{\top}$，$\beta=(\tau,\kappa,\phi)^{\top}$，$p=T+2$。准差分的导数如下：
 \begin{equation}
-\frac{\partial u_{it}(\theta)}{\partial\theta^{\top}}=Y_{i,t+1}r_{it}(\theta)\bigl\{-e_t^{\top},\,x_{it}(\phi)^{\top}-x_{i,t+1}(\phi)^{\top}\bigr\}.
+\frac{\partial u_{it}(\theta)}{\partial\theta^{\top}}=Y_{i,t+1}r_{it}(\theta)\bigl\{-{e_t}^{\top},\,x_{it}(\phi)^{\top}-x_{i,t+1}(\phi)^{\top}\bigr\}.
 \label{eq:jac}
 \end{equation}
-此后 $\lim$ 均指 $G\to\infty$ 下的极限。令 $\bar g(\theta)=\lim G^{-1}\sum_g\E g_g(\theta)$，
-$\Gamma=\partial\bar g(\theta_0)/\partial\theta^{\top}$。在吸收式实施下，记
-$\Sw_{i,t+1}=\ind(D_{it}=0,D_{i,t+1}=1)$ 为切换者。
+此后 $\lim$ 均指 $G\to\infty$ 时的极限。令 $\bar g(\theta)=\lim G^{-1}\sum_g\E g_g(\theta)$，$\Gamma=\partial\bar g(\theta_0)/\partial\theta^{\top}$。在吸收式实施下，记切换者为 $\Sw_{i,t+1}=\ind(D_{it}=0,D_{i,t+1}=1)$。
 
-\begin{theorem}[识别]\label{thm:ident}
-假设 A1--A3、A5 与 A6。(a) $\bar g(\theta_0)=0$，且雅可比为
+\begin{theorem}[识别]
+\label{thm:ident}
+假设 A1--A3、A5 与 A6。
+(a) $\bar g(\theta_0)=0$，雅可比矩阵由下式给出：
 \[
-\Gamma=\lim G^{-1}\sum_g\E\sum_{i\in g}\sum_{t}z_{it}\mu_{it}\{-e_t^{\top},x_{it}^{\top}-x_{i,t+1}^{\top}\}.
+\Gamma=\lim G^{-1}\sum_g\E\sum_{i\in g}\sum_{t}z_{it}\mu_{it}\{-{e_t}^{\top},x_{it}^{\top}-x_{i,t+1}^{\top}\}.
 \]
-若 $\operatorname{rank}\Gamma=p$，则 $\theta_0$ 是 $\bar g$ 在 $\theta_0$ 某邻域内的唯一零点；
-若在邻域内恒有 $\operatorname{rank}\partial\bar g(\theta)/\partial\theta^{\top}=r<p$，则 $\theta_0$ 局部不可识别。
-(b) 设实施为吸收式，固定 $(\kappa,\phi)=(\kappa_0,\phi_0)$，使用工具 $s_{it}e_t$ 与 $s_{it}D_{it}$，
-$s_{it}>0$ 且 $\F_{t-1}$ 可测，并用周矩解出 $\delta$。令
-$A_t=\lim G^{-1}\E\sum_i s_{it}D_{it}\mu_{it}$、$K_t=\lim G^{-1}\E\sum_i s_{it}\mu_{it}\Sw_{i,t+1}$，
-若有某个 $t$ 使 $A_t>0$、$K_t>0$，则 $\tau$ 的剖面矩严格递增，$\tau_0$ 是其在 $\mathbb R$ 上的唯一根。
+若 $\operatorname{rank}\Gamma=p$，则 $\theta_0$ 是 $\bar g$ 在 $\theta_0$ 某邻域内的唯一零点；若在 $\theta_0$ 的某邻域内恒有 $\operatorname{rank}\partial\bar g(\theta)/\partial\theta^{\top}=r<p$，则 $\theta_0$ 局部不可识别。
+(b) 设实施为吸收式，固定 $(\kappa,\phi)=(\kappa_0,\phi_0)$，使用工具 $s_{it}e_t$ 与 $s_{it}D_{it}$（$s_{it}>0$ 且 $\F_{t-1}$ 可测），并由周矩解出 $\delta$。
+令 $A_t=\lim G^{-1}\E\sum_i s_{it}D_{it}\mu_{it}$，$K_t=\lim G^{-1}\E\sum_i s_{it}\mu_{it}\Sw_{i,t+1}$。若有某个 $t$ 使 $A_t>0$ 且 $K_t>0$，则 $\tau$ 的剖面矩严格递增，$\tau_0$ 是它在 $\mathbb R$ 上的唯一根。
 \end{theorem}
 
-(a) 部分是\citet{rothenberg1971identification} 的矩条件版本。(b) 部分指出 $\tau$ 的信息来自何处，
-下一个结果把这一点讲明。
+下一个结果说明 $\tau$ 的信息来自何处。
 
-\begin{proposition}[识别来源]\label{prop:sources}
-假设 A1--A3 且实施为吸收式。(a) 若 $D_{it}=D_{i,t+1}$，则 $u_{it}(\theta)$ 不依赖 $\tau$。
+\begin{proposition}[识别来源]
+\label{prop:sources}
+假设 A1--A3 且实施为吸收式。
+(a) 若 $D_{it}=D_{i,t+1}$，则 $u_{it}(\theta)$ 不依赖 $\tau$。
 (b) $\Gamma$ 的 $\tau$ 列为 $-\lim G^{-1}\sum_g\E\sum_{i\in g}\sum_t z_{it}\mu_{it}\Sw_{i,t+1}$。
-(c) 对前导变量 $D_{i,t+1}$（$\F_t$ 可测而非 $\F_{t-1}$ 可测）以及任意 $\F_{t-1}$ 可测的 $z_{it}$，
-$\E\{z_{it}D_{i,t+1}u_{it}(\theta_0)\}=-\E\{z_{it}\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})\}$。
+(c) 对前导变量 $D_{i,t+1}$（$\F_t$ 可测而非 $\F_{t-1}$ 可测）和任意 $\F_{t-1}$ 可测的 $z_{it}$，$\E\{z_{it}D_{i,t+1}u_{it}(\theta_0)\}=-\E\{z_{it}\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})\}$。
 \end{proposition}
 
-已接受处理且维持不变的单元不提供 $\tau$ 的直接信息，它们只通过周效应进入，而周效应由所有单元共同钉住。
-效应信息来自切换者病例相对共同时期的增长。(c) 部分说明常用的前导安慰剂检验在反馈下\emph{失效}：
-当实施对当期高病例作出反应时 $\cov(D_{i,t+1},\varepsilon_{it}\mid\F_{t-1})>0$，
-即使模型正确，前导矩也取负值。只有实施日期提前至少两周确定时，前导才是有效的安慰剂工具。
-在反馈下，本文改用推论~\ref{cor:J} 的过度识别统计量，并借助额外的前定工具变量完成检验。
+切换者直接识别 $\tau$，一阶权重与切换时的期望病例数成正比，即 $s_{it}\mu_{it}\Sw_{i,t+1}$，因此大规模暴发的权重更大；已处理且维持不变的单元只通过共同周效应提供 $\tau$ 的信息；时不变的异质效应 $\tau_i$ 获得非负权重（命题~\ref{prop:hetero}）。
+效应随时间动态变化时，汇聚估计目标在一阶上是各事件时间效应的加权和，权重之和为一但可以为负（网络附录 A.10；\citealp{goodmanbacon2021did,sun2021estimating}），因此本文推荐事件时间规格 M0-ET。
+吸收式实施只在定理~\ref{thm:ident}(b) 与命题~\ref{prop:sources} 中需要，定理~\ref{thm:ident}(a) 与定理~\ref{thm:asy} 对任意二元路径成立。
+(c) 部分表明前导安慰剂检验在反馈下\emph{无效}：若实施跟随升高的病例，即使模型设定完全正确，前导矩也为负，因此设定检验改用推论~\ref{cor:J} 的 $J$ 检验。
 
-\subsection{估计与推断}\label{ss:estimation}
+\subsection{估计与推断}
+\label{ss:estimation}
 
-默认工具变量为
-$z_{it}=s_{it}\{e_t^{\top},D_{it},\bar D_{it},\bar\phi N_{it}/\Lambda_{it}(\bar\phi)\}^{\top}$，
-尺度权重 $s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$，参考值 $\bar\phi$ 取 0.5。此时 $q=p$，
-估计量 $\hat\theta$ 解 $\hat g(\theta)=0$。给定 $\beta$ 时，周矩有闭式解
+默认工具变量为 $z_{it}=s_{it}\{{e_t}^{\top},D_{it},\bar D_{it},\bar\phi N_{it}/\Lambda_{it}(\bar\phi)\}^{\top}$，尺度权重 $s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$，$\bar\phi$ 为参考值。此时 $q=p$，估计量 $\hat\theta$ 解 $\hat g(\theta)=0$。给定 $\beta$ 时，周矩有如下闭式解：
 \begin{equation}
 e^{\hat\delta_t(\beta)}=\frac{\sum_i s_{it}Y_{i,t+1}q_{it}(\beta)}{\sum_i s_{it}Y_{it}},
 \label{eq:profile}
 \end{equation}
-其中 $q_{it}(\beta)=e^{\tau(D_{it}-D_{i,t+1})+\kappa(\bar D_{it}-\bar D_{i,t+1})}\Lambda_{it}(\phi)/\Lambda_{i,t+1}(\phi)$，
-因此只需在 $\beta$ 上做三维求根。由 \eqref{eq:jac} 解析计算
-$\hat\Gamma=G^{-1}\sum_g\partial g_g(\hat\theta)/\partial\theta^{\top}$，
-及 $\hat\Omega=G^{-1}\sum_g g_g(\hat\theta)g_g(\hat\theta)^{\top}$，方差估计为
-$\hat V=\{G/(G-1)\}\hat\Gamma^{-1}\hat\Omega\hat\Gamma^{-\top}/G$，置信区间用 $t_{G-1}$ 临界值，
-这是\citet{cameron2015practitioner} 推荐的小集群调整。对 $q>p$ 的过度识别版本，
-$\hat\theta$ 最小化 $\hat g(\theta)^{\top}\hat W\hat g(\theta)$。
+其中 $q_{it}(\beta)=e^{\tau(D_{it}-D_{i,t+1})+\kappa(\bar D_{it}-\bar D_{i,t+1})}\Lambda_{it}(\phi)/\Lambda_{i,t+1}(\phi)$，因此只需在 $\beta$ 上做三维求根。
+由 \eqref{eq:jac} 解析计算 $\hat\Gamma=G^{-1}\sum_g\partial g_g(\hat\theta)/\partial\theta^{\top}$，并取 $\hat\Omega=G^{-1}\sum_g g_g(\hat\theta)g_g(\hat\theta)^{\top}$，方差估计为 $\hat V=\{G/(G-1)\}\hat\Gamma^{-1}\hat\Omega\hat\Gamma^{-\top}/G$，置信区间用 $t_{G-1}$ 临界值。
+过度识别版本（$q>p$）最小化 $\hat g(\theta)^{\top}\hat W\hat g(\theta)$，只用少量额外工具作设定检验；工作最优工具与有效 GMM 见网络附录 A.5。
 
-全部可用工具变量下的有效两步 GMM 不是本文的主估计量。州数只有 $G\approx49$，矩有 $T+2$ 个以上，
-估计出的最优权重矩阵接近奇异，两步标准误已知偏小\citep{windmeijer2005finite}。
-过度识别只用于检验，取少量的额外工具变量。
-
-\begin{theorem}[渐近性质]\label{thm:asy}
-假设 A1--A6，并满足 A4$'$ 或附录 A.1 的高层大数定律 (L)。设 $\hat W\to_p W$ 正定（$q=p$ 时取 $W=I$）。
+\begin{theorem}[渐近性质]
+\label{thm:asy}
+假设 A1--A6，并满足 A4$'$ 或网络附录 A.1 的高层大数定律 (L)。设 $\hat W\to_p W$ 正定（$q=p$ 时 $W=I$）。
 (a) $\hat\theta\to_p\theta_0$。
-(b) $\sqrt G(\hat\theta-\theta_0)=G^{-1/2}\sum_g\varphi_g+o_p(1)\to_d N(0,V)$，影响函数为
-$\varphi_g=-(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}Wg_g(\theta_0)$，
-$V=(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}W\Omega W\Gamma(\Gamma^{\top}W\Gamma)^{-1}$，其中
-\[
-\Omega=\lim G^{-1}\sum_g\E\{g_g(\theta_0)g_g(\theta_0)^{\top}\}=\lim G^{-1}\sum_g\sum_s\E(\xi_{gs}\xi_{gs}^{\top}).
-\]
+(b) $G^{1/2}(\hat\theta-\theta_0)=G^{-1/2}\sum_g\varphi_g+o_p(1)\to_d N(0,V)$，影响函数为 $\varphi_g=-(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}Wg_g(\theta_0)$，$V=(\Gamma^{\top}W\Gamma)^{-1}\Gamma^{\top}W\Omega W\Gamma(\Gamma^{\top}W\Gamma)^{-1}$，其中 $\Omega=\lim G^{-1}\sum_g\E\{g_g(\theta_0)g_g(\theta_0)^{\top}\}=\lim G^{-1}\sum_g\sum_s\E(\xi_{gs}{\xi_{gs}}^{\top})$。
 恰好识别时 $\varphi_g=-\Gamma^{-1}g_g(\theta_0)$，$V=\Gamma^{-1}\Omega\Gamma^{-\top}$。
-(c) $\hat\Gamma\to_p\Gamma$、$\hat\Omega\to_p\Omega$，故 $G\hat V\to_p V$。
+(c) $\hat\Gamma\to_p\Gamma$，$\hat\Omega\to_p\Omega$，故 $G\hat V\to_p V$。
 \end{theorem}
 
-\begin{corollary}[过度识别检验]\label{cor:J}
-在定理~\ref{thm:asy} 的条件下，取 $q>p$、$\hat W=\tilde\Omega^{-1}$（$\tilde\Omega$ 在一致的第一步估计处计算），
-则 $J=G\,\hat g(\hat\theta)^{\top}\hat W\hat g(\hat\theta)\to_d\chi^2_{q-p}$。
+\begin{corollary}[过度识别检验]
+\label{cor:J}
+在定理~\ref{thm:asy} 的条件下取 $q>p$，$\hat W=\tilde\Omega^{-1}$ 在一致的第一步估计处计算，则 $J=G\,\hat g(\hat\theta)^{\top}\hat W\hat g(\hat\theta)\to_d{\chi^2}_{q-p}$。
 \end{corollary}
 
-中心极限一步在 $T$ 个周块上使用鞅论证，并在每个块内跨集群使用条件 Lindeberg 论证（附录 A 引理 4，块中心极限定理），
-论证自足，无需援引一般鞅中心极限定理的嵌套条件\citep{hall1980martingale}；
-集群独立时即化为标准的聚类样本理论\citep{hansen2019clustered}。
-依赖第一步估计的工具变量，例如由首轮估计得到的 $\bar\phi=\hat\phi$ 或预测的实施风险，
-不改变 $V$（附录 A 引理 5，估计工具变量），因为前定工具变量的导数与 $u_{it}(\theta_0)$ 正交。
+中心极限一步把跨周块的鞅论证与跨集群的条件 Lindeberg 论证结合起来（网络附录 A 引理 4）；$\bar\phi=\hat\phi$ 这类估计得到的前定工具不改变 $V$（网络附录 A 引理 5）。
 
-\begin{remark}[工作最优工具变量]\label{rem:optimal}
-忽略 $u_{it}$ 与 $u_{i,t+1}$ 的相关、采用泊松工作方差时，
-$\E\{\partial u_{it}/\partial\theta\mid\F_{t-1}\}=\mu_{it}\{-e_t,x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}$，
-$\operatorname{var}(u_{it}\mid\F_{t-1})=\mu_{it}\{1+\E(r_{it}\mid\F_{t-1})\}$，
-于是工作最优工具 $\{x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}/\{1+\E(r_{it}\mid\F_{t-1})\}$ 不含 $\alpha_i$。
-其政策分量是预测的切换风险，可在第一步估计（附录 A 引理 5，估计工具变量）。序贯矩约束下的完全有效工具需要前向正交化
-\citep{chamberlain1992sequential,chamberlain2022feedback}，本文不推导效率界。
-完整的泊松似然下存在更抗反馈的矩\citep{bonhomme2025feedback}；本文的条件均值模型只用准差分矩。
-\end{remark}
+定理~\ref{thm:asy} 涵盖内点且全局识别的情形。零传染 $\phi_0=0$ 位于边界，违反 A6(i)；在零传染模拟设计中，总体矩还有第二个根，其位置随 $\bar\phi$ 移动（第~\ref{ss:simresults} 节），全局识别不成立；在边界处选根之后的推断不在定理覆盖范围内。
+定理~\ref{thm:asy} 也是大 $G$ 结果：在 A4$'$ 下，网络附录 A 引理 3 的依赖半径至少为 28 个集群步，超过第~\ref{s:application} 节 49 州邻接图的直径 11，因此在该应用中 (L) 是一项假设，不能由 A4$'$ 推出。
 
-\subsection{计算、变体与选根}\label{ss:computation}
+网络附录 A.9--A.12 把已知结果改写到更新均值上。定理~\ref{thm:bias} 给出四种比较量的伪真值：两步对数 $R$ 回归（把\citet{feng2024parallel} 的小计数 Jensen 差与 Nickell 型反馈项分开）、泊松固定效应（前定回归元下经典的固定 $T$ 不相合\citep{wooldridge1997multiplicative,blundell2002count}，在随机化下举例说明）、$\log(Y+1)$ 双向固定效应，以及无溢出的 QD-GMM。
+命题~\ref{prop:hetero} 改写\citet{goodmanbacon2021did} 与\citet{dechaisemartin2020twfe} 的加权分析：把 $(\kappa,\phi)$ 固定在真值时，一阶展开在时不变单元异质 $\tau_i$ 下给出非负权重；注~\ref{rem:dynamic} 把\citet{sun2021estimating} 改写到事件时间分箱。
+定理~\ref{thm:psi} 让反事实避免病例数沿更新网络传播，实现路径目标 $\psi^\dagger_{\mathcal P}$ 的推断是定理~\ref{thm:asy} 的 delta 方法推论。网络附录 A.12 讨论周内传播。
 
-主估计量 M0 用第~\ref{ss:estimation} 节的工具变量和预先设定的参考值 $\bar\phi=0.5$，
-从固定初值出发对 $\beta$ 做局部求根，$\gamma$ 由 \eqref{eq:profile} 剖面消去。
-另用三个变体做核对，均在事前固定。M0-OI 增加两个前定工具，
-$s_{it}N_{i,t-1}/\Lambda_{i,t-1}(\bar\phi)$ 与 $s_{it}\log\{(Y_{i,t-1}+0.5)/(Y_{i,t-2}+0.5)\}$，
-用两步 GMM 估计，其作用是提供推论~\ref{cor:J} 的 $J$ 统计量。
-M0-ET 把 $\tau D_{it}$ 换为事件时间效应 $\tau_0,\dots,\tau_5$ 与六周及以上的合并效应，对应注~\ref{rem:dynamic}。
-M0$'$ 强加 $\kappa=\phi=0$，对应定理~\ref{thm:bias}(d)。
+\subsection{计算、变体与选根}
+\label{ss:computation}
 
-定理~\ref{thm:ident} 是局部结果，A6 假定 $\theta_0$ 为内点。单元间无传染（$\phi_0=0$）时真值位于参数空间边界，
-估计方程可能有多个根，其中至多一个是相合的\citep{small2000multiple}，边界取值还会改变估计量的极限分布
-\citep{self1987boundary,andrews1999boundary}。为此预先设定了全局版本 M0-G：在 $[0,3]$ 上取 $\phi$ 网格，
-逐点剖面出 $(\gamma,\tau,\kappa)$ 并计算剩下的 $\phi$ 方程；网格上的每次变号都细化成一个根，
-边界点 $\phi=0$ 作为候选加入；在候选中选出 M0-OI 工具下过度识别准则 $Q$ 最小者，
-这一做法源自用拟合优度准则在多个根之间选择\citep{heyde1998multiple}。推断以所选候选为条件，
-选中边界时如实报告，并给出 $\phi$ 的无 Wald 区间。
+主估计量 M0 使用第~\ref{ss:estimation} 节的工具变量，取 $\bar\phi=0.5$，从固定初值出发求解三维剖面方程组。三个预设变体用于核对：M0-OI 在两步 GMM 中加入 $s_{it}N_{i,t-1}/\Lambda_{i,t-1}(\bar\phi)$ 与 $s_{it}\log\{(Y_{i,t-1}+0.5)/(Y_{i,t-2}+0.5)\}$，用于计算 Hansen 的 $J$；M0-ET 把 $\tau D_{it}$ 换为事件时间效应 $\tau_0,\dots,\tau_5$ 与 $\tau_{6+}$（注~\ref{rem:dynamic}）；M0$'$ 强加 $\kappa=\phi=0$（定理~\ref{thm:bias}(d)）。
 
-第~\ref{s:simulation} 节的模拟表明，这一预设规则不够。因此另报告 M0-GI，它在中期结果可见之后设计，全文标注为事后规则。
-它使用与 M0-G 相同的候选，但 $Q$ 由 M0 的矩加上经尺度加权、参考值取 0.05 与 2.0 的 $\phi$ 工具构成，即
-$s_{it}N_{it}/\Lambda_{it}(0.05)$ 与 $s_{it}N_{it}/\Lambda_{it}(2.0)$，$s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$。理由来自引理~\ref{lem:moment}：
-任意前定工具形成的矩在 $\theta_0$ 处均值都为零，与参考值无关；
-而一个只解出 $\bar\phi$ 工具方程的虚假根不必解出其他参考值下的方程。
-由于选根规则在看过结果之后才定，其表现需要在不用于设计的数据上确认。
-网格上的剖面 $\phi$ 矩连同 $Q$ 一起显示是否存在多于一个根；应用部分（第~\ref{s:application} 节）两者都报告。
-
-应用工作中，这套规则可落为如下顺序，建议完整报告。(1) 从固定初值拟合 M0，记录局部解。
-(2) 在实现所用的 19 个非等距网格点上计算剖面方程：
-\[
-\begin{aligned}
-\phi\in\{&0,0.02,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5,0.6,\\
-        &0.7,0.8,1,1.25,1.5,2,2.5,3\}.
-\end{aligned}
-\]
-对相邻网格点间的变号，以完整矩方程求根精化，并将 $\phi=0$ 作为边界候选纳入比较。
-(3) 若剖面只有一次内部变号，报告 M0 及其聚类稳健区间，并附剖面图作为诊断；该网格搜索不保证发现所有根。
-(4) 若有多次变号，报告全部候选根与各自的 $Q$ 值，并说明结论以所选根为条件；所选候选在边界时，
-声明 $\phi$ 无区间。(5) 无论何种情形都报告过度识别统计量 $J$，因为它对部分形式误设有检验力，
-但在模拟中对虚假根的检验力很低。对 $H_0:\phi_0=0$ 的得分检验本可作为第 (3) 步的前置检验，
-本文未推导，此处由剖面承担这一角色。
-
-三处结果在模拟和应用中用到，推导与证明放在网络附录 A，便于与证明对照阅读。第~\ref{s:simulation} 节的比较量有与 $\theta_0$ 不同的伪真值：两步对数传播回归累积了小计数项和反馈项，
-泊松固定效应在固定 $T$ 下不相合，因为它的偏移量是滞后结局（网络附录 A.9）。效应时不变但异质时，常数效应估计目标是各单元效应的凸组合，没有单元获得负权重；
-效应在实施后累积时，定理~\ref{thm:asy} 的事件时间规格逐格复原它们（网络附录 A.10）。避免病例数由反事实定义，反事实经更新方程和网络传播；
-递推在政策直接或经由邻居到达某单元之前保持该单元序列不变，因此不必选择反事实的起始日，推断针对实现路径上的量，其期望是总体目标（网络附录 A.11）。
-假设 A4 约束的是新息而不是结局：相邻集群通过 $\bar D$ 与 $\Lambda$ 共享历史，引理~\ref{lem:mds} 把每个矩贡献乘以一个 $\F_{s-1}$ 可测因子，
-A4 排除的是在观测周内跨过集群边界的感染。第~\ref{ss:sameweek} 节度量排除这一情形的代价（网络附录 A.12）。
+定理~\ref{thm:ident} 是局部结果，而 $\phi_0=0$ 位于 $[0,\bar\Phi]$ 的边界，因此无传染时方程可以有多个根，其中至多一个相合\citep{small2000multiple}，边界还会改变渐近分布（网络附录 A.1）。
+求解器只要求 $\Lambda_{it}(\phi)>0$，所以可能得到 $\hat\phi<0$ 的拟合，出现时如实报告；在一个零传染设计中，约 0.1\% 的重复出现了这种情况。
+本文预设了全局搜索 M0-G：在 $\phi\in[0,3]$ 的 19 点网格上（网络附录 C）剖面消去 $(\gamma,\tau,\kappa)$，把 $\phi$ 方程在相邻网格点间的变号细化为根，并把 $\phi=0$ 作为边界候选，在候选中选出使 M0-OI 准则 $Q$ 最小者\citep{heyde1998multiple}；选中边界时不给出 $\phi$ 的 Wald 区间。
+在中期结果出现边界失败之后，本文加入事后变体 M0-GI。它使用相同的候选，但把 $Q$ 中 M0-OI 的额外工具换为 $s_{it}N_{it}/\Lambda_{it}(0.05)$ 与 $s_{it}N_{it}/\Lambda_{it}(2.0)$（$s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$）；由引理~\ref{lem:moment}，有效根在任意参考值下都满足矩条件，由 $\bar\phi$ 诱导的虚假根则未必。
+M0-G 与 M0-GI 是没有理论保证的选根启发式规则，选根之后的推断不在定理~\ref{thm:asy} 覆盖范围内。
+无需选根的置信集由 Stock--Wright $S$ 统计量\citep{stock2000weak}在 $\phi$ 网格上反演得到，周效应、$\tau$ 与 $\kappa$ 剖面消去，再投影到 $\tau+\kappa$ 上（网络附录 F）。
+应用工作按以下顺序报告：(1) 拟合 M0；(2) 在 $[0,3]$ 网格上检查剖面 $\phi$ 矩与 $Q$；(3) 若只有一个内部交点，报告 M0，否则报告全部候选根及其 $Q$ 值；(4) 报告 $\phi$ 与 $\tau+\kappa$ 的 $S$ 集；(5) 报告 $J$，并给出按应用校准的模拟所得参照分布。
 
 \section{模拟研究}
 \label{s:simulation}
 
-设计遵循\citet{morris2019ademp} 的 ADEMP 结构：目标、数据生成机制、估计目标、方法、性能指标与成功判据在任何完整运行之前就已确定，偏离之处在本节末尾列出。
+设计遵循\citet{morris2019ademp}；目标、生成器、估计目标、比较方法与成功判据在完整运行之前就已设定。
 
 \subsection{设计}
 
-所有情景共用一个生成器。县在单位正方形内均匀分布，每个县与最近的六个邻居相连；图经对称化后，行归一化的邻接矩阵取为 $W$。
-50 条空间连续的县带充当州。单元效应包含一个州分量、一个县分量，以及一项与该州实施倾向成正比的项，因此实施与传播水平相关。
-结局服从 \eqref{eq:mean}，其中 $S=2$，代际间隔权重为 $(0.85,0.15)$，背景输入与人口成正比，扰动取形状 $k=10$ 的负二项分布，或以 $k=\infty$ 为极限的泊松分布。
-周效应水平经过校准，使县—周病例数的中位数落在 5 至 50 之间。随机实施下，每州的实施周在 $\{2,\dots,T+2\}$ 上均匀抽取，因此在观测窗口内总有一些州未被实施。
-反馈实施下，州在其滞后发病率越过一个随实施倾向上升的阈值时实施，实施州内的县则在自己的滞后发病率越过第二个阈值时跟进。两种设计中的实施都是吸收式。
+县在单位正方形内均匀分布，各与最近的六个邻居相连，经对称化并行归一化后得到邻接矩阵 $W$，并划分为 50 个空间连续的州集群。
+单元效应由州、县与实施倾向三部分组成，因此实施与基线传播相关。结局服从 \eqref{eq:mean}，取 $S=2$、代际权重 $(0.85,0.15)$、与人口成正比的背景输入 $\omega$，新息为负二项（$k=10$）或泊松（$k=\infty$），周效应经校准使县周病例数中位数在 5 到 50 之间。
+随机实施下，各州在 $\{2,\dots,T+2\}$ 上均匀抽取实施周；反馈实施下，州与县在滞后发病率超过随实施倾向变化的阈值后依次实施。所有设计中的实施都是吸收式。
 
-25 个情景分为三组（表 1）。核心组交叉 $N\in\{500,2000\}$、$T\in\{12,26\}$、两种实施规则和两种溢出设定，即 $(\phi_0,\kappa_0)=(0.4,-0.1)$ 或 $(0,0)$，并取 $\tau_0=\log0.8$（情景 1--16）。
-原假设组取 $\tau_0=0$，交叉实施规则与 $k\in\{10,\infty\}$（情景 17--20）。误设组（情景 21--25）每次违反一条假设：
-代际间隔取 $(0.7,0.3)$，而估计时用的是 $(0.85,0.15)$（X1）；州实施后报告概率下降 15\%（X2）；
-单元特定效应 $\tau_i\sim N(\log0.8,0.1^2)$（X3）；存在易感者耗竭，累计感染率最高达 20\%（X4）；效应在实施后从 $-0.1$ 增至 $-0.3$（X5）。
+25 个情景分为三组（表 1）。核心组交叉 $N\in\{500,2000\}$、$T\in\{12,26\}$、实施规则与溢出设定 $(\phi_0,\kappa_0)=(0.4,-0.1)$ 或 $(0,0)$，取 $\tau_0=\log0.8$（情景 1--16）；原假设组取 $\tau_0=0$，交叉实施规则与 $k\in\{10,\infty\}$（情景 17--20）；误设组（情景 21--25）每次扰动一条假设：
+代际权重取 $(0.7,0.3)$ 而估计时用 $(0.85,0.15)$（X1），实施后报告下降 15\%（X2），异质单元效应 $\tau_i\sim N(\log0.8,0.1^2)$（X3），累计感染率最高 20\% 的易感者耗竭（X4），效应随事件时间从 $-0.1$ 增至 $-0.3$（X5）。
 
-估计目标是 $\tau$、$\kappa$ 与 $\phi$ 的生成值。X3 中 $\tau$ 的目标另取切换者在各次重复中 $\tau_i$ 的均值；X5 中的目标是事件时间效应。
-避免病例数方面，推断针对定理~\ref{thm:psi} 中实现路径上的量 $\psi^\dagger$，总体量 $\psi$ 则由公共随机数下生成的 5000 对有政策与无政策路径近似。
-所有方法使用相同的数据集。M0 配有 M0-G、事后的 M0-GI、M0-OI、M0-ET 与 M0$'$。比较方法包括：
-以 $\log\Lambda_{it}(\phi)$ 为偏移的泊松固定效应（M1）及其分面板刀切校正（M1-BC）；定理~\ref{thm:bias}(a) 给出的两步对数传播回归（M2），其中的周再生数按\citet{cori2013epiestim} 的方法估计；
-$\log(Y+1)$ 上的双向固定效应（M3）；合并更新泊松准似然（M4）；以及保留真实单元效应的不可行 Oracle。
-所有区间都是聚类稳健区间，采用 $t_{G-1}$ 临界值。失败情况按方法逐一记录，不做替换。
-对每个情景和方法，我们报告偏倚、经验标准误与模型标准误及其比值、均方根误差、覆盖率、$H_0\colon\tau=0$ 的检验水平和功效、$J$ 检验的水平以及收敛率，
-每项都给出蒙特卡罗标准误，每个情景重复 $R=8000$ 次。
+估计目标为生成用的 $(\tau,\kappa,\phi)$、X3 中切换者 $\tau_i$ 的均值、X5 中的事件时间效应，以及定理~\ref{thm:psi} 的 $\psi^\dagger$（总体 $\psi$ 由 5000 对配对路径近似）。
+在完全相同的 $R=8000$ 个数据集上（失败运行不替换），M0、M0-G、M0-GI、M0-OI、M0-ET 与 M0$'$ 与以下方法比较：以 $\log\Lambda_{it}(\phi)$ 为偏移的泊松固定效应（M1）及其分面板刀切（M1-BC），基于 EpiEstim 再生数的两步对数传播回归\citep[M2;][]{cori2013epiestim}，$\log(Y+1)$ 上的双向固定效应（M3），合并更新准似然（M4），以及观测真实 $\alpha_i$ 的不可行 Oracle。
+区间按州聚类并用 $t_{G-1}$ 临界值。成功判据为：反馈情景中 $(\tau,\kappa,\phi)$ 的偏倚在零的 2 个 MCSE 以内，且覆盖率在 $[93\%,97\%]$ 之间。
 
-预设的成功判据是：在反馈情景中，$\tau$、$\kappa$ 与 $\phi$ 的偏倚同时落在零的 2 个 MCSE 以内，且覆盖率在 $[93\%,97\%]$ 之间；在比较方法一侧，M2 与 M3 的偏倚超出 2 个 MCSE，或覆盖率低于 90\%。
-以下五处对设计文档的偏离按发生顺序记录：单元效应离散程度缩小为四分之一，使 $T=26$ 时的病例数保持在合理范围内；
-重复次数由设计的 1000 次增至 8000 次，以便检出小于约 0.01 的偏倚；修正了试点后发现的 M1 偏移项误差（亦影响 M1-BC）；
-缩减了泊松固定效应选项；M0-G 在试点发现多根之后、完整运行之前加入，而 M0-GI 在查看中期结果之后加入，因此凡出现之处都标为事后设定。
+相对方案有五处偏离：(i) 单元效应离散度缩小为四分之一，使 $T=26$ 时的病例数保持在现实范围；(ii) 重复次数由 1000 增至 8000，使 2 个 MCSE 低于 0.01；(iii) 试点后修正了 M1（及 M1-BC）的偏移项错误，并缩减了泊松固定效应变体；(iv) M0-G 在试点发现多根之后、完整运行之前加入；(v) M0-GI 在中期出现边界失败之后加入，属事后设定，在相同数据集上评估。
+网络附录 C.1 的验证设计、总体根核查、按应用校准的模拟以及修订中加入的应用分析同样是事后分析。
 
 \subsection{结果}
 \label{ss:simresults}
 
-有传染时。在有溢出的八个核心情景中，M0 复原了 $\tau$。两种实施规则下，其偏倚介于 $-0.002$ 与 $0.001$ 之间（八个情景中有七个落在零的 2 个 MCSE 以内，情景 1 为 $-0.0017$、$-2.18$ 个 MCSE），覆盖率介于 94.5\% 与 95.4\% 之间（表 1、图 1）。
-模型标准误与经验标准误相吻合，三个参数在核心溢出情景中的相对误差在 $-2.2\%$ 到 $0.9\%$ 之间（计入原假设组时为 $-3.5\%$ 到 $0.9\%$）；对 $\tau_0=\log0.8$ 的功效在 77.1\% 到 100\% 之间。溢出参数同样得到复原（网络表 2）。
-有一点需要说明：在 $R=8000$ 下，2 个 MCSE 的判据足以检出 $\hat\phi$ 中 0.0035 的偏倚，而这一幅度在 $\phi_0=0.4$ 时至多占 $\phi_0$ 的 0.9\%。
+在全部八个有溢出的情景中，M0 复原了 $\tau$：偏倚介于 $-0.002$ 与 $0.001$ 之间（七个情景落在零的 2 个 MCSE 以内，情景 1 为 $-0.0017$，即 $-2.18$ 个 MCSE），两种实施规则下覆盖率为 94.5\% 到 95.4\%（表 1，图~\ref{fig:core-tau}）。
+三个参数的模型标准误与经验标准差相差 $-2.2\%$ 到 $0.9\%$（计入原假设组为 $-3.5\%$ 到 $0.9\%$），对 $\tau_0=\log0.8$ 的功效为 77.1\% 到 100\%。
+$\hat\phi$ 与 $\hat\kappa$ 的偏倚低于 $\phi_0$ 的 0.9\%；严格的 2 个 MCSE 判据在情景 1--3、9、10 与原假设情景 17--20 中标出 $\hat\phi$ 的偏倚（至多 0.0027），在情景 9 中标出 $\hat\kappa$（网络表 2）。
+忽略反馈、小计数或溢出的比较方法如定理~\ref{thm:bias} 所预测出现偏倚：M1 为 $-0.027$ 到 $-0.017$（覆盖率 78.1\% 到 88.2\%），M2 为 $-0.110$ 到 $0.013$，M4 为 $0.008$ 到 $0.139$，M0$'$ 为 $-0.248$ 到 $-0.114$（覆盖率至多 22.4\%）；M1-BC、M3 与 Oracle 见网络附录 C。
 
-比较方法均未达到判据。两种实施规则下，M1 的偏倚介于 $-0.027$ 与 $-0.017$ 之间，覆盖率在 78.1\% 到 88.2\% 之间，偏倚方向与定理~\ref{thm:bias}(b) 的预测一致。
-分面板校正也没有改善：在两个情景中，M1-BC 的收敛率分别为 14.7\% 和 23.9\%，覆盖率介于 25.7\% 与 82.7\% 之间。
-M2、M3 与 M4 的偏倚不断累积，量级与效应本身相当。强制无溢出（M0$'$）时偏倚为 $-0.248$ 到 $-0.114$，覆盖率最高 22.4\%，与定理~\ref{thm:bias}(d) 一致。
-Oracle 固定真实单元效应并以非加权泊松准似然估计 $(\gamma,\tau,\kappa,\phi)$，这里的覆盖率在 91.3\% 到 94.8\% 之间，但在两个 $T=26$、随机实施且无传染的情景中降到 80.2\% 和 80.5\%。
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{fig_01_core_tau.png}
+\caption{16 个核心情景下的政策效应 $\tau$（$R=8000$）：(a) 偏倚（误差棒为 $\pm2$ MCSE）；(b) 95\% $t_{G-1}$ 区间覆盖率（阴影带为 93\%--97\%）。M0-GI 在相同数据集上事后评估。图内文字为英文，与英文稿图 1 相同。}
+\label{fig:core-tau}
+\end{figure}
 
-检验水平。原假设下，M0 与 M0-OI 的 $J$ 检验保持名义水平，M1 存在轻度过度拒绝（6.3\% 到 9.7\%）；M1-BC、M2 与 M3 拒绝得过于频繁（网络表 3）。
+在 $\tau_0=0$ 下，M0 与 M0-OI 的 $J$ 检验保持名义水平（分别为 4.7\% 到 5.2\% 与 4.4\% 到 4.9\%），M1 过度拒绝（6.3\% 到 9.7\%），M1-BC、M2 与 M3 更严重（网络表 3）。
+正溢出下全部 8000 次重复都只有唯一根，M0、M0-G 与 M0-GI 结果相同。
+$\phi_0=\kappa_0=0$ 位于定理~\ref{thm:asy} 之外，此时 47.2\% 到 51.7\% 的运行出现多个内部根，局部 M0 落入非相合根，偏倚为 0.132 到 0.469，覆盖率为 0.6\% 到 38.8\%（图~\ref{fig:roots}）。
+第二个根是总体矩的性质：它出现在四个零传染设计的全部 40 个大 $N$ 抽样中，并随 $\bar\phi$ 移动（网络表 8）。选根规则是没有理论保证的启发式规则。
+预设的 M0-G 在 28.6\% 到 44.8\% 的运行中选到边界，覆盖率为 52.9\% 到 71.0\%；事后的 M0-GI 在 63.7\% 到 80.9\% 的运行中选到边界，偏倚为 0.000 到 0.052，覆盖率为 87.5\% 到 95.2\%（表 2）。
+在九个独立设计上（各 $R=2000$；网络附录 C.1），M0-GI 在 $\phi_0=0$ 处把覆盖率从 0.377 恢复到 0.893，但在 $\phi_0=0.05$ 处有 56\% 到 79\% 的运行选到边界，覆盖率从 0.960--0.970 降至 0.921--0.935；在 $\phi_0=0.15$ 处两条规则至多相差 0.001。
 
-无传染时。当 $\phi_0=\kappa_0=0$ 时，真值位于参数空间的边界上。从固定初值出发的局部求解器在约一半的重复中落在非相合根上，$\hat\tau$ 的偏倚在 0.132 到 0.469 之间，覆盖率在 0.6\% 到 38.8\% 之间。
-在 47.2\% 到 51.7\% 的重复中，剖面方程有多于一个内部根；一次诊断运行把虚假根追溯到 $\phi$ 工具变量的参考值 $\bar\phi$，而这正是剖面所揭示的问题（图 2）。
-全局选根处理了非相合根：预设的 M0-G 准则在 28.6\% 到 44.8\% 的重复中选到边界（覆盖率 52.9\% 到 71.0\%），事后设计的 M0-GI 准则选边界比例达 63.7\% 到 80.9\%，使偏倚降至 0.000 到 0.052，覆盖率恢复至 87.5\% 到 95.2\%（表 2）。但在独立设计验证中，M0-GI 在 $\phi_0=0.05$ 处过度选择边界，覆盖率下降 3 到 4 个百分点。
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{fig_02_roots.png}
+\caption{$\phi\in[0,3]$ 上剖面 QD-GMM 的根诊断（$R=8000$，误差棒为 $\pm2$ MCSE）：出现多个内部根的比例、选到边界 $\phi=0$ 的比例，以及 M0-G 与 M0 不一致的比例。}
+\label{fig:roots}
+\end{figure}
 
-选根并非边界问题的全部，将 Oracle 与 M0$'$ 对照则能看清尺度权重的作用。表 1 中的 Oracle 以真实 $\alpha_i$ 为偏移自由估计 $(\gamma,\tau,\kappa,\phi)$，在两个 $T=26$ 随机实施无溢出情景中覆盖率降至 80.5\% 和 80.2\%（情景 14 和 16，有溢出的情景 12 降至 91.3\%）。
-对情景 16 的核查显示：由于未使用逆尺度权重 $s_{it}$，未实施政策的州在 26 周内呈指数增长，单个州集群即占全样本总病例的中位数 21.5\%、95 分位达 58.5\%，破坏了聚类稳健夹心方差（平均模型标准误 0.035，而经验标准差 0.066）。
-相反，采用尺度权重 $s_{it}$ 并固定 $\kappa=\phi=0$ 的 M0$'$ 将偏倚保持在 $[-0.000,0.002]$、覆盖率保持在 94.7\% 到 95.5\%，M0-GI 在情景 14 和 16 中也保持 95.0\% 的覆盖率。
-另一方面，在所有有溢出的情景中，8000 次重复里没有任何一次出现多于一个根，M0、M0-G 与 M0-GI 在所有报告位数上完全一致。但当多根或近边界平坦剖面出现时，常规 Wald 区间在 $\phi_0=0$ 附近依然脆弱。
-
-误设。代际间隔取错（X1）时，$\hat\tau$ 虽保持 0.010 偏倚（覆盖率 94.6\%），但溢出参数严重失真：$\hat\phi$ 偏倚达 $+0.516$（覆盖率 0\%）吸收了代际错配，$\hat\kappa$ 覆盖率降至 80.2\%。实施后报告率下降（X2）不仅使 $\hat\tau$ 偏倚 $-0.057$（覆盖率 59.4\%），还使 $\hat\kappa$ 偏倚 $-0.294$（覆盖率 0\%），导致政策层面合计量 $\tau+\kappa$ 偏倚约 $-0.35$。效应异质（X3）与耗竭（X4）对 $\tau$ 的影响微弱（覆盖率 94.0\% 与 95.2\%）。动态效应（X5）下常数 M0 完全失效（偏倚 0.219，覆盖率 0\%），而事件时间规格 M0-ET 复原了每一个分箱（覆盖率 95.3\% 到 95.8\%）。避免病例数继承了 M0 的表现：有溢出时，相对偏倚的中位数在 $\pm0.006$ 以内，$\psi^\dagger$ 覆盖率在 85.7\% 到 95.4\% 之间（网络表 6）。
+动态累积效应下（X5），汇聚常数效应的 M0 失效（偏倚 0.219，覆盖率 0\%），事件时间规格 M0-ET 复原了每个分箱，覆盖率为 95.3\% 到 95.8\%（注~\ref{rem:dynamic}）。
+代际权重错误（X1）几乎不影响 $\hat\tau$（偏倚 0.010，覆盖率 94.6\%），误差被 $\hat\phi$ 吸收（偏倚 $+0.516$）；实施后报告下降 15\%（X2）使 $\hat\tau+\hat\kappa$ 偏移约 $-0.35$；异质性（X3）与耗竭（X4）下 $\hat\tau$ 几乎无偏（网络表 5）。
+有溢出时，实现的避免病例数 $\psi^\dagger$ 的相对偏倚中位数在 $\pm0.006$ 以内，$\psi^\dagger$ 区间覆盖率为 85.7\% 到 95.4\%；对总体 $\psi$ 的覆盖率为 72.1\% 到 92.5\%，因为区间不含过程噪声（注~\ref{rem:psi}；网络表 6）。
 
 \subsubsection{周内传播}
 \label{ss:sameweek}
 
-预设的数据生成过程不含周内传播，因此滞后条件均值 A1 与跨集群条件独立 A4 在每个情景中都严格成立。为量化观测周混合连续感染世代时忽略周内更新的代价，我们在核心情景 $N=500$、$T=12$、反馈实施、$(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$ 上运行了一对匹配设计，每个设计重复 $R=1000$ 次，种子只依赖于重复编号。
-两臂使用相同的周骨架、实施规则与估计量。基准臂的同周份额为零，精确复现周度模型。
-同周臂自窗口第 3 周起启用日度生成（第 1--2 周采用 $(1-w_0)$ 缩放滞后权重的周度抽样），并在同一单元内加入周内再次感染（无周内跨单元传染），再按监测数据的做法把日计数汇总为周计数；估计量只能看到周度汇总数据。
-由于再感染限于本单元内部，跨集群独立性 A4 仍然成立，从而孤立出周度条件均值 A1 误设的影响。标定取名义周内权重 $w_0=0.3$（再进入率 $g=1.744$ 以匹配周均值与受处理份额），非线性周内再感染项本身占总期望病例的 14.5\%（与种子项的周内分量合计占 34\%）。因日度臂消耗更多随机数，两臂按独立样本处理。
+主设计不含周内传染，A1 与 A4 严格成立。为在周内更新下单独考察周度聚合的影响（同周传递只发生在单元内部，A4 保持成立），本文在核心情景 $(N=500,T=12)$、反馈实施、$(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$ 上模拟了两组种子独立的设计，各 $R=1000$ 次。
+基准组为周度模型；同周组自窗口第 3 周起启用日度的单元内再感染，名义权重 $w_0=0.3$（再进入率 $g=1.744$；非线性再感染占总期望病例的 14.5\%，计入同周播种的发病为 34\%）。
+基准组偏倚为 0.001（覆盖率 0.948）；同周更新使 $\hat\tau$ 偏倚 $-0.033$（MCSE 0.001，覆盖率 0.890），$\hat\kappa$ 偏倚 $-0.021$（0.002，覆盖率 0.939），$\hat\tau+\hat\kappa$ 偏倚 $-0.053$（0.002，覆盖率 0.783），约为真实总和的六分之一。
+由于 A4 成立，夹心标准误保持校准，覆盖不足来自偏倚；$J$ 检验对此没有检验力（拒绝率 4.8\%，基准组 4.9\%）。去掉前三周后偏倚仍在（$-0.037$；网络附录 C）。
+$w_0=0.3$ 的设定界定了应用的压力区间：当代际间隔隐含的同周份额与之相当时，需要周内均值模型（网络附录 A.12），本文未提供这一模型。
 
-基准臂复现了主研究：$\hat\tau$ 的偏倚为 0.001，覆盖率为 0.948。在同周更新下，$\hat\tau$ 的偏倚为 $-0.033$（MCSE 0.001），覆盖率为 0.890；$\hat\kappa$ 的偏倚为 $-0.021$（MCSE 0.002），覆盖率为 0.939；
-政策层面合计量 $\hat\tau+\hat\kappa$ 的偏倚为 $-0.053$（MCSE 0.002），覆盖率为 0.783。合计量的偏倚约为其真值的六分之一，是 $\tau$ 偏倚的 1.6 倍、$\kappa$ 偏倚的 2.6 倍。
+\section{应用：诊断州级口罩令的周度传播模型}
 
-问题的根源不在方差估计：由于周内传播限于单元内部，两臂的模型标准误都与经验标准差相吻合，覆盖率下降来自偏倚而非标准误过小（相比之下，跨集群同周传染还会破坏 A4 并扭曲夹心方差）。
-$J$ 检验对此没有反应：基准臂的拒绝率为 4.9\%，存在同周传播时为 4.8\%（差为 $-0.001$，MCSE 0.010）。可见同周份额是一个需要度量的量，而不是可以检验出来的量。缩短观测窗口也无济于事。
-只用第 4 周到第 12 周重新估计，以排除初始条件的影响，偏倚仍为 $-0.037$（MCSE 0.002），覆盖率为 0.913；基准臂为 0.019（MCSE 0.006）与 0.961（两臂在该子窗口内切换比例为 0.301 与 0.665，属提示性对照）。
-可见周内更新份额较大时，周度估计量的偏倚约为真实效应的十分之一甚至更大，而本文报告的任何诊断都无法发现这一偏倚。
-$w_0=0.3$ 的标定是压力测试，而不是设计的阈值：应当对照的是具体应用由代际间隔换算得到的份额，当该份额可观时，估计量需要网络附录 A.12 所述的周内处理。
-
-\subsubsection{独立设计上的验证}
-\label{ss:rsel_body}
-
-选根规则是在需要它们的设定中研究的，因此我们另设九个设计，使用独立的种子基，每个设计重复 $R=2000$ 次，检验这些规则不会越界适用。设计覆盖 $\phi_0\in\{0,0.05,0.10,0.15\}$、$\bar\phi\in\{0.25,0.5,1\}$ 与 $G\in\{20,50,100\}$（网络表 7）。
-以下覆盖率均为 $t_{G-1}$ 区间，与网络表 7 一致。在 $\phi_0=0$ 处，规则的覆盖率恢复到 0.893，而 M0 为 0.377。在 $\phi_0=0.05$ 处，规则反而使覆盖率下降，从常规区间的 0.960 到 0.970 降至 0.921 到 0.935，因为它在 56\% 到 79\% 的重复中选到边界。
-在 $\phi_0=0.10$ 处，反馈实施下两条规则至多相差 0.013，随机实施下相差 0.067；在 $\phi_0=0.15$ 处，两者相差 0.001。
-全局选根是剖面出现多个根时的补救办法，而非常规默认做法；完整表格见网络表 7。
-
-\section{应用：州级口罩令与县级 COVID-19 传播}
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{fig_03_application.png}
+\caption{县级 COVID-19 病例与州级口罩令的应用。(a) M0 的政策层面总效应 $\tau+\kappa$（首行），以及各方法与预设敏感性分析下 $\tau$ 的估计和 95\% 置信区间（$t_{G-1}$，$G=49$）；空心箭头表示区间在坐标轴边界处截断。(b) 主规格下剖面 $\phi$ 矩在 $\phi$ 网格上的取值（零点即估计方程的根），以及沿剖面的 M0-G 选根准则 $Q$。矩在边界 $\phi=0$ 处也接近零（约 $-0.0009$），该候选的 $Q_G=41.34$，内部根处为 40.64。}
+\label{fig:app}
+\end{figure}
 \label{s:application}
 
-我们把这一设计应用于 2020 年下半年美国州级口罩令。这一设定中，病例增长已借助州与县面板研究过
-\citep{lyu2020masks,guy2021masks,vandyke2020kansas,chernozhukov2021masks,sun2025didnetwork}；政策发布在分析单元之上，因此溢出参数具有明确的政策含义。
-面板包括美国本土与哥伦比亚特区的 3091 个县或合并报告单元，覆盖 26 周，从 2020-06-01 到 2020-11-23，此前的两周只用来构造滞后；49 个集群为 48 个本土州与哥伦比亚特区。
-结局为约翰斯·霍普金斯大学 CSSE 数据库中的每周新增报告病例\citep{dong2020dashboard}；州级公共口罩令在某周至少四天生效时，$D_{it}=1$\citep{cdc2021maskorders}。
-州法允许的县级豁免（以堪萨斯最为突出）未予编码，因此 $D$ 在那里高估了暴露。暴露并非严格吸收式（89 次退出涉及 82 个单元），估计量所依赖的矩条件容许这一情况；剔除或截断退出单元对估计值的影响在 0.003 以内。
-县—周病例数的中位数为 27 例，7.4\% 的县—周没有报告病例，56.8\% 的县—周处于口罩令之下；1720 个单位在相邻两周之间改变暴露状态（1768 次进入（1720 个单元），89 次退出（82 个单元）），窗口首周处于暴露状态的单元为 571 个，窗口内共报告 11,528,182 例。
-网络采用行归一化的 2010 年人口普查邻接矩阵；敏感性分析中另用美国社区调查的县间通勤流。
-把\citet{ferretti2020quantifying} 的代际时间分布离散化，得到周权重 $w\approx(0.964,0.036)$，并把约 0.30 的传播分配到同一周内；这部分是周滞后规格无法表示的，第~\ref{ss:sameweek} 节量化了它的代价。
+本文把这一设计应用于 2020 年下半年美国县级层面的州级公共口罩令。这一设定中的县级病例增长已有大量研究\citep{lyu2020masks,guy2021masks,vandyke2020kansas,chernozhukov2021masks,sun2025didnetwork}，政策设在县之上，因此 $\kappa$ 具有政策含义。
+面板包括 49 个州集群中的 3091 个本土县，覆盖 26 周（2020-06-01 到 2020-11-23，另加两周滞后）。周新增病例取自约翰斯·霍普金斯大学 CSSE\citep{dong2020dashboard}；口罩令在第 $t$ 周至少四天生效时 $D_{it}=1$\citep{cdc2021maskorders}；县级豁免（如堪萨斯）未编码（网络附录 D）。
+暴露存在退出（82 个单元共 89 次），矩条件容许非吸收式暴露；截断或剔除退出单元后估计值变化在 0.003 以内。
+县周病例数中位数为 27 例（7.4\% 为零），口罩令覆盖 56.8\% 的县周，1720 个单元切换暴露，571 个单元在第 1 周已暴露，共报告 11,528,182 例。网络 $W$ 采用行归一化的 2010 年人口普查邻接，敏感性分析改用美国社区调查通勤流。
+离散化\citet{ferretti2020quantifying} 的分布得到权重 $w\approx(0.964,0.036)$，并把约 0.30 的传播分配到同一周内。
 
-我们用第~\ref{ss:estimation}--\ref{ss:computation} 节的估计量拟合该面板，取 $\bar\phi=0.5$，按州聚类推断，临界值为 $t_{48}$。
-49 个集群中有 24 个包含窗口内改变暴露状态的县，且各集群规模相差悬殊；因此解读所报告的区间时应结合\citet{imbens2016robust} 的小样本校正。
-敏感性分析改变代际间隔、网络、口罩令时点（平移一周，作为时点对齐检验）、背景输入（$\omega$ 乘以 0.25 和 4）以及参考值，
-并剔除堪萨斯与得克萨斯，因为这两州的口罩令带有县级豁免。常规的前导指示变量回归只供对照：在反馈下，即使模型设定正确，它的矩也不为零（命题~\ref{prop:sources}(c)）。
-避免病例数在全部县上先按 4 周短期时间范围加总。
+本文用第~\ref{ss:estimation}--\ref{ss:computation} 节的估计量拟合，取 $\bar\phi=0.5$。预设的敏感性分析改变代际间隔、网络 $W$、时点（平移一周）、背景 $\omega$（$\times 0.25$、$\times 4$）、$\bar\phi$，并剔除堪萨斯与得克萨斯。
+主区间为按州聚类、取 $t_{48}$ 临界值的夹心区间；这一指定，以及下文的区域、代际间隔、稳健集、事件权重与报告率分析和校准模拟，都在修订中加入，属事后分析（网络附录 F）。49 个集群中只有 24 个包含切换县。
+作为对照的前导回归给出 $\hat\ell=-0.332$（标准误 0.259），在反馈下它不是有效的预趋势检验（命题~\ref{prop:sources}(c)）。
 
-估计结果见表 3 与图 3。对于本县口罩令，M0 给出 $\hat\tau=0.040$（95\% 区间 $-0.217$ 到 $0.296$）；对于处于口罩令下的邻居份额，$\hat\kappa=-0.506$（$-1.018$ 到 $0.006$）；对于输入压力的权重，$\hat\phi=0.772$（0.590 到 0.954）。
-$\phi$ 的剖面在与边界相距较远处只有一个内部零点，正处于模拟所支持的区域内，M0-G 与 M0-GI 选到同一个根。在这一面板上，一次拟合耗时 0.05 秒，全局搜索耗时 0.73 秒。
-两个政策系数区分得并不清楚，原因在于口罩令的作用层级：61.9\% 的县其邻居全部位于本州，对这些县而言，$D_{it}=\bar D_{it}$ 几乎总是成立（仅有 3 个州内的 88 个县、366 个县—周因县级命令或合并单元差异而不同），本县口罩令与邻居口罩令以同一个回归元进入，
-只有 1177 个州界县提供了能够区分两者的变异。Corr$(\hat\tau,\hat\kappa)$ 为 $0.238$。
-因此对于内陆县，模型所蕴含的只有一个政策层面的效应，即 $\hat\tau+\hat\kappa=-0.466$（95\% 区间 $-1.091$ 到 $0.159$，由联合协方差算出，$t=-1.50$，48 个自由度），这才是数据能够回答的估计目标。
-把矩重新索引为 $\tau_{\rm tot}D_{it}+\kappa(\bar D_{it}-D_{it})$ 后，以这一形式作为系数报告得到相同的数值，标准误为 0.311；当政策设在分析单元之上时，我们推荐这样报告。
-由于 49 个州中仅 24 个州包含切换县，针对少簇结构（网络附录 E），我们对 49 个州进行了 Mammen 权重得分野聚类 bootstrap-t 与集群矩成对聚类 bootstrap-t（各 999 次）。固定雅可比矩阵时，得分野 bootstrap 的 95\% 临界值对 $\tau$ 为 1.94、对 $\kappa$ 为 1.77、对 $\phi$ 为 1.93、对 $\tau+\kappa$ 为 1.72（政策层面区间 $-0.999$ 到 $0.067$）。在非线性成对矩 bootstrap-t 中同时纳入雅可比的簇间变异后，临界值升至 $\kappa$ 2.22、$\phi$ 2.44 与 $\tau+\kappa$ 2.78（$\tau$ 为 1.59），政策层面区间展宽至 $-1.330$ 到 $0.397$，均仍包含零。删除一个州的刀切标准误比夹心标准误大 13\% 到 30\%。过度识别检验拒绝了工作模型（$J=17.873$，2 个自由度，$p=0.0001$），M0-OI 给出 $\hat\tau=-0.025$（$-0.251$ 到 $0.201$）与 $\hat\kappa=-0.517$（$-0.988$ 到 $-0.046$）。
+州级口罩令使 61.9\% 的内陆县满足 $D_{it}=\bar D_{it}$（州内差异只出现在三个州的 88 个县），因此 $\tau$ 与 $\kappa$ 只能由 1177 个州界县分开识别（$\text{Corr}(\hat\tau,\hat\kappa)=0.238$）；设计直接识别的对比是政策层面总效应 $\tau+\kappa$。
+M0 给出 $\hat\tau+\hat\kappa=-0.466$（95\% 区间 $-1.091$ 到 $0.159$；标准误 0.311，$t_{48}$），$\hat\tau=0.040$（$-0.217$ 到 $0.296$），$\hat\kappa=-0.506$（$-1.018$ 到 $0.006$），$\hat\phi=0.772$（0.590 到 0.954）。
+各敏感性分析中 $\hat\tau+\hat\kappa$ 在 $-0.764$ 到 $-0.366$ 之间，$\hat\tau$ 在主分析和另外四项中为正（网络表 9），因此稳定的概括量是总效应，$\tau$ 与 $\kappa$ 的拆分随规格改变。
+剖面 $\phi$ 矩在 0.772 处有一个内部根，在边界处也接近零（$\phi=0$ 处取值约 $-0.0009$，此时 $\hat\tau=-2.00$，$\hat\kappa=3.37$；图~\ref{fig:app}(b)）；两个选根准则都偏向内部候选（$Q_G$ 40.64 对 41.34，$Q_{GI}$ 27.62 对 40.32），M0-G 与 M0-GI 与 M0 一致。
+对 $\tau+\kappa$，得分野 bootstrap-$t$（固定 $\hat\Gamma$，不施加原假设）给出 $-0.999$ 到 $0.067$，重新求解估计量的成对聚类 bootstrap-$t$ 给出 $-1.330$ 到 $0.397$；刀切标准误比夹心标准误大 14\% 到 30\%（网络附录 E）。
+在以观测面板、实施日期、网络与代际权重为基础、以 M0 估计为真值的校准模拟中，$\tau+\kappa$ 的 $t_{48}$ 区间覆盖率为 0.935（野 bootstrap 0.925，成对 0.933；$R=600$），在标准误与应用相当的压力设计中为 0.950（网络表 11）；两个设计都假定工作模型成立。
 
-在事件时间规格中，窗口首周处于暴露状态的 571 个单位里有 435 个在窗口开始前就已暴露并始终处于处理状态，其实施周无法观测，对应的分箱与周效应共线；因此该规格剔除这些单位，剩下 37 个集群中的 2656 个单位，并在保留子网络上重新行归一化 $W$。
-估计值在每一分箱都为负：实施当周为 $-0.343$（标准误 0.341），五周后为 $-0.924$（0.685），此后为 $-0.923$（0.735），单周分箱均值为 $-0.677$（标准误 0.521）；
-对全部七个分箱的联合检验给出 $F=2.089$（7 与 30 个自由度，$p=0.076$），卡方形式 $p=0.014$。
-在该完全相同的 2656 单位样本上拟合汇聚常数 M0，得到 $\hat\tau=0.056$（标准误 0.181，表 3），严格落在全部七个负分箱的范围之外。这一背离并非样本构成所致，而是清晰反映了汇聚常数效应估计在动态效应下的加权偏倚（注~\ref{rem:dynamic}、情景 X5）：已处理单元被赋予负权重并污染了对照。
-检验拒绝了周度工作模型，因此我们不把这个系数读作口罩令的因果效应。
-在各项预设敏感性分析中，M0 下政策层面合计量 $\hat\tau+\hat\kappa$ 保持负号（$-0.366$ 到 $-0.764$），但仅看 $\hat\tau$ 在四项中为正，且预设的全局选根 M0-G 在五项中选到边界根并在其中三项使符号反转（网络表 8）。此外，未做人口缩放的行归一化 $\hat\phi=0.772$ 更可能吸收了区域共同冲击。避免病例数在 4 周短期内为 $3.41\times 10^5$ 例（标准误 $3.97\times 10^5$；定理~\ref{thm:psi}）；在缺少易感者耗竭机制下线性更新长周期呈指数爆炸，正文不予列示。
+过度识别诊断拒绝了周度工作模型：$J=17.873$（自由度 2，$p=0.0001$），M0-OI 给出 $\hat\tau=-0.025$（$-0.251$ 到 $0.201$），$\hat\kappa=-0.517$（$-0.988$ 到 $-0.046$）。
+应用中的 $J$ 高于全部 600 个校准抽样（95 分位数 6.66，最大值 12.45），$Q_G=40.64$ 同样如此（最大值 35.13）；$Q_{GI}=27.62$ 在 600 次中被超过 8 次。两个统计量因此都落在工作模型下校准的范围之外。
+加入区域 $\times$ 周或分区 $\times$ 周效应、令 $\phi$ 随区域变化后，拒绝依然存在（$J_{LM}$ 为 16.9 到 17.8，校准 95 分位数为 6.38 到 6.66），$\hat\tau+\hat\kappa$ 保持在 $-0.698$ 到 $-0.466$ 之间且所有区间都覆盖零，区域 $\phi$ 相等的假设未被拒绝（$p\ge 0.505$；网络表 10）。
+相邻州之间的得分相关很弱（112 对，相关系数绝对值都低于 0.1），把它们计入后 $\hat\tau+\hat\kappa$ 的标准误由 0.311 变为 0.292（注~\ref{rem:testable}）；被拒绝的是均值模型，聚类方差没有问题。
+因此本文把 $\hat\tau+\hat\kappa=-0.466$ 读作被拒绝的工作模型的伪真值，即周度拟合的概括量，不作为口罩令的因果效应。
+
+按 Ferretti 的分布约有 0.30、按\citet{nishiura2020serial} 的分布约有 0.39 的传播落在同一周内，因此该应用处于第~\ref{ss:sameweek} 节的压力区间：在这一区间，$\tau+\kappa$ 的区间覆盖不足，$J$ 对周度聚合没有检验力。
+把同周传播并入滞后 1 周，或把感染者时间平移 1.75 到 7 天，$\hat\tau+\hat\kappa$ 只在 $-0.476$ 到 $-0.444$ 之间变动，$\hat\phi$ 在 0.19 到 0.82 之间；$J$ 在 10 个规格中的 9 个拒绝（例外是 Nishiura 分布平移 3.5 天，$J=0.67$），M0-G 在平移 1.75 天与 7 天时偏离 M0（网络表 12）。消除这一误差需要周内均值模型（第~\ref{ss:sameweek} 节）。
+
+由恰好识别的矩得到的 $\phi$ 的 $S$ 集有一个边界分量和一个内部分量：$\bar\phi=0.5$ 时为 $[0,0.002]\cup[0.58,0.97]$，内部分量在 $\bar\phi=0.25$ 时为 $[0.53,0.85]$，在 $\bar\phi=1$ 时为 $[0.64,1.15]$；加入两个过度识别矩后集合为空，与 $J$ 的结论一致。
+$\tau+\kappa$ 的 Bonferroni 投影为 $[-3.55,6.29]$，限于内部分量时为 $[-1.19,0.26]$（网络表 13）。内部根及 $\hat\phi$ 都依赖工具参考值 $\bar\phi$。
+
+在窗口开始前未暴露的 2656 个县（37 个集群）上，M0-ET2 的分箱估计全部为负，从实施当周的 $-0.343$（标准误 0.341）到滞后 5 周的 $-0.924$（0.685），此后为 $-0.923$（0.735），但精度不高：联合检验 $F=2.089$（自由度 7 与 30，$p=0.076$）。
+同一样本上的汇聚 M0 给出 $\hat\tau=0.056$（标准误 0.181）；它与按隐含权重加权的分箱之差为 0.079（标准误 0.240，$p=0.742$），与等权分箱之差为 0.733（0.457，$p=0.117$；网络表 14）。
+这一背离与动态加权的解释相符，但与抽样误差在统计上无法区分。M0 的 $J$ 为 14.37，M0-ET2 为 13.85，动态规格不能解释模型被拒绝。
+
+命题~\ref{prop:ascertainment} 不涵盖由口罩令引起的报告变化。若受处理县报告的病例只占未处理时的 $1-\rho$，则 $\hat\tau+\hat\kappa$ 在 $\rho=0.187$ 处降为零，其 95\% 上限在 $\rho=-0.076$ 处、下限在 $\rho=0.410$ 处到达零（网络表 15）。与口罩令相关的报告率下降 18.7\% 即可抵消点估计。
+
+M0-G 在五项敏感性分析中选到边界或接近零的根（网络表 9）：政策滞后一周（$+0.421$）、$\omega\times4$（$+0.395$）以及代际权重 $w_1=0.9$、0.7 与 0.6（$+0.013$、$-0.260$、$-0.261$）。
+政策滞后一周是唯一一项 M0 区间不含零的分析（$-0.764$，$-1.346$ 到 $-0.182$），而 M0-G 在该分析中给出 $+0.421$。4 周内实现的避免病例数为 $\hat\psi^\dagger=3.41\times 10^5$（标准误 $3.97\times 10^5$；定理~\ref{thm:psi}）。
 
 \section{讨论}
 \label{s:discussion}
 
-本文提出了传播尺度上的双重差分设计。平行趋势被置于更新模型的对数再生数上，该模型的感染压力来自相邻单元；估计量采用准差分 GMM，在不需要严格外生实施的前提下消去不受限制的单元效应。
-相对于已有研究，本文的贡献在于：对疫情作出反应的实施行为，以及集群之间的传染，由同一组前定矩处理，因此即使相邻集群之间交换感染，推断仍然采用标准的聚类稳健夹心方差。
-做到这一点，靠的是用观测到的历史构造工具变量，并把政策溢出写成邻居处于政策之下的份额；由此把面板双重差分文献与计数的序贯矩估计量联系起来。
-在正溢出、实施存在反馈、过度离散且计数较小的情景中，估计量复原了直接效应与溢出参数，而第~\ref{s:simulation} 节的比较方法则不能。
-该设计在许多集群的长面板上成本最低；当政策设在分析单元之上时，如口罩令应用中那样，它以系数的形式报告政策层面的效应。
+把平行趋势放在带输入感染压力的对数再生数上，再用前向准差分消去单元效应，得到的双重差分设计同时容纳反馈实施与滞后的跨集群传染，并保留常规聚类稳健夹心方差。
+在包含溢出、反馈、过度离散与小计数的模拟中，QD-GMM 复原了直接效应与溢出效应，而建立在病例数、对数病例数或第一步再生数之上的比较方法存在偏倚；当命令设在单元之上时，设计直接识别政策层面总效应。
 
-设计的三个组成部分支撑了整个论证，每一部分都对应估计量所报告的内容。
-准差分使单元效应相消，因此传播水平上不受限制的异质性不带来任何代价；识别所依赖的是对数传播上的平行趋势，以及给定观测历史后实施的序贯外生性。
-后者无法用估计所使用的矩来检验，且在存在反馈时也不为常规的前导安慰剂检验所涉及（命题~\ref{prop:sources}(c)）。
-引理~\ref{lem:mds} 的鞅表示保证了在滞后传染下聚类稳健推断依然有效；$\phi$ 上的剖面使非线性关系变得可见：剖面只有一个根时无需决策，有多个根时则把选择报告出来，而不是默不作声地作出选择。
-边界区域是剖面发挥作用最多的地方。在 $\phi_0=0$ 附近，邻居项不提供识别信息，方程可能有多个根，选根规则能够找回相合的那个根；
-模拟还表明，在那里即便位于正确的根上，Wald 区间仍不可靠，因此在该区域，对弱识别稳健的区间\citep{andrews2012identification} 是剖面的必要配套，而非进一步的改良。
+设计的使用受三个条件约束。单一内部根是首要条件：零传染位于定理~\ref{thm:asy} 之外，此时总体矩可以有第二个根；预设的全局搜索 M0-G 在 $\phi_0=0$ 处覆盖不足，事后的 M0-GI 修复了这一点，但在传染小而为正时过度选择边界。两者都是启发式规则，所选根应与剖面和识别稳健集\citep{stock2000weak}一同报告。
+周度聚合是另一个条件：当相当比例的传播落在周内，如 $w_0=0.3$ 的压力区间，政策层面总效应偏倚约六分之一，$J$ 检验对此没有检验力（第~\ref{ss:sameweek} 节），此时需要带星期报告效应与延迟的周内均值模型。
+集群数是第三个条件：定理~\ref{thm:asy} 是大 $G$ 结果；在 49 个州、其中 24 个有切换的情形下，按应用校准的模拟支持 $t_{G-1}$ 夹心区间（$\tau+\kappa$ 覆盖率 0.935 到 0.950），而受处理集群较少时推断可能失效\citep{ferman2019inference,canay2021wild}。
 
-设计适用范围由两个可在估计之前度量的量决定，而二者都不是耦合系数本身。
-第一项是数据能否在传播尺度上区分本地与输入的感染压力：耦合为正还不够，它必须在邻域项与政策份额被投影掉之后仍带有独立变异，这正是给定面板上 $\phi$ 剖面所显示的内容。
-第二项是周度聚合对周内传播的敏感程度。更新方程以整周为单位书写，因此发生在周内的传播无法进入模型；第~\ref{ss:sameweek} 节的压力测试设计表明，在名义周内权重 $w_0=0.3$（非线性周内再感染占预期总病例 14.5\%）下，政策层面合计量的偏倚约为效应的六分之一，$J$ 检验无法发现它，缩短窗口也不能消除它。这一数字是标定值，不是阈值：应当对照的是具体应用中代际间隔所隐含的份额，当它较大时估计量需要周内的生成机制。
-第三项、也更难处理的是集群结构。应用中只有 49 个州级集群，其中 24 个包含窗口内改变暴露状态的县，而模拟中使用的是规模相等的集群。
-当受处理集群数量较少时，聚类稳健推断的小样本校正\citep{imbens2016robust} 以及更进一步随机化推断，是恰当的配套方法。
+应用中，诊断拒绝了周度模型，加入区域周效应与区域耦合后依然如此；加入过度识别矩后 $\phi$ 的稳健集为空，约三分之一的传播落在同一周。政策层面总效应 $-0.466$ 因此是周度拟合的伪真值。
+事件时间估计与实施后逐步累积的效应相符，但精度不高（联合 $p=0.076$）；与口罩令相关的报告率下降 18.7\% 即可抵消点估计。
 
-由此有两个方向。更有效的工具变量，无论是达到序贯矩约束效率界的\citep{chamberlain1992sequential,chamberlain2022feedback}，还是利用完整计数似然的\citep{bonhomme2025feedback}，都能在不改变设计的情况下收紧区间；对弱识别稳健的区间\citep{andrews2012identification} 可以把报告覆盖率延伸到剖面已经标出的边界区域。在此之外，第~\ref{ss:sameweek} 节所用的那类周内生成机制可以把测得的同周份额变成容许它的估计量，而把代际间隔与报告过程同政策效应联合估计\citep{goldwasser2026rt} 可以去掉设计目前视为已知的两项输入。
+$\log R$ 上的平行趋势约束\citep{roth2023parallel}把本地压力与输入压力分开\citep{elenev2025staggered}，并与无混杂性表述\citep{callaway2023pandemic}互为补充。
+这一设计把报告病例面板转化为传播尺度上的估计，配以标准的聚类推断，其诊断能够显示周度工作模型何时无法支持因果解读。
+序贯效率界\citep{chamberlain1992sequential,chamberlain2022feedback}、基于似然的反馈模型\citep{bonhomme2025feedback}、周内估计方程，以及代际间隔与报告过程的联合估计\citep{goldwasser2026rt}，都是它的自然延伸。
+
+\section*{致谢}
+\markboth{声明}{声明}
+作者感谢约翰斯·霍普金斯大学 CSSE、美国疾病控制与预防中心公共卫生法项目和美国人口普查局公开监测与政策记录。
+
+\section*{数据可得性声明}
+所有数据均公开可得；来源、校验和与下载说明见网络附录 D 与 \texttt{experiment/data}。复现代码随文提供。
+
+\section*{支持材料}
+网络附录 A--F（正则条件、证明与改写的比较量结果、数值核对、补充模拟、数据来源与清洗、少簇推断、应用诊断）在第~\ref{s:intro}--\ref{s:discussion} 节中引用，作为本文的支持材料提供。
+
+\section*{利益冲突}
+作者声明无利益冲突。
+
+\section*{资助}
+（资助声明待投稿前补充。）
 
 \appendix
 \section*{网络附录（对应英文稿 Web Appendix A.9--A.12）}
 \addcontentsline{toc}{section}{网络附录（对应英文稿 Web Appendix A.9--A.12）}
+\markboth{网络附录 A.9--A.12}{网络附录 A.9--A.12}
 \setcounter{section}{0}
+\setcounter{equation}{0}
+\renewcommand{\theequation}{A.\arabic{equation}}
 
-\subsection*{A.9 反馈下主流估计量估计的是什么}
-\addcontentsline{toc}{subsection}{A.9 反馈下主流估计量估计的是什么}
+\subsection*{A.9 反馈下常用估计量估计的是什么}
+\addcontentsline{toc}{subsection}{A.9 反馈下常用估计量估计的是什么}
 \label{ss:bias}
 
-(a)--(c) 部分取 $\kappa_0=\phi_0=0$，并把压力 $\Lambda_{it}=L_{it}+\omega_i$ 视为已知，这对比较量有利。
-$\ddot D_{it}$ 表示平衡面板中双向去均值的 $D_{it}$，$d^2=\lim N^{-1}\E\sum_{i,t}\ddot D_{it}^2>0$，
-极限在 $T$ 固定、$G\to\infty$ 下取。
+(a)--(c) 部分取 $\kappa_0=\phi_0=0$，并把压力 $\Lambda_{it}=L_{it}+\omega_i$ 视为已知，这对比较方法有利。$\ddot D_{it}$ 表示平衡面板中双向去均值的 $D_{it}$，$d^2=\lim N^{-1}\E\sum_{i,t}\ddot D_{it}^2>0$，极限在 $T$ 固定、$G\to\infty$ 下取。
 
-\begin{theorem}[伪真值]\label{thm:bias}
+\begin{theorem}[伪真值]
+\label{thm:bias}
 假设 A1--A6 与 (L)。
 \begin{enumerate}[leftmargin=2em,label=(\alph*)]
-\item \emph{两步对数 $R$ 双重差分。} 设 $\hat\tau_2$ 为
-$y_{it}=\log\{(Y_{it}+c)/\Lambda_{it}\}$ 对 $D_{it}$ 的双向固定效应斜率，$c>0$\citep{feng2024parallel}。
-令 $b_{it}=\log\mu_{it}-\E\{\log(Y_{it}+c)\mid\F_{t-1}\}$，
-$\eta_{it}=\log(Y_{it}+c)-\E\{\log(Y_{it}+c)\mid\F_{t-1}\}$，则精确地
-$\hat\tau_2-\tau_0=\{-\sum\ddot D_{it}b_{it}+\sum\ddot D_{it}\eta_{it}\}/\sum\ddot D_{it}^2$，
-且 $\hat\tau_2\to_p\tau_0+B_J+B_F$，
+\item \emph{两步对数 $R$ 双重差分。} 设 $\hat\tau_2$ 为 $y_{it}=\log\{(Y_{it}+c)/\Lambda_{it}\}$ 对 $D_{it}$ 的双向固定效应斜率，$c>0$\citep{feng2024parallel}。
+令 $b_{it}=\log\mu_{it}-\E\{\log(Y_{it}+c)\mid\F_{t-1}\}$，$\eta_{it}=\log(Y_{it}+c)-\E\{\log(Y_{it}+c)\mid\F_{t-1}\}$。则精确地有 $\hat\tau_2-\tau_0=\{-\sum\ddot D_{it}b_{it}+\sum\ddot D_{it}\eta_{it}\}/\sum\ddot D_{it}^2$，且 $\hat\tau_2\to_p\tau_0+B_J+B_F$，其中各项如下：
 \[
 B_J=-\lim\frac{\E\sum_{i,t}\ddot D_{it}b_{it}}{Nd^2},\qquad
 B_F=-\lim\frac{\E\sum_i\sum_{t<s}D_{is}\eta_{it}}{NTd^2},\qquad
 |B_F|\le\frac{2\bar\sigma_\eta T^{1/2}}{3d^2},
 \]
-其中 $\bar\sigma_\eta^2=\sup_{i,t}\E\eta_{it}^2$。在均值为 $\mu$、形状为 $k$ 的负二项工作分布下，
-二阶展开给出 $b_{it}\approx-(c-1/2+c/k)/\mu_{it}+1/(2k)$。若
-$\E(\eta_{it}\mid D_{i1},\dots,D_{iT})=0$ 则 $B_F=0$；实施跟随异常高病例时 $B_F<0$。
-\item \emph{泊松固定效应。} 设 $\hat\beta_1$ 为以 $\log\Lambda_{it}$ 为偏移、含单元与周效应、
-回归元为 $x_{it}$ 的条件（泊松固定效应）估计量。其估计函数为
-$S_i(\beta)=\sum_s\{x_{is}-\bar x^m_i(\beta)\}Y_{is}$，$\bar x^m_i=\sum_s m_{is}x_{is}/\sum_s m_{is}$，
-且 $\E S_i(\beta_0)=-\sum_s\E\{\bar x^m_i(\beta_0)\varepsilon_{is}\}$；当 $\Lambda_{i,s+1}$ 或 $D_{i,s+1}$
-依赖 $Y_{is}$ 时，该量一般不为零。若 $Y_{is}\mid\F_{s-1}$ 为泊松，且
-$\bar x^m_i=f(Y_{is},R_{is})$，其中 $R_{is}$ 条件独立于 $Y_{is}$，则
-$\E(\bar x^m_i\varepsilon_{is}\mid\F_{s-1})=\mu_{is}\E\{f(Y_{is}+1,R_{is})-f(Y_{is},R_{is})\mid\F_{s-1}\}$
-\citep{chen1975poisson}。取 $T=2$、$S=1$、$D_{i1}=0$，$D_{i2}$ 为 $Y_{i1}$ 与独立噪声的函数，
-组 $D_{i2}=d$ 中伪真第 2 周对数增长 $\tilde h_d$ 满足
+$(\bar\sigma_\eta)^2=\sup_{i,t}\E\eta_{it}^2$。在均值为 $\mu$、形状为 $k$ 的负二项工作分布下，二阶展开给出 $b_{it}\approx-(c-1/2+c/k)/\mu_{it}+1/(2k)$。若 $\E(\eta_{it}\mid D_{i1},\dots,D_{iT})=0$ 则 $B_F=0$；实施跟随异常高的病例时 $B_F<0$。
+\item \emph{泊松固定效应。} 设 $\hat\beta_1$ 为以 $\log\Lambda_{it}$ 为偏移、含单元与周效应、回归元为 $x_{it}$ 的条件（泊松固定效应）估计量。其估计函数为 $S_i(\beta)=\sum_s\{x_{is}-\bar x^m_i(\beta)\}Y_{is}$，$\bar x^m_i=\sum_s m_{is}x_{is}/\sum_s m_{is}$，且 $\E S_i(\beta_0)=-\sum_s\E\{\bar x^m_i(\beta_0)\varepsilon_{is}\}$；当 $\Lambda_{i,s+1}$ 或 $D_{i,s+1}$ 依赖 $Y_{is}$ 时，该量一般不为零。
+若 $Y_{is}\mid\F_{s-1}$ 为泊松分布，且 $\bar x^m_i=f(Y_{is},R_{is})$，$R_{is}$ 条件独立于 $Y_{is}$，则 $\E(\bar x^m_i\varepsilon_{is}\mid\F_{s-1})=\mu_{is}\E\{f(Y_{is}+1,R_{is})-f(Y_{is},R_{is})\mid\F_{s-1}\}$\citep{chen1975poisson}。
+取 $T=2$、$S=1$、$D_{i1}=0$，$D_{i2}$ 为 $Y_{i1}$ 与独立噪声的函数，组 $D_{i2}=d$ 中伪真的第 2 周对数增长 $\tilde h_d$ 满足下式：
 \begin{equation}
 \E\Bigl[\ind(D_{i2}=d)\,\Lambda_{i2}\,\frac{\Lambda_{i1}e^{\alpha_i+h_0+\tau_0d}-e^{\tilde h_d}Y_{i1}}{\Lambda_{i1}+e^{\tilde h_d}\Lambda_{i2}}\Bigr]=0,
 \label{eq:t2fe}
 \end{equation}
-且 $\hat\tau_1\to_p\tilde h_1-\tilde h_0$。由于 $\Lambda_{i2}=Y_{i1}+\omega_i$，
-一般有 $\tilde h_d\ne h_0+\tau_0d$，从而 $\tilde h_1-\tilde h_0\ne\tau_0$，即使 $D_{i2}$ 是随机化的。
-\item \emph{$\log(Y+1)$ 上的双向固定效应。} 斜率 $\hat\tau_3$ 满足
+且 $\hat\tau_1\to_p\tilde h_1-\tilde h_0$。由于 $\Lambda_{i2}=Y_{i1}+\omega_i$，一般有 $\tilde h_d\ne h_0+\tau_0d$，从而 $\tilde h_1-\tilde h_0\ne\tau_0$，即使 $D_{i2}$ 是随机化的。
+\item \emph{$\log(Y+1)$ 上的双向固定效应。} 斜率 $\hat\tau_3$ 满足下式：
 \[
 \hat\tau_3-\tau_0=\frac{\sum\ddot D_{it}\log\Lambda_{it}}{\sum\ddot D_{it}^2}+\frac{-\sum\ddot D_{it}b^{(1)}_{it}+\sum\ddot D_{it}\eta^{(1)}_{it}}{\sum\ddot D_{it}^2},
 \]
-其中 $b^{(1)},\eta^{(1)}$ 取 (a) 中 $c=1$ 的形式。第一项为省略压力带来的偏倚，实施跟随压力上升时为正，
-政策压低后续压力时为负，偏倚符号因此不确定。
-\item \emph{忽略溢出。} 设 $(\tilde\delta,\tilde\tau)$ 是强加 $\kappa=\phi=0$、使用工具 $s_{it}e_t$、$s_{it}D_{it}$
-的 QD-GMM 的伪真值，它满足 $\lim G^{-1}\E\sum_{i,t}z_{it}\mu_{it}\{R_{it}(\delta,\tau)-1\}=0$，其中
+其中 $b^{(1)},\eta^{(1)}$ 取 (a) 中 $c=1$ 的形式。第一项来自省略的压力，实施跟随压力上升时为正，政策压低后续压力时为负，偏倚符号因此不确定。
+\item \emph{忽略溢出。} 设 $(\tilde\delta,\tilde\tau)$ 是强加 $\kappa=\phi=0$、使用工具 $s_{it}e_t$ 与 $s_{it}D_{it}$ 的 QD-GMM 的伪真值，它满足 $\lim G^{-1}\E\sum_{i,t}z_{it}\mu_{it}\{R_{it}(\delta,\tau)-1\}=0$，其中的比值如下：
 \[
-R_{it}(\delta,\tau)=\exp\{\gamma_{t+1}-\gamma_t-\delta_t
--(\tau-\tau_0)\Delta D_{i,t+1}+\kappa_0\Delta\bar D_{i,t+1}\}\,
-\frac{1+\phi_0\tilde N_{i,t+1}}{1+\phi_0\tilde N_{it}},
+R_{it}(\delta,\tau)=\exp\{\gamma_{t+1}-\gamma_t-\delta_t-(\tau-\tau_0)\Delta D_{i,t+1}+\kappa_0\Delta\bar D_{i,t+1}\}\,\frac{1+\phi_0\tilde N_{i,t+1}}{1+\phi_0\tilde N_{it}},
 \]
-$\tilde N_{it}=N_{it}/(L_{it}+\omega_i)$，$\Delta X_{i,t+1}=X_{i,t+1}-X_{it}$。
-若 $\kappa_0=\phi_0=0$ 则 $\tilde\tau=\tau_0$。在 $(\kappa_0,\phi_0)$ 的一阶上，$\tilde\tau-\tau_0$ 等于
-以 $s_{it}\mu_{it}$ 为权重、以 $(e_t,D_{it})$ 为工具，把
-$\kappa_0\Delta\bar D_{i,t+1}+\phi_0\Delta\tilde N_{i,t+1}$ 对周指示与 $\Delta D_{i,t+1}$ 做恰好识别工具变量回归时
-$\Delta D_{i,t+1}$ 的系数。当 $\Delta\bar D$ 随 $\Delta D$ 一起变动，如州级实施下的情形，$\kappa_0$ 的贡献与 $\kappa_0$ 同号。
+$\tilde N_{it}=N_{it}/(L_{it}+\omega_i)$，$\Delta X_{i,t+1}=X_{i,t+1}-X_{it}$。若 $\kappa_0=\phi_0=0$ 则 $\tilde\tau=\tau_0$。
+在 $(\kappa_0,\phi_0)$ 的一阶上，$\tilde\tau-\tau_0$ 等于以 $s_{it}\mu_{it}$ 为权重、以 $(e_t,D_{it})$ 为工具，把 $\kappa_0\Delta\bar D_{i,t+1}+\phi_0\Delta\tilde N_{i,t+1}$ 对周指示与 $\Delta D_{i,t+1}$ 做恰好识别工具变量回归时 $\Delta D_{i,t+1}$ 的系数。当 $\Delta\bar D$ 随 $\Delta D$ 一起变动（如州级实施）时，$\kappa_0$ 的贡献与 $\kappa_0$ 同号。
 \end{enumerate}
 \end{theorem}
 
-(a) 部分把两种机制分开。Jensen 项 $B_J$ 是估计再生数的小计数问题，不随 $T$ 增大而消失；
-反馈项 $B_F$ 产生于 $D$ 的单元均值用到了未来的实施，而未来实施对当期冲击有反应。这正是动态面板中组内估计量
-固定 $T$ 偏倚的来源\citep{nickell1981biases}。因为 $d^2=\lim N^{-1}\E\sum_{i,t}\ddot D_{it}^2$ 跨所有 $t=1,\dots,T$ 求和，在处理变异不随时间消失的设计中 $d^2$ 随 $T$ 线性增长。因此 (a) 中的一般上界实际为 $O(T^{-1/2})$；若在近期冲击条件下交叉乘积和为 $O(T)$，上界 $C/d^2$ 为 $O(T^{-1})$，与 Nickell 动态面板偏倚速率一致。
-(b) 部分说明泊松固定效应即使面对随机化实施，也会因滞后结局进入偏移而在固定 $T$ 下不一致；这一性质在动态计数面板中已知\citep{blundell2002count}。
-分面板刀切校正\citep{dhaene2015splitpanel} 依赖平稳性，而周效应与交错实施都违背平稳性，
-因此校正后的估计量只用模拟评估。
+定理~\ref{thm:bias} 把计数面板中前定回归元的已知结果改写到更新均值上，作用是把各比较方法放在同一框架下比较，不建立新的不相合结果。
+(a) 部分把两种机制分开。Jensen 项 $B_J$ 是估计再生数的小计数问题，不随 $T$ 增大而消失；反馈项 $B_F$ 的来源是 $D$ 的单元均值用到了未来的实施，而未来实施对当期冲击有反应，这正是动态面板中组内估计量固定 $T$ 偏倚的机制\citep{nickell1981biases}。
+由于 $d^2$ 对全部 $t=1,\dots,T$ 求和，在每期单元内处理变异不消失的设计中 $d^2$ 随 $T$ 线性增长，(a) 中的一般上界因此为 $O(T^{-1/2})$；在近期冲击条件下交叉乘积和为 $O(T)$，上界 $C/d^2$ 为 $O(T^{-1})$，与 Nickell 速率一致。
+(b) 部分说明回归元（这里是滞后结局偏移）为前定而非严格外生时泊松固定效应估计量经典的固定 $T$ 不相合\citep{hausman1984count,wooldridge1997multiplicative,wooldridge1999distribution,blundell2002count}；它在随机化实施下同样成立，但在网络附录 B 的随机化设计中偏倚为 $-0.004$，因此 (b) 在那里是示例，没有实际影响。
+(c) 部分是\citet{santossilva2006log} 与\citet{chen2024logs} 的对数线性化问题再加上省略的压力项；基于泊松的双重差分\citep{wooldridge2023nonlinear}消除前者，不能消除后者。
+分面板刀切校正\citep{dhaene2015splitpanel}依赖平稳性，周效应与交错实施都违背平稳性；大 $N$、大 $T$ 非线性面板的解析校正\citep{fernandezval2016individual}需要长面板，因此校正后的估计量只用模拟评估。
 
 \subsection*{A.10 异质效应与动态效应}
 \addcontentsline{toc}{subsection}{A.10 异质效应与动态效应}
 
-\begin{proposition}[异质效应]\label{prop:hetero}
-设 A1 成立但效应为单元特定、时不变的 $\tau_i$，可以与 $\alpha_i$ 及实施过程相关；实施为吸收式，
-$(\kappa,\phi)=(\kappa_0,\phi_0)$ 固定，使用定理~\ref{thm:ident}(b) 的工具。令
-$M_t=\lim G^{-1}\E\sum_i s_{it}\mu_{it}$，并设有某个 $t$ 使 $A_t>0$、$K_t>0$。
-则伪真值 $\tilde\tau$ 存在且唯一，落在 $\tau_i$ 支撑集在度量 $s_{it}\mu_{it}\Sw_{i,t+1}$（限于 $A_t>0$ 的周）下的闭凸包内。
-在 $\tau_i-\tilde\tau$ 的一阶上，
+\begin{proposition}[异质效应]
+\label{prop:hetero}
+设 A1 成立，但效应为单元特定、时不变的 $\tau_i$，可以与 $\alpha_i$ 及实施过程相关；实施为吸收式，$(\kappa,\phi)=(\kappa_0,\phi_0)$ 固定，使用定理~\ref{thm:ident}(b) 的工具。
+令 $M_t=\lim G^{-1}\E\sum_i s_{it}\mu_{it}$，并设有某个 $t$ 使 $A_t>0$、$K_t>0$。则伪真值 $\tilde\tau$ 存在且唯一，落在 $\tau_i$ 支撑集在度量 $s_{it}\mu_{it}\Sw_{i,t+1}$（限于 $A_t>0$ 的周）下的闭凸包内。在 $\tau_i-\tilde\tau$ 的一阶上有如下近似：
 \[
-\tilde\tau\approx\frac{\sum_t(A_t/M_t)\lim G^{-1}\E\sum_i s_{it}\mu_{it}\Sw_{i,t+1}\tau_i}{\sum_t(A_t/M_t)K_t},
+\tilde\tau\approx\frac{\sum_t(A_t/M_t)\lim G^{-1}\E\sum_i s_{it}\mu_{it}\Sw_{i,t+1}\tau_i}{\sum_t(A_t/M_t)K_t}.
 \]
 这是一个权重非负的加权平均。
 \end{proposition}
 
-与交错实施下的双向固定效应\citep{goodmanbacon2021did,dechaisemartin2020twfe} 不同，
-当效应时不变时，常数效应的 QD-GMM 估计目标不会给任何单元的效应赋负权重；
-没有受处理单元的周里的切换者获得的一阶权重为零。
+命题~\ref{prop:hetero} 把交错实施下双向固定效应的加权分析\citep{goodmanbacon2021did,dechaisemartin2020twfe}改写到准差分矩上；它把 $(\kappa,\phi)$ 固定在真值，权重为一阶近似。
+效应时不变时，常数效应的 QD-GMM 估计目标不会给任何单元的效应赋负权重，这一点与双向固定效应不同。没有受处理单元的周里的切换者一阶权重为零。
 
-\begin{remark}[动态效应]\label{rem:dynamic}
-若效应随实施后时间变化，已接受处理的维持者不再消去 $\tau$，它们的病例增长中包含 $\tau_{e+1}-\tau_e$。
-由于已处理单元参与钉住周效应（命题~\ref{prop:sources}），常数效应估计目标可能落在真实效应范围之外，
-甚至符号相反，与双向固定效应中的已处理比较问题相同\citep{goodmanbacon2021did}。
-因此本文推荐事件时间规格 $\sum_{e=0}^{E}\tau_e\ind\{t-A_i=e\}$，其中 $A_i$ 为实施周，最后一格汇总 $e\ge E$，
-以 $s_{it}\ind\{t-A_i=e\}$ 为工具。这些指示变量是 $\F_{t-1}$ 可测的，只要秩条件成立，定理~\ref{thm:asy} 即适用。
-秩条件需要存在尚未处理或从未处理的单元。
+\setcounter{remark}{1}
+\begin{remark}[动态效应]
+\label{rem:dynamic}
+若效应随实施后时间变化，已处理的维持者不再消去 $\tau$，它们的病例增长中含有 $\tau_{e+1}-\tau_e$。由于已处理单元参与钉住周效应（命题~\ref{prop:sources}），常数效应估计目标可能落在真实效应范围之外，甚至符号相反，与双向固定效应中的已处理比较问题相同\citep{goodmanbacon2021did}。
+因此本文推荐事件时间规格 $\sum_{e=0}^{E}\tau_e\ind\{t-A_i=e\}$，其中 $A_i$ 为实施周，最后一格汇总 $e\ge E$，以 $s_{it}\ind\{t-A_i=e\}$ 为工具。这些指示变量是 $\F_{t-1}$ 可测的，只要秩条件成立，定理~\ref{thm:asy} 即适用。秩条件要求存在尚未处理或从未处理的单元。
 \end{remark}
+
+注~\ref{rem:dynamic} 把\citet{sun2021estimating} 与\citet{borusyak2024imputation} 的事件研究分析改写到准差分矩上。隐含权重可以写成显式形式。
+设事件时间模型成立，分箱效应为 $\tau^*=(\tau^*_0,\dots,\tau^*_E)^{\top}$；当政策以分箱系数 $\boldsymbol\tau$ 进入时，记汇聚恰好识别矩（剖面消去周效应）的极限为 $\bar g_P(\boldsymbol\tau,\kappa,\phi)$，汇聚规格取 $\boldsymbol\tau=\tau\mathbf 1$。
+汇聚伪真值 $(\tilde\tau,\tilde\kappa,\tilde\phi)$ 满足 $\bar g_P(\tilde\tau\mathbf 1,\tilde\kappa,\tilde\phi)=0$。在 $(\tau^*,\kappa_0,\phi_0)$ 处记 $H_b=\partial\bar g_P/\partial\boldsymbol\tau^{\top}$、$H_\kappa=\partial\bar g_P/\partial\kappa$、$H_\phi=\partial\bar g_P/\partial\phi$，一阶展开给出如下关系：
+\[
+A\,(\tilde\tau,\ \tilde\kappa-\kappa_0,\ \tilde\phi-\phi_0)^{\top}=H_b\tau^*,\qquad
+A=[H_b\mathbf 1,\ H_\kappa,\ H_\phi].
+\]
+于是 $\tilde\tau\approx\sum_{b}\omega_b\tau^*_b$，$\omega^{\top}$ 为 $A^{-1}H_b$ 的第一行。由于 $A^{-1}H_b\mathbf 1=e_1$，权重之和为一；已处理的维持者在 $H_b$ 中与切换者符号相反，权重因此可以为负。
+第二行表明分箱效应不同时 $\tilde\kappa$ 也受到污染。网络表 14 报告应用中在 M0-ET2 估计与汇聚估计处计算的 $\omega$，以及汇聚与动态之差，其标准误来自堆叠影响函数的联合聚类夹心方差。
 
 \subsection*{A.11 避免病例数}
 \addcontentsline{toc}{subsection}{A.11 避免病例数}
 
-令 $t\le0$ 时 $\nu_{it}=Y_{it}$。对 $t\ge1$，反事实在所有单元上联合递推定义：
+令 $t\le 0$ 时 $\nu_{it}=Y_{it}$。对 $t\ge 1$，反事实在所有单元上联合递推定义如下：
 \begin{equation}
 \nu_{it}(\theta)=c_{it}(\theta)Y_{it},\qquad
 c_{it}(\theta)=e^{-\tau D_{it}-\kappa\bar D_{it}}\,\frac{\Lambda_{it}(\nu;\phi)}{\Lambda_{it}(Y;\phi)},
 \label{eq:nu}
 \end{equation}
-其中 $\Lambda_{it}(\nu;\phi)$ 由 $\nu$ 算出的压力。在政策经由 $\bar D_{it}$ 或经由所受压力作用于单元 $i$ 之前，
-递推保持 $\nu_{it}=Y_{it}$，因此无需选择反事实的起始日。递归 \eqref{eq:nu} 不含易感者耗竭项；累计感染相对易感人口可以忽略时这是恰当的，
-周数很长、攻击率上升时则需加入耗竭约束，因为此时递推会持续放大，方差也随周期数增长。令
-$\hat\psi_{\mathcal P}=\sum_{(i,t)\in\mathcal P}\{\nu_{it}(\hat\theta)-Y_{it}\}$，
-$\psi^\dagger_{\mathcal P}=\sum_{(i,t)\in\mathcal P}\{\nu_{it}(\theta_0)-Y_{it}\}$。
+其中 $\Lambda_{it}(\nu;\phi)$ 是由 $\nu$ 算出的压力。在政策直接作用、经由 $\bar D_{it}$ 或经由所受压力影响单元 $i$ 之前，递推保持 $\nu_{it}=Y_{it}$，因此无需选择反事实的起始日。
+令 $\hat\psi_{\mathcal P}=\sum_{(i,t)\in\mathcal P}\{\nu_{it}(\hat\theta)-Y_{it}\}$，$\psi^\dagger_{\mathcal P}=\sum_{(i,t)\in\mathcal P}\{\nu_{it}(\theta_0)-Y_{it}\}$。
 
-\begin{theorem}[反事实传播]\label{thm:psi}
-(a) 在 A1--A3 与 A5 下，对所有 $i$、$t$ 有
-$\E(\nu_{it}(\theta_0)\mid\alpha,Y_{\le0})=\E\{Y_{it}(\mathbf 0)\mid\alpha,Y_{\le0}\}$，
-故 $\E\psi^\dagger_{\mathcal P}=\psi_{\mathcal P}$。
-(b) 在定理~\ref{thm:asy} 的条件下，若 $|\mathcal P|/G$ 有界且 $\partial\nu_{it}/\partial\beta$
-满足网络附录 A.1 的控制条件，则 $\sqrt G(\hat\psi_{\mathcal P}-\psi^\dagger_{\mathcal P})/G\to_d N(0,\Psi V\Psi^{\top})$，
-其中 $\Psi=\plim G^{-1}\sum_{(i,t)\in\mathcal P}\partial\nu_{it}(\theta_0)/\partial\theta^{\top}$。
+\begin{theorem}[反事实传播]
+\label{thm:psi}
+(a) 在 A1--A3 与 A5 下，对所有 $i$、$t$ 有 $\E(\nu_{it}(\theta_0)\mid\alpha,Y_{\le 0})=\E\{Y_{it}(\mathbf 0)\mid\alpha,Y_{\le 0}\}$，故 $\E\psi^\dagger_{\mathcal P}=\psi_{\mathcal P}$。
+(b) 在定理~\ref{thm:asy} 的条件下，若 $|\mathcal P|/G$ 有界且 $\partial\nu_{it}/\partial\beta$ 满足网络附录 A.1 的控制条件，则 $G^{1/2}(\hat\psi_{\mathcal P}-\psi^\dagger_{\mathcal P})/G\to_d N(0,\Psi V\Psi^{\top})$，其中 $\Psi=\plim G^{-1}\sum_{(i,t)\in\mathcal P}\partial\nu_{it}(\theta_0)/\partial\theta^{\top}$。
 \end{theorem}
 
-直接按 $Y_{it}e^{-\tau D_{it}-\kappa\bar D_{it}}$ 缩放忽略了被避开的病例本身也会传染他人；
-定理~\ref{thm:psi} 让反事实沿更新方程与网络传播。(b) 中的推断针对实现路径上的量 $\psi^\dagger$，其期望为 $\psi$。
+直接按 $Y_{it}e^{-\tau D_{it}-\kappa\bar D_{it}}$ 缩放忽略了被避免的病例本身也会传染他人；定理~\ref{thm:psi} 让反事实沿更新方程与网络传播。(b) 部分是定理~\ref{thm:asy} 的标准 delta 方法推论，不含新的渐近论证。(b) 中的推断针对实现路径上的量 $\psi^\dagger$，其期望为 $\psi$。
 
-\begin{remark}[过程噪声与耗竭]\label{rem:psi}
-$\psi^\dagger_{\mathcal P}-\psi_{\mathcal P}$ 是零均值、局部相关项之和。与矩贡献不同，这些项在相邻集群间相关，因为 $\nu_{it}$ 依赖邻居的结局；总体水平 $\psi_{\mathcal P}$ 的方差估计量还需补充集群图 HAC 项。若易感者耗竭使 A1 中的均值乘以 $1-C_{i,t-1}/P_i$，递推不再关于既往 $\nu$ 线性，定理~\ref{thm:psi}(a) 仅近似成立。
+\begin{remark}[过程噪声与耗竭]
+\label{rem:psi}
+$\psi^\dagger_{\mathcal P}-\psi_{\mathcal P}$ 是零均值、局部相关项之和。与矩贡献不同，这些项在相邻集群间相关，因为 $\nu_{it}$ 依赖邻居的结局。总体水平 $\psi_{\mathcal P}$ 的方差估计量需要加入集群图 HAC 项；本文推测其相合，但未给出证明。
+若易感者耗竭使 A1 中的均值乘以 $1-C_{i,t-1}/P_i$（$C$ 为累计病例，$P$ 为人口），递推不再关于过去的 $\nu$ 线性，定理~\ref{thm:psi}(a) 只近似成立；耗竭还会使效应估计随暴露时间漂移\citep{janvin2025depletion}。
 \end{remark}
 
-\begin{remark}[可检验性]\label{rem:testable}
-工作模型的设定可以直接检验：引理~\ref{lem:mds} 意味着相邻集群的矩贡献不相关；推论~\ref{cor:J} 的 $J$ 检验用额外的前定工具核对乘性更新结构；把 $D$ 滞后一周的敏感性分析核对政策时点对齐。序贯可忽略性（A2(b)）与实施后平行未处理对数传播路径不可检验。
+\begin{remark}[可检验性]
+\label{rem:testable}
+引理~\ref{lem:mds} 意味着相邻集群的矩贡献不相关，这一点可以直接核对。应用中，112 对相邻州的州得分贡献相关系数为 0.082（$\tau$）、0.088（$\kappa$）与 $-0.092$（$\phi$）；把相邻对的交叉乘积加入 $\hat\Omega$，$\hat\tau+\hat\kappa$ 的标准误由 0.3108 变为 0.2915，$\hat\tau$ 的标准误由 0.1276 变为 0.1293。
+推论~\ref{cor:J} 的 $J$ 检验沿用\citet{arellano1991tests} 的思路，用额外的前定工具核对乘性更新结构；把 $D$ 滞后一周的敏感性分析核对政策时点对齐。
+序贯可忽略性（A2(b)）与实施后未处理对数传播路径的平行性不可检验：反馈下前导回归不是有效检验（命题~\ref{prop:sources}(c)），预检验会扭曲后续推断\citep{roth2022pretest}；允许有界偏离平行趋势的方法\citep{rambachan2023credible}与基于设计的动态效应视角\citep{bojinov2021panel}是可选的替代，本文未采用。
 \end{remark}
 
 \subsection*{A.12 周内传播与假设 A4}
 \addcontentsline{toc}{subsection}{A.12 周内传播与假设 A4}
 \label{ss:weekwithin}
 
-A4 要求给定历史后，同一周内各集群的结局相互独立。若一次感染在同一周内跨过集群边界，且两县都在该周被记录，
-则给定 $\F_{t-1}$ 后第 $t$ 周的两个新息相关，A4 恰好在它重要的地方失效。这何时发生，代价多大？
+A4 要求给定历史后，同一周内各集群的结局相互独立。若一次感染在同一周内跨过集群边界，且两县都在该周被记录，则给定 $\F_{t-1}$ 时第 $t$ 周的两个新息相关，A4 恰好在关键之处失效。下文讨论这种情形何时出现以及代价多大。
 
-首先，假设约束的是新息而不是结局水平。相邻集群通过 $\bar D$ 和网络压力 $\Lambda$ 共享历史，
-引理~\ref{lem:mds} 以 $\F_{s-1}$ 可测因子对每个矩贡献加权，已把这一层考虑进去。
-A4 所排除的，是与结局同一周到达、来不及进入信息集的那部分相关。
+A4 约束的是新息，不约束结局水平。相邻集群通过 $\bar D$ 和网络压力 $\Lambda$ 共享历史，引理~\ref{lem:mds} 以 $\F_{s-1}$ 可测因子对每个矩贡献加权，已经计入这一层。A4 排除的是与结局同一周到达、来不及进入信息集的相关。
 
-其次，周面板只有在传播至少滞后一期时才自洽，因为定义估计目标的更新方程 \eqref{eq:mean} 按整周书写。
-周内传播会改变该模型隐含的条件均值，也可能改变准差分的协方差结构；由此得到的矩未必仍是鞅差，
-一致性论证和常规聚类夹心方差都不能在没有附加条件时直接沿用。参数与方差偏差的方向和幅度不能由周频模型本身确定。
-应用中按所假定的代际间隔换算，约 30\% 的传播落在当周；第~\ref{ss:sameweek} 节的一对匹配模拟生成这样的数据并聚合到周，
-那里周估计量的偏倚约为真实效应的 15\%，$\tau$ 的覆盖率降到 0.89，$\tau+\kappa$ 降到 0.78，$J$ 检验检不出这一误设。
+周面板只有在传染至少滞后一期时才内在一致，因为定义估计目标的更新方程 \eqref{eq:mean} 按整周书写。同周传播改变该模型隐含的条件均值，也可能改变准差分的协方差结构；所得的矩未必仍是鞅差，相合性论证和常规聚类夹心方差在没有附加条件时都不能沿用。参数与方差偏差的方向和大小不能仅由周度模型确定。
+应用中按所假定的代际间隔换算，约 30\% 的传播落在同一周。第~\ref{ss:sameweek} 节的匹配模拟生成单元内的周内更新（$w_0=0.3$，非线性周内再感染占 14.5\%）并聚合到周，周估计量的偏倚约为真实效应的 15\%，$\tau$ 的覆盖率降到 0.89，$\tau+\kappa$ 降到 0.78，$J$ 检验检不出这一误设。
 
-再次，周内传播可以在下一期信息集建立之前把相邻集群的新息联系起来。这不同于 A4 和引理~\ref{lem:mds}
-允许的滞后跨集群传播；现有条件不能推出这些矩贡献在工具半径之外仍不相关。Conley 型空间校正
-\citep{conley1999gmm} 在相应依赖条件下处理协方差，但不能单独修复条件均值误设或恢复鞅差性质。
-25 个预设情景不含周内传播；第~\ref{ss:sameweek} 节的匹配模拟单独量化了它对偏倚与覆盖率的影响。
+同周传播造成的依赖可以在下一期信息集建立之前把不同集群的新息联系起来。这与 A4 和引理~\ref{lem:mds} 允许的滞后跨集群传播不同；现有条件不能推出所得矩贡献在工具半径之外仍不相关。\citet{conley1999gmm} 那样的空间校正在相应依赖条件下处理协方差，但它本身不能修复误设的条件均值，也不能恢复鞅差性质。
+25 个预设情景不含同周传播；第~\ref{ss:sameweek} 节的匹配模拟单独量化了它对偏倚与覆盖率的影响。
 
-最后，在相当比例的传播发生在一周以内时，周度聚合可能不足。缩短观测间隔或直接设定周内更新过程
-会改变数据模型；单独修正方差不能解决均值误设，任何提出的修正都应在生成并聚合周内传播的设计下评估。
+当相当比例的传播发生在一周之内时，周度聚合可能不够。缩短观测间隔或设定周内更新过程会改变数据模型：日计数带有星期报告效应与报告延迟\citep{lison2024nowcast}，违反命题~\ref{prop:ascertainment} 的无延迟报告，需要新的矩条件和新的模拟验证。仅靠方差校正无法解决均值设定问题。因此这一情形需要周内估计量，本文未提供。
+
+同周模拟中，周内机制自从零计数的窗口序号 2（\texttt{ENGINE\_FROM = 2}）即窗口第 3 周起启用。
+
+\section*{网络附录 D：数据来源与清洗}
+\addcontentsline{toc}{section}{网络附录 D：数据来源与清洗}
+\markboth{网络附录 D}{网络附录 D}
+
+应用使用六个公开文件（五个数据文件与美国社区调查通勤表），每个文件在 \path{experiment/data/checksums.tsv} 中记录 SHA-256 校验和，由 \path{experiment/code/data_prep.py} 读取。
+
+\begin{enumerate}
+\item 病例数据为美国各县 COVID-19 累计确诊周计数，取自约翰斯·霍普金斯大学 CSSE 时间序列\citep{dong2020dashboard}。周发病数为相邻周起始日累计值之差，修订造成的负值置为零。
+\item 暴露数据为州与领地公共口罩令，取自 CDC 公共卫生法项目的县日文件\citep{cdc2021maskorders}。原始文件（217 MB）可由 \path{experiment/data/fetch_cdc_masks.py} 下载，并以 \path{checksums.tsv} 中的 SHA-256 校验和核对。口罩令在该周七天中至少四天生效时 $D_{it}=1$。
+州法允许的县级豁免（如堪萨斯\citep{ginther2021kansas}）不在该文件中，因此未编码；$D$ 在这些州高估了暴露，剔除堪萨斯与得克萨斯的分析因此一并报告。犹他与密苏里的合并报告单元遵循 JHU CSSE 的约定（\path{data_contract.md}）。
+\item 单元为美国本土与哥伦比亚特区的县及合并县报告单元，共 3091 个；阿拉斯加、夏威夷与领地不在样本内。49 个集群为 48 个本土州与哥伦比亚特区。
+\item 网络为 2010 年人口普查县邻接文件，对称化后行归一化；敏感性分析改用美国社区调查 2011--2015 年县间通勤流，同样对称化后行归一化。
+\item 人口取 JHU CSSE 文件中的县人口字段，只用于背景输入 $\omega_i=$ 人口$/10^5$。
+\item 代际间隔的周更新权重由\citet{ferretti2020quantifying} 的代际时间分布在周内感染日均匀的假设下离散化得到，见第~\ref{s:application} 节。
+\end{enumerate}
+
+周次按起始星期一划分。估计窗口自 2020-06-01 开始，此前两周只用于构造滞后压力。没有单元因结局缺失而被剔除；某周无报告病例的县以零计数进入。
+
+\section*{网络附录 E：应用中的少簇推断}
+\addcontentsline{toc}{section}{网络附录 E：应用中的少簇推断}
+\markboth{网络附录 E}{网络附录 E}
+
+应用有 49 个州集群，其中 24 个含切换暴露的县，集群规模从 1 到 254 个县；在这种设定下，野 bootstrap 推断需要谨慎\citep{mackinnon2017wild}。表 3 的 $t_{48}$ 区间把集群视为渐近多个。本附录报告针对这一假设的三项检查，实现于 \path{verification/application/wild_bootstrap.py}。
+
+删除一个州的刀切依次删去每个州，在剩余县上重建行归一化邻接矩阵，重算滞后压力，并以全样本估计为初值重新拟合 M0。49 次重拟合全部收敛到内部根。
+刀切标准误定义如下，其中 $\tilde\theta_{(g)}$ 为第 $g$ 个删一估计相对全样本估计的偏差：
+\[
+\Bigl\{(G-1)G^{-1}\textstyle\sum_g(\tilde\theta_{(g)}-\overline{\tilde\theta})^2\Bigr\}^{1/2}.
+\]
+它对 $\tau$ 为 0.166、对 $\kappa$ 为 0.289、对 $\phi$ 为 0.105，对应的夹心标准误为 0.128、0.255 与 0.091。刀切更大，是因为单是得克萨斯就占 3091 个县中的 254 个，删去一个州对集群总体的扰动并不小。
+
+得分野聚类 bootstrap-$t$ 沿用\citet{kline2012score}：对 $b=1,\dots,999$，为全样本夹心中的 49 个集群影响向量 $\hat\varphi_g=-\hat\Gamma^{-1}g_g(\hat\theta)$ 抽取独立的 Mammen 两点权重 $w_g$，其均值为 $0$，方差为 $1$，且 ${w_g}^2\ne 1$；计算 $\Delta_b=G^{-1}\sum_g w_g\hat\varphi_g$ 及其去中心化 bootstrap 方差 $\{G(G-1)\}^{-1}\sum_g(w_g\hat\varphi_g-\Delta_b)^2$，取学生化统计量的 0.95 分位数。
+所得临界值对 $\tau$ 为 1.941、对 $\kappa$ 为 1.775、对 $\phi$ 为 1.925、对 $\tau+\kappa$ 为 1.716（政策层面区间 $-0.999$ 到 $0.067$；Webb 六点权重给出 2.006、1.766、1.900 与 1.657）。这一线性化得分检查固定了 $\hat\Gamma$，不含集群层面的雅可比变异。
+
+集群矩上的成对聚类 bootstrap-$t$ 依据引理~\ref{lem:mds}：在 A4 下各州的集群矩贡献 $g_g(\theta_0)$ 互不相关。本文抽取 $B=999$ 组多项分布集群权重 $m\sim\mathrm{Multinomial}(49;1/49,\dots,1/49)$，重解 $\sum_g m_g g_g(\hat\theta^*_b)=0$（保持县网络 $W$ 与滞后压力不变），并在每次抽样中重算集群加权夹心方差 $\hat V^*_b$（999/999 收敛）。
+同时纳入规模不等的各州间的得分与雅可比变异后，临界值对 $\tau$ 为 1.594、对 $\kappa$ 为 2.220、对 $\phi$ 为 2.439、对 $\tau+\kappa$ 为 2.778，政策层面区间展宽为 $-1.330$ 到 $0.397$。
+
+三种区间方法在网络附录 F 的按应用校准的模拟中评估（网络表 11）。对 $\tau+\kappa$，$t_{48}$ 夹心、得分野 bootstrap 与成对区间的覆盖率在校准设计中（$R=600$）为 0.935、0.925 与 0.933，在压力设计中（$R=300$）为 0.950、0.930 与 0.923；对 $\tau$，三种方法都过度覆盖（0.980 到 0.993）。
+$t_{48}$ 夹心在两个设计中校准最好，被指定为主区间；这一指定在修订中、校准模拟之后作出，属事后选择。
+集群少且不等时，受处理集群数较少会扭曲推断\citep{conley2011inference,ferman2019inference}，野聚类 bootstrap 的有效性依赖对受处理集群的条件，这里未必满足\citep{mackinnon2018wild,canay2021wild}；$t_{48}$ 参照分布是夹心方差常用的小样本调整\citep{imbens2016robust}，刀切与成对 bootstrap 因此作为敏感性检查报告。两个校准设计都假定工作模型成立，评估的对象是区间方法，不涉及模型本身。
+
+\section*{网络附录 F：应用诊断}
+\addcontentsline{toc}{section}{网络附录 F：应用诊断}
+\markboth{网络附录 F}{网络附录 F}
+
+本附录的全部分析都在修订中加入，属事后分析。它们使用存档的应用面板和本文的估计代码；分组规格使用 M0 的一个扩展（\path{verification/revision/common/qdx.py}），该扩展复现了本文的 M0 拟合（\path{verification/revision/validate_qdx}）。每张表的注释给出结果文件。
+
+F.1 节把全国周效应换为区域 $\times$ 周或分区 $\times$ 周效应，并让 $\phi$ 按人口普查区域变化（网络表 10）。两个输入压力矩的得分形式统计量 $J_{LM}$ 在每个规格中都在 16.93 到 17.77 之间，校准模拟中的 95 分位数为 6.38 到 6.66；区域耦合相等的假设未被拒绝（$p=0.505$ 与 0.630）。拒绝因此不来自区域共同冲击。区域 $\hat\phi$ 在 0.27 到 1.08 之间。
+
+F.2 节的按应用校准的模拟保留观测到的 49 州面板、县病例数、实施日期、网络与代际权重，以 M0 估计为真值，加入负二项噪声和空间相关的州 $\times$ 周冲击。压力设计调高冲击标准差，使 $\hat\tau+\hat\kappa$ 的标准误接近应用中的 0.311。
+网络表 11 给出区间覆盖率（网络附录 E）以及 $J$、$Q_G$ 与 $Q_{GI}$ 的参照分布。应用中的 $J$（17.87）与 $Q_G$（40.64）在两个设计中都高于全部校准抽样；$Q_{GI}$（27.62）在 600 次中被超过 8 次，在 300 次中被超过 5 次。
+
+F.3 节使用\citet{ferretti2020quantifying} 与\citet{nishiura2020serial} 的代际间隔，按正文方法离散化，并把同周质量并入滞后 1，或通过平移感染者时间移出同一周（网络表 12）。总效应 $\hat\tau+\hat\kappa$ 保持在 $-0.476$ 到 $-0.444$ 之间，$\hat\phi$（0.19 到 0.82）与 $J$ 随时点变化；除 Nishiura 间隔平移 3.5 天外，$J$ 在每个变体中都拒绝。
+
+F.4 节反演 Stock--Wright $S$ 统计量\citep{stock2000weak}，所得置信集在 $\phi$ 弱识别或不能全局识别时仍然有效，且无需选根\citep{andrews2012identification,kleibergen2005testing,andrews2019weak}。
+恰好识别集 $S_1$ 对每个 $\bar\phi$ 都有一个边界分量和一个内部分量；加入过度识别矩（$S_3$）后集合为空（网络表 13）。在 $\phi=0$ 处剖面估计为 $\hat\tau=-2.00$，$\hat\kappa=3.37$。
+
+F.5 节报告网络附录 A.10 的权重 $\omega$（网络表 14）。实施当周分箱的权重大于一，大多数后续分箱获得负权重，因此汇聚估计目标不是各分箱效应的凸组合。在四种加权下，汇聚与动态之差都不显著（$p\ge 0.117$）。
+
+F.6 节按报告变化 $(1-\rho)^{D_{it}}$ 校正病例数后重新拟合 M0（网络表 15）。$\tau+\kappa$ 的点估计在 $\rho=0.187$ 处穿过零。存档数据中没有一致可得的 2020 年县级检测量，因此这里无法估计 $\rho$；污水监测\citep{goldstein2024wastewater}为今后的应用提供了不依赖报告的信号。
 
 \bibliographystyle{plainnat}
 \bibliography{bibliography}
-
-
-
-
-\clearpage
-\section*{致谢}
-作者感谢约翰斯·霍普金斯大学系统科学与工程中心、美国疾病控制与预防中心公共卫生法项目与美国人口普查局公开数据。
-
-\section*{数据可得性声明}
-应用所用数据均公开可得；来源、校验和与暴露编码见网络附录 D。核对文件校验和、复现模拟与应用、重新生成全部表图的代码，随本文的复现包一并提供。
-
-\section*{利益冲突}
-作者声明无利益冲突。
-
-\section*{资助}
-（资助声明待补。）
-
-\section*{报告规范}
-应用部分按观察性研究的 STROBE 条目报告，完整清单见复现包 verification/application 目录。
-
-\section*{网络附录 D：数据来源与清洗}
-\label{app:data}
-
-应用使用六个公开文件，每个文件在 \texttt{experiment/data/checksums.tsv} 中记录 SHA-256 校验和，由
- \texttt{experiment/code/data\_prep.py} 读取。
-
-\begin{enumerate}
-\item 病例。美国各县 COVID-19 累计确诊周计数，取自约翰斯·霍普金斯大学 CSSE 时间序列\citep{dong2020dashboard}。
-周发病数为相邻周累计值之差，修订导致的负值截断为零。
-\item 暴露。州与领地的公共口罩令，取自 CDC 公共卫生法项目的县—日文件\citep{cdc2021maskorders}。若口罩令在该周七天中至少四天生效，$D_{it}=1$。
-州法允许的县级豁免（如堪萨斯）不在该文件中，因此未编码；$D$ 在这些州高估暴露，剔除堪萨斯与得克萨斯的结果即为对照。
-\item 单元。美国本土与哥伦比亚特区的县或合并报告单元，共 3091 个；阿拉斯加、夏威夷与领地不在样本内。49 个集群为 48 个本土州与哥伦比亚特区。
-\item 网络。2010 年人口普查县邻接文件，对称化后行归一化；敏感性分析改用美国社区调查 2011--2015 年县间通勤流，同样对称化后行归一化。
-\item 人口。JHU CSSE 文件中的县人口字段，仅用于构造外部输入 $\omega_i=$ 人口$/10^5$。
-\item 代际间隔。周更新权重由\citet{ferretti2020quantifying} 的代际时间分布在周内感染日均匀的假设下离散化得到，见第~\ref{s:application} 节。
-\end{enumerate}
-
-周次按起始星期一划分。估计窗口自 2020-06-01 起，此前两周仅用于构造滞后压力。没有单元因结局缺失而被剔除；某周无报告病例的县以零计数进入。
-
-
-\section*{网络附录 E：应用中的少簇推断}
-\label{app:fewcluster}
-
-应用有 49 个州集群，其中 24 个含窗口内切换暴露的县，集群规模从 1 到 254 个县。表 3 的 $t_{48}$ 区间把聚类视为渐近多个。本附录报告针对该假设的三项检查，实现于 \path{verification/application/wild_bootstrap.py}。
-
-第一项是删除一个州的刀切。依次删去每个州，在剩余县上重建行归一化邻接矩阵，重算滞后压力，并以全样本估计为初值重新拟合 M0。49 次重拟合全部收敛到内部根。刀切标准误对 $\tau$ 为 0.166、对 $\kappa$ 为 0.289、对 $\phi$ 为 0.105，对应的夹心标准误为 0.128、0.255 与 0.091。刀切更大，是因为单是德州就占 3091 个县中的 254 个，删除一个州并不是对聚类总体的微小扰动。
-
-第二项是得分野聚类 bootstrap-t \citep{kline2012score}。对全样本夹心矩阵的 49 个簇影响向量 $\hat\varphi_g=-\hat\Gamma^{-1}g_g(\hat\theta)$ 施加独立 Mammen 两点权重（均值 0、方差 1、$w_g^2\ne 1$），重抽 999 次并以去中心化的 bootstrap 方差作学生化，得到 $\tau$、$\kappa$、$\phi$ 与 $\tau+\kappa$ 的 95\% 临界值分别为 1.941、1.775、1.925 与 1.716（政策层面合计量区间 $-0.999$ 到 $0.067$；Webb 六点权重为 2.006、1.766、1.900 与 1.657）。由于该线性化检验固定了 $\hat\Gamma$，未能反映雅可比矩阵的簇间变异。
-
-第三项是集群矩成对聚类 bootstrap-t。依据引理~\ref{lem:mds}，在 A4 下不同州的矩贡献 $g_g(\theta_0)$ 互不相关。我们抽取 999 组多项分布簇权重 $m\sim\mathrm{Multinomial}(49;1/49,\dots,1/49)$，保持县间网络 $W$ 与滞后压力不变，重解 $\sum_g m_g g_g(\hat\theta^*_b)=0$ 并在每次抽样中重算簇加权夹心方差 $\hat V^*_b$（999/999 全部收敛）。同时纳入得分与雅可比矩阵的簇间变异后，$\tau$、$\kappa$、$\phi$ 与 $\tau+\kappa$ 的 95\% 临界值分别为 1.594、2.220、2.439 与 2.778，政策层面合计量区间展宽至 $-1.330$ 到 $0.397$，依然包含零。
-
-上述检查均未在簇权重之外额外刻画州规模异质性，也未通过已知覆盖率的模拟验证；它们用于核验政策层面合计量结论对少簇结构的敏感性，而非替代 $t_{48}$ 区间。
 
 \end{document}

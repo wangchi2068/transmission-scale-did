@@ -1,0 +1,10 @@
+ferretti_base w [0.964 0.036] p0 0.304 tpk -0.466 ci [-1.091  0.159] phi 0.772 J 17.87 G: interior -0.466 GI: interior -0.466
+ferretti_fold w [0.975 0.025] p0 0.304 tpk -0.463 ci [-1.103  0.177] phi 0.82 J 17.02 G: interior -0.463 GI: interior -0.463
+ferretti_shift_1.75 w [0.887 0.113] p0 0.127 tpk -0.475 ci [-1.055  0.104] phi 0.546 J 12.6 G: interior -0.044 GI: interior -0.475
+ferretti_shift_3.5 w [0.74 0.26] p0 0.031 tpk -0.474 ci [-1.012  0.064] phi 0.305 J 9.95 G: interior -0.474 GI: interior -0.474
+ferretti_shift_7 w [0.312 0.688] p0 0.0 tpk -0.444 ci [-0.936  0.047] phi 0.239 J 28.19 G: interior 0.043 GI: interior -0.444
+nishiura_base w [0.913 0.087] p0 0.393 tpk -0.474 ci [-1.064  0.117] phi 0.608 J 15.63 G: interior -0.474 GI: interior -0.474
+nishiura_fold w [0.947 0.053] p0 0.393 tpk -0.47 ci [-1.08  0.14] phi 0.71 J 17.91 G: interior -0.47 GI: interior -0.47
+nishiura_shift_1.75 w [0.871 0.129] p0 0.201 tpk -0.476 ci [-1.05   0.098] phi 0.511 J 10.12 G: interior -0.096 GI: interior -0.476
+nishiura_shift_3.5 w [0.787 0.213] p0 0.062 tpk -0.475 ci [-1.024  0.073] phi 0.364 J 0.67 G: interior -0.475 GI: interior -0.475
+nishiura_shift_7 w [0.418 0.582] p0 0.0 tpk -0.451 ci [-0.947  0.045] phi 0.19 J 28.36 G: interior -0.127 GI: interior -0.451

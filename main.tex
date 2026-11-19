@@ -20,17 +20,20 @@
   \IfFileExists{fonts/times.ttf}{
     \setmainfont{Times New Roman}[Path=fonts/,Extension=.ttf,UprightFont=times,BoldFont=timesbd,ItalicFont=timesi,BoldItalicFont=timesbi]
   }{
-    \PackageError{manuscript}{Times New Roman is not available}{Install Times New Roman or place times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf in fonts/.}
+    % Fallback for build machines without Times New Roman: metric-compatible Liberation Serif.
+    \IfFontExistsTF{Liberation Serif}{\setmainfont{Liberation Serif}[SmallCapsFont={Liberation Serif}]}{\PackageError{manuscript}{Times New Roman is not available}{Install Times New Roman or place times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf in fonts/.}}
   }
 }
 \usepackage{amsmath,amssymb}
 % OpenType math (same Computer Modern design as the class default) so that every math glyph,
 % including sized delimiters, carries a Unicode mapping in the PDF text layer.
 \usepackage[math-style=TeX,bold-style=TeX]{unicode-math}
-\setmathfont{Latin Modern Math}
+\setmathfont{Latin Modern Math}[BoldFont={Latin Modern Math},BoldFeatures={FakeBold=1.5}]
 % \mathcal in the Latin Modern Math OpenType face maps to a missing script glyph;
 % take calligraphic letters from XITS Math, which has them at the standard positions.
-\setmathfont{XITS Math}[range={\mathcal,\mathscr}]
+\IfFontExistsTF{XITS Math}{\setmathfont{XITS Math}[range={\mathcal,\mathscr}]}{%
+  \IfFontExistsTF{STIX Two Math}{\setmathfont{STIX Two Math}[range={\mathcal,\mathscr}]}{%
+    \IfFontExistsTF{TeX Gyre Termes Math}{\setmathfont{TeX Gyre Termes Math}[range={\mathcal,\mathscr}]}{}}}
 \usepackage{graphicx}
 \usepackage{etoolbox}
 \usepackage{booktabs}
@@ -43,7 +46,11 @@
 \setlength{\paperheight}{11in}
 \usepackage[hidelinks,unicode=true]{hyperref}
 \usepackage{xr}
-\externaldocument[][nocite]{supporting_information}
+% xr before 2023 has no [nocite] option; on older TeX Live, skip imported \bibcite entries by hand.
+\makeatletter
+\@ifpackagelater{xr}{2023/01/01}{\externaldocument[][nocite]{supporting_information}}{%
+  \begingroup\let\bibcite\@gobbletwo\externaldocument{supporting_information}\endgroup}
+\makeatother
 \urlstyle{same}
 \usepackage{caption}
 \usepackage{placeins}
@@ -128,6 +135,7 @@
 \input{sections/backmatter}
 
 % References (included in the 25-page Biometrics count; endfloat places Tables and Figures after References).
+\FloatBarrier
 \clearpage
 \bibliographystyle{biom}
 \bibliography{bibliography}

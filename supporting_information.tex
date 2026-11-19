@@ -15,13 +15,16 @@
   \IfFileExists{fonts/times.ttf}{
     \setmainfont{Times New Roman}[Path=fonts/,Extension=.ttf,UprightFont=times,BoldFont=timesbd,ItalicFont=timesi,BoldItalicFont=timesbi]
   }{
-    \PackageError{supporting_information}{Times New Roman is not available}{Install Times New Roman or place times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf in fonts/.}
+    % Fallback for build machines without Times New Roman: metric-compatible Liberation Serif.
+    \IfFontExistsTF{Liberation Serif}{\setmainfont{Liberation Serif}[SmallCapsFont={Liberation Serif}]}{\PackageError{supporting_information}{Times New Roman is not available}{Install Times New Roman or place times.ttf, timesbd.ttf, timesi.ttf and timesbi.ttf in fonts/.}}
   }
 }
 \usepackage{amsmath,amssymb}
 \usepackage[math-style=TeX,bold-style=TeX]{unicode-math}
-\setmathfont{Latin Modern Math}
-\setmathfont{XITS Math}[range={\mathcal,\mathscr}]
+\setmathfont{Latin Modern Math}[BoldFont={Latin Modern Math},BoldFeatures={FakeBold=1.5}]
+\IfFontExistsTF{XITS Math}{\setmathfont{XITS Math}[range={\mathcal,\mathscr}]}{%
+  \IfFontExistsTF{STIX Two Math}{\setmathfont{STIX Two Math}[range={\mathcal,\mathscr}]}{%
+    \IfFontExistsTF{TeX Gyre Termes Math}{\setmathfont{TeX Gyre Termes Math}[range={\mathcal,\mathscr}]}{}}}
 \usepackage{graphicx}
 \usepackage{etoolbox}
 \usepackage{booktabs}
@@ -33,7 +36,11 @@
 \setlength{\paperheight}{11in}
 \usepackage[hidelinks,unicode=true]{hyperref}
 \usepackage{xr}
-\externaldocument[][nocite]{main}
+% xr before 2023 has no [nocite] option; on older TeX Live, skip imported \bibcite entries by hand.
+\makeatletter
+\@ifpackagelater{xr}{2023/01/01}{\externaldocument[][nocite]{main}}{%
+  \begingroup\let\bibcite\@gobbletwo\externaldocument{main}\endgroup}
+\makeatother
 \urlstyle{same}
 \usepackage{caption}
 \usepackage{placeins}
@@ -103,7 +110,7 @@
 % Continue theorem-like numbering from the main manuscript
 \setcounter{theorem}{2}
 \setcounter{proposition}{2}
-\setcounter{remark}{1}
+\setcounter{remark}{0}
 \setcounter{corollary}{1}
 
 \input{sections/appendix}

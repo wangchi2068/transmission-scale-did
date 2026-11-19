@@ -279,8 +279,8 @@ def table_m0gi(t, scen):
             "M0 and M0-G was observed, experiment\\_design.md deviation~7): same candidate roots as M0-G, "
             "selection criterion built from the $\\phi$-instrument at reference values $0.05$ and $2$ instead of "
             "the M0-OI instruments. Same data sets (seeds) as the main run; M0 and M0-G: %s, M0-GI: $R_{\\rm GI}$ "
-            "replications (bias, cov over the replications it reached). bound.\\ GI = share (\\%%) of boundary "
-            "($\\hat\\phi=0$) selections. Largest MCSE for M0-GI: bias %s, coverage %s (percentage points)."
+            "replications (bias, cov over the replications it reached). Column \\emph{boundary GI}: share (\\%%) of boundary "
+            "($\\hat\\phi=0$) selections by M0-GI. Largest MCSE for M0-GI: bias %s, coverage %s (percentage points)."
             % (rr, fmt(maxof(mb)), fmt(maxof(mc), pct=True)))
     return tabular("lr" + "rr" * 2 + "rrrrr" + "rr", head, body, note,
                    r"Post-hoc root selection M0-GI versus the pre-specified M0 and M0-G ($\tau$): bias (mean over replications) and coverage of nominal 95\% confidence intervals.", "tab:sim-m0gi"), \

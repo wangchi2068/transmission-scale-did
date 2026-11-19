@@ -1,0 +1,28 @@
+rho -0.60 tau -0.712 kappa -0.617 phi 0.732 tpk -1.329 [-1.919, -0.738] J 19.29 G boundary 1.287
+rho -0.55 tau -0.667 kappa -0.609 phi 0.735 tpk -1.276 [-1.867, -0.685]
+rho -0.50 tau -0.620 kappa -0.601 phi 0.738 tpk -1.221 [-1.813, -0.629] J 19.09 G boundary 1.290
+rho -0.45 tau -0.570 kappa -0.592 phi 0.741 tpk -1.163 [-1.756, -0.570]
+rho -0.40 tau -0.518 kappa -0.584 phi 0.744 tpk -1.102 [-1.696, -0.508] J 18.87 G boundary 1.296
+rho -0.35 tau -0.463 kappa -0.575 phi 0.747 tpk -1.038 [-1.634, -0.443]
+rho -0.30 tau -0.405 kappa -0.566 phi 0.750 tpk -0.971 [-1.569, -0.373] J 18.64 G boundary 1.305
+rho -0.25 tau -0.343 kappa -0.556 phi 0.754 tpk -0.900 [-1.500, -0.300]
+rho -0.20 tau -0.278 kappa -0.547 phi 0.757 tpk -0.825 [-1.428, -0.221] J 18.40 G boundary 1.319
+rho -0.15 tau -0.207 kappa -0.537 phi 0.761 tpk -0.744 [-1.351, -0.137]
+rho -0.10 tau -0.131 kappa -0.527 phi 0.765 tpk -0.658 [-1.270, -0.047] J 18.15 G interior -0.658
+rho -0.05 tau -0.049 kappa -0.517 phi 0.768 tpk -0.566 [-1.183, 0.051]
+rho +0.00 tau 0.040 kappa -0.506 phi 0.772 tpk -0.466 [-1.091, 0.159] J 17.87 G interior -0.466
+rho +0.05 tau 0.137 kappa -0.495 phi 0.776 tpk -0.358 [-0.992, 0.277]
+rho +0.10 tau 0.245 kappa -0.483 phi 0.781 tpk -0.238 [-0.886, 0.409] J 17.58 G interior -0.238
+rho +0.15 tau 0.365 kappa -0.471 phi 0.785 tpk -0.107 [-0.771, 0.558]
+rho +0.20 tau 0.499 kappa -0.458 phi 0.790 tpk 0.041 [-0.646, 0.728] J 17.26 G interior 1.483
+rho +0.25 tau 0.653 kappa -0.444 phi 0.794 tpk 0.209 [-0.510, 0.929]
+rho +0.30 tau 0.830 kappa -0.427 phi 0.799 tpk 0.404 [-0.363, 1.170] J 16.91 G interior 1.586
+rho +0.35 tau 1.040 kappa -0.405 phi 0.805 tpk 0.635 [-0.203, 1.473]
+rho +0.40 tau 1.294 kappa -0.375 phi 0.810 tpk 0.919 [-0.034, 1.872] J 16.52 G interior 0.919
+rho +0.45 tau 1.610 kappa -0.325 phi 0.817 tpk 1.285 [0.135, 2.436]
+rho +0.50 tau 2.020 kappa -0.229 phi 0.825 tpk 1.791 [0.286, 3.296] J 16.09 G interior 1.791
+rho +0.55 tau 2.555 kappa -0.022 phi 0.837 tpk 2.534 [0.451, 4.616]
+rho +0.60 tau 3.181 kappa 0.393 phi 0.857 tpk 3.574 [0.962, 6.185] J 15.73 G interior 3.574
+rho_star_tpk_zero 0.18666796659360277
+rho_star_upper_limit_zero -0.07565590733085786
+rho_star_lower_limit_zero 0.4099796999105053

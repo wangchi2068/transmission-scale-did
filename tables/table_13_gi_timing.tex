@@ -1,0 +1,26 @@
+\begin{table}[!t]
+\centering
+\caption{Application under alternative generation-interval discretisations.}
+\label{tab:rev-gi}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrlll}
+\toprule
+variant & same-week mass & $\hat\phi$ & $\hat\tau+\hat\kappa$ (95\% CI) & $J$ ($p$) & M0-G $\hat\phi$ / $\hat\tau+\hat\kappa$ \\
+\midrule
+ferretti\_base & 0.304 & 0.772 & -0.466 (-1.091, 0.159) & 17.87 ($<$0.001) & same as M0 \\
+ferretti\_fold & 0.304 & 0.820 & -0.463 (-1.103, 0.177) & 17.02 ($<$0.001) & same as M0 \\
+ferretti\_shift\_1.75 & 0.127 & 0.546 & -0.475 (-1.055, 0.104) & 12.60 (0.002) & 0.0013 / -0.044 \\
+ferretti\_shift\_3.5 & 0.031 & 0.305 & -0.474 (-1.012, 0.064) & 9.95 (0.007) & same as M0 \\
+ferretti\_shift\_7 & 0.000 & 0.239 & -0.444 (-0.936, 0.047) & 28.19 ($<$0.001) & 0.0021 / 0.043 \\
+nishiura\_base & 0.393 & 0.608 & -0.474 (-1.064, 0.117) & 15.63 ($<$0.001) & same as M0 \\
+nishiura\_fold & 0.393 & 0.710 & -0.470 (-1.080, 0.140) & 17.91 ($<$0.001) & same as M0 \\
+nishiura\_shift\_1.75 & 0.201 & 0.511 & -0.476 (-1.050, 0.098) & 10.12 (0.006) & 0.0018 / -0.096 \\
+nishiura\_shift\_3.5 & 0.062 & 0.364 & -0.475 (-1.024, 0.073) & 0.67 (0.715) & same as M0 \\
+nishiura\_shift\_7 & 0.000 & 0.190 & -0.451 (-0.947, 0.045) & 28.36 ($<$0.001) & 0.0053 / -0.127 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Generation interval of Ferretti et al.\ (reference) or Nishiura et al., discretised to weeks. \emph{base}: paper's discretisation (same-week mass dropped); \emph{fold}: same-week mass moved into lag 1; \emph{shift}: infector timing shifted by 1.75, 3.5 or 7 days before discretisation, which moves mass out of the same week. Same-week mass is the share of the generation interval within the same week. M0-G column: selected $\hat\phi$ / $\hat\tau+\hat\kappa$ where M0-G picks a root different from M0; M0-GI keeps the M0 root in all variants. $J$: Hansen statistic, $\chi^2_2$. Variants added in revision (post hoc). Source: \texttt{verification/revision/gi\_timing/results.json}.}
+\end{table}

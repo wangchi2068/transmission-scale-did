@@ -1,0 +1,12 @@
+pooled {'tau': 0.056, 'kappa': -0.447, 'phi': 0.751} se {'tau': 0.181, 'kappa': 0.297, 'phi': 0.098}
+ET2 {'tau_e0': -0.343, 'tau_e1': -0.619, 'tau_e2': -0.672, 'tau_e3': -0.823, 'tau_e4': -0.68, 'tau_e5': -0.924, 'tau_e6': -0.923, 'kappa': -0.579, 'phi': 0.757}
+at ET2 omega [ 1.79  -0.407 -0.177 -0.124  0.173 -0.101 -0.154] sum 1.0 remainder 0.0
+at pooled omega [ 2.109e+00 -2.940e-01 -3.330e-01 -1.000e-03 -1.900e-02  9.000e-03
+ -4.710e-01] sum 1.0 remainder 0.0
+implicit_omega_at_ET2 avg -0.024 (0.229) diff 0.079 se 0.240 p 0.742
+implicit_omega_at_pooled avg 0.122 (0.195) diff -0.066 se 0.268 p 0.806
+equal_e0_e5 avg -0.677 (0.521) diff 0.733 se 0.457 p 0.117
+cell_share avg -0.843 (0.665) diff 0.899 se 0.592 p 0.138
+J M0 14.37 p 0.00076 | J ET2 13.85 p 0.00098
+M0_ET2 roots [('interior', 0.0), ('interior', 0.7567), ('boundary', 0.0)]
+pooled_M0 roots [('interior', 0.0), ('interior', 0.7515), ('boundary', 0.0)]

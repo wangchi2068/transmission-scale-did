@@ -1,35 +1,38 @@
 \section{Discussion}
 \label{s:discussion}
 
-We developed a difference-in-differences design on the transmission scale that places parallel
-trends on log reproduction numbers with imported infection pressure and eliminates unrestricted unit
-effects by quasi-differencing without strict exogeneity. Predetermined past instruments accommodate
-feedback adoption and cross-cluster contagion simultaneously, preserving standard cluster-robust
-sandwich inference while separating policy effects from imported transmission. Under positive
-spillover, feedback, overdispersion and small counts, QD-GMM recovers direct and spillover effects
-where standard comparators fail, performing best on long panels with many clusters and directly
-identifying policy-level totals when mandates sit above the unit.
+Placing parallel trends on the log reproduction number with imported infection pressure, and removing
+unit effects by forward quasi-differencing, gives a difference-in-differences design that accommodates
+feedback adoption and lagged cross-cluster contagion together while keeping the ordinary
+cluster-robust sandwich. In simulations with spillover, feedback, overdispersion and small counts,
+QD-GMM recovers direct and spillover effects where comparators built on counts, log counts or
+first-step reproduction numbers are biased, and it identifies the policy-level total directly when
+mandates are set above the unit.
 
-Three mechanisms govern the design. Quasi-differencing cancels time-invariant unit heterogeneity,
-leaving identification on parallel transmission trends and sequential exogeneity, which is
-untestable with estimating moments alone and not assessed by lead regressions under feedback
-(Proposition~\ref{prop:sources}(c)). Lemma~\ref{lem:mds} validates clustered sandwich inference
-under lagged cross-cluster contagion, while profiling over $\phi$ reveals root multiplicity near
-$\phi_0=0$: global search recovers the consistent root there, though weak-identification-robust
-intervals \citep{andrews2012identification} remain advisable near the boundary.
+Three conditions govern its use. The first is a single interior root. Zero contagion lies outside
+Theorem~\ref{thm:asy}, and the population moments can then have a second root. Pre-specified global
+search (M0-G) under-covers at $\phi_0=0$, and post hoc M0-GI repairs this but over-selects the boundary
+when contagion is small but positive. Both are heuristics, so the profile and identification-robust
+sets \citep{stock2000weak} should accompany any selected root. The second is weekly aggregation. When a substantial share of transmission falls within the week, as in the
+$w_0=0.3$ stress regime, policy-level totals are biased by about one-sixth and the $J$ test has no power
+against it (Section~\ref{ss:sameweek}); a sub-weekly mean with day-of-week reporting and delays is then
+needed, and this paper does not provide one. The third is the number of clusters. Theorem~\ref{thm:asy}
+is a large-$G$ result; with 49 states, of which 24 switch, an application-calibrated simulation supports
+$t_{G-1}$ sandwich intervals (coverage 0.935 to 0.950 for $\tau+\kappa$), whereas inference with few
+treated clusters can fail more generally \citep{ferman2019inference,canay2021wild}.
 
-Applicability turns on two empirical diagnostics plus cluster structure. First, the functional form
-of parallel trends on $\log R$ \citep{roth2023parallel} separates local from imported pressure
-\citep{elenev2025staggered}, which contrasts with unconfoundedness formulations \citep{callaway2023pandemic};
-the $\phi$-profile tests whether these pressures vary independently once policies are projected out.
-Second, the weekly model excludes within-week renewal; in our stress test ($w_0=0.3$, 14.5\% nonlinear
-within-week re-infection share), policy-level sums carry roughly one-sixth bias undetected by the $J$
-test (Section~\ref{ss:sameweek}), signalling when a sub-weekly specification is required. Finally,
-as in our 49-state application with 24 switching clusters and unequal cluster sizes, few-cluster corrections
-\citep{conley2011inference,imbens2016robust} and cluster-bootstrap checks \citep{mackinnon2017wild,mackinnon2018wild}
-complement asymptotic inference. Under dynamic effects, pooled constant estimators suffer from weighting
-bias \citep{goodmanbacon2021did,sun2021estimating}, making event-time paths the preferred summary. Future work
-could pursue sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback}
-or likelihood-based feedback models \citep{bonhomme2025feedback}, weak-identification intervals
-\citep{andrews2012identification}, sub-weekly estimating equations, and joint estimation of
-generation intervals and reporting \citep{goldwasser2026rt}.
+In the application the diagnostics reject the weekly model, also with regional week effects and
+coupling; the robust sets for $\phi$ are empty once over-identifying moments are added, and about a
+third of transmission falls in the same week. The policy-level total $-0.466$ is therefore a
+pseudo-true value of the weekly fit. Event-time estimates are consistent with effects that build up
+after adoption but are imprecise (joint $p=0.076$), and an 18.7\% order-linked fall in ascertainment
+would offset the point estimate.
+
+The parallel-trend restriction on $\log R$ \citep{roth2023parallel} separates local from imported
+pressure \citep{elenev2025staggered} and complements unconfoundedness formulations
+\citep{callaway2023pandemic}. The design turns a panel of reported cases into estimates on the
+transmission scale with standard clustered inference, and its diagnostics show when the weekly
+working model cannot support a causal reading. Sequential efficiency bounds
+\citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood-based feedback models
+\citep{bonhomme2025feedback}, sub-weekly estimating equations and joint estimation of generation
+intervals and reporting \citep{goldwasser2026rt} extend it naturally.

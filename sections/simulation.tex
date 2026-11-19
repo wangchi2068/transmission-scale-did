@@ -1,8 +1,8 @@
 \section{Simulation Study}
 \label{s:simulation}
 
-The design follows \citet{morris2019ademp}; aims, generators, estimands, comparators and criteria were
-pre-specified prior to the full runs, and all five protocol departures are documented below.
+The design follows \citet{morris2019ademp}; aims, generators, estimands, comparators and success
+criteria were pre-specified before the full runs.
 
 \subsection{Design}
 
@@ -27,19 +27,20 @@ to 20\% attack rates (X4), and effects growing from $-0.1$ to $-0.3$ over event 
 Estimands are generating $(\tau,\kappa,\phi)$, the switcher mean of $\tau_i$ in X3, event-time
 effects in X5, and $\psi^\dagger$ of Theorem~\ref{thm:psi} (with population $\psi$ approximated from
 5000 paired paths). On identical $R=8000$ data sets without replacement of failed runs, we evaluate
-M0, M0-G, post hoc M0-GI, M0-OI, M0-ET and M0$'$, against Poisson fixed effects with offset
+M0, M0-G, M0-GI, M0-OI, M0-ET and M0$'$ against Poisson fixed effects with offset
 $\log\Lambda_{it}(\phi)$ (M1) and its split-panel jackknife (M1-BC), two-step log-transmission
 regression using EpiEstim reproduction numbers \citep[M2;][]{cori2013epiestim}, TWFE on
-$\log(Y+1)$ (M3), pooled renewal QMLE (M4) and an infeasible Oracle observing true $\alpha_i$.
-Confidence intervals use $t_{G-1}$ critical values clustered by state. Success required bias
-within 2 MCSE of zero for $(\tau,\kappa,\phi)$ and coverage in $[93\%,97\%]$ under feedback, while
-M2 and M3 fail by bias $>2$ MCSE or coverage $<90\%$.
+$\log(Y+1)$ (M3), pooled renewal QMLE (M4) and an infeasible Oracle observing
+true $\alpha_i$. Intervals use $t_{G-1}$ critical values clustered by state. Success required bias
+within 2 MCSE of zero for $(\tau,\kappa,\phi)$ and coverage in $[93\%,97\%]$ under feedback.
 
-Five protocol departures occurred, in chronological order: unit-effect spread was quartered to keep
-$T=26$ counts realistic; replications rose from 1000 to 8000 so 2 MCSE fell below 0.01; an offset
-error in M1 (affecting M1-BC) was fixed after the pilot; fewer Poisson FE variants were retained;
-and M0-G (pre-run, after pilot root multiplicity) and M0-GI (post hoc, evaluated on the replications
-reached on identical data) were added.
+Departures from the protocol: (i) the unit-effect spread was quartered to keep $T=26$ counts
+realistic; (ii) replications rose from 1000 to 8000 so that 2 MCSE fell below 0.01; (iii) an offset
+error in M1 (and M1-BC) was corrected after the pilot, and fewer Poisson fixed-effects variants were
+retained; (iv) M0-G was added after the pilot revealed root multiplicity, before the full runs; and
+(v) M0-GI was added after interim boundary failures and is post hoc, evaluated on the identical data
+sets. The validation designs of Web Appendix~\ref{app:rsel}, the population root checks, the
+application-calibrated simulation and the application analyses added in revision are also post hoc.
 
 \subsection{Results}
 \label{ss:simresults}
@@ -49,16 +50,13 @@ to $0.001$ (within 2 MCSE of zero in seven scenarios, and $-2.18$ MCSE at $-0.00
 with coverage 94.5\% to 95.4\% under both adoption rules (Table~\ref{tab:sim-core-tau},
 Figure~\ref{fig:core-tau}). Model SEs match empirical SDs within $-2.2\%$ to $0.9\%$ across all
 three parameters ($-3.5\%$ to $0.9\%$ including the null block), and power against $\tau_0=\log0.8$
-ranges from 77.1\% to 100\%. For $\phi$ and $\kappa$, biases are likewise small (below 0.9\% of
-$\phi_0$), though the strict 2 MCSE criterion flags minor biases in $\hat\phi$ for scenarios 1, 2, 3,
-9, 10 and in $\hat\kappa$ for scenario 9 (Web Table~\ref{tab:sim-core-spill}). By contrast, M1 shows
-bias $-0.027$ to $-0.017$ and coverage 78.1\% to 88.2\% (Theorem~\ref{thm:bias}(b)); M1-BC fails to
-converge in up to 85.3\% of runs (14.7\% and 23.9\% in two scenarios, coverage 25.7\% to 82.7\%); M2
-bias spans $-0.110$ to $0.013$ (coverage up to 94.0\% at $T=26$), while M4 bias spans $0.008$ to
-$0.139$; and M0$'$ (imposing $\kappa=\phi=0$) yields bias $-0.248$ to $-0.114$ with coverage at most
-22.4\% (Theorem~\ref{thm:bias}(d)). Infeasible Oracle retains 92.0\% to 94.8\% coverage under
-spillover (except 91.3\% in scenario 12), but falls to 80.5\% and 80.2\% in the two $T=26$
-random-adoption no-spillover cells (scenarios 14 and 16).
+ranges from 77.1\% to 100\%. Biases of $\hat\phi$ and $\hat\kappa$ are below 0.9\% of $\phi_0$; the
+strict 2-MCSE criterion flags them in $\hat\phi$ for scenarios 1--3, 9 and 10 and the null scenarios
+17--20 (at most 0.0027) and in $\hat\kappa$ for scenario 9 (Web Table~\ref{tab:sim-core-spill}).
+Comparators that ignore feedback, small counts or spillover are biased as Theorem~\ref{thm:bias}
+predicts: M1 by $-0.027$ to $-0.017$ (coverage 78.1\% to 88.2\%), M2 by $-0.110$ to $0.013$, M4 by
+$0.008$ to $0.139$, and M0$'$ by $-0.248$ to $-0.114$ (coverage at most 22.4\%); M1-BC, M3 and the
+Oracle are reported in Web Appendix~\ref{app:supp}.
 
 \begin{figure}[!t]
 \centering
@@ -70,34 +68,29 @@ data sets.}
 \end{figure}
 
 \emph{Size and boundary.} Under $\tau_0=0$, M0 and the $J$ test of M0-OI preserve nominal size
-(4.7\%--5.2\% and 4.4\%--4.9\%); M1 shows moderate over-rejection (6.3\% to 9.7\%), whereas M1-BC,
-M2 and M3 severely over-reject (Web Table~\ref{tab:sim-null}). When $\phi_0=\kappa_0=0$, multiple
-interior roots appear in 47.2\% to 51.7\% of runs (tracing a spurious root near $\bar\phi$), trapping
-local M0 at bias 0.132 to 0.469 and coverage 0.6\% to 38.8\% (Figure~\ref{fig:roots}). Global root
-selection addresses the inconsistent root: pre-specified M0-G selects the boundary in 28.6\% to
-44.8\% of runs (coverage 52.9\%--71.0\%), while post hoc M0-GI selects the boundary in 63.7\% to
-80.9\%, reducing bias to 0.000--0.052 and raising coverage to 87.5\%--95.2\% (Table~\ref{tab:sim-m0gi}).
-On independent designs (Section~\ref{ss:rsel_body}), however, M0-GI over-selects the boundary at
-$\phi_0=0.05$, costing 3 to 4 percentage points of coverage. Here scale weighting also separates
-M0$'$ from Oracle: without inverse-scale weights $s_{it}$, Oracle's coverage drops to 80.5\% and
-80.2\% in scenarios 14 and 16 because a single untreated cluster concentrates a median 21.5\% and up
-to 58.5\% (95th percentile) of total cases, breaking its cluster-robust SE (mean SE 0.035 vs empirical
-SD 0.066). Weighted M0$'$ holds $[-0.000,0.002]$ bias and 94.7\%--95.5\% coverage, and M0-GI attains
-95.0\% in scenarios 14 and 16. Under positive spillover ($\phi_0=0.4$), all 8000 replications have a
-unique root and M0, M0-G and M0-GI agree identically; near $\phi_0=0$, Wald intervals remain
-fragile under flat or multi-root profiles.
+(4.7\%--5.2\% and 4.4\%--4.9\%), whereas M1 over-rejects (6.3\% to 9.7\%) and M1-BC, M2 and M3 more
+severely (Web Table~\ref{tab:sim-null}). Under positive spillover all 8000 replications have a unique
+root and M0, M0-G and M0-GI coincide. When $\phi_0=\kappa_0=0$, which lies outside
+Theorem~\ref{thm:asy}, multiple interior roots appear in 47.2\% to 51.7\% of runs, trapping local M0
+at bias 0.132 to 0.469 and coverage 0.6\% to 38.8\% (Figure~\ref{fig:roots}). The second root is a
+property of the population moments: it appears in all 40 large-$N$ draws of the four zero-contagion
+designs and moves with $\bar\phi$ (Web Table~\ref{tab:rev-poproots}). The selection rules are
+heuristics without a stated guarantee. Pre-specified M0-G selects the boundary in 28.6\% to 44.8\% of
+runs, with coverage 52.9\% to 71.0\%; post hoc M0-GI selects it in 63.7\% to 80.9\%, with bias 0.000
+to 0.052 and coverage 87.5\% to 95.2\% (Table~\ref{tab:sim-m0gi}). On nine independent designs ($R=2000$
+each; Web Appendix~\ref{app:rsel}), M0-GI restores coverage from 0.377 to 0.893 at $\phi_0=0$ but
+selects the boundary in 56\% to 79\% of runs at $\phi_0=0.05$, lowering coverage from 0.960--0.970 to
+0.921--0.935; the rules differ by at most 0.001 at $\phi_0=0.15$.
 
-\emph{Misspecification and cases averted.} Under misspecification (Table~\ref{tab:sim-misspec}), wrong
-generation weights (X1) leave $\hat\tau$ nearly unbiased (0.010, coverage 94.6\%), but severely
-distort the spillover parameters: $\hat\phi$ carries bias $+0.516$ (0\% coverage), absorbing the lag
-mismatch, and $\hat\kappa$ coverage drops to 80.2\%. A 15\% post-adoption reporting drop (X2) biases
-$\hat\tau$ to $-0.057$ (59.4\% coverage) and $\hat\kappa$ to $-0.294$ (0\% coverage), inducing a
-substantial $-0.35$ bias in the policy-level total $\tau+\kappa$. Heterogeneous unit effects (X3) and
-depletion (X4, 95.2\% coverage) cause negligible distortion in $\tau$. Dynamic build-up (X5) causes
-pooled constant M0 to break down completely with bias 0.219 (0\% coverage), while event-time M0-ET
-recovers every bin at 95.3\%--95.8\% coverage (Remark~\ref{rem:dynamic}; Web Table~\ref{tab:sim-misspec}).
-Under spillover, realised cases averted $\psi^\dagger$ achieve median relative bias within $\pm0.006$
-(coverage 85.7\%--95.4\%; Web Table~\ref{tab:sim-psi}).
+\emph{Misspecification and cases averted.} Pooled constant-effect M0 breaks down under dynamic
+build-up (X5; bias 0.219, coverage 0\%), while event-time M0-ET recovers every bin with coverage
+95.3\% to 95.8\% (Remark~\ref{rem:dynamic}). Wrong generation weights (X1) leave $\hat\tau$ nearly
+unbiased (0.010, coverage 94.6\%) but are absorbed by $\hat\phi$ (bias $+0.516$); a 15\% post-adoption
+reporting drop (X2) shifts $\hat\tau+\hat\kappa$ by about $-0.35$; heterogeneity (X3) and depletion
+(X4) leave $\hat\tau$ nearly unbiased (Web Table~\ref{tab:sim-misspec}). Under spillover, realised
+cases averted $\psi^\dagger$ have median relative bias within $\pm0.006$ and interval coverage of
+85.7\% to 95.4\% for $\psi^\dagger$, but 72.1\% to 92.5\% for the population $\psi$, because the
+intervals omit process noise (Remark~\ref{rem:psi}; Web Table~\ref{tab:sim-psi}).
 
 \subsubsection{Same-week transmission}
 \label{ss:sameweek}
@@ -106,18 +99,17 @@ The main designs exclude within-week contagion, so A1 and A4 hold exactly. To is
 of weekly aggregation under within-week renewal (preserving A4 via unit-only same-week transfer),
 we simulated two $R=1000$ independent-seed arms on core $(N=500,T=12)$ feedback with
 $(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$: a weekly benchmark arm and a same-week arm
-activating daily unit re-infection from week 3 with nominal weight $w_0=0.3$ (re-entry $g=1.744$;
-nonlinear re-infection accounts for 14.5\% of total expected cases, or 34\% including same-week
-seeded incidence). While the benchmark yields bias 0.001 (coverage 0.948), same-week renewal biases
-$\hat\tau$ by $-0.033$ (MCSE 0.001, coverage 0.890), $\hat\kappa$ by $-0.021$ (0.002, coverage
-0.939), and $\hat\tau+\hat\kappa$ by $-0.053$ (0.002, coverage 0.783), roughly one-sixth of the
-true sum (1.6 and 2.6 times the component biases). Sandwich SEs remain calibrated because A4 holds,
-so under-coverage stems from bias, yet the $J$ test misses it (4.8\% vs 4.9\% benchmark rejection;
-difference $-0.001$, MCSE 0.010). Dropping weeks 1--3 still leaves bias $-0.037$ (MCSE 0.002,
-coverage 0.913 vs benchmark 0.019, MCSE 0.006, coverage 0.961; treated shares 0.301 vs 0.665; Web
-Appendix~\ref{app:supp}). Thus $w_0=0.3$ serves as a stress calibration; when an application's
-generation interval implies a large same-week share, the sub-weekly extension of Web
-Appendix~\ref{ss:weekwithin} is required.
+activating daily unit re-infection from the third window week with nominal weight $w_0=0.3$ (re-entry
+$g=1.744$; nonlinear re-infection accounts for 14.5\% of total expected cases, or 34\% including
+same-week seeded incidence). The benchmark yields bias 0.001 (coverage 0.948); same-week renewal
+biases $\hat\tau$ by $-0.033$ (MCSE 0.001, coverage 0.890), $\hat\kappa$ by $-0.021$ (0.002, coverage
+0.939), and $\hat\tau+\hat\kappa$ by $-0.053$ (0.002, coverage 0.783), roughly one-sixth of the true
+sum. Sandwich SEs remain calibrated because A4 holds, so the under-coverage stems from bias, and the
+$J$ test has no power against it (4.8\% versus 4.9\% rejection in the benchmark). Dropping the first
+three weeks does not remove the bias ($-0.037$; Web Appendix~\ref{app:supp}). This $w_0=0.3$ regime
+defines the stress regime for applications: when the generation interval implies a comparable
+same-week share, a sub-weekly mean is needed (Web Appendix~\ref{ss:weekwithin}), and this paper does
+not provide one.
 
 \input{tables/table_1_core_tau}
 
@@ -130,14 +122,3 @@ shares with multiple interior roots, $\phi=0$ boundary selection and M0-G diverg
 \end{figure}
 
 \input{tables/table_8_m0gi_posthoc}
-
-\subsubsection{Validation on independent designs}
-\label{ss:rsel_body}
-
-Nine independent designs ($R=2000$ replications each, Web Table~\ref{tab:rsel}) test root
-selection across $\phi_0\in\{0,0.05,0.10,0.15\}$, $\bar\phi\in\{0.25,0.5,1\}$ and
-$G\in\{20,50,100\}$ using $t_{G-1}$ intervals. At $\phi_0=0$, M0-GI restores coverage from 0.377
-to 0.893; at $\phi_0=0.05$, frequent boundary selection (56\%--79\%) lowers coverage from
-0.960--0.970 to 0.921--0.935. Differences shrink to $\le 0.013$ (0.067 under random adoption) at
-$\phi_0=0.10$ and 0.001 at $\phi_0=0.15$, confirming that global search should be reserved for
-profiles exhibiting boundary pinning or multiple roots (Web Appendix~\ref{app:rsel}).

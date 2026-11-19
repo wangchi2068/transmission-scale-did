@@ -48,7 +48,8 @@ def build_main(rows):
         "$\\tau+\\kappa$ is the identifiable policy-level total. On the 2656-unit sample excluding pre-window exposed "
         "units (37 clusters), pooled M0 yields $\\hat\\tau=0.056$ while the dynamic event-time model M0-ET2 yields "
         "negative estimates across all seven bins ($-0.343$ to $-0.924$, mean $-0.677$, joint $F=2.089$, $p=0.076$), "
-        "illustrating dynamic weighting bias in pooled constant estimators (Remark~\\ref{rem:dynamic}, X5). "
+        "a divergence consistent with dynamic weighting (Remark~\\ref{rem:dynamic}, X5) but not statistically "
+        "distinguishable from sampling error (Web Appendix~\\ref{app:diag}). "
         "Data sources and coding are in Web Appendix D."
     )
     return MT.tabular("llrrrr", head, body, note, caption, label)

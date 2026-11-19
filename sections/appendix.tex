@@ -37,6 +37,12 @@ $\Sigma_s=\lim G^{-1}\sum_g\E(\xi_{gs}\xi_{gs}{}^{\top})$ exists for $s=1,\dots,
 $\bar g(\theta)^{\top}W\bar g(\theta)=0$ only at $\theta=\theta_0$.
 \end{description}
 
+\noindent A6(i) and A6(iv) restrict Theorem~\ref{thm:asy} to interior, globally identified cases. A
+zero-contagion design with $\phi_0=0$ violates A6(i), so that boundary asymptotics apply
+\citep{self1987boundary,andrews1999boundary}, and when the population moments have a second
+root (Web Table~\ref{tab:rev-poproots}) it also violates the global part of A6(iv); boundary
+selection by M0-G or M0-GI is therefore not covered by Theorem~\ref{thm:asy}.
+
 \noindent Condition (L) collects the laws of large numbers. For every $\theta\in\Theta$,
 $G^{-1}\sum_g\{f_g-\E f_g\}\to_p0$ for each of $f_g=g_g(\theta)$, $\partial g_g(\theta)/\partial\theta^{\top}$,
 $g_g(\theta_0)g_g(\theta_0)^{\top}$, $\sup_\theta\|\partial g_g(\theta)/\partial\theta^{\top}\|$ and
@@ -110,6 +116,11 @@ A4$'$ implies A4 by the same conditional representation, because the week-$t$ in
 independent across clusters and of $\F_{t-1}$.
 \end{proof}
 
+\noindent Lemma~\ref{lem:lln} is a large-$G$ device. With $T=26$ and $\rho\ge 0$, the dependence
+radius is $L\ge 28$, which exceeds the diameter (11) of the contiguity graph of the 49 states in
+Section~\ref{s:application}; there, every pair of state contributions may be dependent under A4$'$,
+and (L) is an assumption rather than a consequence of A4$'$.
+
 \begin{lemma}[Block central limit theorem]
 \label{lem:clt}
 Let $\xi_{gs}\in\mathbb R^q$ be $\F_s$-measurable with $\E(\xi_{gs}\mid\F_{s-1})=0$, conditionally
@@ -150,7 +161,9 @@ $\E Q_T\to\prod_sc_s=\exp(-\lambda^{\top}\sum_s\Sigma_s\lambda/2)$, and the resu
 continuity theorem and the Cram\'er--Wold device.
 \end{proof}
 
-\noindent The limits $\Sigma_s$ must be non-random. With feedback, this holds under (L) because
+\noindent The argument does not appeal to general martingale nesting conditions
+\citep{hall1980martingale} and reduces to standard clustered theory under independent clusters
+\citep{hansen2019clustered}. The limits $\Sigma_s$ must be non-random. With feedback, this holds under (L) because
 $V_s$ averages over many clusters. It would fail if all clusters responded to a common random
 national signal, which is excluded by A4$'$.
 
@@ -288,6 +301,22 @@ $\sqrt G\Omega^{-1/2}\hat g(\hat\theta)=\{I-P\}\Omega^{-1/2}\sqrt G\hat g(\theta
 orthogonal projection onto the column space of $\Omega^{-1/2}\Gamma$, of rank $p$. Hence
 $J\to_d\chi^2_{q-p}$ \citep{hansen1982gmm}.
 \end{proof}
+
+\begin{remark}[Working-optimal instruments]
+\label{rem:optimal}
+Under a Poisson working variance ignoring serial correlation between $u_{it}$ and $u_{i,t+1}$,
+$\E\{\partial u_{it}/\partial\theta\mid\F_{t-1}\}=\mu_{it}\{-e_t,x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}$
+and $\operatorname{var}(u_{it}\mid\F_{t-1})=\mu_{it}\{1+\E(r_{it}\mid\F_{t-1})\}$, yielding the
+$\alpha_i$-free working-optimal instrument $\{x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}/\{1+\E(r_{it}\mid\F_{t-1})\}$,
+whose policy component is the predicted switching hazard (Lemma~\ref{lem:generated}). Full
+efficiency requires forward orthogonalisation \citep{chamberlain1992sequential,chamberlain2022feedback};
+under a full Poisson likelihood additional feedback-robust moments exist \citep{bonhomme2025feedback}.
+\end{remark}
+
+Efficient two-step GMM with all available instruments is not the primary estimator. With
+$G\approx 49$ states and $T+2$ or more moments, the estimated optimal weight matrix is close to
+singular and two-step standard errors are known to be too small \citep{windmeijer2005finite}, so
+over-identification is used only for specification tests with a few additional instruments.
 
 \subsection{A.6 Proofs for the pseudo-true values (Theorem~\ref{thm:bias})}
 
@@ -470,7 +499,26 @@ Figure~\ref{fig:misspec} the misspecification block, and Web Table~\ref{tab:sim-
 cases averted. All results use $R=8000$ replications per scenario. In the matched same-week
 transmission experiment of Section~\ref{ss:sameweek} ($R=1000$), re-estimating on window weeks 4
 to 12 leaves bias at $-0.037$ (MCSE 0.002) with coverage 0.913, against 0.019 (MCSE 0.006) and
-0.961 in the benchmark arm (switching fractions 0.301 and 0.665 over that sub-window).
+0.961 in the benchmark arm (switching fractions 0.301 and 0.665 over that sub-window). The
+same-week mechanism is switched on from window index 2 counted from zero, that is, from the third
+window week.
+
+\emph{Comparators.} The split-panel jackknife M1-BC fails to converge in 85.3\% (scenario 2), 76.1\%
+(scenario 4), 3.6\% (scenario 6) and 0.1\% (scenario 1) of the 8000 runs and converges in all others;
+its coverage over converged runs is 25.7\% to 82.7\%. The infeasible Oracle keeps 92.0\% to 94.8\%
+coverage under spillover (91.3\% in scenario 12) but falls to 80.5\% and 80.2\% in the two $T=26$
+random-adoption no-spillover cells (scenarios 14 and 16). Without the inverse-scale weights $s_{it}$, a
+single untreated cluster there concentrates a median 21.5\% (95th percentile 58.5\%) of total cases and
+the cluster-robust SE understates the variability (mean SE 0.035 against empirical SD 0.066); the
+weighted M0$'$ has bias in $[-0.000,0.002]$ and coverage 94.7\% to 95.5\% in those cells, and M0-GI
+attains 95.0\%. M2 reaches coverage up to 94.0\% at $T=26$.
+
+\emph{Misspecification and cases averted.} Under wrong generation weights (X1), $\hat\phi$ absorbs the
+lag mismatch (bias $+0.516$, coverage 0\%) and $\hat\kappa$ coverage drops to 80.2\%. The 15\%
+post-adoption reporting drop (X2) gives bias $-0.057$ in $\hat\tau$ (coverage 59.4\%) and $-0.294$ in
+$\hat\kappa$ (coverage 0\%). Under depletion (X4) coverage for $\tau$ is 95.2\%; for cases averted, the
+intervals cover $\psi^\dagger$ in 92.6\% of runs but the population $\psi$ in only 53.6\%, because
+depletion makes the recursion of Theorem~\ref{thm:psi} approximate (Remark~\ref{rem:psi}).
 
 \begin{figure}[!t]
 \centering
@@ -563,6 +611,18 @@ apply a global selection only when the profile has more than one root, not as a 
 the rules was pre-specified in this validation; it is a check that the rule proposed in the
 previous subsection does not extend beyond the design that motivated it.
 
+\subsubsection{Population roots in the zero-contagion designs}
+\setreflabel{C.2}
+\label{app:poproots}
+
+\input{tables/table_17_population_roots}
+
+To separate sampling from population root multiplicity, the four zero-contagion designs (scenarios 5,
+6, 13 and 14) were simulated with the paper's generator at $N=20000$ (three draws for each
+$\bar\phi\in\{0.25,0.5,1\}$) and $N=50000$ (one draw at $\bar\phi=0.5$). A second root of the profiled
+$\phi$-equation appears in all 40 draws, and its location moves with $\bar\phi$ (Web
+Table~\ref{tab:rev-poproots}). The second root is therefore a property of the moment equations
+induced by the reference value, and global identification (A6(iv)) fails in these designs.
 
 \input{tables/table_7b_application_sensitivity}
 
@@ -582,7 +642,7 @@ the cumulative series at consecutive week starts, with negative values from revi
 Program county-by-day file \citep{cdc2021maskorders}. The raw file (217 MB) can be downloaded via
 \texttt{experiment/data/fetch\_cdc\_masks.py} matching the SHA-256 checksum in \texttt{checksums.tsv}.
 $D_{it}=1$ when an order was in force on at least four of the seven days of the week. County-level
-opt-outs permitted under state law, such as in Kansas, are not recorded in that file and are not coded;
+opt-outs permitted under state law, such as in Kansas \citep{ginther2021kansas}, are not recorded in that file and are not coded;
 $D$ therefore overstates exposure in those states, and the analysis excluding Kansas and Texas is reported
 for that reason. Merged reporting units in Utah and Missouri follow JHU CSSE conventions (\texttt{data\_contract.md}).
 \item \emph{Units.} Counties and merged county reporting units of the contiguous United States and
@@ -608,7 +668,8 @@ outcome data; counties without reported cases in a week enter with a zero count.
 \label{app:fewcluster}
 
 The application has 49 state clusters, 24 of which contain a county that switches exposure,
-and the cluster sizes range from 1 to 254 counties. The $t_{48}$ intervals of Table~\ref{tab:app}
+and the cluster sizes range from 1 to 254 counties, a setting in which wild bootstrap inference
+needs care \citep{mackinnon2017wild}. The $t_{48}$ intervals of Table~\ref{tab:app}
 treat the clusters as asymptotically many. This appendix reports three checks for that assumption,
 implemented in \texttt{verification/application/wild\_bootstrap.py}.
 
@@ -638,10 +699,80 @@ re-solve $\sum_g m_g g_g(\hat\theta^*_b)=0$ (preserving the county network $W$ a
 and recompute the cluster-weighted sandwich $\hat V^*_b$ in every draw (999/999 converge). Including
 both score and Jacobian variability across unequal states yields critical values of 1.594 for
 $\tau$, 2.220 for $\kappa$, 2.439 for $\phi$ and 2.778 for $\tau+\kappa$; the policy-level
-interval widens to $-1.330$ to $0.397$, reinforcing the conclusion that the panel cannot rule out
-either zero or a sizable reduction.
+interval widens to $-1.330$ to $0.397$.
 
-None of these checks models the cluster-size heterogeneity beyond the cluster weights themselves,
-and they are not validated by coverage simulations; they are reported to assess the sensitivity of
-the policy-level conclusion to the 49-cluster structure rather than as replacements for the
-$t_{48}$ intervals.
+\emph{Calibrated coverage and choice of the primary interval.} The three interval methods were
+evaluated in the application-calibrated simulation of Web Appendix~\ref{app:diag} (Web
+Table~\ref{tab:rev-calsim}). For $\tau+\kappa$, coverage of the $t_{48}$ sandwich, score wild and
+pairs intervals is 0.935, 0.925 and 0.933 in the calibrated design ($R=600$) and 0.950, 0.930 and
+0.923 in the stress design ($R=300$); for $\tau$ the three methods over-cover (0.980 to 0.993). The
+$t_{48}$ sandwich is the best calibrated of the three in both designs and is designated the primary
+interval; this designation was made in revision, after the calibrated simulation, and is post hoc.
+With few and unequal clusters, inference can be distorted when the number of treated clusters is
+small \citep{conley2011inference,ferman2019inference}, and the wild cluster bootstrap is valid under conditions on the
+treated clusters that need not hold here \citep{mackinnon2018wild,canay2021wild}; the $t_{48}$ reference
+distribution is the usual small-sample adjustment of the sandwich \citep{imbens2016robust}, and the jackknife and pairs bootstrap are
+therefore reported as sensitivity checks. Both calibrated designs assume that the working model
+holds, so they assess the interval methods, not the model.
+
+\section*{Web Appendix F: Diagnostics of the application}
+\setreflabel{F}
+\label{app:diag}
+
+All analyses in this appendix were added in revision and are post hoc. They use the archived
+application panel and the paper's estimation code; grouped specifications use an extension of M0
+(\texttt{verification/revision/common/qdx.py}) that reproduces the paper's M0 fit
+(\texttt{verification/revision/validate\_qdx}). Each table note gives the result file.
+
+\emph{F.1 Regional week effects and regional coupling.} Web Table~\ref{tab:rev-regional} replaces the
+national week effects by region $\times$ week or division $\times$ week effects and lets $\phi$ vary by
+census region. The score-form statistic $J_{LM}$ for the two imported-pressure moments stays between
+16.93 and 17.77 in every specification, against 95th percentiles of 6.38 to 6.66 in the calibrated
+simulation, and equal regional coupling is not rejected ($p=0.505$ and 0.630). Common regional shocks
+are therefore not the source of the rejection. Region-specific $\hat\phi$ ranges from 0.27 to 1.08.
+
+\input{tables/table_11_regional}
+
+\emph{F.2 Application-calibrated simulation.} The generator keeps the observed 49-state panel,
+county counts, adoption dates, network and generation weights, sets the truth to the M0 estimate and
+adds negative binomial noise and spatially correlated state $\times$ week shocks. The stress design
+raises the shock standard deviation so that the standard error of $\hat\tau+\hat\kappa$ is close to the
+application's 0.311. Web Table~\ref{tab:rev-calsim} gives interval coverage (Web
+Appendix~\ref{app:fewcluster}) and the reference distributions of $J$, $Q_G$ and $Q_{GI}$. The
+application values of $J$ (17.87) and $Q_G$ (40.64) exceed every calibrated draw in both designs;
+$Q_{GI}$ (27.62) is exceeded in 8 of 600 and 5 of 300 draws.
+
+\input{tables/table_12_calibrated_sim}
+
+\emph{F.3 Generation-interval timing.} Web Table~\ref{tab:rev-gi} uses the generation intervals of
+\citet{ferretti2020quantifying} and \citet{nishiura2020serial}, discretised as in the paper, with
+same-week mass folded into lag 1 or moved out of the same week by shifting infector times. The total
+$\hat\tau+\hat\kappa$ stays between $-0.476$ and $-0.444$, while $\hat\phi$ (0.19 to 0.82) and $J$
+respond to the timing; $J$ rejects in every variant except the Nishiura interval with a 3.5-day
+shift.
+
+\input{tables/table_13_gi_timing}
+
+\emph{F.4 Identification-robust sets.} Inverting Stock--Wright $S$ statistics
+\citep{stock2000weak} gives confidence sets that remain valid when $\phi$ is weakly or not globally
+identified, without selecting a root \citep{andrews2012identification,kleibergen2005testing,andrews2019weak}. The
+just-identified set $S_1$ has a boundary component and an interior component for every $\bar\phi$;
+adding the over-identifying moments ($S_3$) empties the set (Web Table~\ref{tab:rev-robust}). At
+$\phi=0$ the profiled estimates are $\hat\tau=-2.00$ and $\hat\kappa=3.37$.
+
+\input{tables/table_16_robust_sets}
+
+\emph{F.5 Implicit event-time weights.} Web Table~\ref{tab:rev-event} reports the weights $\omega$ of
+Web Appendix~\ref{ss:hetero}. Weights on the adoption bin exceed one and most later bins receive
+negative weight, so the pooled estimand is not a convex average of the bin effects. The pooled--dynamic
+contrasts are not significant under any of the four weightings ($p\ge 0.117$).
+
+\input{tables/table_14_event_weights}
+
+\emph{F.6 Treatment-linked reporting.} Web Table~\ref{tab:rev-ascert} corrects counts for a
+reporting change $(1-\rho)^{D_{it}}$ and refits M0. The point estimate of $\tau+\kappa$ crosses zero at
+$\rho=0.187$. County testing volumes for 2020 are not consistently available in the archived data,
+so $\rho$ cannot be estimated here; wastewater surveillance \citep{goldstein2024wastewater} offers a
+reporting-independent signal for future applications.
+
+\input{tables/table_15_ascertainment}

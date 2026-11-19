@@ -69,7 +69,9 @@ the $\kappa_0$ contribution has the sign of $\kappa_0$.
 \end{enumerate}
 \end{theorem}
 
-Part (a) separates two mechanisms. The Jensen term $B_J$ is the small-count problem of
+Theorem~\ref{thm:bias} adapts known results on count panels with predetermined regressors to the
+renewal mean; its contribution is to place the comparators on a common footing, not to establish new
+inconsistency results. Part (a) separates two mechanisms. The Jensen term $B_J$ is the small-count problem of
 estimated reproduction numbers and does not vanish as $T$ grows. The feedback term $B_F$ arises
 because the unit mean of $D$ uses future adoption, which responds to current shocks. This is the
 mechanism behind the fixed-$T$ bias of within estimators in dynamic panels
@@ -78,14 +80,22 @@ $t=1,\dots,T$, in designs with non-vanishing within-unit treatment variation per
 linearly with $T$. The general bound in (a) is therefore $O(T^{-1/2})$, and under the recent-shocks
 condition with cross-product sum $O(T)$, the bound $C/d^2$ is $O(T^{-1})$, matching the Nickell
 rate.
-Part (b) shows that the Poisson fixed-effects estimator is inconsistent for fixed $T$ even with
-randomised adoption, through the lagged-outcome offset; this fixed-$T$ inconsistency under feedback
-is a known property of dynamic count panels \citep{blundell2002count}.
+Part (b) illustrates the classical fixed-$T$ inconsistency of the Poisson fixed-effects estimator
+\citep{hausman1984count} when regressors, here the lagged-outcome offset, are predetermined rather
+than strictly exogenous \citep{wooldridge1997multiplicative,wooldridge1999distribution,blundell2002count};
+it holds even with randomised adoption, but in the randomised designs of Web Appendix~\ref{app:numeric}
+the bias is $-0.004$, so (b) is an illustration rather than a practical concern there. Part (c) is
+the log-linearisation problem of \citet{santossilva2006log} and \citet{chen2024logs} combined with
+an omitted pressure term; Poisson-based difference-in-differences \citep{wooldridge2023nonlinear}
+removes the former but not the latter.
 Split-panel jackknife corrections \citep{dhaene2015splitpanel} assume stationarity, which week
-effects and staggered adoption violate, so the corrected estimator is assessed only by
-simulation.
+effects and staggered adoption violate, and analytical corrections for nonlinear panels with large
+$N$ and $T$ \citep{fernandezval2016individual} require long panels, so the corrected estimator is
+assessed only by simulation.
 
 \subsection{A.10 Heterogeneous and dynamic effects}
+\setreflabel{A.10}
+\label{ss:hetero}
 
 \begin{proposition}[Heterogeneous effects]
 \label{prop:hetero}
@@ -102,9 +112,11 @@ $\tau_i-\tilde\tau$ gives the following approximation.
 This is a weighted average with non-negative weights.
 \end{proposition}
 
-Unlike two-way fixed effects with staggered adoption
-\citep{goodmanbacon2021did,dechaisemartin2020twfe}, the constant-effect QD-GMM estimand cannot
-place negative weight on any unit's effect when effects are time-invariant. Switchers in weeks
+Proposition~\ref{prop:hetero} adapts the weighting analyses of two-way fixed effects with
+staggered adoption \citep{goodmanbacon2021did,dechaisemartin2020twfe} to the quasi-differenced
+moment; it holds $(\kappa,\phi)$ at their true values and its weights are first order. Unlike two-way
+fixed effects, the constant-effect QD-GMM estimand cannot place negative weight on any unit's effect
+when effects are time-invariant. Switchers in weeks
 with no treated units receive zero first-order weight.
 
 \begin{remark}[Dynamic effects]
@@ -120,6 +132,28 @@ instrumented by $s_{it}\ind\{t-A_i=e\}$. These indicators are $\F_{t-1}$-measura
 Theorem~\ref{thm:asy} applies whenever the rank condition holds. The rank condition requires
 not-yet-treated or never-treated units.
 \end{remark}
+
+Remark~\ref{rem:dynamic} adapts the event-study analysis of \citet{sun2021estimating} and
+\citet{borusyak2024imputation} to the quasi-differenced moments. The implicit weights can be made
+explicit. Suppose the event-time model holds with bin effects $\tau^*=(\tau^*_0,\dots,\tau^*_E)^{\top}$
+and let $\bar g_P(\boldsymbol\tau,\kappa,\phi)$ denote the limit of the pooled just-identified moments
+(week effects profiled out) when the policy enters through bin-specific coefficients
+$\boldsymbol\tau$; the pooled specification sets $\boldsymbol\tau=\tau\mathbf 1$. The pooled
+pseudo-true value $(\tilde\tau,\tilde\kappa,\tilde\phi)$ solves $\bar g_P(\tilde\tau\mathbf
+1,\tilde\kappa,\tilde\phi)=0$. With $H_b=\partial\bar g_P/\partial\boldsymbol\tau^{\top}$,
+$H_\kappa=\partial\bar g_P/\partial\kappa$ and $H_\phi=\partial\bar g_P/\partial\phi$ at
+$(\tau^*,\kappa_0,\phi_0)$, a first-order expansion gives
+\[
+A\,(\tilde\tau,\ \tilde\kappa-\kappa_0,\ \tilde\phi-\phi_0)^{\top}=H_b\tau^*,\qquad
+A=[H_b\mathbf 1,\ H_\kappa,\ H_\phi],
+\]
+so that $\tilde\tau\approx\sum_{b}\omega_b\tau^*_b$, where $\omega^{\top}$ is the first row of
+$A^{-1}H_b$. Because $A^{-1}H_b\mathbf 1=e_1$, the weights sum to one; they are not restricted to be
+non-negative, because treated stayers enter $H_b$ with the opposite sign to switchers. The second row
+shows that $\tilde\kappa$ is also contaminated when the bin effects differ. Web
+Table~\ref{tab:rev-event} reports $\omega$ for the application, evaluated at the M0-ET2 and at the
+pooled estimates, together with pooled--dynamic contrasts whose standard errors come from the joint
+cluster sandwich of the stacked influence functions.
 
 \subsection{A.11 Cases averted}
 
@@ -146,7 +180,8 @@ $\Psi=\plim G^{-1}\sum_{(i,t)\in\mathcal P}\partial\nu_{it}(\theta_0)/\partial\t
 
 The naive rescaling $Y_{it}e^{-\tau D_{it}-\kappa\bar D_{it}}$ ignores that averted cases would
 themselves have infected others; Theorem~\ref{thm:psi} propagates the counterfactual through the
-renewal equation and the network. Inference in (b) targets the realised-path quantity
+renewal equation and the network. Part (b) is a standard delta-method consequence of
+Theorem~\ref{thm:asy} and adds no new asymptotic argument. Inference in (b) targets the realised-path quantity
 $\psi^\dagger$, whose expectation is $\psi$.
 
 \begin{remark}[Process noise and depletion]
@@ -157,16 +192,25 @@ $\nu_{it}$ depends on neighbours' outcomes. A variance estimator for the populat
 $\psi_{\mathcal P}$ would add a cluster-graph HAC term; we conjecture that it is consistent but do
 not prove it. If susceptible depletion multiplies the mean in A1 by
 $1-C_{i,t-1}/P_i$, where $C$ is cumulative cases and $P$ population, the recursion is no longer
-linear in past $\nu$ and Theorem~\ref{thm:psi}(a) holds only approximately.
+linear in past $\nu$ and Theorem~\ref{thm:psi}(a) holds only approximately; depletion also makes
+effect estimates drift with time since exposure \citep{janvin2025depletion}.
 \end{remark}
 
 \begin{remark}[Testability]
 \label{rem:testable}
 Lemma~\ref{lem:mds} implies that moment contributions of adjacent clusters are uncorrelated,
-which can be checked directly. The J test of Corollary~\ref{cor:J} checks the multiplicative
-renewal structure against extra predetermined instruments. A sensitivity analysis lagging $D$ by
-one week checks sensitivity to policy-timing alignment. Sequential ignorability (A2(b)) and parallel untreated
-log-transmission paths after adoption are not testable.
+which can be checked directly. In the application, the correlations of the state score
+contributions over the 112 adjacent state pairs are 0.082 ($\tau$), 0.088 ($\kappa$) and $-0.092$
+($\phi$); adding the adjacent-pair cross-products to $\hat\Omega$ changes the SE of
+$\hat\tau+\hat\kappa$ from 0.3108 to 0.2915 and that of $\hat\tau$ from 0.1276 to 0.1293. The
+$J$ test of Corollary~\ref{cor:J}, in the spirit of \citet{arellano1991tests}, checks the
+multiplicative renewal structure against extra predetermined instruments. A sensitivity analysis
+lagging $D$ by one week checks sensitivity to policy-timing alignment. Sequential ignorability
+(A2(b)) and parallel untreated log-transmission paths after adoption are not testable; under
+feedback, lead regressions are not valid tests (Proposition~\ref{prop:sources}(c)), pre-testing
+distorts subsequent inference \citep{roth2022pretest}, and bounded departures from parallel trends
+\citep{rambachan2023credible} or a design-based view of dynamic effects \citep{bojinov2021panel}
+offer alternatives that we do not pursue.
 \end{remark}
 
 \subsection{A.12 Transmission within a week and assumption A4}
@@ -209,6 +253,12 @@ simulation of Section~\ref{ss:sameweek} quantifies its effect on bias and covera
 
 Fourth, weekly aggregation may be inadequate when a substantial share of transmission occurs within
 a week. Shortening the observation interval or specifying a within-week renewal process would change
-the data model; variance corrections alone cannot resolve that mean specification. Any proposed
-correction should be evaluated under a design that generates and aggregates within-week transmission.
+the data model: daily counts carry day-of-week reporting effects and reporting delays
+\citep{lison2024nowcast}, which violate the delay-free reporting of
+Proposition~\ref{prop:ascertainment} and require new moment conditions and new simulation
+validation. Variance corrections alone cannot resolve the mean specification. A sub-weekly estimator
+is therefore needed in this regime, and this paper does not provide one.
+
+In the same-week simulation, the within-week mechanism is switched on from window index 2 counted
+from zero (\texttt{ENGINE\_FROM = 2}), that is, from the third window week.
 

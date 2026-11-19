@@ -1,21 +1,20 @@
 \begin{abstract}
-Panels of reported cases are the standard data for evaluating non-pharmaceutical interventions,
-yet difference-in-differences on case counts rests on assumptions that epidemic data violate:
-transmission is multiplicative and self-exciting, policies respond to rising cases, and units
-infect one another. We place parallel trends on the log reproduction number inside a renewal model
-whose infection pressure is imported from neighbouring units, and estimate the resulting effects
-by quasi-differenced generalised method of moments. The quasi-difference removes unrestricted unit
-effects and uses instruments built only from the past, so adoption that responds to the epidemic is
-allowed. Under stated cross-cluster dependence conditions, which exclude unmodelled same-week
-cross-cluster transmission, the conventional cluster-robust sandwich applies without spatial
-adjustment. Week effects are profiled out analytically. In pre-specified simulations, the direct
-effect has bias between $-0.002$ and $0.001$ and interval coverage of 94.5\% to 95.4\% in
-positive-spillover scenarios under adoption feedback, overdispersion and small counts. When contagion
-is absent, equations can have multiple roots and boundary inference requires selection. In an
-application to US state mask orders and county COVID-19 cases, event-time estimates are negative across
-all lags ($-0.34$ to $-0.92$) and the policy-level total effect is $-0.466$ (95\% interval $-1.091$ to
-$0.159$; pairs bootstrap $-1.330$ to $0.397$), whereas pooled constant-effect estimates suffer from
-dynamic weighting bias; over-identification rejects the working model.
+Panels of reported cases are the standard data for evaluating non-pharmaceutical interventions, yet
+difference-in-differences on case counts rests on assumptions that epidemic data violate:
+transmission is self-exciting, policies respond to rising cases, and units infect one another. We
+place parallel trends on the log reproduction number of a renewal model whose infection pressure is
+imported from neighbouring units, and estimate policy effects by quasi-differenced generalized method
+of moments. The quasi-difference removes unrestricted unit effects, and instruments built only from
+the past allow adoption to respond to the epidemic. When same-week transmission across clusters is
+excluded, the ordinary cluster-robust sandwich applies without spatial adjustment and week effects
+profile out in closed form. The design comes with diagnostics: a profiled contagion equation that
+exposes multiple roots, over-identification tests read against a calibrated reference distribution,
+and identification-robust confidence sets. In pre-specified simulations with adoption feedback,
+spillover, overdispersion and small counts, the direct effect has bias between $-0.002$ and $0.001$
+and interval coverage of 94.5\% to 95.4\%. In an application to US state mask orders and county
+COVID-19 cases, the diagnostics reject the weekly working model: the over-identification statistic
+exceeds all calibrated draws, also with regional week effects. The policy-level total of $-0.47$ (95\% interval $-1.09$ to
+$0.16$) is therefore a summary of the weekly fit, not a causal effect.
 \end{abstract}
 \begin{keywords}
 Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.

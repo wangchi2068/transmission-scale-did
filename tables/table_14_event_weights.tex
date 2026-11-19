@@ -1,0 +1,29 @@
+\begin{table}[!t]
+\centering
+\caption{Implicit event-time weights of the pooled estimand and pooled--dynamic contrasts.}
+\label{tab:rev-event}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrr}
+\toprule
+event time & $\hat\tau_e$ (SE) & $\omega$ at M0-ET2 & $\omega$ at M0 \\
+\midrule
+$e=0$ & -0.343 (0.341) & 1.790 & 2.109 \\
+$e=1$ & -0.619 (0.432) & -0.407 & -0.294 \\
+$e=2$ & -0.672 (0.521) & -0.177 & -0.333 \\
+$e=3$ & -0.823 (0.572) & -0.124 & -0.001 \\
+$e=4$ & -0.680 (0.611) & 0.173 & -0.019 \\
+$e=5$ & -0.924 (0.685) & -0.101 & 0.009 \\
+$e=6$+ & -0.923 (0.735) & -0.154 & -0.471 \\
+\midrule
+\multicolumn{4}{l}{\emph{Pooled minus weighted bins}} \\
+implicit weights at M0-ET2 & 0.079 (0.240) & \multicolumn{2}{l}{$p$ = 0.742} \\
+implicit weights at M0 & -0.066 (0.268) & \multicolumn{2}{l}{$p$ = 0.806} \\
+equal weights $e=0,\dots,5$ & 0.733 (0.457) & \multicolumn{2}{l}{$p$ = 0.117} \\
+treated-cell shares & 0.899 (0.592) & \multicolumn{2}{l}{$p$ = 0.138} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Sample: 2656 counties in the 37 states with event-time cells (identical for M0 and M0-ET2). Implicit weights $\omega$ of the pooled estimand on the event-time effects, $\hat\tau_{pooled}\approx\sum_e\omega_e\tau_e$ ($\omega$ = $\tau$-row of $A^{-1}H_b$, $\sum_e\omega_e = 1$; Web Appendix A.10), evaluated at the M0-ET2 and at the pooled estimates. Contrasts use the joint cluster sandwich of the stacked influence functions with $t_{36}$. Pooled $\hat\tau$ = 0.056 (SE 0.181). $J$ ($\chi^2_2$): M0 14.37 ($p$ = 0.0008), M0-ET2 13.85 ($p$ = 0.0010). Added in revision (post hoc). Source: \texttt{verification/revision/event\_time/results.json}.}
+\end{table}

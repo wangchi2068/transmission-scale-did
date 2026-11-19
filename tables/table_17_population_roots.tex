@@ -1,0 +1,32 @@
+\begin{table}[!t]
+\centering
+\caption{Second roots of the profiled $\phi$-equation in zero-contagion designs at large $N$.}
+\label{tab:rev-poproots}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrll}
+\toprule
+design & $N$ & $\bar\phi$ & draws with 2nd root & $\phi$ at 2nd root & $\tau$ at 2nd root \\
+\midrule
+S5: T 12, feedback & 20000 & 0.25 & 3/3 & 0.279 to 0.297 & -0.024 to -0.007 \\
+S5: T 12, feedback & 20000 & 0.50 & 3/3 & 0.413 to 0.437 & -0.003 to 0.011 \\
+S5: T 12, feedback & 20000 & 1.00 & 3/3 & 0.570 to 0.605 & 0.007 to 0.019 \\
+S5: T 12, feedback & 50000 & 0.50 & 1/1 & 0.447 to 0.447 & 0.031 to 0.031 \\
+S6: T 26, feedback & 20000 & 0.25 & 3/3 & 0.228 to 0.261 & -0.066 to -0.050 \\
+S6: T 26, feedback & 20000 & 0.50 & 3/3 & 0.379 to 0.433 & -0.043 to -0.024 \\
+S6: T 26, feedback & 20000 & 1.00 & 3/3 & 0.578 to 0.672 & -0.031 to -0.009 \\
+S6: T 26, feedback & 50000 & 0.50 & 1/1 & 0.371 to 0.371 & -0.015 to -0.015 \\
+S13: T 12, random & 20000 & 0.25 & 3/3 & 0.318 to 0.366 & 0.058 to 0.235 \\
+S13: T 12, random & 20000 & 0.50 & 3/3 & 0.449 to 0.540 & 0.090 to 0.293 \\
+S13: T 12, random & 20000 & 1.00 & 3/3 & 0.603 to 0.746 & 0.111 to 0.337 \\
+S13: T 12, random & 50000 & 0.50 & 1/1 & 0.508 to 0.508 & 0.060 to 0.060 \\
+S14: T 26, random & 20000 & 0.25 & 3/3 & 0.109 to 0.153 & -0.012 to 0.101 \\
+S14: T 26, random & 20000 & 0.50 & 3/3 & 0.174 to 0.241 & 0.015 to 0.153 \\
+S14: T 26, random & 20000 & 1.00 & 3/3 & 0.265 to 0.360 & 0.037 to 0.200 \\
+S14: T 26, random & 50000 & 0.50 & 1/1 & 0.145 to 0.145 & 0.005 to 0.005 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Zero-contagion designs ($\phi_0=\kappa_0=0$, $\tau_0=\log 0.8=-0.223$) simulated with the paper's DGP at large $N$ (seeds of the paper, scenarios.seed\_for). The profiled equation for $\phi$ is evaluated on a grid from $-0.1$ to 3; a sign change at $\phi>0.05$ is a second root. Its persistence at large $N$ and its movement with $\bar\phi$ indicate a population root, i.e.\ failure of global identification (A6). $\hat\tau$ at the second root is interpolated. Added in revision (post hoc). Source: \texttt{verification/revision/population\_roots/results.json}.}
+\end{table}

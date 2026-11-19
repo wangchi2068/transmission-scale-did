@@ -1,0 +1,33 @@
+\begin{table}[!t]
+\centering
+\caption{Application: sensitivity to a treatment-linked change in reporting.}
+\label{tab:rev-ascert}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lllrl}
+\toprule
+$\rho$ & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\phi$ & $J$ & M0-G \\
+\midrule
+-0.60 & -1.329 (-1.919, -0.738) & 0.732 & 19.29 & boundary (1.287) \\
+-0.50 & -1.221 (-1.813, -0.629) & 0.738 & 19.09 & boundary (1.290) \\
+-0.40 & -1.102 (-1.696, -0.508) & 0.744 & 18.87 & boundary (1.296) \\
+-0.30 & -0.971 (-1.569, -0.373) & 0.750 & 18.64 & boundary (1.305) \\
+-0.20 & -0.825 (-1.428, -0.221) & 0.757 & 18.40 & boundary (1.319) \\
+-0.10 & -0.658 (-1.270, -0.047) & 0.765 & 18.15 & interior \\
+0.00 & -0.466 (-1.091, 0.159) & 0.772 & 17.87 & interior \\
+0.10 & -0.238 (-0.886, 0.409) & 0.781 & 17.58 & interior \\
+0.20 & 0.041 (-0.646, 0.728) & 0.790 & 17.26 & near-zero root (1.483) \\
+0.30 & 0.404 (-0.363, 1.170) & 0.799 & 16.91 & near-zero root (1.586) \\
+0.40 & 0.919 (-0.034, 1.872) & 0.810 & 16.52 & interior \\
+0.50 & 1.791 (0.286, 3.296) & 0.825 & 16.09 & interior \\
+0.60 & 3.574 (0.962, 6.185) & 0.857 & 15.73 & interior \\
+\midrule
+-0.076 (upper limit = 0) & -0.614 (-1.228, 0.000) & 0.766 & 18.08 & \\
+0.187 ($\hat\tau+\hat\kappa$ = 0) & 0.000 (-0.680, 0.680) & 0.788 & 17.30 & \\
+0.410 (lower limit = 0) & 0.984 (0.000, 1.968) & 0.812 & 16.48 & \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Observed counts $Y^{obs}_{it} = c_i c_t (1-\rho)^{D_{it}} X_{it}$: treated counties report a share $1-\rho$ of what they would report untreated ($\rho>0$: reporting falls after the order). Counts are corrected by $(1-\rho)^{-D}$, $L$ and $N$ rebuilt and M0 refitted. M0-G column: selected root type, with $\hat\tau+\hat\kappa$ where it differs from M0. Bottom rows: values of $\rho$ at which the estimate or a 95\% limit crosses zero. Added in revision (post hoc). Source: \texttt{verification/revision/ascertainment/results.json}.}
+\end{table}
