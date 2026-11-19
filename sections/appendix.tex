@@ -569,7 +569,7 @@ constant-effect M0 estimate.}
 
 \input{tables/table_5_psi}
 
-\subsubsection{Validation of the root-selection rules on independent designs}
+\subsubsection{C.1 Validation of the root-selection rules on independent designs}
 \setreflabel{C.1}
 \label{app:rsel}
 
@@ -611,7 +611,7 @@ apply a global selection only when the profile has more than one root, not as a 
 the rules was pre-specified in this validation; it is a check that the rule proposed in the
 previous subsection does not extend beyond the design that motivated it.
 
-\subsubsection{Population roots in the zero-contagion designs}
+\subsubsection{C.2 Population roots in the zero-contagion designs}
 \setreflabel{C.2}
 \label{app:poproots}
 
@@ -705,7 +705,7 @@ interval widens to $-1.330$ to $0.397$.
 evaluated in the application-calibrated simulation of Web Appendix~\ref{app:diag} (Web
 Table~\ref{tab:rev-calsim}). For $\tau+\kappa$, coverage of the $t_{48}$ sandwich, score wild and
 pairs intervals is 0.935, 0.925 and 0.933 in the calibrated design ($R=600$) and 0.950, 0.930 and
-0.923 in the stress design ($R=300$); for $\tau$ the three methods over-cover (0.980 to 0.993). The
+0.923 in the high-noise design ($R=300$); for $\tau$ the three methods over-cover (0.980 to 0.993). The
 $t_{48}$ sandwich is the best calibrated of the three in both designs and is designated the primary
 interval; this designation was made in revision, after the calibrated simulation, and is post hoc.
 With few and unequal clusters, inference can be distorted when the number of treated clusters is
@@ -720,9 +720,9 @@ holds, so they assess the interval methods, not the model.
 \label{app:diag}
 
 All analyses in this appendix were added in revision and are post hoc. They use the archived
-application panel and the paper's estimation code; grouped specifications use an extension of M0
-(\texttt{verification/revision/common/qdx.py}) that reproduces the paper's M0 fit
-(\texttt{verification/revision/validate\_qdx}). Each table note gives the result file.
+application panel and the paper's estimation code; grouped specifications use an extension of M0 in
+the \texttt{qdx} module of the replication package, which reproduces the paper's M0 fit. Each table
+note gives the result file.
 
 \emph{F.1 Regional week effects and regional coupling.} Web Table~\ref{tab:rev-regional} replaces the
 national week effects by region $\times$ week or division $\times$ week effects and lets $\phi$ vary by
@@ -735,7 +735,7 @@ are therefore not the source of the rejection. Region-specific $\hat\phi$ ranges
 
 \emph{F.2 Application-calibrated simulation.} The generator keeps the observed 49-state panel,
 county counts, adoption dates, network and generation weights, sets the truth to the M0 estimate and
-adds negative binomial noise and spatially correlated state $\times$ week shocks. The stress design
+adds negative binomial noise and spatially correlated state $\times$ week shocks. The high-noise design
 raises the shock standard deviation so that the standard error of $\hat\tau+\hat\kappa$ is close to the
 application's 0.311. Web Table~\ref{tab:rev-calsim} gives interval coverage (Web
 Appendix~\ref{app:fewcluster}) and the reference distributions of $J$, $Q_G$ and $Q_{GI}$. The

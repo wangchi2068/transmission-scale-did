@@ -2,19 +2,18 @@
 \label{s:simulation}
 
 The design follows \citet{morris2019ademp}; aims, generators, estimands, comparators and success
-criteria were pre-specified before the full runs.
+criteria were pre-specified.
 
 \subsection{Design}
 
-Counties sit uniformly on the unit square, linked to their six nearest neighbours via a symmetrised,
-row-normalised adjacency matrix $W$ and grouped into 50 contiguous state clusters. Unit effects
-combine state, county and adoption-propensity components, correlating adoption with baseline
-transmission. Outcomes follow \eqref{eq:mean} with $S=2$, generation weights $(0.85,0.15)$,
-population-proportional background input $\omega$, negative binomial ($k=10$) or Poisson ($k=\infty$)
-innovations, and week effects calibrated for median county-week counts between 5 and 50. Under
-random adoption, states draw adoption weeks uniformly on $\{2,\dots,T+2\}$; under feedback adoption,
-states and counties adopt sequentially once lagged incidence exceeds propensity-dependent thresholds.
-Adoption is absorbing throughout.
+Counties sit uniformly on the unit square, linked to their six nearest neighbours by a symmetrised,
+row-normalised adjacency $W$ and grouped into 50 contiguous state clusters. Unit effects combine
+state, county and adoption-propensity components, correlating adoption with baseline transmission.
+Outcomes follow \eqref{eq:mean} with $S=2$, generation weights $(0.85,0.15)$, population-proportional
+background $\omega$, negative binomial ($k=10$) or Poisson ($k=\infty$) innovations, and week effects
+calibrated for median county-week counts of 5 to 50. Under random adoption, states draw adoption weeks
+uniformly on $\{2,\dots,T+2\}$; under feedback, states and counties adopt sequentially once lagged
+incidence exceeds propensity-dependent thresholds. Adoption is absorbing.
 
 Twenty-five scenarios span three blocks (Table~\ref{tab:sim-core-tau}): a core block crossing
 $N\in\{500,2000\}$, $T\in\{12,26\}$, adoption rule and spillover, $(\phi_0,\kappa_0)=(0.4,-0.1)$ or
@@ -25,14 +24,14 @@ drop (X2), heterogeneous unit effects $\tau_i\sim N(\log0.8,0.1^2)$ (X3), suscep
 to 20\% attack rates (X4), and effects growing from $-0.1$ to $-0.3$ over event time (X5).
 
 Estimands are generating $(\tau,\kappa,\phi)$, the switcher mean of $\tau_i$ in X3, event-time
-effects in X5, and $\psi^\dagger$ of Theorem~\ref{thm:psi} (with population $\psi$ approximated from
-5000 paired paths). On identical $R=8000$ data sets without replacement of failed runs, we evaluate
+effects in X5, and $\psi^\dagger$ of Theorem~\ref{thm:psi} (population $\psi$ from 5000 paired paths).
+On identical $R=8000$ data sets, without replacing failed runs, we evaluate
 M0, M0-G, M0-GI, M0-OI, M0-ET and M0$'$ against Poisson fixed effects with offset
 $\log\Lambda_{it}(\phi)$ (M1) and its split-panel jackknife (M1-BC), two-step log-transmission
 regression using EpiEstim reproduction numbers \citep[M2;][]{cori2013epiestim}, TWFE on
 $\log(Y+1)$ (M3), pooled renewal QMLE (M4) and an infeasible Oracle observing
-true $\alpha_i$. Intervals use $t_{G-1}$ critical values clustered by state. Success required bias
-within 2 MCSE of zero for $(\tau,\kappa,\phi)$ and coverage in $[93\%,97\%]$ under feedback.
+true $\alpha_i$. Intervals use $t_{G-1}$ critical values clustered by state, and success required
+bias within 2 MCSE of zero for $(\tau,\kappa,\phi)$ and coverage in $[93\%,97\%]$ under feedback.
 
 Departures from the protocol: (i) the unit-effect spread was quartered to keep $T=26$ counts
 realistic; (ii) replications rose from 1000 to 8000 so that 2 MCSE fell below 0.01; (iii) an offset
@@ -40,7 +39,7 @@ error in M1 (and M1-BC) was corrected after the pilot, and fewer Poisson fixed-e
 retained; (iv) M0-G was added after the pilot revealed root multiplicity, before the full runs; and
 (v) M0-GI was added after interim boundary failures and is post hoc, evaluated on the identical data
 sets. The validation designs of Web Appendix~\ref{app:rsel}, the population root checks, the
-application-calibrated simulation and the application analyses added in revision are also post hoc.
+application-calibrated simulation and the revision's application analyses are also post hoc.
 
 \subsection{Results}
 \label{ss:simresults}

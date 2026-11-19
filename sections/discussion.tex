@@ -2,37 +2,40 @@
 \label{s:discussion}
 
 Placing parallel trends on the log reproduction number with imported infection pressure, and removing
-unit effects by forward quasi-differencing, gives a difference-in-differences design that accommodates
-feedback adoption and lagged cross-cluster contagion together while keeping the ordinary
-cluster-robust sandwich. In simulations with spillover, feedback, overdispersion and small counts,
-QD-GMM recovers direct and spillover effects where comparators built on counts, log counts or
-first-step reproduction numbers are biased, and it identifies the policy-level total directly when
-mandates are set above the unit.
+unit effects by forward quasi-differencing, gives a design that accommodates feedback adoption and
+lagged cross-cluster contagion while keeping the ordinary cluster-robust sandwich. In simulations with
+spillover, feedback, overdispersion and small counts, QD-GMM recovers direct and spillover effects
+where comparators built on counts, log counts or first-step reproduction numbers are biased, and
+identifies the policy-level total directly when mandates are set above the unit.
 
 Three conditions govern its use. The first is a single interior root. Zero contagion lies outside
 Theorem~\ref{thm:asy}, and the population moments can then have a second root. Pre-specified global
 search (M0-G) under-covers at $\phi_0=0$, and post hoc M0-GI repairs this but over-selects the boundary
 when contagion is small but positive. Both are heuristics, so the profile and identification-robust
-sets \citep{stock2000weak} should accompany any selected root. The second is weekly aggregation. When a substantial share of transmission falls within the week, as in the
-$w_0=0.3$ stress regime, policy-level totals are biased by about one-sixth and the $J$ test has no power
-against it (Section~\ref{ss:sameweek}); a sub-weekly mean with day-of-week reporting and delays is then
-needed, and this paper does not provide one. The third is the number of clusters. Theorem~\ref{thm:asy}
-is a large-$G$ result; with 49 states, of which 24 switch, an application-calibrated simulation supports
-$t_{G-1}$ sandwich intervals (coverage 0.935 to 0.950 for $\tau+\kappa$), whereas inference with few
-treated clusters can fail more generally \citep{ferman2019inference,canay2021wild}.
+sets \citep{stock2000weak} should accompany any selected root. The second is weekly aggregation. When
+a substantial share of transmission falls within the week, as in the $w_0=0.3$ stress regime,
+policy-level totals are biased by about one-sixth and the $J$ test has no power against it
+(Section~\ref{ss:sameweek}); a sub-weekly mean with day-of-week reporting and delays is then needed,
+and this paper does not provide one. The third is the number of clusters. Theorem~\ref{thm:asy} is a
+large-$G$ result; with 49 states, of which 24 switch, an application-calibrated simulation in which the
+weekly model holds supports $t_{G-1}$ sandwich intervals, with coverage 0.935 for $\tau+\kappa$ in the
+base design and 0.950 once the state-by-week shocks are scaled up to reproduce the application's
+standard error, whereas inference with few treated clusters can fail more generally
+\citep{ferman2019inference,canay2021wild}. That calibration does not cover the same-week regime this
+application occupies, where the same interval covers 0.783 and $J$
+has no power against the aggregation (Section~\ref{ss:sameweek}).
 
 In the application the diagnostics reject the weekly model, also with regional week effects and
 coupling; the robust sets for $\phi$ are empty once over-identifying moments are added, and about a
-third of transmission falls in the same week. The policy-level total $-0.466$ is therefore a
-pseudo-true value of the weekly fit. Event-time estimates are consistent with effects that build up
-after adoption but are imprecise (joint $p=0.076$), and an 18.7\% order-linked fall in ascertainment
-would offset the point estimate.
+third of transmission falls in the same week, so the policy-level total $-0.466$ is a pseudo-true
+value. Event-time estimates are consistent with effects that build up after adoption but imprecise
+(joint $p=0.076$), and an 18.7\% order-linked fall in ascertainment would offset the point estimate.
 
 The parallel-trend restriction on $\log R$ \citep{roth2023parallel} separates local from imported
 pressure \citep{elenev2025staggered} and complements unconfoundedness formulations
 \citep{callaway2023pandemic}. The design turns a panel of reported cases into estimates on the
-transmission scale with standard clustered inference, and its diagnostics show when the weekly
-working model cannot support a causal reading. Sequential efficiency bounds
+transmission scale with standard clustered inference, and its diagnostics show when the weekly model
+cannot support a causal reading. Sequential efficiency bounds
 \citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood-based feedback models
 \citep{bonhomme2025feedback}, sub-weekly estimating equations and joint estimation of generation
-intervals and reporting \citep{goldwasser2026rt} extend it naturally.
+intervals and reporting \citep{goldwasser2026rt} extend it.

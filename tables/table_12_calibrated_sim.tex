@@ -14,7 +14,7 @@ cal & $\tau+\kappa$ & 0.007 & 0.156 & 0.142 & 0.935 & 0.925 & 0.933 & 0.57 / 0.5
  & $\tau$ & -0.003 & 0.125 & 0.135 & 0.985 & 0.980 & 0.980 & 0.54 / 0.52 / 0.53 \\
  & $\kappa$ & 0.009 & 0.138 & 0.125 & 0.945 & 0.935 & 0.928 & 0.50 / 0.48 / 0.49 \\
  & $\phi$ & 0.000 & 0.033 & 0.032 & 0.937 & 0.925 & 0.938 & 0.13 / 0.12 / 0.13 \\
-stress & $\tau+\kappa$ & 0.015 & 0.366 & 0.348 & 0.950 & 0.930 & 0.923 & 1.40 / 1.33 / 1.37 \\
+high-noise & $\tau+\kappa$ & 0.015 & 0.366 & 0.348 & 0.950 & 0.930 & 0.923 & 1.40 / 1.33 / 1.37 \\
  & $\tau$ & 0.005 & 0.266 & 0.302 & 0.993 & 0.983 & 0.983 & 1.22 / 1.16 / 1.14 \\
  & $\kappa$ & 0.010 & 0.285 & 0.277 & 0.957 & 0.947 & 0.933 & 1.11 / 1.06 / 1.06 \\
  & $\phi$ & 0.001 & 0.040 & 0.040 & 0.947 & 0.937 & 0.937 & 0.16 / 0.15 / 0.16 \\
@@ -26,12 +26,12 @@ cal & $J$ & 2.12 & 6.66 & 8.92 & 12.45 & 17.87 & 0/600 & 0.005 \\
  & $J_{LM,inv}$ & 2.00 & 5.73 & 8.88 & 12.76 & 5.61 & 31/600 & 0.069 \\
  & $Q_G$ & 9.73 & 24.93 & 30.32 & 35.13 & 40.64 & 0/600 & 0.005 \\
  & $Q_{GI}$ & 8.35 & 21.74 & 28.56 & 32.83 & 27.62 & 8/600 & 0.024 \\
-stress & $J$ & 2.42 & 6.17 & 9.57 & 10.87 & 17.87 & 0/300 & 0.010 \\
+high-noise & $J$ & 2.42 & 6.17 & 9.57 & 10.87 & 17.87 & 0/300 & 0.010 \\
  & $J_{LM,inv}$ & 1.88 & 5.88 & 7.49 & 8.74 & 5.61 & 20/300 & 0.095 \\
  & $Q_G$ & 11.55 & 28.14 & 33.44 & 34.72 & 40.64 & 0/300 & 0.010 \\
  & $Q_{GI}$ & 8.18 & 19.94 & 28.67 & 30.18 & 27.62 & 5/300 & 0.035 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Application-calibrated simulation (added in revision, post hoc): observed 49-state panel, county counts, adoption dates, network and generation-interval weights; truth = M0 estimate ($\tau$ 0.040, $\kappa$ -0.506, $\phi$ 0.772); NB2 noise ($k$ = 15.9) and spatially correlated state $\times$ week shocks, sd 0.23 (\emph{cal}, R = 600) or 0.50 (\emph{stress}, R = 300; chosen so that the standard error of $\hat\tau+\hat\kappa$ is close to the application's 0.311). Coverage of nominal 95\% intervals: cluster sandwich with $t_{48}$, score wild bootstrap (Mammen, B = 999), pairs cluster bootstrap (B = 199); MCSE about 0.010 (cal) and 0.013 (stress). Widths for $\tau+\kappa$ etc.\ in the order $t_{48}$ / wild / pairs. Panel (b): \emph{exceed} = draws at or above the application value; \emph{95\% upper} = Clopper--Pearson upper limit of the exceedance probability. Seeds: data 20261118000+r, wild 20261118500000+r, pairs 20261118900000+r. Source: \texttt{verification/revision/calibrated\_sim/results.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Application-calibrated simulation (added in revision, post hoc): observed 49-state panel, county counts, adoption dates, network and generation-interval weights; truth = M0 estimate ($\tau$ 0.040, $\kappa$ -0.506, $\phi$ 0.772); NB2 noise ($k$ = 15.9) and spatially correlated state $\times$ week shocks, sd 0.23 (\emph{cal}, R = 600) or 0.50 (\emph{high-noise}, R = 300; chosen so that the standard error of $\hat\tau+\hat\kappa$ is close to the application's 0.311). Coverage of nominal 95\% intervals: cluster sandwich with $t_{48}$, score wild bootstrap (Mammen, B = 999), pairs cluster bootstrap (B = 199); MCSE about 0.010 (cal) and 0.013 (high-noise). Widths for $\tau+\kappa$ etc.\ in the order $t_{48}$ / wild / pairs. Panel (b): \emph{exceed} = draws at or above the application value; \emph{95\% upper} = Clopper--Pearson upper limit of the exceedance probability. Seeds: data 20261118000+r, wild 20261118500000+r, pairs 20261118900000+r. Source: \texttt{verification/revision/calibrated\_sim/results.json}.}
 \end{table}

@@ -48,12 +48,16 @@ adoption, spillover, overdispersion and small counts, the estimator recovers dir
 between $-0.002$ and $0.001$ and coverage of 94.5\% to 95.4\%, where standard comparators are biased.
 Third, the design comes with diagnostics that show when its own working model fails: the profiled
 contagion equation exposes root multiplicity, over-identification tests are read against a calibrated
-reference distribution, and identification-robust sets avoid root selection.
+reference distribution, and identification-robust sets for $\phi$ do not depend on the selected root.
 
 In the application to US state mask orders, these diagnostics reject the weekly
 working model under national and regional week effects, so the reported policy-level total is a summary of the
-weekly fit rather than a causal effect, and they identify same-week transmission as the regime that a
-weekly model cannot handle. Sections~\ref{s:methods}--\ref{s:discussion} present the theory, the
-simulations, the application and the scope of the design; Web Appendices~A--F give proofs, adapted
-comparator results, numerical checks, supplementary simulations, data, few-cluster inference and
-application diagnostics.
+weekly fit rather than a causal effect. The generation-interval weights put about 0.30 of transmission
+in the same week as the infector, where the weekly model cannot work and $J$ cannot detect the
+aggregation (Section~\ref{ss:sameweek}); that arithmetic, not a diagnostic test, rules the weekly
+specification out. The identification-robust set for $\phi$ has a boundary and an interior component
+and is emptied by the over-identifying moments, so here the sets confirm the rejection rather than
+replace root selection with a usable interval. Sections~\ref{s:methods}--\ref{s:discussion} present
+the theory, simulations, application and scope; Web Appendices~A--F give proofs, adapted comparator
+results, numerical checks, supplementary simulations, data, few-cluster inference and application
+diagnostics.
