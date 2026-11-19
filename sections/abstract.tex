@@ -4,8 +4,8 @@ difference-in-differences on case counts rests on assumptions that epidemic data
 transmission is self-exciting, policies respond to rising cases, and units infect one another. We
 place parallel trends on the log reproduction number of a renewal model whose infection pressure is
 imported from neighbouring units, and estimate policy effects by quasi-differenced generalized method
-of moments. The quasi-difference removes unrestricted unit effects, and instruments built only from
-the past allow adoption to respond to the epidemic. When same-week transmission across clusters is
+of moments. The quasi-difference removes unrestricted unit effects, and past-only instruments let
+adoption respond to the epidemic. When same-week transmission across clusters is
 excluded, the ordinary cluster-robust sandwich applies without spatial adjustment and week effects
 profile out in closed form. The design comes with diagnostics: a profiled contagion equation that
 exposes multiple roots, over-identification tests read against a calibrated reference distribution,
@@ -13,8 +13,8 @@ and identification-robust confidence sets. In pre-specified simulations with ado
 spillover, overdispersion and small counts, the direct effect has bias between $-0.002$ and $0.001$
 and interval coverage of 94.5\% to 95.4\%. In an application to US state mask orders and county
 COVID-19 cases, the diagnostics reject the weekly working model: the over-identification statistic
-exceeds all calibrated draws, also with division $\times$ week effects, while the robust set for the
-coupling parameter is empty once the over-identifying moments are added. The policy-level total of
+exceeds all calibrated draws, also with division $\times$ week effects, and the robust set for the
+coupling parameter is empty. The policy-level total of
 $-0.47$ (95\% interval $-1.09$ to $0.16$) is therefore a summary of the weekly fit, not a causal
 effect.
 \end{abstract}

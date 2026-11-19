@@ -1,9 +1,10 @@
 # 传播尺度双重差分（QD-GMM）
 
 论文、LaTeX 源码、实验代码与验证材料。按 *Biometrics* Regular Article 规范拆分为两份独立 PDF：
-- 英文主稿 `main.pdf`（共 31 页）：首页为标题/摘要（不计入限页），正文、Back Matter 与 References 为第 1–24 印刷页（严格 ≤ 25 页上限），末 6 页为 `endfloat` 排出的图表（不计入限页）。
-- 网络补充材料 `supporting_information.pdf`（共 30 页）：Web Appendices A–E 与附带文献，与主稿通过 `xr` 双向交叉引用。
-- 中文阅读稿 `paper_zh/main.pdf`（22 页）。
+- 英文主稿 `main.pdf`（共 32 页）：首页为标题/摘要（不计入限页），正文、Back Matter 与 References 为第 1–19 印刷页，加上 6 页 `endfloat` 排出的图表（不计入限页），计入限页的共 25 页（上限 25，恰好用满）。
+- 网络补充材料 `supporting_information.pdf`（共 43 页）：Web Appendices A–F 与附带文献，与主稿通过 `xr` 双向交叉引用。
+- 中文阅读稿 `paper_zh/main.pdf`（26 页）。
+- 回复信 `response/`：`response-to-reviewers-r1r2.md`（第一、二轮）与 `response-to-reviewers-r3.md`（第三轮小修）。
 
 ## 目录
 
@@ -20,9 +21,11 @@ QD-GMM_transmission_DiD_2026-11-13/
 │   ├── analysis/              results.json、metrics.csv、实验报告与设计文档
 │   └── logs/                  运行日志
 ├── verification/
-│   ├── root_selection/        根选择规则在 9 个独立设计上的验证（18000 次重复）、边界推断诊断
-│   ├── application/           τ+κ 联合区间、M0-ET 分箱修正、STROBE 清单、稳健推断方案、少簇检查（删除一州刀切 + 野聚类 bootstrap-t）
+│   ├── revision/              修订轮新增的应用诊断（区域效应、校准模拟、代际重组、稳健集、事件权重、报告率、总体根），各子目录的 results.json 是正文数字的出处
+│   ├── root_selection/        根选择规则在 9 个独立设计上的验证（18000 次重复）
+│   ├── application/           τ+κ 联合区间、M0-ET 分箱修正、STROBE 清单、少簇检查（删除一州刀切 + 野聚类 bootstrap-t）
 │   └── same_week/             同周传播的匹配模拟（w0 = 0 对 w0 = 0.3，每臂 1000 次）
+├── response/                  两封逐点回复信
 └── scripts/                   构建与质量检查脚本（见下）
 ```
 
@@ -89,11 +92,15 @@ xelatex -interaction=nonstopmode supporting_information.tex
 - 新增 Web Appendix D（数据来源与清洗）；补利益冲突、资助、报告规范声明与 STROBE 清单。
 - 旧的 `paper.pdf`、`paper.html` 已删除，`main.pdf` 是唯一编译产物。
 
-2026-11-17 又按第三轮意见及 *Biometrics* 冲刺要求完成全面优化：
+2026-11-18 按第二轮评审（大修 6/10）的意见补做了应用诊断，2026-11-19 再按第三轮评审（小修 7/10）改写了措辞。合并后的当前状态：
 
-- **少簇与数值修正**：新增 Web Appendix E（应用少簇推断：删除一州刀切、Mammen/Webb6 得分野聚类 bootstrap-t 与 999/999 收敛的非线性成对集群矩 bootstrap-t，见 `verification/application/wild_bootstrap.py`）；修正 Theorem 3(b) 反馈条件均值偏移与 Lemma 5 逐行中值标记、Proposition 3 有界/无界支撑表述及 `numeric_checks.py` S1/S3/S5/S7/S8（8/8 通过）；明确 Scenario 16 未加权 Oracle 覆盖率下降系单簇集中度所致（中位 21.5%，95 分位 58.5%），同周实验明确区分非线性再感染份额（14.5%）与合计份额（34%）。
-- **结构拆包与合规（≤ 25 页）**：将 Web Appendix A–E 拆为独立 `supporting_information.tex`（31 页），主稿启用 `endfloat` 将图表移至文献之后并通过 `\externaldocument[][nocite]` 实现 `xr` 双向交叉引用；精简正文 1–5 节与 Back Matter 后，计入 *Biometrics* 限页的正文+声明+References 恰好为 25 印刷页（严格 ≤ 25 页，零 `Overfull \vbox/\hbox`、零未定义引用）。
-- **实证与动态推断响应**：直接直面动态效应下汇聚常数估计量（$\hat\tau=+0.056$）与事件时间所有分箱全负（$-0.34$ 至 $-0.92$）的背离，将其归因于动态加权偏倚（Remark 2, X5）；主表以政策总和 $\tau+\kappa=-0.466$ 为首列并直接列出成对集群矩 Bootstrap 区间（$[-1.330, 0.397]$）；彻底删除 26 周 717 亿避免病例的无耗竭指数爆炸数值，收束至 4 周短期；修正情景 14/16 Oracle 笔误与表 3 表注，补齐 Feng & Bilinski 2024 medRxiv DOI 及前沿文献。
+- **应用改为对周度工作模型的诊断。** 加入区域 × 周、分区 × 周效应与区域特定 φ 后，$J_{LM}$ 仍在 16.9–17.8，校准 95 分位 6.38–6.66；$J=17.873$ 与 $Q_G=40.64$ 超过全部 600 次校准抽样，$Q_{GI}=27.62$ 被超过 8 次。τ+κ = −0.466（95% 区间 −1.091 到 0.159）因此报为被拒绝模型的伪真值，不作因果解读。
+- **新增 Web Appendix F 与网络表 10–17**：区域效应、按应用校准的模拟（并给出 $J$、$Q$ 的参照分布）、代际分布同周质量重组、Stock–Wright 识别稳健集、事件时间隐含权重、报告率临界点。各表注标明对应的 `verification/revision/*/results.json`。
+- **少簇推断成文。** Web Appendix E 报告删除一州刀切（标准误比夹心大 14%–30%）与两种 bootstrap-t；正文 §4 给出成对集群矩区间 $[-1.330, 0.397]$。
+- **第三轮只改措辞，不动数字。** 讨论的校准覆盖率句限定为"工作模型成立时"，并写出同周情形 τ+κ 覆盖率 0.783；正文补出 τ+κ 投影所依赖的"给定 φ 强识别"条件（φ=0 处条件标准误 2.13）；事件时间写出隐含权重非凸（2.109 至 −0.471）并把 ω 加权对比标为线性化核对；正文补出集群规模 1–254 县与 τ̂ 随 φ̄ 的移动（0.074 到 0.018）；摘要 "regional week effects" 改 "division × week effects"。
+- **排版与一致性。** 0.292 改为 0.291（二次舍入）；表 3 注的均值改为 $e_0$–$e_5$ 的均值；网络附录 C 印出 C.1／C.2 编号；A.12 去掉代码变量名；网络表 11 的 "stress design" 改名 "high-noise design"，避免与同周的 "stress regime" 混淆；主稿与 SI 均零 Overfull、零未定义引用。
+- **篇幅。** 新增披露与为它腾出的删减相抵后，第 1–5 节净增约 170 词（致谢与数据可得性声明合段，利益冲突与资助合用一个标题）；未删任何数字、条件或披露，计入限页仍恰好 25 页。
+
 
 ## 投稿前仍需处理
 
