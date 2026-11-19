@@ -1,265 +1,363 @@
-"""Build the county-week analysis panel for the application (method_brief.md section 9).
+"""Build the processed German county-level weekly Varicella panel (2015-2019 + 3 pre-sample weeks).
 
-Inputs (data/raw/, untrusted; run this script with `python3 -I`):
-  jhu_confirmed/time_series_covid19_confirmed_US.csv   cumulative confirmed cases (JHU CSSE, CC BY 4.0)
-  jhu_deaths/time_series_covid19_deaths_US.csv         Population column
-  cdc_masks/rows.csv                                   state/territorial mask orders by county-day (CDC 62d6-pm5i)
-  census_adj2010/county_adjacency.txt                  2010 county adjacency (Census)
-  acs_commuting/table1.xlsx  (optional)                ACS 2011-2015 county-to-county commuting flows
-Output: data/processed/panel.npz and data/processed/panel_summary.json.
+Inputs (experiment/data/raw/germany/):
+  - rki_varicella_2014_2019.json           Weekly RKI SurvStat Varicella counts + 2017 populations
+  - germany_school_holidays_2014_2019.json Official 16-state KMK school holiday dates (OpenHolidays)
+  - counties_ags.geojson                   5-digit AGS German county polygons
 
-Rules (pre-specified):
-  * contiguous US + DC (Alaska, Hawaii and territories excluded); clusters = states;
-  * window 2020-06-01 .. 2020-11-29 (T = 26 Monday-start weeks) plus S = 2 lag weeks from 2020-05-18;
-  * weekly cases = difference of cumulative counts at week ends; negative revisions truncated to 0;
-  * reporting units: JHU reports Utah by health district for some counties, so districts and their member
-    counties are merged into one unit; Dukes and Nantucket (MA) merged; Kansas City (MO) assigned to Jackson
-    County; prison rows (MI) and "Out of"/"Unassigned" rows dropped (their share of cases is reported);
-  * D_it = 1 if a state order requiring masks in public applies on >= 4 of the 7 days (population-weighted
-    over member counties for merged units). Opt-outs under state law are NOT coded in the CDC data.
+Outputs (experiment/data/processed/):
+  - panel.npz
+  - panel_summary.json
 """
 from __future__ import annotations
 
+import datetime as dt
+import hashlib
 import json
-import os
-import sys
-import time
+import re
+from collections import defaultdict, deque
+from pathlib import Path
 
 import numpy as np
-import pandas as pd
+import scipy.sparse as sps
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-RUN = os.path.dirname(HERE)
-RAW = os.path.join(RUN, "data", "raw")
-OUT = os.path.join(RUN, "data", "processed")
+ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = ROOT / "experiment" / "data"
+RAW_DIR = DATA_DIR / "raw" / "germany"
+OUT_DIR = DATA_DIR / "processed"
 
-START = pd.Timestamp("2020-06-01")
-T_WEEKS = 26
-S_LAGS = 2
-EXCLUDE_STATE_FIPS = {2, 15}                      # Alaska, Hawaii (non-contiguous)
-UTAH_DISTRICTS = {
-    "Bear River": [49003, 49005, 49033],
-    "Central Utah": [49023, 49027, 49031, 49039, 49041, 49055],
-    "Southeast Utah": [49007, 49015, 49019],
-    "Southwest Utah": [49001, 49017, 49021, 49025, 49053],
-    "TriCounty": [49009, 49013, 49047],
-    "Weber-Morgan": [49057, 49029],
+EXPECTED_SHA256 = {
+    "rki_varicella_2014_2019.json": "b55d8973975aba56de69b2f06adc4174e1f136432115efe87a94c06ba4f45d01",
+    "germany_school_holidays_2014_2019.json": "fc799aa000bd362105c95e2a722ac2a5279abc8d3767b2cf18a97cd721bd008a",
+    "counties_ags.geojson": "8a0d0bf29ff31b6e536622613ce6e2f6198a6999bd725a631b4b1707780a6abd",
 }
-ADJ_RECODE = {46113: 46102, 51515: 51019}         # Shannon->Oglala Lakota (2015), Bedford city->Bedford Co (2013)
+
+STATE_ABBR = {
+    1: "SH", 2: "HH", 3: "NI", 4: "HB", 5: "NW", 6: "HE", 7: "RP", 8: "BW",
+    9: "BY", 10: "SL", 11: "BE", 12: "BB", 13: "MV", 14: "SN", 15: "ST", 16: "TH",
+}
+
+# 4 German macro-regions: 0=North, 1=West, 2=South, 3=East
+REGION_OF_STATE = {
+    1: 0, 2: 0, 3: 0, 4: 0, 13: 0,
+    5: 1, 6: 1, 7: 1, 10: 1,
+    8: 2, 9: 2,
+    11: 3, 12: 3, 14: 3, 15: 3, 16: 3,
+}
 
 
-def week_starts():
-    first = START - pd.Timedelta(weeks=S_LAGS)
-    return [first + pd.Timedelta(weeks=k) for k in range(S_LAGS + T_WEEKS)]
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
-def load_jhu():
-    c = pd.read_csv(os.path.join(RAW, "jhu_confirmed", "time_series_covid19_confirmed_US.csv"))
-    d = pd.read_csv(os.path.join(RAW, "jhu_deaths", "time_series_covid19_deaths_US.csv"),
-                    usecols=["UID", "Population"])
-    c = c.merge(d, on="UID", how="left", validate="one_to_one")
-    return c
+def verify_checksums() -> dict:
+    verified = {}
+    for fname, expected in EXPECTED_SHA256.items():
+        p = RAW_DIR / fname
+        actual = sha256_file(p)
+        if actual != expected:
+            raise RuntimeError(f"Checksum mismatch for {fname}: got {actual}, expected {expected}")
+        verified[fname] = dict(bytes=p.stat().st_size, sha256=actual)
+    return verified
 
 
-def county_unit_map(c: pd.DataFrame):
-    """Map JHU rows to reporting units; return (row -> unit key) series and unit membership dict."""
-    member = {}                                    # unit key -> list of county FIPS
-    row_unit = pd.Series(index=c.index, dtype=object)
-    district_of = {f: nm for nm, fl in UTAH_DISTRICTS.items() for f in fl}
-    dropped = []
-    for i, r in c.iterrows():
-        f = r["FIPS"]
-        key = None
-        if pd.isna(f):
-            ck = str(r["Combined_Key"])
-            if ck.startswith("Dukes and Nantucket"):
-                key = "U25007"
-            elif ck.startswith("Kansas City"):
-                key = "C29095"
-            else:
-                nm = ck.split(",")[0].strip()
-                if nm in UTAH_DISTRICTS:
-                    key = "UT_" + nm
-        else:
-            f = int(f)
-            st = f // 1000
-            if f < 1000 or st >= 57 or st in EXCLUDE_STATE_FIPS or f % 1000 == 0 or f >= 80000:
-                key = None
-            elif f in district_of:
-                key = "UT_" + district_of[f]
-            elif f in (25007, 25019):
-                key = "U25007"
-            else:
-                key = "C%05d" % f
-        row_unit[i] = key
-        if key is None:
-            dropped.append(str(r["Combined_Key"]))
-        elif not pd.isna(r["FIPS"]):
-            member.setdefault(key, []).append(int(r["FIPS"]))
-        else:
-            member.setdefault(key, [])
-    return row_unit, member, dropped
+def extract_ags(rki_key: str):
+    m = re.findall(r"&\[([^\]]+)\]", rki_key)
+    if not m:
+        return None, None
+    state = m[0]
+    ags = m[-1]
+    if state == "11":  # Merge Berlin's 12 boroughs into city-state 11000
+        ags = "11000"
+    return state, ags
 
 
-def weekly_cases(c: pd.DataFrame, row_unit: pd.Series):
-    ws = week_starts()
-    date_cols = {pd.Timestamp(pd.to_datetime(col, format="%m/%d/%y")): col for col in c.columns
-                 if col.count("/") == 2}
-    ends = [w + pd.Timedelta(days=6) for w in ws]
-    prev = [w - pd.Timedelta(days=1) for w in ws]
-    keep = row_unit.notna()
-    cum_end = c.loc[keep, [date_cols[e] for e in ends]].to_numpy(float)
-    cum_prev = c.loc[keep, [date_cols[p] for p in prev]].to_numpy(float)
-    units = row_unit[keep].to_numpy()
-    inc = cum_end - cum_prev                                   # rows x weeks
-    df = pd.DataFrame(inc, columns=range(len(ws)))
-    df["unit"] = units
-    agg = df.groupby("unit").sum()
-    neg = int((agg.to_numpy() < 0).sum())
-    neg_mass = float(-agg.to_numpy()[agg.to_numpy() < 0].sum())
-    Y = np.clip(agg.to_numpy(), 0, None).T                     # weeks x units
-    # share of window cases in dropped rows (Out of / Unassigned / prisons / AK / HI excluded separately)
-    all_inc = (c[[date_cols[e] for e in ends]].to_numpy(float) - c[[date_cols[p] for p in prev]].to_numpy(float))
-    return agg.index.to_list(), Y, neg, neg_mass, all_inc
+def nuts2_code(ags: str) -> str:
+    """Map 5-digit AGS to Germany's 38 NUTS-2 Regierungsbezirke (or state if single NUTS-2)."""
+    st = ags[:2]
+    # States with sub-state NUTS-2 regions (3-digit AGS prefix defines Regierungsbezirk):
+    # NI (03: 031..034), NW (05: 051,053,055,057,059), HE (06: 064..066),
+    # RP (07: 071..073), BW (08: 081..084), BY (09: 091..097), SN (14: 145..147)
+    if st in {"03", "05", "06", "07", "08", "09", "14"}:
+        return ags[:3]
+    return st + "0"
 
 
-def mask_policy(units, member, pop_county):
-    cdc = pd.read_csv(os.path.join(RAW, "cdc_masks", "rows.csv"),
-                      usecols=["FIPS_State", "FIPS_County", "date", "Face_Masks_Required_in_Public"],
-                      dtype={"Face_Masks_Required_in_Public": "object"})
-    cdc["date"] = pd.to_datetime(cdc["date"], format="%m/%d/%Y")
-    cdc["fips"] = cdc["FIPS_State"] * 1000 + cdc["FIPS_County"]
-    ws = week_starts()
-    lo, hi = ws[0], ws[-1] + pd.Timedelta(days=6)
-    cdc = cdc[(cdc.date >= lo) & (cdc.date <= hi)].copy()
-    cdc["yes"] = (cdc["Face_Masks_Required_in_Public"] == "Yes").astype(float)
-    cdc["week"] = ((cdc.date - lo).dt.days // 7).astype(int)
-    share = cdc.groupby(["fips", "week"]).yes.mean().unstack("week")      # county x week share of days
-    ndays = cdc.groupby(["fips", "week"]).size().unstack("week")
-    missing, Dshare = [], np.zeros((len(ws), len(units)))
-    for j, u in enumerate(units):
-        fl = member[u]
-        ok = [f for f in fl if f in share.index]
-        if len(ok) < len(fl):
-            missing += [f for f in fl if f not in share.index]
-        if not ok:
-            Dshare[:, j] = np.nan
+def build_adjacency(geo_path: Path, ags_list: list[str]):
+    gj = json.loads(geo_path.read_text(encoding="utf-8"))
+    ags_to_idx = {a: i for i, a in enumerate(ags_list)}
+    v2polys = defaultdict(set)
+    matched = set()
+
+    def iter_rings(geom):
+        t = geom["type"]
+        coords = geom["coordinates"]
+        if t == "Polygon":
+            for ring in coords:
+                yield ring
+        elif t == "MultiPolygon":
+            for poly in coords:
+                for ring in poly:
+                    yield ring
+
+    for feat in gj["features"]:
+        raw = str(feat.get("id") or "").strip()
+        if raw.isdigit():
+            raw = raw.zfill(5)[:5]
+        # Known AGS consolidations
+        if raw in ("03152", "03156") and "03159" in ags_to_idx:
+            raw = "03159"
+        if raw == "16056" and "16063" in ags_to_idx:
+            raw = "16063"
+        if raw.startswith("11") and "11000" in ags_to_idx:
+            raw = "11000"
+        if raw not in ags_to_idx:
             continue
-        wts = np.array([pop_county.get(f, 0.0) for f in ok], float)
-        wts = wts / wts.sum() if wts.sum() > 0 else np.full(len(ok), 1.0 / len(ok))
-        Dshare[:, j] = (share.loc[ok].to_numpy() * wts[:, None]).sum(0)
-    full_weeks = bool((ndays.to_numpy() == 7).all())
-    return Dshare, missing, full_weeks
+        idx = ags_to_idx[raw]
+        matched.add(idx)
+        for ring in iter_rings(feat["geometry"]):
+            for pt in ring:
+                v2polys[(round(pt[0], 3), round(pt[1], 3))].add(idx)
+
+    if len(matched) != len(ags_list):
+        raise RuntimeError(f"Expected {len(ags_list)} matched counties, got {len(matched)}")
+
+    edges_set = set()
+    for polys in v2polys.values():
+        if len(polys) >= 2:
+            pl = sorted(polys)
+            for a_i in range(len(pl)):
+                for b_i in range(a_i + 1, len(pl)):
+                    edges_set.add((pl[a_i], pl[b_i]))
+
+    edges = np.array(sorted(edges_set), dtype=np.int32)
+    N = len(ags_list)
+    rows = np.concatenate([edges[:, 0], edges[:, 1]])
+    cols = np.concatenate([edges[:, 1], edges[:, 0]])
+    A = sps.coo_matrix((np.ones(len(rows)), (rows, cols)), shape=(N, N)).tocsr()
+    A.setdiag(0.0)
+    A.eliminate_zeros()
+    deg = np.asarray(A.sum(1)).ravel()
+    if (deg == 0).any():
+        raise RuntimeError(f"Found {(deg == 0).sum()} isolated counties")
+    W = sps.diags(1.0 / deg) @ A
+    return W.tocsr(), edges, deg
 
 
-def adjacency(units, member):
-    unit_of = {f: u for u, fl in member.items() for f in fl}
-    path = os.path.join(RAW, "census_adj2010", "county_adjacency.txt")
-    edges = set()
-    cur = None
-    unknown = set()
-    with open(path, encoding="latin-1") as fh:
-        for line in fh:
-            parts = line.rstrip("\n").split("\t")
-            if len(parts) < 4:
+def graph_diameter(adj: np.ndarray) -> int:
+    n = adj.shape[0]
+    diam = 0
+    for s in range(n):
+        dist = [-1] * n
+        dist[s] = 0
+        q = deque([s])
+        while q:
+            u = q.popleft()
+            for v in np.where(adj[u])[0]:
+                if dist[v] < 0:
+                    dist[v] = dist[u] + 1
+                    q.append(v)
+        if min(dist) < 0:
+            return -1
+        diam = max(diam, max(dist))
+    return diam
+
+
+def build_holiday_matrices(hol_json: dict, weeks: list[tuple[int, int]], ags_list: list[str],
+                           ags_state: dict[str, str], holiday_filter: str | None):
+    hol_days = defaultdict(set)
+    for st_code, srec in hol_json.items():
+        for h in srec["holidays"]:
+            hname = " ".join(n["text"] for n in h.get("name", [])).lower()
+            if holiday_filter and holiday_filter not in hname:
                 continue
-            if parts[1].strip():
-                cur = ADJ_RECODE.get(int(parts[1]), int(parts[1]))
-            nb = ADJ_RECODE.get(int(parts[3]), int(parts[3]))
-            a, b = unit_of.get(cur), unit_of.get(nb)
-            if a is None or b is None:
-                if cur // 1000 not in EXCLUDE_STATE_FIPS and cur // 1000 < 57:
-                    unknown.add(cur if a is None else nb)
-                continue
-            if a != b:
-                edges.add((min(a, b), max(a, b)))
-    idx = {u: k for k, u in enumerate(units)}
-    E = np.array(sorted((idx[a], idx[b]) for a, b in edges), int)
-    return E, sorted(f for f in unknown if f // 1000 < 57 and f // 1000 not in EXCLUDE_STATE_FIPS)
+            d0 = dt.date.fromisoformat(h["startDate"])
+            d1 = dt.date.fromisoformat(h["endDate"])
+            cur = d0
+            while cur <= d1:
+                hol_days[st_code].add(cur)
+                cur += dt.timedelta(days=1)
 
-
-def commuting_edges(units, member):
-    """ACS 2011-2015 county-to-county commuting flows (optional). Returns (i, j, workers) for i != j."""
-    path = os.path.join(RAW, "acs_commuting", "table1.xlsx")
-    if not os.path.exists(path):
-        return None
-    # layout (checked): 7 title/header rows; columns = residence state, county, names, workplace state
-    # (3-digit, "0SS" for US states), workplace county, names, workers, margin of error
-    df = pd.read_excel(path, header=None, skiprows=7, dtype=str, engine="openpyxl")
-    df = df.iloc[:, [0, 1, 4, 5, 8]]
-    df.columns = ["rs", "rc", "ws", "wc", "flow"]
-    df = df.dropna()
-    df = df[df.rs.str.fullmatch(r"[0-9]+") & df.ws.str.fullmatch(r"0[0-9][0-9]")
-            & df.wc.str.fullmatch(r"[0-9][0-9][0-9]")]
-    df["r"] = df.rs.str[-2:].astype(int) * 1000 + df.rc.astype(int)
-    df["w"] = df.ws.str[-2:].astype(int) * 1000 + df.wc.astype(int)
-    df["flow"] = pd.to_numeric(df.flow.str.replace(",", ""), errors="coerce")
-    unit_of = {f: u for u, fl in member.items() for f in fl}
-    unit_of.update({ADJ_RECODE.get(f, f): unit_of[f] for f in list(unit_of)})
-    idx = {u: k for k, u in enumerate(units)}
-    df["i"] = df.r.map(lambda f: idx.get(unit_of.get(ADJ_RECODE.get(f, f))))
-    df["j"] = df.w.map(lambda f: idx.get(unit_of.get(ADJ_RECODE.get(f, f))))
-    df = df.dropna(subset=["i", "j", "flow"])
-    df = df[df.i != df.j]
-    g = df.groupby(["i", "j"]).flow.sum().reset_index()
-    return g[["i", "j", "flow"]].to_numpy(float)
+    T_all = len(weeks)
+    N = len(ags_list)
+    D = np.zeros((T_all, N), dtype=np.float64)
+    Dshare = np.zeros((T_all, N), dtype=np.float64)
+    for t, (yr, wk) in enumerate(weeks):
+        try:
+            mon = dt.date.fromisocalendar(yr, wk, 1)
+        except ValueError:
+            mon = dt.date.fromisocalendar(yr, wk - 1, 1) + dt.timedelta(days=7)
+        days = [mon + dt.timedelta(days=k) for k in range(7)]
+        for i, a in enumerate(ags_list):
+            st = ags_state[a]
+            cnt = sum(1 for dd in days if dd in hol_days[st])
+            Dshare[t, i] = cnt / 7.0
+            D[t, i] = 1.0 if cnt >= 4 else 0.0
+    return D, Dshare
 
 
 def main():
-    t0 = time.time()
-    os.makedirs(OUT, exist_ok=True)
-    c = load_jhu()
-    row_unit, member, dropped = county_unit_map(c)
-    units, Yu, neg, neg_mass, all_inc = weekly_cases(c, row_unit)
-    pop_county = {int(f): float(p) for f, p in zip(c.FIPS, c.Population) if not pd.isna(f)}
-    pop = np.array([sum(pop_county.get(f, 0.0) for f in member[u]) for u in units])
-    state = np.array([int(member[u][0]) // 1000 if member[u] else 29 for u in units])
-    Dshare, missing_cdc, full_weeks = mask_policy(units, member, pop_county)
-    # drop units without policy coding or with zero population
-    keep = np.isfinite(Dshare).all(0) & (pop > 0)
-    units = [u for u, k in zip(units, keep) if k]
-    Yu, Dshare, pop, state = Yu[:, keep], Dshare[:, keep], pop[keep], state[keep]
-    E, unknown_adj = adjacency(units, member)
-    comm = commuting_edges(units, member)
-    D = (Dshare >= 4.0 / 7.0 - 1e-12).astype(float)
-    ws = week_starts()
-    # summary of dropped mass
-    keep_rows = row_unit.notna()
-    win = slice(S_LAGS, S_LAGS + T_WEEKS)
-    total_us = float(np.clip(all_inc[:, win], 0, None).sum())
-    st_all = (c.FIPS.fillna(0) // 1000).astype(int)
-    contig = ~st_all.isin(list(EXCLUDE_STATE_FIPS)) & (st_all < 57) & ~c.Province_State.isin(
-        ["Alaska", "Hawaii", "American Samoa", "Guam", "Northern Mariana Islands", "Puerto Rico", "Virgin Islands",
-         "Diamond Princess", "Grand Princess"])
-    dropped_contig = float(np.clip(all_inc[(~keep_rows & contig).to_numpy()][:, win], 0, None).sum())
-    np.savez_compressed(os.path.join(OUT, "panel.npz"), Y=Yu, D=D, Dshare=Dshare, pop=pop, state=state,
-                        units=np.array(units), edges=E,
-                        comm=comm if comm is not None else np.zeros((0, 3)),
-                        week_start=np.array([str(w.date()) for w in ws]))
-    summ = dict(
-        created_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), runtime_sec=round(time.time() - t0, 1),
-        n_units=len(units), n_states=int(len(np.unique(state))), weeks_total=len(ws), S=S_LAGS, T=T_WEEKS,
-        first_week=str(ws[0].date()), first_estimation_week=str(ws[S_LAGS].date()), last_week=str(ws[-1].date()),
-        n_edges=int(len(E)), isolated_units=[units[k] for k in range(len(units))
-                                             if k not in set(E.ravel().tolist())],
-        adjacency_fips_not_in_units=unknown_adj[:50],
-        commuting_edges=None if comm is None else int(len(comm)),
-        negative_weekly_increments_truncated=neg, negative_mass_truncated=neg_mass,
-        cases_window_all_rows=total_us, cases_window_units=float(Yu[win].sum()),
-        cases_window_dropped_rows_contiguous=dropped_contig,
-        dropped_rows_examples=sorted(set(dropped))[:30], cdc_fips_missing=missing_cdc,
-        cdc_all_unit_weeks_have_7_days=full_weeks,
-        share_unit_weeks_treated=float(D[win].mean()), median_weekly_cases=float(np.median(Yu[win])),
-        frac_zero_unit_weeks=float((Yu[win] == 0).mean()),
-        n_units_ever_treated_in_window=int((D[win].max(0) == 1).sum()),
-        n_units_treated_at_window_start=int((D[S_LAGS] == 1).sum()),
-        n_units_on_to_off=int(((D[win][1:] == 0) & (D[win][:-1] == 1)).any(0).sum()),
-        merged_units={u: member[u] for u in units if not u.startswith("C") or u == "C29095"},
+    checksums = verify_checksums()
+    rki = json.loads((RAW_DIR / "rki_varicella_2014_2019.json").read_text(encoding="utf-8"))
+    hol = json.loads((RAW_DIR / "germany_school_holidays_2014_2019.json").read_text(encoding="utf-8"))
+
+    years = (2014, 2015, 2016, 2017, 2018, 2019)
+    ags_state = {}
+    for k in rki["years"][str(years[0])]["rows"]:
+        st, ags = extract_ags(k)
+        if ags and ags.isdigit() and len(ags) == 5:
+            ags_state[ags] = st
+    ags_list = sorted(ags_state.keys())
+    ags_idx = {a: i for i, a in enumerate(ags_list)}
+    N = len(ags_list)
+
+    weeks = []
+    Y_rows = []
+    for yr in years:
+        yd = rki["years"][str(yr)]
+        n_w = len(yd["cols"])
+        Y_yr = np.zeros((n_w, N), dtype=np.float64)
+        for k, rec in yd["rows"].items():
+            _, ags = extract_ags(k)
+            if ags in ags_idx:
+                Y_yr[:, ags_idx[ags]] += np.asarray(rec["counts"], dtype=np.float64)
+        for _, w_cap in yd["cols"]:
+            weeks.append((yr, int(w_cap)))
+        Y_rows.append(Y_yr)
+    Y_all = np.vstack(Y_rows)
+
+    pop = np.zeros(N, dtype=np.float64)
+    for k, rec in rki["population_2017"].items():
+        _, ags = extract_ags(k)
+        if ags in ags_idx:
+            pop[ags_idx[ags]] += float(rec["pop"])
+    n_imputed_pop = int((pop <= 0).sum())
+    med_pop = float(np.median(pop[pop > 0]))
+    pop = np.where(pop > 0, pop, med_pop)
+
+    D_sum_all, Dshare_sum_all = build_holiday_matrices(hol, weeks, ags_list, ags_state, "summer")
+    D_any_all, Dshare_any_all = build_holiday_matrices(hol, weeks, ags_list, ags_state, None)
+
+    W, edges, deg = build_adjacency(RAW_DIR / "counties_ags.geojson", ags_list)
+
+    state_arr = np.array([int(ags_state[a]) for a in ags_list], dtype=np.int32)
+    states = np.unique(state_arr)
+    cl = np.searchsorted(states, state_arr).astype(np.int32)
+    region = np.array([REGION_OF_STATE[int(s)] for s in state_arr], dtype=np.int32)
+    nuts2_labels = [nuts2_code(a) for a in ags_list]
+    nuts2_uniq = sorted(set(nuts2_labels))
+    nuts2 = np.array([nuts2_uniq.index(lbl) for lbl in nuts2_labels], dtype=np.int32)
+
+    # State contiguity graph & diameter
+    G = len(states)
+    A_st = np.zeros((G, G), dtype=bool)
+    for i, j in edges:
+        if cl[i] != cl[j]:
+            A_st[cl[i], cl[j]] = True
+            A_st[cl[j], cl[i]] = True
+    st_edges = int(A_st.sum() // 2)
+    st_diam = graph_diameter(A_st)
+
+    # Slice to 2014-W50 .. 2019-W52 (3 pre-sample weeks + 261 estimation weeks = 264 rows)
+    idx_2015_w1 = weeks.index((2015, 1))
+    start_idx = idx_2015_w1 - 3  # 2014-W50
+    Y = Y_all[start_idx:]
+    D_summer = D_sum_all[start_idx:]
+    Dshare_summer = Dshare_sum_all[start_idx:]
+    D_all = D_any_all[start_idx:]
+    Dshare_all = Dshare_any_all[start_idx:]
+    weeks_win = weeks[start_idx:]
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        OUT_DIR / "panel.npz",
+        Y=Y,
+        D_summer=D_summer,
+        Dshare_summer=Dshare_summer,
+        D_all=D_all,
+        Dshare_all=Dshare_all,
+        Y_full_2014_2019=Y_all,
+        D_summer_full=D_sum_all,
+        D_all_full=D_any_all,
+        pop=pop,
+        state=state_arr,
+        cl=cl,
+        states=states,
+        region=region,
+        nuts2=nuts2,
+        nuts2_codes=np.array(nuts2_uniq),
+        ags=np.array(ags_list),
+        weeks=np.array(weeks_win, dtype=np.int32),
+        edges=edges,
+        W_indptr=W.indptr,
+        W_indices=W.indices,
+        W_data=W.data,
+        W_shape=np.array(W.shape, dtype=np.int32),
     )
-    with open(os.path.join(OUT, "panel_summary.json"), "w") as fh:
-        json.dump(summ, fh, indent=1)
-    print(json.dumps({k: v for k, v in summ.items() if k not in ("merged_units",)}, indent=1))
+
+    Y_est = Y[3:]
+    D_sum_est_lag1 = np.vstack([np.zeros((1, N)), D_summer[:-1]])[3:]
+    counts_per_state = [int((cl == g).sum()) for g in range(G)]
+    # Summer onset weeks across 16 states for each year 2015..2019
+    stagger_by_year = {}
+    for yr in range(2015, 2020):
+        st_starts = {}
+        for g, st_num in enumerate(states):
+            col = np.where(cl == g)[0][0]
+            wks_on = [wk for t, (y, wk) in enumerate(weeks_win) if y == yr and D_summer[t, col] == 1.0]
+            if wks_on:
+                st_starts[STATE_ABBR[int(st_num)]] = dict(start_week=min(wks_on), end_week=max(wks_on), n_weeks=len(wks_on))
+        starts_vals = [v["start_week"] for v in st_starts.values()]
+        stagger_by_year[str(yr)] = dict(
+            earliest_start_week=min(starts_vals),
+            latest_start_week=max(starts_vals),
+            span_weeks=max(starts_vals) - min(starts_vals),
+            states=st_starts,
+        )
+
+    summary = dict(
+        N=N,
+        G=G,
+        T_est=int(Y_est.shape[0]),
+        S_pre=3,
+        first_presample_week=list(weeks_win[0]),
+        first_est_week=list(weeks_win[3]),
+        last_est_week=list(weeks_win[-1]),
+        total_cases_2015_2019=int(Y_est.sum()),
+        total_cases_2014_2019=int(Y_all.sum()),
+        mean_count=float(Y_est.mean()),
+        median_count=float(np.median(Y_est)),
+        iqr_count=[float(np.quantile(Y_est, 0.25)), float(np.quantile(Y_est, 0.75))],
+        max_count=int(Y_est.max()),
+        zero_share=float((Y_est == 0).mean()),
+        summer_share_lag1=float(D_sum_est_lag1.mean()),
+        all_holiday_share_lag0=float(D_all[3:].mean()),
+        counties_per_state=dict(min=min(counts_per_state), median=float(np.median(counts_per_state)),
+                                max=max(counts_per_state), by_state={STATE_ABBR[int(s)]: c for s, c in zip(states, counts_per_state)}),
+        n_nuts2=len(nuts2_uniq),
+        county_edges=int(len(edges)),
+        county_mean_degree=float(deg.mean()),
+        county_min_degree=int(deg.min()),
+        county_max_degree=int(deg.max()),
+        state_edges=st_edges,
+        state_mean_degree=float(A_st.sum(1).mean()),
+        state_graph_diameter=st_diam,
+        total_population_2017=float(pop.sum()),
+        median_county_pop=med_pop,
+        n_imputed_pop_counties=n_imputed_pop,
+        stagger_by_year=stagger_by_year,
+        checksums=checksums,
+    )
+    (OUT_DIR / "panel_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    print(json.dumps({k: v for k, v in summary.items() if k != "stagger_by_year"}, indent=2))
+    print("\nSummer holiday staggering span by year:")
+    for yr, rec in stagger_by_year.items():
+        print(f"  {yr}: weeks {rec['earliest_start_week']}..{rec['latest_start_week']} (span {rec['span_weeks']} wk)")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

@@ -1,126 +1,154 @@
-\section{Application: Diagnosing a Weekly Transmission Model for State Mask Orders}
+\section{Application: Staggered Summer School Holidays and Varicella Transmission in Germany}
 \label{s:application}
 
-We apply the design to state public mask mandates across US counties in the second half of 2020,
-where county-level case growth has been extensively studied
-\citep{lyu2020masks,guy2021masks,vandyke2020kansas,chernozhukov2021masks,sun2025didnetwork} and
-policy is set above the county unit so $\kappa$ carries policy meaning. The panel covers
-3091 contiguous counties in 49 state clusters over 26 weeks (2020-06-01 to 2020-11-23, plus two lag
-weeks). Weekly new cases come from Johns Hopkins CSSE \citep{dong2020dashboard}, and $D_{it}=1$ if a
-mandate held for $\ge 4$ days of week $t$ \citep{cdc2021maskorders}; county exemptions (e.g.\ Kansas)
-are uncoded (Web Appendix~\ref{app:data}). Exposure is non-absorbing (89 exits across 82 units), which
-the moment conditions accommodate; censoring or dropping exiting units leaves estimates within 0.003.
-Median weekly counts are 27 cases (7.4\% zeros), orders cover 56.8\% of county-weeks, 1720 units
-switch exposure, and 11,528,182 cases are reported. Network $W$ is row-normalised 2010 Census
-adjacency, with ACS commuting flows in sensitivity runs. Discretising
-\citet{ferretti2020quantifying} yields $w\approx(0.964,0.036)$, putting $\approx 0.30$ of
-transmission inside the same week.
+School closures and scheduled school holidays are classic natural experiments for quantifying how
+contact reductions alter childhood respiratory transmission
+\citep{cauchemez2008school,jackson2014varicella}. We apply the QD-GMM framework to weekly
+county-level varicella (chickenpox) surveillance in Germany over 2015--2019, exploiting the
+staggered six-week summer school holidays (\emph{Sommerferien}) set independently across Germany's
+16 federal states (\emph{L\"ander}). This setting is ideally matched to the weekly renewal design on
+three counts. First, varicella has a long, sharply peaked serial interval with mean 14.0 days and
+standard deviation 2.5 days \citep{vink2014serial}; discretising this lognormal distribution onto
+weekly lags $s=1,2,3$ yields $w=(0.141,0.721,0.138)$, placing essentially zero transmission within
+the same week ($w_0=2.6\times 10^{-6}$, tail beyond week 3 equal to $0.0016$), squarely inside the
+weekly model's domain of validity (Section~\ref{ss:sameweek}). Second, the 16 federal states rotate
+their summer holiday start weeks across a five- to six-week window every summer (ISO weeks 25--32),
+so every state switches on and off five times over 2015--2019, exercising Theorems~\ref{thm:ident}(a)
+and \ref{thm:asy} under non-absorbing, recurrent exposure. Third, county counts are sparse (58.8\%
+zeros, median 0, mean 1.10), creating a demanding real-data test of Theorem~\ref{thm:bias} where
+outcome-scale and two-step log-$R$ estimators are vulnerable to small-count bias.
 
-We fit the estimators of Sections~\ref{ss:estimation}--\ref{ss:computation} at $\bar\phi=0.5$,
-with pre-specified sensitivity runs over generation interval, network $W$, timing (one-week shift),
-background $\omega$ ($\times 0.25$, $\times 4$), $\bar\phi$ and exclusion of Kansas and Texas. The
-state-clustered sandwich with $t_{48}$ critical values is the primary interval; this designation, the
-regional, generation-interval, robust-set, event-weight and reporting analyses, and the calibrated
-simulation below were added in revision and are post hoc (Web Appendix~\ref{app:diag}). Only 24 of 49
-clusters contain switching counties, and cluster size is unequal, from 1 to 254 counties, so the
-largest state carries much of the weight in every moment. A comparison lead regression gives
-$\hat\ell=-0.332$ (SE 0.259), which under feedback is not a valid pre-trend test
-(Proposition~\ref{prop:sources}(c)).
-
-\emph{Estimates.} Because state mandates set $D_{it}=\bar D_{it}$ for the 61.9\% of interior counties
-(varying in-state across only 88 counties in three states), $\tau$ and $\kappa$ are separately
-identified only from the 1177 border counties ($\text{Corr}(\hat\tau,\hat\kappa)=0.238$); the
-contrast the design identifies directly is the policy-level total $\tau+\kappa$. M0 gives
-$\hat\tau+\hat\kappa=-0.466$ (95\% CI $-1.091$ to $0.159$; SE 0.311, $t_{48}$), with
-$\hat\tau=0.040$ ($-0.217$ to $0.296$), $\hat\kappa=-0.506$ ($-1.018$ to $0.006$) and
-$\hat\phi=0.772$ (0.590 to 0.954). Across sensitivity runs $\hat\tau+\hat\kappa$ ranges from $-0.764$
-to $-0.366$ while $\hat\tau$ is positive in five runs (Web Table~\ref{tab:app-all}), so the total,
-not its split, is the stable summary. The profiled
-$\phi$-moment has an interior root at 0.772 and is also close to zero at the boundary (value
-$\approx-0.0009$ at $\phi=0$, where $\hat\tau=-2.00$ and $\hat\kappa=3.37$; Figure~\ref{fig:app}(b));
-both selection criteria favour the interior candidate ($Q_G$ 40.64 versus 41.34; $Q_{GI}$ 27.62 versus
-40.32), so M0-G and M0-GI coincide with M0. For $\tau+\kappa$ the score wild bootstrap-$t$ ($\hat\Gamma$
-held fixed, null not imposed) gives $-0.999$ to $0.067$ and the pairs cluster bootstrap-$t$, which
-re-solves the estimator, $-1.330$ to $0.397$; jackknife SEs exceed sandwich SEs by 14\%--30\% (Web
-Appendix~\ref{app:fewcluster}). In a simulation calibrated to the observed panel, adoption dates,
-network and generation weights with the M0 estimate as truth, $t_{48}$ intervals for $\tau+\kappa$
-cover 0.935 (wild 0.925, pairs 0.933; $R=600$), and 0.950 in a high-noise design that scales the
-shocks to the application's standard error (Web Table~\ref{tab:rev-calsim}); both assume the working
-model holds.
-
-\emph{Over-identification.} The diagnostics reject the weekly working model: $J=17.873$ (df $=2$,
-$p=0.0001$), with M0-OI giving $\hat\tau=-0.025$ ($-0.251$ to $0.201$) and $\hat\kappa=-0.517$
-($-0.988$ to $-0.046$). The application value of $J$ exceeds all 600 calibrated draws (95th percentile
-6.66, maximum 12.45), as does $Q_G=40.64$ (maximum 35.13); $Q_{GI}=27.62$ is exceeded in 8 of 600,
-so both lie outside the range calibrated under the working model. Rejection persists
-with region $\times$ week or division $\times$ week effects and with region-specific $\phi$ ($J_{LM}$
-16.9--17.8 against calibrated 95th percentiles of 6.38--6.66), while $\hat\tau+\hat\kappa$ stays
-between $-0.698$ and $-0.466$ with every interval covering zero and equal regional $\phi$ is not
-rejected ($p\ge 0.505$; Web Table~\ref{tab:rev-regional}). Score dependence between adjacent states is
-weak (112 pairs, correlations below 0.1 in absolute value) and moves the SE of $\hat\tau+\hat\kappa$
-from 0.311 to 0.291 (Remark~\ref{rem:testable}), so the rejection concerns the mean model. We read
-$\hat\tau+\hat\kappa=-0.466$ as the pseudo-true value of a rejected working model, not as a causal
-effect of mask orders.
-
-\emph{Same-week transmission.} With $\approx 0.30$ (Ferretti) or 0.39 \citep[Nishiura;][]{nishiura2020serial}
-of transmission in the same week, the application lies in the stress regime of
-Section~\ref{ss:sameweek}, where intervals for $\tau+\kappa$ under-cover and $J$ has no power against
-weekly aggregation. Folding same-week transmission into lag 1 or shifting infector times by 1.75 to 7
-days moves $\hat\tau+\hat\kappa$ only within $-0.476$ to $-0.444$, with $\hat\phi$ between 0.19 and
-0.82; $J$ rejects in 9 of 10 specifications (the exception, Nishiura with a 3.5-day shift, gives
-$J=0.67$) and M0-G departs from M0 under the 1.75- and 7-day shifts (Web Table~\ref{tab:rev-gi}). A
-sub-weekly mean is needed to remove this error, and this paper does not provide one.
-
-\emph{Robust sets and $\bar\phi$.} From the just-identified moments, the $S$ set for $\phi$ has a
-boundary and an interior component, $[0,0.002]\cup[0.58,0.97]$ at $\bar\phi=0.5$, with the interior
-component at $[0.53,0.85]$ for $\bar\phi=0.25$ and $[0.64,1.15]$ for $\bar\phi=1$; adding the two
-over-identifying moments empties the set, mirroring $J$. The Bonferroni projection for $\tau+\kappa$ is
-$[-3.55,6.29]$, or $[-1.19,0.26]$ on the interior component (Web Table~\ref{tab:rev-robust}). The
-projection combines a $97.5\%$ set for $\phi$ with a $97.5\%$ Wald interval for $\tau+\kappa$ at each
-$\phi$, so its second step presumes $(\tau,\kappa)$ strongly identified there. On the boundary
-component that fails: at $\phi=0$ the fit gives $\hat\tau=-2.00$, $\hat\kappa=3.37$, and a conditional
-standard error of 2.13 for $\tau+\kappa$. We therefore report the projection as a bound computed under
-that condition, not an interval with guaranteed coverage, and recommend the $S$ set for $\phi$, which
-does not need it. $\hat\phi$ depends on the instrument reference value $\bar\phi$, and $\hat\tau$
-moves with it, from 0.074 at $\bar\phi=0.25$ to 0.018 at $\bar\phi=1$, while $\hat\tau+\hat\kappa$
-stays between $-0.476$ and $-0.466$.
-
-\emph{Event time.} On the 2656 counties (37 clusters) not exposed before the window, M0-ET2 bin
-estimates are negative throughout, from $-0.343$ (SE 0.341) at adoption to $-0.924$ (0.685) at lag 5
-and $-0.923$ (0.735) thereafter, but imprecise: the joint test gives $F=2.089$ (df $=7,30$, $p=0.076$).
-Pooled M0 on this sample gives $\hat\tau=0.056$ (SE 0.181). The implicit weights of the pooled
-estimand are 2.109 on the adoption bin and negative thereafter, down to $-0.471$ for $e6+$, so the
-pooled estimate is not a convex combination of the bin effects. Subtracting the implicitly weighted
-bins leaves 0.079 (SE 0.240, $p=0.742$), a check of the linearisation rather than a comparison of
-estimands, since the two sides agree to first order by construction; subtracting the equally weighted
-bins leaves 0.733 (0.457, $p=0.117$), which is informative (Web Table~\ref{tab:rev-event}). The
-divergence is consistent with dynamic weighting but not distinguishable from sampling error. $J$ is 14.37 for M0 and 13.85 for M0-ET2, so the dynamic specification does not account for the
-rejection.
-
-\emph{Reporting.} Proposition~\ref{prop:ascertainment} does not cover a change in reporting caused by
-the order. If treated counties report a share $1-\rho$ of the untreated share, $\hat\tau+\hat\kappa$
-reaches zero at $\rho=0.187$; its upper and lower 95\% limits reach zero at $\rho=-0.076$ and
-$\rho=0.410$ (Web Table~\ref{tab:rev-ascert}). An 18.7\% order-linked drop in ascertainment would thus
-offset the point estimate.
-
-\emph{Sensitivity runs.} M0-G selects the boundary or a near-zero root in five runs (Web
-Table~\ref{tab:app-all}): one-week policy lag ($+0.421$), $\omega\times4$ ($+0.395$) and generation
-weights $w_1=0.9$, 0.7, 0.6 ($+0.013$, $-0.260$, $-0.261$). The one-week lag is the only run whose M0
-interval excludes zero ($-0.764$, $-1.346$ to $-0.182$), and there M0-G gives $+0.421$. Realised
-cases averted over 4 weeks are $\hat\psi^\dagger=3.41\times 10^5$ (SE $3.97\times 10^5$;
-Theorem~\ref{thm:psi}).
+Weekly mandatory varicella notifications come from the Robert Koch-Institut SurvStat@RKI 2.0
+database \citep{faensen2006survnet} for all $N=400$ German counties (merging Berlin's 12 boroughs
+into city-state unit 11000) across $T=261$ estimation weeks (ISO 2015-W01 through 2019-W52;
+115{,}129 total cases), with three pre-sample lag weeks from late 2014 (2014-W50 to 2014-W52).
+Official state holiday calendars come from the OpenHolidays compilation of Kultusministerkonferenz
+schedules, and county contiguity comes from 5-digit AGS administrative polygons (1{,}043 undirected
+edges, mean degree 5.22, zero isolated counties; row-normalised $W$; Web Appendix~\ref{app:data}).
+Because varicella has a roughly 14-day incubation period and surveillance notifications are recorded
+by reporting week, our primary exposure indicator $D_{it}$ flags weeks in which a state had at least
+four summer holiday days lagged by one week (11.8\% of county-weeks); contemporaneous lag 0, lags
+2--4, continuous holiday fractions and a full event-time profile around holiday onset are evaluated
+directly below. Background importation follows the paper's convention $\omega_i=\text{population}_i/10^5$,
+and all primary confidence intervals use the state-clustered sandwich ($G=16$ states, cluster sizes
+1 to 96 counties, median 16.5) with $t_{15}=2.13$ critical values.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_03_application.png}
-\caption{Application to county COVID-19 cases and state mask orders. (a) Policy-level sum
-$\tau+\kappa$ for M0 (top row) and estimates of $\tau$ with 95\% confidence intervals ($t_{G-1}$,
-$G=49$) across methods and pre-specified sensitivity analyses. Open arrowheads mark intervals
-clipped at the axis limits. (b) Profiled $\phi$-moment of the main specification over the $\phi$
-grid, whose zero crossings are the roots of the estimating equations, and the M0-G selection
-criterion $Q$ along the profile. The moment is also close to zero at the boundary $\phi=0$ (value
-$\approx -0.0009$), a second candidate with $Q_G=41.34$ against 40.64 at the interior root.}
+\caption{German county-level varicella and staggered summer school holidays (2015--2019, $N=400$,
+$G=16$ states, $T=261$ weeks). (a) Policy-level log-$R$ effect ($\tau+\kappa$ for models with
+spillover, $\tau$ otherwise) with 95\% intervals across QD-GMM inference methods ($t_{15}$ sandwich,
+nonlinear pairs cluster bootstrap-$t$, and Stock--Wright Bonferroni projection), standard comparators
+(M0$'$, M1--M4) and NUTS-2 aggregation ($N=38$). (b) Event-time profile around summer holiday onset
+($e=-2,\dots,7$, controlling for $\bar D_{it}$): flat pre-trends ($e=-2,-1$), null onset week
+($e=0$), and post-incubation decline across holiday weeks $e=1,\dots,5$ (shaded). (c) Profiled
+Stock--Wright $S_1(\phi)$ across $\phi\in[0,3]$, showing the unique interior root $\hat\phi=0.325$
+and the connected 95\% $F_{1,15}$ confidence set $[0.21,2.33]$ (shaded) excluding zero.}
 \label{fig:app}
 \end{figure}
+
+\subsection{Primary estimates, comparators and cases averted}
+
+Because summer school holidays are set at the federal-state level, interior counties satisfy
+$D_{it}=\bar D_{it}$ and the policy-level total $\tau+\kappa$ is the primary identifiable contrast,
+while $\tau$ and $\kappa$ are separated only by cross-border county pairs. Primary QD-GMM (M0,
+$\bar\phi=0.5$) estimates a policy-level log-$R$ reduction of $\hat\tau+\hat\kappa=-0.238$ (SE
+0.058; 95\% $t_{15}$ CI $-0.362$ to $-0.114$), corresponding to a 21.2\% reduction in the
+reproduction number (95\% CI 10.8\% to 30.4\%; Table~\ref{tab:app}, Figure~\ref{fig:app}(a)). This
+magnitude aligns closely with the 22\%--31\% summer-holiday drop estimated for England and Wales
+using forty-year TSIR models \citep{jackson2014varicella}. The component estimates are
+$\hat\tau=-0.301$ ($-0.854$ to $0.253$), $\hat\kappa=0.062$ ($-0.535$ to $0.660$) and contagion
+coupling $\hat\phi=0.325$ (SE 0.056; 95\% CI $0.206$ to $0.445$). Propagating this reduction through
+the renewal network (Theorem~\ref{thm:psi}) yields $\hat\psi^\dagger=2{,}440$ (SE 670) cases averted
+during treated county-weeks and $2{,}995$ (SE 900) cases averted network-wide, reflecting roughly
+23\% additional indirect cases averted through interrupted transmission chains.
+
+Standard comparators confirm Theorem~\ref{thm:bias} directly on real surveillance data
+(Table~\ref{tab:app}, Figure~\ref{fig:app}(a)). Two-step EpiEstim log-$R$ DiD (M2) reverses sign
+entirely, estimating $\hat\tau=+0.064$ (95\% CI $0.036$ to $0.093$). Aggregating the same 400
+counties to Germany's 38 NUTS-2 government districts lowers the zero-count share from 58.8\% to
+2.9\%: M0 continues to estimate a negative effect ($\hat\tau+\hat\kappa=-0.146$, 95\% CI $-0.280$ to
+$-0.013$), whereas M2 flips from $+0.064$ to $-0.102$, directly isolating the small-count Jensen
+bias $B_J$ of Theorem~\ref{thm:bias}(a). Likewise, $\log(Y+1)$ TWFE (M3) is severely attenuated to
+$\hat\tau=-0.102$ ($-0.120$ to $-0.083$; Theorem~\ref{thm:bias}(c)), while Poisson fixed effects
+(M1) and pooled QMLE (M4) produce comparable policy totals ($-0.290$ and $-0.307$) but collapse the
+spatial contagion coupling $\hat\phi$ to $0.060$ and $0.002$.
+
+\subsection{Few-cluster inference, root uniqueness and diagnostics}
+
+With $G=16$ federal states of unequal size (1 county in Berlin and Hamburg to 96 in Bavaria),
+large-$G$ asymptotics warrant direct finite-cluster verification (Web Appendix~\ref{app:fewcluster}).
+Every alternative interval for $\tau+\kappa$ excludes zero: Mammen score wild bootstrap-$t$
+($B=999$) gives $[-0.357,-0.120]$ (Webb 6-point $[-0.363,-0.113]$); nonlinear pairs cluster moment
+bootstrap-$t$ ($999/999$ draws converged) gives $[-0.383,-0.094]$; and delete-one-state jackknife
+gives SE 0.064 and interval $[-0.374,-0.103]$. Across all 16 leave-one-state-out refits,
+$\hat\tau+\hat\kappa$ stays tightly within $[-0.268,-0.202]$, ruling out dominance by any single
+state. Adding adjacent-state score cross-products over the 29 neighbouring state pairs
+(Remark~\ref{rem:testable}) lowers the SE of $\hat\tau+\hat\kappa$ from 0.0582 to 0.0486, showing
+that the ordinary state-clustered sandwich is slightly conservative. In an application-calibrated
+simulation on the exact 400-county, 261-week panel ($R=500$; Web Table~\ref{tab:rev-calsim}), M0 has
+near-zero bias ($-0.005$) and 100\% unique interior roots; $t_{15}$ coverage is 0.930--0.936 for
+$\tau$, $\kappa$ and $\phi$, and 0.892 for $\tau+\kappa$ (0.902 in the high-noise design),
+reflecting finite-cluster leverage across unequal states and underscoring the value of corroborating
+$t_{15}$ with the wider pairs bootstrap and projection intervals.
+
+Global root search over $\phi\in[0,3]$ finds a single interior root at $\hat\phi=0.325$, and both
+rank-safe score-form selection criteria choose it over the $\phi=0$ boundary ($S_{3,\mathrm{inv}}$:
+4.27 versus 8.65; $S_{3,\mathrm{oi}}$: 9.05 versus 9.06), so M0, M0-G and M0-GI coincide exactly.
+Inverting the profiled Stock--Wright $S_1$ statistic over 304 grid values of $\phi\in[0,3]$ produces
+a single connected interior 95\% confidence set excluding zero across every instrument reference
+value: $[0.21,2.33]$ under $F_{1,15}$ and $[0.23,0.98]$ under $\chi^2_1$ at $\bar\phi=0.5$
+(Figure~\ref{fig:app}(c); Web Table~\ref{tab:rev-robust}), rejecting $\phi=0$ ($S_1(0)=5.75$,
+$p_F=0.030$). Unlike a rejected model, both over-identified robust sets $S_{3,\mathrm{inv}}(\chi^2)$
+($[0.04,2.61]$) and $S_{3,\mathrm{oi}}(F)$ ($[0.00,3.00]$) are non-empty, and the identification-robust
+Bonferroni 95\% projection for $\tau+\kappa$ is $[-0.492,-0.081]$ at $\bar\phi=0.5$ (similarly
+strictly negative at $\bar\phi=0.25$ and $1.0$).
+
+Because $T=261>G=16$, over-identification is tested in rank-safe score form ($J_{LM}$; Web
+Appendix~\ref{app:diag}). Reference-value invariance passes cleanly: $J_{LM,\mathrm{inv}}=4.12$
+($p_{\chi^2}=0.128$, $p_F=0.183$, calibrated $p=0.090$ against null 95th percentile 4.71;
+$S_{3,\mathrm{inv}}=4.27$, calibrated $p=0.144$). The lagged-instrument test yields
+$J_{LM,\mathrm{oi}}=9.05$ ($p_F=0.037$, calibrated $p=0.002$ against null 95th percentile 4.72).
+Decomposing $J_{LM,\mathrm{oi}}$ into its two single-degree-of-freedom components pinpoints the
+source: the lagged imported-pressure share passes cleanly ($1.23$, $p_F=0.285$), whereas one-week
+lagged log case growth drives the signal ($6.75$, $p_F=0.020$), reflecting short-run week-to-week
+reporting dispersion in sparse county counts. Confirming this interpretation, $J_{LM,\mathrm{oi}}$
+falls below the 5\% $F_{2,14}$ threshold under a reporting-convolved generation-interval SD of 6.0
+days ($6.10$, $p_F=0.092$), at NUTS-2 aggregation ($7.18$, $p_F=0.065$), and in each of the four
+individual years 2016--2019 ($4.86$--$6.99$, $p_F=0.069$--$0.140$; Web Tables~\ref{tab:app-all} and
+\ref{tab:rev-gi}).
+
+\subsection{Dynamic timing, holiday reporting and sensitivities}
+
+An event-time specification around each state's summer holiday onset ($e=-2,\dots,7$, controlling for
+neighbour holiday share $\bar D_{it}$; Figure~\ref{fig:app}(b), Web Table~\ref{tab:rev-event})
+provides a sharp biological check against holiday-induced reporting artifacts. Pre-trend leads
+($e_{-2}=+0.048$, $e_{-1}=+0.063$) are jointly indistinguishable from zero ($\chi^2_2=0.60$,
+$p=0.741$, $p_F=0.760$). Crucially, the onset-week coefficient is dead zero ($\hat\tau_0=-0.008$, SE
+0.124): if fewer families visited clinics immediately when school holidays began, notifications
+would drop in week $e=0$ before the 14-day incubation window elapses. Instead, transmission drops
+only after week 0 across post-incubation holiday weeks $e_1$--$e_5$ ($-0.153$ to $-0.171$ in weeks
+1--3, joint $\chi^2_5=13.91$, $p=0.016$; together with $\hat\kappa=-0.211$), before moderating
+toward baseline after school reopening. In a tipping-point analysis for holiday-linked ascertainment
+$Y_{it}=c_ic_t(1-\rho)^{D_{it}}I_{it}$ (Proposition~\ref{prop:ascertainment}; Web
+Table~\ref{tab:rev-ascert}), holiday reporting would need to fall by $\rho^*_{\mathrm{CI}}=9.3\%$
+to push the 95\% upper limit to zero and by $\rho^*_0=17.8\%$ to erase the point estimate---shifts
+inconsistent with the null onset-week estimate.
+
+The policy-level reduction is robust across the sensitivity battery (Web Tables~\ref{tab:app-all},
+\ref{tab:rev-regional} and \ref{tab:rev-gi}). Varying $\bar\phi\in\{0.25,0.50,1.00\}$ leaves
+$\hat\tau+\hat\kappa=-0.238$ invariant to three decimals. Perturbing the generation-interval mean
+(12--16 days) or dispersion (SD 2.5--6.0 days) keeps $\hat\tau+\hat\kappa\in[-0.245,-0.211]$, all
+excluding zero. Using continuous holiday fractions yields $-0.325$ ($-0.446$ to $-0.205$),
+contemporaneous lag 0 yields $-0.142$ ($-0.232$ to $-0.051$), lags 2--4 yield $-0.331$ to $-0.542$,
+and pooling all school holidays yields $-0.275$ ($-0.311$ to $-0.239$) at lag 0. Adding
+East/West $\times$ week fixed effects yields $-0.216$ ($-0.322$ to $-0.111$), and four-region
+$\times$ week fixed effects---which absorb most inter-state holiday staggering, leaving only two to
+five states per region---still yield $-0.168$ ($-0.375$ to $0.038$). Scaling background importation
+$\omega_i$ by $0.25\times$ and $4\times$ preserves a clear negative total effect ($-0.343$ and
+$-0.188$, both excluding zero), although $\hat\phi$ moves from $0.618$ to $0.036$ because mean
+county counts (1.10) are comparable in scale to $\omega_i$; this sensitivity highlights that
+accurate specification of $\omega_i$ matters most for separating $\phi$ when counts are sparse.
 
 \input{tables/table_7_application}

@@ -151,9 +151,8 @@ so that $\tilde\tau\approx\sum_{b}\omega_b\tau^*_b$, where $\omega^{\top}$ is th
 $A^{-1}H_b$. Because $A^{-1}H_b\mathbf 1=e_1$, the weights sum to one; they are not restricted to be
 non-negative, because treated stayers enter $H_b$ with the opposite sign to switchers. The second row
 shows that $\tilde\kappa$ is also contaminated when the bin effects differ. Web
-Table~\ref{tab:rev-event} reports $\omega$ for the application, evaluated at the M0-ET2 and at the
-pooled estimates, together with pooled--dynamic contrasts whose standard errors come from the joint
-cluster sandwich of the stacked influence functions.
+Table~\ref{tab:rev-event} reports the dynamic event-time profile around summer holiday onset for
+the application of Section~\ref{s:application}.
 
 \subsection{A.11 Cases averted}
 
@@ -200,9 +199,10 @@ effect estimates drift with time since exposure \citep{janvin2025depletion}.
 \label{rem:testable}
 Lemma~\ref{lem:mds} implies that moment contributions of adjacent clusters are uncorrelated,
 which can be checked directly. In the application, the correlations of the state score
-contributions over the 112 adjacent state pairs are 0.082 ($\tau$), 0.088 ($\kappa$) and $-0.092$
-($\phi$); adding the adjacent-pair cross-products to $\hat\Omega$ changes the SE of
-$\hat\tau+\hat\kappa$ from 0.3108 to 0.2915 and that of $\hat\tau$ from 0.1276 to 0.1293. The
+contributions over the 29 adjacent German state pairs are 0.173 ($\tau$), 0.118 ($\kappa$) and $-0.115$
+($\phi$); adding the adjacent-pair cross-products to $\hat\Omega$ reduces the SE of
+$\hat\tau+\hat\kappa$ from 0.0582 to 0.0486 and that of $\hat\phi$ from 0.0561 to 0.0356, showing
+that the ordinary state-clustered sandwich is slightly conservative here. The
 $J$ test of Corollary~\ref{cor:J}, in the spirit of \citet{arellano1991tests}, checks the
 multiplicative renewal structure against extra predetermined instruments. A sensitivity analysis
 lagging $D$ by one week checks sensitivity to policy-timing alignment. Sequential ignorability
@@ -233,14 +233,15 @@ period, because the renewal equation used to define the estimand, equation~\eqre
 written in completed weeks. Same-week transmission therefore changes the conditional mean implied
 by that model and may also change the covariance structure of the quasi-difference. The resulting
 moments need not be martingale differences, so neither the consistency argument nor the conventional
-cluster-robust sandwich follows without additional conditions. The direction and magnitude of
-parameter and variance distortions are not determined by the weekly model alone. In the application,
-about 30\% of transmission is assigned to the same week under the assumed generation-interval
-conversion. A matched simulation reported in Section~\ref{ss:sameweek} generates within-week
+cluster-robust sandwich follows without additional conditions. The direction and magnitude of parameter and variance distortions are not determined by the weekly
+model alone. For fast-generation pathogens such as SARS-CoV-2, roughly 30\% of transmission falls
+within the same week; the matched simulation in Section~\ref{ss:sameweek} generates within-week
 own-unit renewal ($w_0=0.3$, 14.5\% nonlinear within-week re-infection share) and aggregates it to
-weeks; there the weekly estimator is biased by roughly 15\% of the true effect,
-coverage falls to 0.89 for $\tau$ and 0.78 for $\tau+\kappa$, and the $J$ test does not detect
-the misspecification.
+weeks, yielding a bias of roughly 15\% of the true effect, coverage of 0.89 for $\tau$ and 0.78 for
+$\tau+\kappa$, and an unpowered $J$ test. By contrast, for longer-generation pathogens such as
+varicella in Section~\ref{s:application}, the generation interval places less than $10^{-5}$ of its
+mass within the same week ($w_0=2.6\times 10^{-6}$), so the within-week aggregation bias mechanism is
+negligible.
 
 Third, dependence created by same-week transmission can link innovations across clusters before
 the next period's information set is observed. This is distinct from the lagged cross-cluster
@@ -256,8 +257,8 @@ a week. Shortening the observation interval or specifying a within-week renewal 
 the data model: daily counts carry day-of-week reporting effects and reporting delays
 \citep{lison2024nowcast}, which violate the delay-free reporting of
 Proposition~\ref{prop:ascertainment} and require new moment conditions and new simulation
-validation. Variance corrections alone cannot resolve the mean specification. A sub-weekly estimator
-is therefore needed in this regime, and this paper does not provide one.
+validation. Variance corrections alone cannot resolve the mean specification, so fast-generation pathogens with
+large same-week mass ($w_0\gtrsim 0.3$) require a dedicated sub-weekly estimator.
 
 In the same-week simulation, the within-week mechanism is switched on from the third window week,
 that is, from index 2 counting the first window week as 0.

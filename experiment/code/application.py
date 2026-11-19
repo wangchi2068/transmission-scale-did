@@ -1,485 +1,706 @@
-"""Application: state public mask orders and county-level COVID-19 transmission, US, June-November 2020
-(explore/method_brief.md section 9; data sources and processing in data_contract.md).
+"""Formal empirical application: German county-level weekly Varicella (2015-2019)
+and staggered 16-state summer school holidays.
 
-Input  : data/processed/panel.npz (built by src/data_prep.py from the raw public files).
-Output : application/application_results.json (read by aggregate.py -> results.json["application"],
-         make_tables.py table_7 and make_figures.py fig_07).
-
-Pre-specified analyses
-  main          W = row-normalised 2010 Census county adjacency; generation-interval (GI) weights from the
-                Ferretti et al. (2020) Weibull generation time discretised to weeks; omega_i = pop_i / 1e5;
-                phi_bar = 0.5; clusters = states (G = 49).  Methods: M0, M0-G (with phi profile), M0-OI
-                (Hansen J), M0', M0-ET (event time), M1, M1-BC, M2, M3, M4; cases averted psi for M0 / M0-G.
-  sensitivity   GI from the Nishiura et al. (2020) serial interval; GI grid w = (a, 1-a), a in {0.6,...,1.0};
-                commuting-flow W (ACS 2011-2015); policy lagged one week; omega x 0.25 and x 4;
-                phi_bar in {0.25, 1}; excluding Kansas and Texas (county-level opt-outs/exemptions not coded
-                in the CDC file); conventional lead placebo (invalid under feedback, Proposition 2(c);
-                reported for comparison only).
-Every sensitivity analysis is fitted with M0 and M0-G.
-Usage: python src/application.py [--out application/application_results.json] [--quick]
+Reads:  experiment/data/processed/panel.npz (built by experiment/code/data_prep.py)
+Writes: experiment/analysis/germany_application_results.json
 """
 from __future__ import annotations
 
-for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
-    __import__("os").environ.setdefault(_v, "1")
-
-import argparse
 import json
-import os
-import subprocess
 import sys
 import time
+from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
 
 import numpy as np
 import scipy.sparse as sps
-from scipy import stats
+from scipy import optimize, stats
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import comparators as cmp  # noqa: E402
-import dgp  # noqa: E402
-import psi as psimod  # noqa: E402
-import qdgmm  # noqa: E402
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "experiment" / "code"))
+sys.path.insert(0, str(ROOT / "verification" / "revision" / "common"))
+sys.path.insert(0, str(ROOT / "verification" / "application"))
 
-RUN = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PANEL = os.path.join(RUN, "data", "processed", "panel.npz")
-VERSION = "1.0.0"
-S = dgp.S_LAGS
-STATE_KS, STATE_TX = 20, 48
+import comparators as cmp
+import dgp
+import psi as psi_mod
+import qdgmm
+import wild_bootstrap as WB
+from qdx import QDX, inv_extras, oi_extras, tsum
 
-# Published distributions (parameters as reported in the cited papers)
-GI_SOURCES = {
-    "ferretti": dict(dist="weibull", shape=2.826, scale=5.665,
-                     what="generation time, Weibull (Ferretti et al. 2020, Science 368:eabb6936, Table 1)"),
-    "nishiura": dict(dist="lognormal", mean=4.7, sd=2.9,
-                     what="serial interval, lognormal, mean 4.7 d, SD 2.9 d (Nishiura, Linton & Akhmetzhanov "
-                          "2020, Int J Infect Dis 93:284-286)"),
-}
-GI_GRID = (0.6, 0.7, 0.8, 0.9, 1.0)
-PSI_HORIZONS = (4, 8, 13)
+PANEL_PATH = ROOT / "experiment" / "data" / "processed" / "panel.npz"
+SUMMARY_PATH = ROOT / "experiment" / "data" / "processed" / "panel_summary.json"
+OUT_PATH = ROOT / "experiment" / "analysis" / "germany_application_results.json"
+
+PHI_GRID_FINE = np.r_[0.0, 0.001, 0.002, 0.005, 0.01, 0.02, 0.03, 0.04, np.arange(0.05, 3.0001, 0.01)]
+PHI_GRID_ROOTS = np.r_[0.0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0]
 
 
-# ------------------------------------------------------------------------------------------------
-# Generation interval: daily continuous distribution -> weekly lag weights
-# ------------------------------------------------------------------------------------------------
-def _cdf(src: dict):
-    if src["dist"] == "weibull":
-        return stats.weibull_min(src["shape"], scale=src["scale"]).cdf
-    if src["dist"] == "lognormal":
-        s2 = np.log(1.0 + (src["sd"] / src["mean"]) ** 2)
-        mu = np.log(src["mean"]) - s2 / 2
-        return stats.lognorm(np.sqrt(s2), scale=np.exp(mu)).cdf
-    raise ValueError(src["dist"])
+def gi_weekly(mean: float = 14.0, sd: float = 2.5, S: int = 3) -> dict:
+    """Discretise a continuous lognormal generation interval (days) onto weekly lags 1..S."""
+    sigma2 = np.log(1.0 + (sd / mean) ** 2)
+    sigma = float(np.sqrt(sigma2))
+    mu = float(np.log(mean) - 0.5 * sigma2)
+    cdf = lambda x: float(stats.lognorm.cdf(x, s=sigma, scale=np.exp(mu))) if x > 0 else 0.0
+    # Same-week mass (0..3.5 days) and weekly lag bins: lag s covers [7s - 3.5, 7s + 3.5]
+    # Wait: check exact convention used in prior application.py!
+    # In continuous-day to weekly lag integration: lag 0 = [0, 7), lag s = [7(s-1), 7s) OR midpoint?
+    # Let's match the exact convention of the paper (same-week integral of triangular overlap on [0,7]):
+    # P(same week) = int_0^7 (1 - u/7) f(u) du; P(lag s) = int_{7(s-1)}^{7(s+1)} (1 - |u-7s|/7) f(u) du.
+    from scipy import integrate
+    pdf = lambda u: stats.lognorm.pdf(u, s=sigma, scale=np.exp(mu))
+    w0, _ = integrate.quad(lambda u: (1.0 - u / 7.0) * pdf(u), 0.0, 7.0)
+    raw = []
+    for s in range(1, S + 1):
+        val, _ = integrate.quad(lambda u: (1.0 - abs(u - 7.0 * s) / 7.0) * pdf(u), 7.0 * (s - 1), 7.0 * (s + 1))
+        raw.append(float(val))
+    raw_arr = np.array(raw, float)
+    w = raw_arr / raw_arr.sum()
+    tail = max(0.0, 1.0 - w0 - float(raw_arr.sum()))
+    return dict(dist="lognormal", mean=mean, sd=sd, S=S, w0=float(w0), tail_beyond_S=float(tail),
+                raw=raw_arr.tolist(), w=w.tolist())
 
 
-def gi_weekly(src: dict, S: int = S, n_u: int = 7000) -> dict:
-    """P(lag = s weeks) when the infector's case falls uniformly within its week and the delay X has the
-    published distribution: p_s = E_u[F(7(s+1) - u) - F(7s - u)], u ~ U[0, 7).  Same-week transmission
-    (s = 0) cannot enter a lagged renewal term; weights for s = 1..S are renormalised to sum to one
-    (methods.tex: sum_s w_s = 1) and the excluded mass is reported."""
-    F = _cdf(src)
-    u = (np.arange(n_u) + 0.5) / n_u * 7.0
-    p = np.array([np.mean(F(np.clip(7 * (s + 1) - u, 0, None)) - F(np.clip(7 * s - u, 0, None)))
-                  for s in range(S + 1)])
-    w = p[1:] / p[1:].sum()
-    return dict(w=w.tolist(), p_by_week_lag=p.tolist(), mass_same_week=float(p[0]),
-                mass_beyond_S=float(1.0 - p.sum()), source=src)
-
-
-# ------------------------------------------------------------------------------------------------
-# Data
-# ------------------------------------------------------------------------------------------------
-def row_normalise(A: sps.spmatrix) -> sps.csr_matrix:
-    A = sps.csr_matrix(A, dtype=float)
-    A.setdiag(0.0)
-    A.eliminate_zeros()
-    deg = np.asarray(A.sum(1)).ravel()
-    inv = np.where(deg > 0, 1.0 / np.where(deg > 0, deg, 1.0), 0.0)
-    return (sps.diags(inv) @ A).tocsr()
-
-
-def load_data(path: str = PANEL) -> dict:
-    z = np.load(path, allow_pickle=False)
-    d = {k: z[k] for k in z.files}
-    N = d["Y"].shape[1]
-    e = d["edges"].astype(int)
-    A = sps.coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(N, N))
-    d["W_adj"] = row_normalise(A + A.T)
-    c = d["comm"]
-    if len(c):
-        C = sps.coo_matrix((c[:, 2], (c[:, 0].astype(int), c[:, 1].astype(int))), shape=(N, N)).tocsr()
-        d["W_comm"] = row_normalise(C + C.T)      # flows in both directions between i and j
-    else:
-        d["W_comm"] = None
-    states = np.unique(d["state"])
-    d["cl"] = np.searchsorted(states, d["state"])
-    d["states"] = states
-    return d
-
-
-def verify(d: dict) -> dict:
-    """Key-variable checks (fail loudly on violation)."""
-    Y, D, pop = d["Y"], d["D"], d["pop"]
-    T_all, N = Y.shape
-    chk = dict(shape_ok=Y.shape == D.shape == d["Dshare"].shape and pop.shape == (N,),
-               Y_nonneg_integer=bool(np.all(Y >= 0) and np.all(Y == np.round(Y))),
-               D_binary=bool(np.isin(D, (0.0, 1.0)).all()),
-               pop_positive=bool(np.all(pop > 0)), weeks=int(T_all), units=int(N),
-               states=int(len(d["states"])), no_isolated_units=bool(np.all(np.asarray(d["W_adj"].sum(1)) > 0)))
-    bad = [k for k, v in chk.items() if v is False]
-    if bad:
-        raise RuntimeError("data checks failed: %s" % bad)
-    return chk
-
-
-def make_panel(d, w, W, D_all=None, omega_mult=1.0, units=None, drop_presample=False):
-    D_all = d["D"] if D_all is None else D_all
-    Yall, cl, pop = d["Y"], d["cl"], d["pop"]
-    if drop_presample:      # M0-ET2: remove units already under the policy in the pre-sample weeks
-        keep = ~D_all[:S].any(0)
-        units = keep if units is None else units[keep[units]]
-    if units is not None:
-        W = W[:, units]     # subnetwork adjacency restricted to kept units; row-normalised after subsetting
-        Yall, D_all, pop = Yall[:, units], D_all[:, units], pop[units]
-        W = row_normalise(W[units])
-        cl = np.unique(cl[units], return_inverse=True)[1]
-    omega = omega_mult * pop / 1e5
-    panel = dgp.build_panel(Yall, D_all, W, omega, cl, w=w, S=S)
-    return qdgmm.attach_presample(panel, D_all[:S]), Yall   # Dpre: pre-sample policy path for spec_m0_et2
-
-
-# ------------------------------------------------------------------------------------------------
-# Fitting helpers
-# ------------------------------------------------------------------------------------------------
-def _f(x):
-    try:
-        x = float(x)
-    except (TypeError, ValueError):
-        return None
-    return x if np.isfinite(x) else None
-
-
-def ci_row(analysis, method, res, tc, names=("tau", "kappa", "phi"), figure=False, extra=None, panel=None, spec=None):
-    r = dict(analysis=analysis, method=method, ok=bool(res.get("ok")), figure=figure)
-    est, se = res.get("est", {}), res.get("se", {})
-    for n in names:
-        e, s = _f(est.get(n)), _f(se.get(n))
-        r[n], r[n + "_se"] = e, s
-        r[n + "_lo"] = None if e is None or s is None else e - tc * s
-        r[n + "_hi"] = None if e is None or s is None else e + tc * s
-    if panel is not None and spec is not None and res.get("ok") and {"tau", "kappa"} <= set(est):
-        # total effect tau+kappa from the joint covariance (Reviewer M3: report the policy-level target)
-        try:
-            mod = qdgmm.QDModel(panel, spec)
-            inf = mod.inference(np.array([est[n] for n in spec.names]))
-            if inf is not None:
-                i, j = list(spec.names).index("tau"), list(spec.names).index("kappa")
-                V = inf["Vb"]
-                tot = est["tau"] + est["kappa"]
-                s_tot = float(np.sqrt(V[i, i] + V[j, j] + 2 * V[i, j]))
-                r.update(tau_plus_kappa=float(tot), tau_plus_kappa_se=s_tot,
-                         tau_plus_kappa_lo=float(tot - tc * s_tot), tau_plus_kappa_hi=float(tot + tc * s_tot))
-        except Exception:  # noqa: BLE001 - the column stays empty if the covariance is unavailable
-            pass
-    if extra:
-        r.update(extra)
-    return r
-
-
-def slim(res):
-    keep = ("ok", "est", "se", "reason", "resid", "start_used", "cond", "iters", "J", "J_df", "J_p", "n_roots",
-            "roots", "at_boundary", "chosen", "Q", "profile")
-    out = {k: res[k] for k in keep if k in res}
-    return json.loads(json.dumps(out, default=lambda o: o.tolist() if hasattr(o, "tolist") else str(o)))
-
-
-def timed(fn, *a, **k):
-    t0 = time.perf_counter()
-    try:
-        out = fn(*a, **k)
-    except Exception as e:  # noqa: BLE001 - recorded, never fatal
-        out = dict(ok=False, est={}, se={}, reason="exception: %r" % (e,))
-    out["time_sec"] = time.perf_counter() - t0
-    return out
-
-
-def phi_profile(panel, phi_bar=0.5, grid=qdgmm.PHI_GRID):
-    """Profiled phi-moment F(phi) (scaled) and the selection criterion Q at each grid value (M0-G ingredients)."""
-    sp = qdgmm.spec_m0(panel, phi_bar)
-    mod = qdgmm.QDModel(panel, sp)
-    mod_oi = qdgmm.QDModel(panel, qdgmm.spec_m0_oi(panel, phi_bar))
-    x = np.zeros(mod.K)
-    out = dict(phi=[], F=[], Q=[], tau=[], kappa=[], ok=[])
-    for ph in grid:
-        b, ok, Fp = qdgmm._solve_given_phi(mod, ph, x)
-        if ok:
-            x = b
-        out["phi"].append(float(ph)); out["ok"].append(bool(ok))
-        out["F"].append(_f(Fp) if ok else None)
-        out["Q"].append(_f(qdgmm.selection_criterion(mod_oi, np.r_[b, ph])) if ok else None)
-        out["tau"].append(_f(b[0]) if ok else None); out["kappa"].append(_f(b[1]) if ok else None)
-    return out
-
-
-def psi_block(Yall, panel, res, label):
-    if not res.get("ok") or res.get("beta") is None:
-        return dict(method=label, ok=False, reason="estimator failed")
-    beta = np.asarray(res["beta"], float)
-
-    def idx(b):
-        return b[0] * panel["D"] + b[1] * panel["Db"], b[2]
-    out = psimod.psi_with_se(Yall, panel, beta, res.get("Vb"), idx)
-    # cumulative psi over the first h window weeks (Theorem 4 with P = {(i, t): t < h}); the full-window
-    # psi compounds the per-week multiplier through renewal and contagion, so shorter horizons are reported too
-    Vb = res.get("Vb")
-    T = panel["Y"].shape[0]
-    hs = [h for h in PSI_HORIZONS if h < T] + [T]
-
-    def cum(b):
-        ix, ph = idx(b)
-        nu = psimod.nu_recursion(Yall, ix, panel["W"], panel["omega"], panel["w"], ph, S)
-        dw = (nu - Yall[S:]).sum(1)
-        return np.array([dw[:h].sum() for h in hs])
-    base = cum(beta)
-    se = np.full(len(hs), np.nan)
-    if Vb is not None and np.all(np.isfinite(Vb)):
-        hstep = 1e-5
-        grad = np.column_stack([(cum(beta + hstep * e) - cum(beta - hstep * e)) / (2 * hstep)
-                                for e in np.eye(len(beta))])
-        se = np.sqrt(np.clip(np.einsum("ij,jk,ik->i", grad, Vb, grad), 0, None))
-    out["by_horizon"] = [dict(weeks=int(h), est=_f(v), se=_f(s)) for h, v, s in zip(hs, base, se)]
-    out["method"] = label
-    out["observed_cases_treated"] = float(Yall[S:][panel["D"] == 1].sum())
-    out["observed_cases_all"] = float(Yall[S:].sum())
-    return out
-
-
-def event_time_block(res, spet, tc):
-    """Event-time bins (tau_e*), equal-weight average over the single-week bins (open-ended last bin excluded)
-    with its t_{G-1} interval, and the cluster-robust Wald test of H0: all event-time effects = 0
-    (F form, (G-1) denominator; chi-square form reported alongside)."""
-    G = int(spet.G)   # clusters of the panel the spec was built on (the M0-ET2 panel drops some states)
-    names = [n for n in spet.names if n.startswith("tau_e")]
-    out = dict(ok=res.get("ok"), bins=names, G=G,
-               est={n: _f(res.get("est", {}).get(n)) for n in spet.names},
-               se={n: _f(res.get("se", {}).get(n)) for n in spet.names},
-               n_cells={n: float(spet.lin[n].sum()) for n in names})
-    if not (res.get("ok") and res.get("Vb") is not None):
-        return out
-    ix = [spet.names.index(n) for n in names]
-    Vb = np.asarray(res["Vb"])
-    bvec = np.array([res["est"][n] for n in names])
-    a_w = np.zeros(len(names))
-    a_w[:-1] = 1.0 / (len(names) - 1)
-    Ve = Vb[np.ix_(ix, ix)]
-    avg, avg_se = float(a_w @ bvec), float(np.sqrt(a_w @ Ve @ a_w))
-    W = float(bvec @ np.linalg.solve(Ve, bvec))
-    q = len(names)
-    Fst = W / q * (G - q) / (G - 1)
-    out["average_e0_to_e%d" % (len(names) - 2)] = dict(
-        est=avg, se=avg_se, lo=avg - tc * avg_se, hi=avg + tc * avg_se,
-        weights="equal over single-week bins, open-ended last bin excluded")
-    out["joint_wald"] = dict(W=W, q=q, F=float(Fst), df1=q, df2=int(G - q),
-                             p_F=float(stats.f.sf(Fst, q, G - q)), p_chi2=float(stats.chi2.sf(W, q)))
-    return out
-
-
-def unit_counts(d, panel):
-    """Sample composition of the application panel by treatment timing (counts of units)."""
-    D, ev = panel["D"], panel["ev"]
-    pre = qdgmm.pre_exposed(panel)
-    ever = D.any(0)
-    Dpre = np.asarray(panel["Dpre"])
+def load_data() -> dict:
+    z = np.load(PANEL_PATH, allow_pickle=False)
+    W = sps.csr_matrix((z["W_data"], z["W_indices"], z["W_indptr"]), shape=tuple(z["W_shape"]))
     return dict(
-        n_units_full_sample=int(D.shape[1]),
-        n_units_m0et2=int((~pre).sum()), n_states=int(d["states"].size),
-        n_never_treated_window=int((~ever).sum()),
-        n_ever_treated_window=int(ever.sum()),
-        n_presample_exposed=int(pre.sum()),
-        n_presample_exposed_ever_window=int((pre & ever).sum()),
-        n_presample_exposed_not_window=int((pre & ~ever).sum()),
-        n_switch_window_week0_not_presample=int((~pre & (ev == 0)).sum()),
-        n_switch_window_week_ge1=int((ev >= 1).sum()),
-        presample_weeks=int(Dpre.shape[0]),
-        week0_treated_window=int(D[0].sum()))
+        Y=z["Y"],
+        D_summer=z["D_summer"],
+        Dshare_summer=z["Dshare_summer"],
+        D_all=z["D_all"],
+        Dshare_all=z["Dshare_all"],
+        pop=z["pop"],
+        state=z["state"],
+        cl=z["cl"],
+        states=z["states"],
+        region=z["region"],
+        nuts2=z["nuts2"],
+        nuts2_codes=z["nuts2_codes"],
+        ags=z["ags"],
+        weeks=z["weeks"],
+        edges=z["edges"],
+        W=W,
+    )
 
 
-def lead_indicator(D):
-    """1{policy switches on next week} (the week before adoption); last window week has no lead -> 0."""
-    L = np.zeros_like(D)
-    L[:-1] = np.clip(D[1:] - D[:-1], 0, None)
-    return L
+def lag_matrix(M: np.ndarray, lag: int) -> np.ndarray:
+    if lag <= 0:
+        return M.copy()
+    return np.vstack([np.zeros((lag, M.shape[1]), dtype=float), M[:-lag]])
 
 
-# ------------------------------------------------------------------------------------------------
-def main(argv=None):
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--panel", default=PANEL)
-    ap.add_argument("--out", default=os.path.join(RUN, "application", "application_results.json"))
-    ap.add_argument("--quick", action="store_true", help="main analysis only (smoke test)")
-    a = ap.parse_args(argv)
-    t_start = time.time()
-    d = load_data(a.panel)
-    checks = verify(d)
-    N = d["Y"].shape[1]
-    G = len(d["states"])
-    tc = qdgmm.tcrit(G)
-    gis = {k: gi_weekly(v) for k, v in GI_SOURCES.items()}
-    w_main = gis["ferretti"]["w"]
-    print("[app] %d units, %d states, GI weights ferretti=%s nishiura=%s" %
-          (N, G, np.round(w_main, 4), np.round(gis["nishiura"]["w"], 4)), flush=True)
+def make_panel(d: dict, w: np.ndarray, D_mat: np.ndarray, lag: int = 1, omega_mult: float = 1.0,
+               S: int = 3, t_slice: slice | None = None, Y_override: np.ndarray | None = None) -> dict:
+    Y = d["Y"] if Y_override is None else Y_override
+    Dl = lag_matrix(D_mat, lag)
+    if t_slice is not None:
+        Y = Y[t_slice]
+        Dl = Dl[t_slice]
+    omega = omega_mult * d["pop"] / 1e5
+    panel = dgp.build_panel(Y, Dl, d["W"], omega, d["cl"], w=w, S=S)
+    panel = qdgmm.attach_presample(panel, Dl[:S])
+    panel["Yall"] = Y
+    return panel
 
-    panel, Yall = make_panel(d, w_main, d["W_adj"])
-    analyses, table, psi, notes = {}, [], {}, []
 
-    # ---------------- main analysis: all methods ----------------
-    main_res = {}
-    m0 = timed(qdgmm.fit, panel, qdgmm.spec_m0(panel))
-    main_res["M0"] = m0
-    mg = timed(qdgmm.fit_global, panel)
-    main_res["M0_G"] = mg
-    # M0-GI: post-hoc root-selection variant (run-sim-application, experiment_design.md deviation 7)
-    mgi = timed(qdgmm.fit_global, panel, selection="inv")
-    main_res["M0_GI"] = mgi
-    main_res["M0_OI"] = timed(qdgmm.fit_two_step, panel, qdgmm.spec_m0_oi(panel), m0) if m0.get("ok") else \
-        dict(ok=False, est={}, se={}, reason="M0 failed")
-    main_res["M0p"] = timed(qdgmm.fit, panel, qdgmm.spec_m0prime(panel))
-    spet = qdgmm.spec_m0_et(panel)
-    met = timed(qdgmm.fit, panel, spet)
-    # M0-ET2 (revision): pre-sample-exposed units (Dall[:S] = 1, ev = 0 only inside the window) form their
-    # own bin tau_pre instead of being pooled into tau_e0; spec_m0_et and event_time are kept unchanged.
-    panel2, Yall2 = make_panel(d, w_main, d["W_adj"], drop_presample=True)
-    spet2 = qdgmm.spec_m0_et2(panel2)
-    met2 = timed(qdgmm.fit, panel2, spet2)
-    m1 = timed(cmp.poisson_fe, panel)
-    main_res["M1"] = m1
-    main_res["M1_BC"] = timed(cmp.poisson_fe_bc, panel, m1)
-    main_res["M2"] = timed(cmp.m2_logr_did, panel)
-    main_res["M3"] = timed(cmp.m3_logy_twfe, panel)
-    main_res["M4"] = timed(cmp.poisson_qmle, panel)
-    for k, v in main_res.items():
-        print("[app] main %-6s ok=%s tau=%s (%.1fs)" % (k, v.get("ok"), _f(v.get("est", {}).get("tau")),
-                                                         v.get("time_sec", 0)), flush=True)
-    analyses["main"] = {k: slim(v) for k, v in main_res.items()}
-    analyses["main"]["M0_ET"] = slim(met)
-    analyses["main"]["M0_ET2"] = slim(met2)
-    for k in ("M0", "M0_G", "M0_GI", "M0_OI", "M0p", "M1", "M1_BC", "M2", "M3", "M4"):
-        names = ("tau",) if k in ("M2", "M3") else ("tau", "kappa", "phi")
-        if k == "M0p":
-            names = ("tau",)
-        extra = {"at_boundary": main_res[k].get("at_boundary")} if k in ("M0_G", "M0_GI") else None
-        panel_k, spec_k = (panel, qdgmm.spec_m0(panel)) if k in ("M0", "M0_G", "M0_GI") else (None, None)
-        table.append(ci_row("main", k, main_res[k], tc, names, figure=True, extra=extra,
-                            panel=panel_k, spec=spec_k))
-    J = {k: _f(main_res["M0_OI"].get(k)) for k in ("J", "J_df", "J_p")}
-    profile = phi_profile(panel)
-    profile.update(roots=mg.get("roots"), chosen=mg.get("chosen"), at_boundary=mg.get("at_boundary"))
-    event_time = event_time_block(met, spet, tc)
-    event_time2 = event_time_block(met2, spet2, qdgmm.tcrit(int(panel2["G"])))
-    event_time2["spec"] = ("pre-exposed units (Dall[:S] = 1) removed from the sample; tau_e0 = switches on in "
-                           "window week 0; bins tau_e1..tau_e6 and kappa as in M0-ET")
-    event_time2["sample_counts"] = unit_counts(d, panel)
-    print("[app] main M0_ET2 ok=%s fields=%s (%.1fs)" % (met2.get("ok"), spet2.names, met2.get("time_sec", 0)),
-          flush=True)
+def score_s3_at_beta(X: QDX, beta: np.ndarray, extra_sel: list[int]) -> dict:
+    """Rank-safe 3-moment score statistic S3 over [phi-moment, extra_sel[0], extra_sel[1]]
+    orthogonalised against (week, tau, kappa). Valid for any T regardless of G > 3."""
+    m = X.moments(beta, extra=True)
+    if m is None:
+        return dict(S3=float("nan"), p_chi2=float("nan"), p_F=float("nan"))
+    G = X.G
+    nW = X.nW
+    n_idx = np.r_[np.arange(nW), nW, nW + 1]
+    t_idx = [nW + 2] + [nW + 3 + k for k in extra_sel]
+    J = m["J"] / G
+    gg = m["gg"]
+    Gnn = J[np.ix_(n_idx, n_idx)]
+    Gtn = J[np.ix_(t_idx, n_idx)]
+    psi = gg[t_idx] - Gtn @ np.linalg.solve(Gnn, gg[n_idx])
+    pbar = psi.sum(1) / G
+    Sm = psi @ psi.T / G
+    stat = float(G * pbar @ np.linalg.solve(Sm, pbar))
+    df = len(t_idx)
+    return dict(
+        S3=stat,
+        p_chi2=float(stats.chi2.sf(stat, df)),
+        p_F=float(stats.f.sf(stat * (G - df) / (df * (G - 1)), df, G - df)),
+    )
 
-    for lab, res in (("M0", m0), ("M0_G", mg), ("M0_GI", mgi)):
-        psi[lab] = json.loads(json.dumps(timed(psi_block, Yall, panel, res, lab), default=float))
-    desc = dgp.panel_descriptives(panel)
 
-    # ---------------- sensitivity analyses: M0 and M0-G ----------------
-    sens = []
-    if not a.quick:
-        sens.append(("gi_nishiura", dict(w=gis["nishiura"]["w"]), True))
-        for g in GI_GRID:
-            sens.append(("gi_w1_%.1f" % g, dict(w=[g, 1.0 - g]), False))
-        if d["W_comm"] is not None:
-            sens.append(("W_commuting", dict(W=d["W_comm"]), True))
+def fit_global_score(panel: dict, phi_bar: float = 0.5, grid=PHI_GRID_ROOTS) -> dict:
+    """Global root search over phi in [0, max(grid)] using rank-safe score-form S3 criterion
+    for both OI extras (M0-G) and invariance extras (M0-GI)."""
+    exo, _ = oi_extras(panel, phi_bar=phi_bar)
+    exi, _ = inv_extras(panel)
+    X = QDX(panel, {"tau": panel["D"], "kappa": panel["Db"]}, phi_bar=phi_bar, extras=exo + exi)
+    cands, prof = X.global_roots(grid)
+    interior = [c for c in cands if c[0] == "interior"]
+    cand_records = []
+    for kind, beta in cands:
+        s3_oi = score_s3_at_beta(X, beta, [0, 1])
+        s3_inv = score_s3_at_beta(X, beta, [2, 3])
+        if kind == "interior":
+            inf = X.inference(beta)
+            Vb = inf["Vb"]
+            se = np.sqrt(np.diag(Vb))
+            tpk_se = tsum(Vb, 0, 1)
         else:
-            notes.append("commuting W unavailable (ACS file missing); sensitivity skipped")
-        D_lag = np.vstack([d["D"][:1], d["D"][:-1]])
-        sens.append(("policy_lag1", dict(D_all=D_lag), True))
-        sens.append(("omega_x0.25", dict(omega_mult=0.25), False))
-        sens.append(("omega_x4", dict(omega_mult=4.0), False))
-        sens.append(("phibar_0.25", dict(phi_bar=0.25), False))
-        sens.append(("phibar_1", dict(phi_bar=1.0), False))
-        keep = np.where(~np.isin(d["state"], (STATE_KS, STATE_TX)))[0]
-        sens.append(("excl_KS_TX", dict(units=keep), True))
-    for name, kw, fig in sens:
-        phi_bar = kw.pop("phi_bar", 0.5)
-        pnl, Ya = make_panel(d, kw.pop("w", w_main), kw.pop("W", d["W_adj"]), **kw)
-        r0 = timed(qdgmm.fit, pnl, qdgmm.spec_m0(pnl, phi_bar))
-        rg = timed(qdgmm.fit_global, pnl, phi_bar)
-        rgi = timed(qdgmm.fit_global, pnl, phi_bar, selection="inv")
-        analyses[name] = {"M0": slim(r0), "M0_G": slim(rg), "M0_GI": slim(rgi), "n_units": int(pnl["Y"].shape[1]),
-                          "G": int(pnl["G"])}
-        tcs = qdgmm.tcrit(int(pnl["G"]))
-        tab_spec = qdgmm.spec_m0(pnl, phi_bar)
-        table.append(ci_row(name, "M0", r0, tcs, figure=fig, panel=pnl, spec=tab_spec))
-        table.append(ci_row(name, "M0_G", rg, tcs, figure=False, extra={"at_boundary": rg.get("at_boundary")},
-                            panel=pnl, spec=tab_spec))
-        table.append(ci_row(name, "M0_GI", rgi, tcs, figure=False, extra={"at_boundary": rgi.get("at_boundary")},
-                            panel=pnl, spec=tab_spec))
-        print("[app] %-12s M0 tau=%s phi=%s | M0-G tau=%s phi=%s (%s) | M0-GI tau=%s (%s)" % (
-            name, _f(r0.get("est", {}).get("tau")), _f(r0.get("est", {}).get("phi")),
-            _f(rg.get("est", {}).get("tau")), _f(rg.get("est", {}).get("phi")), rg.get("chosen"),
-            _f(rgi.get("est", {}).get("tau")), rgi.get("chosen")), flush=True)
-    lead = None
-    if not a.quick:
-        sp = qdgmm.QDSpec(lin={"tau": panel["D"], "kappa": panel["Db"], "lead": lead_indicator(panel["D"])},
-                          phi_free=True, phi_bar=0.5)
-        rl = timed(qdgmm.fit, panel, sp)
-        analyses["lead_placebo"] = {"M0": slim(rl)}
-        e, s = _f(rl.get("est", {}).get("lead")), _f(rl.get("se", {}).get("lead"))
-        lead = dict(est=e, se=s, t=None if e is None or s is None else e / s,
-                    note="conventional lead placebo; not a valid test under feedback (Proposition 2(c))")
-        table.append(ci_row("lead_placebo", "M0", rl, tc, figure=False))
-        # the row must report the lead coefficient itself, not tau (Reviewer m3, round 2)
-        table[-1]["lead"] = e
-        table[-1]["lead_se"] = s
-        table[-1]["lead_lo"] = None if e is None or s is None else e - tc * s
-        table[-1]["lead_hi"] = None if e is None or s is None else e + tc * s
+            Xc = QDX(panel, {"tau": panel["D"], "kappa": panel["Db"]}, phi_bar=phi_bar, phi_free=False, phi_fixed=0.0)
+            inf = Xc.inference(beta[:2])
+            Vs = inf["Vb"]
+            se = np.r_[np.sqrt(np.diag(Vs)), np.nan]
+            tpk_se = tsum(Vs, 0, 1)
+        cand_records.append(dict(
+            kind=kind,
+            est=dict(tau=float(beta[0]), kappa=float(beta[1]), phi=float(beta[2]), tpk=float(beta[0] + beta[1])),
+            se=dict(tau=float(se[0]), kappa=float(se[1]), phi=float(se[2]), tpk=float(tpk_se)),
+            S3_oi=s3_oi,
+            S3_inv=s3_inv,
+        ))
+    idx_g = int(np.argmin([r["S3_oi"]["S3"] for r in cand_records]))
+    idx_gi = int(np.argmin([r["S3_inv"]["S3"] for r in cand_records]))
+    return dict(
+        n_interior_roots=len(interior),
+        interior_phis=[float(c[1][2]) for c in interior],
+        profile=[dict(phi=float(p), ok=bool(ok), F_phi=float(fp)) for p, _, ok, fp in prof],
+        candidates=cand_records,
+        M0_G=cand_records[idx_g],
+        M0_GI=cand_records[idx_gi],
+    )
+
+
+def fit_m0_full(panel: dict, phi_bar: float = 0.5, wgroup=None) -> dict:
+    """Fit M0 via QDX and compute sandwich inference, J_LM (oi, inv, and 1-df breakdown)."""
+    exo, _ = oi_extras(panel, phi_bar=phi_bar)
+    exi, _ = inv_extras(panel)
+    X = QDX(panel, {"tau": panel["D"], "kappa": panel["Db"]}, wgroup=wgroup, phi_bar=phi_bar, extras=exo + exi)
+    x, ok, res = X.fit(starts=[[-0.3, 0.0, 0.3], [-0.2, -0.1, 0.5], [0.0, 0.0, 0.5]])
+    if not ok:
+        return dict(ok=False)
+    inf = X.inference(x)
+    Vb = inf["Vb"]
+    se = np.sqrt(np.diag(Vb))
+    G = X.G
+    tc = float(stats.t.ppf(0.975, G - 1))
+    tpk = float(x[0] + x[1])
+    tpk_se = tsum(Vb, 0, 1)
+
+    mX = X.moments(x, extra=True)
+    j_oi = X.j_lm(x, sel=[0, 1], m=mX)
+    j_inv = X.j_lm(x, sel=[2, 3], m=mX)
+    j_imp = X.j_lm(x, sel=[0], m=mX)
+    j_grw = X.j_lm(x, sel=[1], m=mX)
+
+    def f_p(J, df):
+        return float(stats.f.sf(J * (G - df) / (df * (G - 1)), df, G - df))
+
+    return dict(
+        ok=True,
+        G=G,
+        N=int(panel["Y"].shape[1]),
+        T=int(panel["Y"].shape[0]),
+        tcrit=tc,
+        est=dict(tau=float(x[0]), kappa=float(x[1]), phi=float(x[2]), tpk=tpk),
+        se=dict(tau=float(se[0]), kappa=float(se[1]), phi=float(se[2]), tpk=tpk_se),
+        ci_t=dict(
+            tau=[float(x[0] - tc * se[0]), float(x[0] + tc * se[0])],
+            kappa=[float(x[1] - tc * se[1]), float(x[1] + tc * se[1])],
+            phi=[float(x[2] - tc * se[2]), float(x[2] + tc * se[2])],
+            tpk=[float(tpk - tc * tpk_se), float(tpk + tc * tpk_se)],
+        ),
+        J_LM_oi=dict(stat=j_oi["J_LM"], df=2, p_chi2=j_oi["p"], p_F=f_p(j_oi["J_LM"], 2)),
+        J_LM_inv=dict(stat=j_inv["J_LM"], df=2, p_chi2=j_inv["p"], p_F=f_p(j_inv["J_LM"], 2)),
+        J_LM_oi_components=dict(
+            lag_import_share=dict(stat=j_imp["J_LM"], p_chi2=j_imp["p"], p_F=f_p(j_imp["J_LM"], 1)),
+            lag_growth=dict(stat=j_grw["J_LM"], p_chi2=j_grw["p"], p_F=f_p(j_grw["J_LM"], 1)),
+        ),
+        _beta=x,
+        _Vb=Vb,
+        _inf=inf,
+    )
+
+
+def strip_private(rec: dict) -> dict:
+    return {k: v for k, v in rec.items() if not k.startswith("_")}
+
+
+def jackknife_m0(d: dict, w: np.ndarray, lag: int = 1, phi_bar: float = 0.5) -> dict:
+    """Delete-one-state jackknife (re-restricting W to the 15 kept states and row-normalising)."""
+    G = len(d["states"])
+    ests = []
+    by_state = {}
+    A_full = (d["W"] > 0).astype(float).tocsr()
+    for g in range(G):
+        keep = d["cl"] != g
+        Ak = A_full[keep][:, keep]
+        deg = np.asarray(Ak.sum(1)).ravel()
+        # Keep only non-isolated counties if any (dropping a state could isolate a tiny border county? check)
+        sub_keep = deg > 0
+        if not sub_keep.all():
+            idx_k = np.where(keep)[0][sub_keep]
+            keep_mask = np.zeros(len(d["cl"]), dtype=bool)
+            keep_mask[idx_k] = True
+            Ak = A_full[keep_mask][:, keep_mask]
+            deg = np.asarray(Ak.sum(1)).ravel()
+        else:
+            keep_mask = keep
+        Wk = sps.diags(1.0 / deg) @ Ak
+        Yk = d["Y"][:, keep_mask]
+        Dk = lag_matrix(d["D_summer"][:, keep_mask], lag)
+        omk = d["pop"][keep_mask] / 1e5
+        clk_raw = d["cl"][keep_mask]
+        _, clk = np.unique(clk_raw, return_inverse=True)
+        pk = dgp.build_panel(Yk, Dk, Wk.tocsr(), omk, clk, w=w, S=3)
+        sp = qdgmm.spec_m0(pk, phi_bar=phi_bar)
+        m0 = qdgmm.fit(pk, sp, starts=[[-0.3, 0.0, 0.3], [0.0, 0.0, 0.5]])
+        b = np.array([m0["est"]["tau"], m0["est"]["kappa"], m0["est"]["phi"], m0["est"]["tau"] + m0["est"]["kappa"]])
+        ests.append(b)
+        by_state[int(d["states"][g])] = dict(tau=float(b[0]), kappa=float(b[1]), phi=float(b[2]), tpk=float(b[3]))
+    E = np.array(ests)
+    ebar = E.mean(0)
+    se_jk = np.sqrt((G - 1) / G * ((E - ebar) ** 2).sum(0))
+    return dict(
+        se=dict(tau=float(se_jk[0]), kappa=float(se_jk[1]), phi=float(se_jk[2]), tpk=float(se_jk[3])),
+        tpk_range=[float(E[:, 3].min()), float(E[:, 3].max())],
+        phi_range=[float(E[:, 2].min()), float(E[:, 2].max())],
+        by_dropped_state=by_state,
+    )
+
+
+def stock_wright_sets(panel: dict, phi_bar: float = 0.5, grid=PHI_GRID_FINE) -> dict:
+    """Profiled Stock-Wright S1, S3(oi), and S3(inv) confidence sets + Bonferroni 95% projection for tau+kappa."""
+    exo, _ = oi_extras(panel, phi_bar=phi_bar)
+    exi, _ = inv_extras(panel)
+    Xf = QDX(panel, {"tau": panel["D"], "kappa": panel["Db"]}, phi_bar=phi_bar, extras=exo + exi)
+    G = Xf.G
+    nW = Xf.nW
+    n_idx = np.r_[np.arange(nW), nW, nW + 1]
+    rows = []
+    x = np.array([-0.3, 0.0])
+    for ph in grid:
+        b, ok, Fp = Xf.solve_given_phi(np.array([ph]), x)
+        if not ok:
+            rows.append(dict(phi=float(ph), ok=False))
+            continue
+        x = b
+        beta = np.r_[b, ph]
+        m = Xf.moments(beta, extra=True)
+        J = m["J"] / G
+        gg = m["gg"]
+        Gnn = J[np.ix_(n_idx, n_idx)]
+        rec = dict(phi=float(ph), ok=True, tau=float(b[0]), kappa=float(b[1]), tpk=float(b[0] + b[1]), F_phi=float(Fp[0]))
+        for lab, t_idx in (("S1", [nW + 2]), ("S3_oi", [nW + 2, nW + 3, nW + 4]), ("S3_inv", [nW + 2, nW + 5, nW + 6])):
+            Gtn = J[np.ix_(t_idx, n_idx)]
+            psi = gg[t_idx] - Gtn @ np.linalg.solve(Gnn, gg[n_idx])
+            pbar = psi.sum(1) / G
+            Sm = psi @ psi.T / G
+            stat = float(G * pbar @ np.linalg.solve(Sm, pbar))
+            df = len(t_idx)
+            rec[lab] = stat
+            rec[lab + "_p_chi2"] = float(stats.chi2.sf(stat, df))
+            rec[lab + "_p_F"] = float(stats.f.sf(stat * (G - df) / (df * (G - 1)), df, G - df))
+        Xc = QDX(panel, {"tau": panel["D"], "kappa": panel["Db"]}, phi_bar=phi_bar, phi_free=False, phi_fixed=ph)
+        inf = Xc.inference(b)
+        if inf is not None:
+            rec["tpk_se_phi_fixed"] = tsum(inf["Vb"], 0, 1)
+        rows.append(rec)
+
+    def intervals(mask, phis):
+        ivs, cur = [], None
+        for m_, p_ in zip(mask, phis):
+            if m_ and cur is None:
+                cur = [p_, p_]
+            elif m_:
+                cur[1] = p_
+            elif cur is not None:
+                ivs.append(cur)
+                cur = None
+        if cur is not None:
+            ivs.append(cur)
+        return ivs
+
+    ok_rows = [r for r in rows if r["ok"]]
+    phis = [r["phi"] for r in ok_rows]
+    sets_out = {}
+    for lab in ("S1", "S3_oi", "S3_inv"):
+        for kind in ("chi2", "F"):
+            sets_out[f"{lab}_{kind}_95"] = intervals([r[f"{lab}_p_{kind}"] > 0.05 for r in ok_rows], phis)
+    # Bonferroni 95% projection for tau+kappa using 97.5% S1(F) x 97.5% conditional t_{G-1}
+    tc975 = float(stats.t.ppf(1.0 - 0.025 / 2.0, G - 1))
+    inset = [r for r in ok_rows if r["S1_p_F"] > 0.025 and "tpk_se_phi_fixed" in r]
+    if inset:
+        sets_out["phi_set_975_S1_F"] = intervals([r["S1_p_F"] > 0.025 for r in ok_rows], phis)
+        sets_out["tpk_bonferroni_95"] = [
+            float(min(r["tpk"] - tc975 * r["tpk_se_phi_fixed"] for r in inset)),
+            float(max(r["tpk"] + tc975 * r["tpk_se_phi_fixed"] for r in inset)),
+        ]
+        sets_out["tpk_range_over_975_phi_set"] = [
+            float(min(r["tpk"] for r in inset)),
+            float(max(r["tpk"] for r in inset)),
+        ]
+    return dict(sets=sets_out, S1_at_0=ok_rows[0], curve=[
+        dict(phi=r["phi"], F_phi=r["F_phi"], S1=r["S1"], S1_p_F=r["S1_p_F"],
+             S3_oi=r["S3_oi"], S3_oi_p_F=r["S3_oi_p_F"], S3_inv=r["S3_inv"], S3_inv_p_F=r["S3_inv_p_F"],
+             tpk=r["tpk"]) for r in ok_rows
+    ])
+
+
+def event_time_analysis(d: dict, w: np.ndarray, include_leads: bool = True) -> dict:
+    """Event-time bins around Summer holiday onset (e = -2, -1, 0, 1, ..., 7), controlling for Dbar."""
+    Y = d["Y"]
+    D0 = d["D_summer"]
+    T_all, N = D0.shape
+    ks = list(range(-2, 8)) if include_leads else list(range(0, 8))
+    bins = {f"e{k}": np.zeros((T_all, N), dtype=float) for k in ks}
+    for i in range(N):
+        onsets = [t for t in range(1, T_all) if D0[t, i] == 1.0 and D0[t - 1, i] == 0.0]
+        for t0 in onsets:
+            for k in ks:
+                if 0 <= t0 + k < T_all:
+                    bins[f"e{k}"][t0 + k, i] = 1.0
+    panel = dgp.build_panel(Y, D0, d["W"], d["pop"] / 1e5, d["cl"], w=w, S=3)
+    lin = {k: v[3:] for k, v in bins.items()}
+    lin["kappa"] = panel["Db"]
+    X = QDX(panel, lin, phi_bar=0.5)
+    x0 = np.r_[np.zeros(len(lin)), 0.32]
+    x, ok, _ = X.fit(starts=[x0, np.r_[np.zeros(len(lin)), 0.5]])
+    inf = X.inference(x)
+    Vb = inf["Vb"]
+    se = np.sqrt(np.diag(Vb))
+    G = X.G
+    tc = float(stats.t.ppf(0.975, G - 1))
+    coefs = {}
+    for idx, nm in enumerate(X.names):
+        coefs[nm] = dict(est=float(x[idx]), se=float(se[idx]),
+                         ci=[float(x[idx] - tc * se[idx]), float(x[idx] + tc * se[idx])])
+    out = dict(ok=ok, include_leads=include_leads, coefs=coefs)
+    if include_leads:
+        # Joint Wald test H0: e_{-2} = e_{-1} = 0
+        b_pre = x[:2]
+        V_pre = Vb[:2, :2]
+        W_pre = float(b_pre @ np.linalg.solve(V_pre, b_pre))
+        out["pretrend_wald"] = dict(
+            stat=W_pre, df=2,
+            p_chi2=float(stats.chi2.sf(W_pre, 2)),
+            p_F=float(stats.f.sf(W_pre * (G - 2) / (2 * (G - 1)), 2, G - 2)),
+        )
+    # Joint Wald test of post-incubation weeks e1..e5 == 0
+    post_idx = [X.names.index(f"e{k}") for k in (1, 2, 3, 4, 5)]
+    b_post = x[post_idx]
+    V_post = Vb[np.ix_(post_idx, post_idx)]
+    W_post = float(b_post @ np.linalg.solve(V_post, b_post))
+    out["post_wald_e1_e5"] = dict(
+        stat=W_post, df=5,
+        p_chi2=float(stats.chi2.sf(W_post, 5)),
+        p_F=float(stats.f.sf(W_post * (G - 5) / (5 * (G - 1)), 5, G - 5)),
+    )
+    return out
+
+
+def remark4_adjacent_dependence(d: dict, panel: dict, beta: np.ndarray) -> dict:
+    sp = qdgmm.spec_m0(panel)
+    mod = qdgmm.QDModel(panel, sp)
+    inf = mod.inference(beta)
+    G = mod.G
+    gg = inf["gg"]
+    edges = d["edges"]
+    cl = d["cl"]
+    Adj = np.zeros((G, G), dtype=bool)
+    a, b = cl[edges[:, 0]], cl[edges[:, 1]]
+    Adj[a, b] = True
+    Adj[b, a] = True
+    np.fill_diagonal(Adj, False)
+    Om = gg @ gg.T / G
+    cross = sum(np.outer(gg[:, i], gg[:, j]) for i, j in zip(*np.nonzero(Adj))) / G
+    Tm1 = mod.T - 1
+    names = sp.names
+    Gi = np.linalg.inv(inf["Gam"])
+
+    def se_from(Omega):
+        Vb = (Gi @ Omega @ Gi.T / G * G / (G - 1))[Tm1:, Tm1:]
+        res = {n: float(np.sqrt(Vb[k, k])) if Vb[k, k] > 0 else float("nan") for k, n in enumerate(names)}
+        v = Vb[0, 0] + Vb[1, 1] + 2.0 * Vb[0, 1]
+        res["tpk"] = float(np.sqrt(v)) if v > 0 else float("nan")
+        return res
+
+    corr = {}
+    for k, n in enumerate(names):
+        r = gg[Tm1 + k]
+        num = sum(r[i] * r[j] for i, j in zip(*np.nonzero(Adj))) / Adj.sum()
+        corr[n] = float(num / (r @ r / G))
+    # Also compute score correlation for the linear combination tau+kappa in influence function space
+    return dict(
+        G=G,
+        adjacent_state_pairs=int(Adj.sum() // 2),
+        mean_state_neighbours=float(Adj.sum(1).mean()),
+        se_cluster=se_from(Om),
+        se_with_adjacent=se_from(Om + cross),
+        adj_pair_score_corr=corr,
+    )
+
+
+def ascertainment_tipping_point(d: dict, w: np.ndarray, lag: int = 1) -> dict:
+    """Holiday-linked ascertainment tipping point: Y_it = c_i c_t (1 - rho)^{D_it} X_it.
+    rho > 0 means lower reporting during summer holidays; undo via Y*_it = Y_it / (1 - rho)^{D_it}."""
+    D_lag = lag_matrix(d["D_summer"], lag)
+    G = len(d["states"])
+    tc = float(stats.t.ppf(0.975, G - 1))
+
+    def fit_rho(rho: float, extra: bool = False):
+        Y_corr = d["Y"] / ((1.0 - rho) ** D_lag)
+        p = make_panel(d, w, d["D_summer"], lag=lag, Y_override=Y_corr)
+        r = fit_m0_full(p)
+        if not r["ok"]:
+            return dict(rho=float(rho), ok=False)
+        out = dict(
+            rho=float(rho), ok=True,
+            est=r["est"], se=r["se"],
+            lo=r["ci_t"]["tpk"][0], hi=r["ci_t"]["tpk"][1],
+            bound_log_shift=float(abs(np.log(1.0 - rho))),
+        )
+        if extra:
+            out["J_LM_oi"] = r["J_LM_oi"]
+            out["J_LM_inv"] = r["J_LM_inv"]
+        return out
+
+    grid = [round(x, 3) for x in np.arange(-0.40, 0.5001, 0.05)]
+    rows = [fit_rho(rho, extra=(abs(rho * 10 - round(rho * 10)) < 1e-9)) for rho in grid]
+
+    def find_root(key: str):
+        xs = [r["rho"] for r in rows if r["ok"]]
+        vs = [r["est"]["tpk"] if key == "tpk" else r[key] for r in rows if r["ok"]]
+        for a, b, va, vb in zip(xs[:-1], xs[1:], vs[:-1], vs[1:]):
+            if np.sign(va) != np.sign(vb):
+                fn = lambda rr: (fit_rho(rr)["est"]["tpk"] if key == "tpk" else fit_rho(rr)[key])
+                return float(optimize.brentq(fn, a, b, xtol=1e-4))
+        return None
+
+    rho_zero = find_root("tpk")
+    rho_hi_zero = find_root("hi")
+    return dict(
+        grid=rows,
+        rho_star_tpk_zero=rho_zero,
+        rho_star_upper_ci_zero=rho_hi_zero,
+        rho_star_tpk_zero_fit=fit_rho(rho_zero, extra=True) if rho_zero is not None else None,
+        rho_star_upper_ci_zero_fit=fit_rho(rho_hi_zero, extra=True) if rho_hi_zero is not None else None,
+    )
+
+
+def nuts2_aggregation(d: dict, w: np.ndarray, lag: int = 1) -> dict:
+    """Aggregate 400 counties to 38 NUTS-2 regions (G=16 states, low-zero regime)."""
+    n2 = d["nuts2"]
+    K = int(n2.max()) + 1
+    Y2 = np.stack([d["Y"][:, n2 == k].sum(1) for k in range(K)], 1)
+    D2 = np.stack([d["D_summer"][:, n2 == k].mean(1) for k in range(K)], 1)
+    D2 = (D2 >= 0.5).astype(float)
+    pop2 = np.array([d["pop"][n2 == k].sum() for k in range(K)])
+    cl2 = np.array([int(d["cl"][n2 == k][0]) for k in range(K)], dtype=int)
+    A2 = np.zeros((K, K), float)
+    for i, j in d["edges"]:
+        if n2[i] != n2[j]:
+            A2[n2[i], n2[j]] = 1.0
+            A2[n2[j], n2[i]] = 1.0
+    deg2 = A2.sum(1)
+    W2 = sps.csr_matrix(A2 / np.maximum(deg2[:, None], 1.0))
+
+    D2l = lag_matrix(D2, lag)
+    p = dgp.build_panel(Y2, D2l, W2, pop2 / 1e5, cl2, w=w, S=3)
+    m0 = strip_private(fit_m0_full(p))
+    m0p = qdgmm.fit(p, qdgmm.spec_m0prime(p))
+    comps = {}
+    for nm, fn in [("M1", cmp.poisson_fe), ("M2", cmp.m2_logr_did), ("M3", cmp.m3_logy_twfe), ("M4", cmp.poisson_qmle)]:
+        r = fn(p)
+        comps[nm] = dict(ok=r["ok"], est=r.get("est"), se=r.get("se"))
+    return dict(
+        N=K, G=int(p["G"]), T=int(p["Y"].shape[0]),
+        median_Y=float(np.median(p["Y"])),
+        mean_Y=float(p["Y"].mean()),
+        zero_share=float((p["Y"] == 0).mean()),
+        M0=m0,
+        M0_prime=dict(est=m0p["est"], se=m0p["se"]),
+        comparators=comps,
+    )
+
+
+def main():
+    t0 = time.time()
+    d = load_data()
+    summary = json.loads(SUMMARY_PATH.read_text(encoding="utf-8"))
+    gi_main = gi_weekly(14.0, 2.5, S=3)
+    w = np.array(gi_main["w"])
+    print(f"Varicella GI (14.0d, SD 2.5d, S=3): w={np.round(w, 4)}, w0={gi_main['w0']:.2e}, tail={gi_main['tail_beyond_S']:.4f}", flush=True)
+
+    # 1. Primary panel & M0
+    panel = make_panel(d, w, d["D_summer"], lag=1, omega_mult=1.0, S=3)
+    m0_raw = fit_m0_full(panel, phi_bar=0.5)
+    beta0 = m0_raw["_beta"]
+    Vb0 = m0_raw["_Vb"]
+    inf0 = m0_raw["_inf"]
+    m0 = strip_private(m0_raw)
+
+    # Wild bootstrap-t (B=999, Mammen & Webb6) + Nonlinear pairs cluster moment bootstrap-t (B=999)
+    sp0 = qdgmm.spec_m0(panel, phi_bar=0.5)
+    mod0 = qdgmm.QDModel(panel, sp0)
+    phi_g = inf0["infl_b"]
+    wild_mam = WB.score_wild_bootstrap(phi_g, 999, 20261119, "mammen")
+    wild_web = WB.score_wild_bootstrap(phi_g, 999, 20261120, "webb6")
+    print("Running nonlinear pairs cluster bootstrap (B=999)...", flush=True)
+    pairs = WB.pairs_moment_bootstrap(mod0, beta0, 999, 20261119)
+    tpk = m0["est"]["tpk"]
+    tpk_se = m0["se"]["tpk"]
+    ci_wild_mam = [float(tpk - wild_mam["q95"][3] * tpk_se), float(tpk + wild_mam["q95"][3] * tpk_se)]
+    ci_wild_web = [float(tpk - wild_web["q95"][3] * tpk_se), float(tpk + wild_web["q95"][3] * tpk_se)]
+    ci_pairs = [float(tpk - pairs["q95"][3] * tpk_se), float(tpk + pairs["q95"][3] * tpk_se)]
+    print(f"M0 primary: tpk={tpk:+.3f} (SE {tpk_se:.3f}) | t15={np.round(m0['ci_t']['tpk'], 3)} | wild(Mam)={np.round(ci_wild_mam, 3)} | pairs({pairs['ok']}/999)={np.round(ci_pairs, 3)}", flush=True)
+
+    # Delete-one-state jackknife
+    jk = jackknife_m0(d, w, lag=1, phi_bar=0.5)
+    tc = m0["tcrit"]
+    ci_jk = [float(tpk - tc * jk["se"]["tpk"]), float(tpk + tc * jk["se"]["tpk"])]
+    print(f"Jackknife: SE(tpk)={jk['se']['tpk']:.3f}, CI={np.round(ci_jk, 3)}, LOO range={np.round(jk['tpk_range'], 3)}", flush=True)
+
+    # Cases averted psi^dagger (Theorem 4)
+    def idx_fn(b):
+        return b[0] * panel["D"] + b[1] * panel["Db"], float(b[2])
+    psi_res = psi_mod.psi_with_se(panel["Yall"], panel, beta0, Vb0, idx_fn)
+    Y_treated_sum = float(panel["Y"][panel["D"] == 1].sum())
+    Y_total_sum = float(panel["Y"].sum())
+    psi_res["treated"]["obs_cases"] = Y_treated_sum
+    psi_res["treated"]["pct_of_counterfactual"] = float(100.0 * psi_res["treated"]["est"] / (Y_treated_sum + psi_res["treated"]["est"]))
+    psi_res["network"]["obs_cases"] = Y_total_sum
+    psi_res["network"]["pct_of_counterfactual"] = float(100.0 * psi_res["network"]["est"] / (Y_total_sum + psi_res["network"]["est"]))
+    print(f"Cases averted: treated={psi_res['treated']['est']:.0f} (SE {psi_res['treated']['se']:.0f}), network={psi_res['network']['est']:.0f} (SE {psi_res['network']['se']:.0f})", flush=True)
+
+    # 2. Global root search (M0-G, M0-GI)
+    glob = fit_global_score(panel, phi_bar=0.5)
+    print(f"Global roots: n_interior={glob['n_interior_roots']}, phis={glob['interior_phis']}, M0-G={glob['M0_G']['kind']} ({glob['M0_G']['est']['phi']:.3f}), M0-GI={glob['M0_GI']['kind']} ({glob['M0_GI']['est']['phi']:.3f})", flush=True)
+
+    # 3. Comparators (M0', M1, M2, M3, M4)
+    m0p = qdgmm.fit(panel, qdgmm.spec_m0prime(panel))
+    comparators = dict(M0_prime=dict(ok=m0p["ok"], est=m0p["est"], se=m0p["se"]))
+    for nm, fn in [("M1", cmp.poisson_fe), ("M2", cmp.m2_logr_did), ("M3", cmp.m3_logy_twfe), ("M4", cmp.poisson_qmle)]:
+        r = fn(panel)
+        rec = dict(ok=r["ok"], est=r.get("est"), se=r.get("se"))
+        if r["ok"] and "kappa" in r["est"] and r.get("Vb") is not None:
+            rec["est"]["tpk"] = float(r["est"]["tau"] + r["est"]["kappa"])
+            rec["se"]["tpk"] = tsum(r["Vb"], 0, 1)
+            rec["ci_t_tpk"] = [float(rec["est"]["tpk"] - tc * rec["se"]["tpk"]),
+                               float(rec["est"]["tpk"] + tc * rec["se"]["tpk"])]
+        elif r["ok"]:
+            rec["ci_t_tau"] = [float(r["est"]["tau"] - tc * r["se"]["tau"]),
+                               float(r["est"]["tau"] + tc * r["se"]["tau"])]
+        comparators[nm] = rec
+        print(f"  {nm}: est={r.get('est')}, se={r.get('se')}", flush=True)
+
+    # 4. Remark 4 adjacent-state score dependence
+    rem4 = remark4_adjacent_dependence(d, panel, beta0)
+    print(f"Remark 4 adj score corr: {rem4['adj_pair_score_corr']} | SE(tpk) {rem4['se_cluster']['tpk']:.3f} -> {rem4['se_with_adjacent']['tpk']:.3f}", flush=True)
+
+    # 5. Stock-Wright robust sets (phi_bar = 0.5, 0.25, 1.0)
+    print("Computing Stock-Wright robust sets (304-pt grid x 3 phi_bar)...", flush=True)
+    sw = {}
+    for pb in (0.5, 0.25, 1.0):
+        sw[f"phi_bar_{pb:g}"] = stock_wright_sets(panel, phi_bar=pb)
+        print(f"  phi_bar={pb}: {sw[f'phi_bar_{pb:g}']['sets']}", flush=True)
+
+    # 6. Event-time profiles (with and without pre-trend leads)
+    ev_leads = event_time_analysis(d, w, include_leads=True)
+    ev_noleads = event_time_analysis(d, w, include_leads=False)
+    print(f"Event-time (with leads): pretrend Wald={ev_leads['pretrend_wald']}, e0={ev_leads['coefs']['e0']['est']:+.3f}, e1={ev_leads['coefs']['e1']['est']:+.3f}, e3={ev_leads['coefs']['e3']['est']:+.3f}", flush=True)
+
+    # 7. Sensitivity battery
+    print("Running sensitivity battery...", flush=True)
+    sens = {}
+    for pb in (0.25, 1.0):
+        sens[f"phi_bar_{pb:g}"] = strip_private(fit_m0_full(panel, phi_bar=pb))
+    for om in (0.25, 4.0):
+        p_om = make_panel(d, w, d["D_summer"], lag=1, omega_mult=om)
+        sens[f"omega_x_{om:g}"] = strip_private(fit_m0_full(p_om))
+    for lg in (0, 2, 3, 4):
+        p_lg = make_panel(d, w, d["D_summer"], lag=lg)
+        sens[f"summer_lag_{lg}"] = strip_private(fit_m0_full(p_lg))
+    # Continuous holiday fraction Dshare (lag 1)
+    p_sh = make_panel(d, w, d["Dshare_summer"], lag=1)
+    sens["summer_Dshare_lag1"] = strip_private(fit_m0_full(p_sh))
+    # Generation interval perturbations
+    gi_sens = {}
+    for nm, mn, sd_ in [
+        ("Vink_main_14d_sd2.5", 14.0, 2.5),
+        ("mean_12d_sd2.5", 12.0, 2.5),
+        ("mean_16d_sd2.5", 16.0, 2.5),
+        ("mean_14d_sd4.0", 14.0, 4.0),
+        ("mean_14d_sd6.0_report", 14.0, 6.0),
+    ]:
+        g_i = gi_weekly(mn, sd_, S=3)
+        p_gi = make_panel(d, np.array(g_i["w"]), d["D_summer"], lag=1)
+        gi_sens[nm] = dict(gi=g_i, fit=strip_private(fit_m0_full(p_gi)))
+    # Regional x week FE (4 German macro-regions; also East/West)
+    reg4_lag1 = strip_private(fit_m0_full(panel, wgroup=d["region"]))
+    reg4_lag2 = strip_private(fit_m0_full(make_panel(d, w, d["D_summer"], lag=2), wgroup=d["region"]))
+    east_west = (d["region"] == 3).astype(int)
+    ew_lag1 = strip_private(fit_m0_full(panel, wgroup=east_west))
+    regional = dict(four_region_x_week_lag1=reg4_lag1, four_region_x_week_lag2=reg4_lag2, east_west_x_week_lag1=ew_lag1)
+
+    # Individual calendar years (2015..2019)
+    wks = d["weeks"]
+    by_year = {}
+    for yr in range(2015, 2020):
+        idx_yr = np.where(wks[:, 0] == yr)[0]
+        sl = slice(int(idx_yr[0]) - 3, int(idx_yr[-1]) + 1)
+        p_yr = make_panel(d, w, d["D_summer"], lag=1, t_slice=sl)
+        by_year[str(yr)] = strip_private(fit_m0_full(p_yr))
+
+    # All school holidays (2015-2019 lag 0 & lag 1; 2017-2018 lag 0)
+    all_hol = dict(
+        all_2015_2019_lag0=strip_private(fit_m0_full(make_panel(d, w, d["D_all"], lag=0))),
+        all_2015_2019_lag1=strip_private(fit_m0_full(make_panel(d, w, d["D_all"], lag=1))),
+    )
+    idx_17 = np.where(wks[:, 0] == 2017)[0][0]
+    idx_18_end = np.where(wks[:, 0] == 2018)[0][-1]
+    all_hol["all_2017_2018_lag0"] = strip_private(fit_m0_full(make_panel(d, w, d["D_all"], lag=0, t_slice=slice(int(idx_17) - 3, int(idx_18_end) + 1))))
+
+    # NUTS-2 spatial aggregation
+    nuts2_res = nuts2_aggregation(d, w, lag=1)
+    print(f"NUTS-2 (N=38, zero%={100*nuts2_res['zero_share']:.1f}%): M0 tpk={nuts2_res['M0']['est']['tpk']:+.3f} {np.round(nuts2_res['M0']['ci_t']['tpk'], 3)}, M2 tau={nuts2_res['comparators']['M2']['est']['tau']:+.3f}", flush=True)
+
+    # Holiday ascertainment tipping point
+    print("Running holiday ascertainment tipping point...", flush=True)
+    asc = ascertainment_tipping_point(d, w, lag=1)
+    print(f"Ascertainment tipping: rho*(tpk=0)={asc['rho_star_tpk_zero']}, rho*(upper CI=0)={asc['rho_star_upper_ci_zero']}", flush=True)
 
     out = dict(
-        task="epi-novel-method", version=VERSION, created_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        runtime_sec=round(time.time() - t_start, 1), mode="quick" if a.quick else "full",
-        n_units=N, G=G, T=int(panel["Y"].shape[0]), S=S, first_week=str(d["week_start"][S]),
-        last_week=str(d["week_start"][-1]), ci="95%% t_{G-1}, G = %d" % G, tcrit=tc,
-        data_checks=checks, descriptives=desc, gi=gis, omega="pop/1e5", phi_bar=0.5,
-        table=table, analyses=analyses, profile=profile, J=J, psi=psi, event_time=event_time,
-        event_time2=event_time2, lead_placebo=lead,
-        kansas_subset="not run: the CDC file codes state orders only; Kansas county opt-outs are not coded",
-        notes=notes, git_sha=_git_sha())
-    os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
-    tmp = a.out + ".tmp"
-    with open(tmp, "w") as fh:
-        json.dump(_clean(out), fh, indent=1)
-    os.replace(tmp, a.out)
-    print("[app] wrote %s in %.1f s" % (a.out, time.time() - t_start), flush=True)
-    return 0
-
-
-def _clean(x):
-    if isinstance(x, dict):
-        return {str(k): _clean(v) for k, v in x.items()}
-    if isinstance(x, (list, tuple)):
-        return [_clean(v) for v in x]
-    if isinstance(x, np.ndarray):
-        return _clean(x.tolist())
-    if isinstance(x, (np.bool_,)):
-        return bool(x)
-    if isinstance(x, (np.integer,)):
-        return int(x)
-    if isinstance(x, (float, np.floating)):
-        return _f(x)
-    return x
-
-
-def _git_sha():
-    try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=RUN, capture_output=True, text=True,
-                              timeout=10).stdout.strip() or None
-    except Exception:  # noqa: BLE001
-        return None
+        panel_summary=summary,
+        gi_main=gi_main,
+        primary=dict(
+            M0=m0,
+            wild_mammen=dict(q95=wild_mam["q95"], ci_tpk=ci_wild_mam, B=999),
+            wild_webb6=dict(q95=wild_web["q95"], ci_tpk=ci_wild_web, B=999),
+            pairs_bootstrap=dict(q95=pairs["q95"], ci_tpk=ci_pairs, ok=pairs["ok"], B=999),
+            jackknife=dict(**jk, ci_tpk=ci_jk),
+            psi=psi_res,
+        ),
+        global_roots=glob,
+        comparators=comparators,
+        remark4=rem4,
+        stock_wright=sw,
+        event_time_with_leads=ev_leads,
+        event_time_no_leads=ev_noleads,
+        sensitivities=sens,
+        gi_sensitivity=gi_sens,
+        regional_fe=regional,
+        by_year=by_year,
+        all_holidays=all_hol,
+        nuts2=nuts2_res,
+        ascertainment=asc,
+        seconds=round(time.time() - t0, 2),
+    )
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OUT_PATH.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    print(f"\nSaved {OUT_PATH} in {out['seconds']}s")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

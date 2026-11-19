@@ -1,104 +1,515 @@
 {
- "created_utc": "2026-11-12T14:16:14Z",
- "runtime_sec": 17.3,
- "n_units": 3091,
- "n_states": 49,
- "weeks_total": 28,
- "S": 2,
- "T": 26,
- "first_week": "2020-05-18",
- "first_estimation_week": "2020-06-01",
- "last_week": "2020-11-23",
- "n_edges": 9185,
- "isolated_units": [],
- "adjacency_fips_not_in_units": [],
- "commuting_edges": 131124,
- "negative_weekly_increments_truncated": 417,
- "negative_mass_truncated": 4006.0,
- "cases_window_all_rows": 11751953.0,
- "cases_window_units": 11528182.0,
- "cases_window_dropped_rows_contiguous": 8711.0,
- "dropped_rows_examples": [
-  "Adjuntas, Puerto Rico, US",
-  "Aguada, Puerto Rico, US",
-  "Aguadilla, Puerto Rico, US",
-  "Aguas Buenas, Puerto Rico, US",
-  "Aibonito, Puerto Rico, US",
-  "Aleutians East, Alaska, US",
-  "Aleutians West, Alaska, US",
-  "American Samoa, US",
-  "Anasco, Puerto Rico, US",
-  "Anchorage, Alaska, US",
-  "Arecibo, Puerto Rico, US",
-  "Arroyo, Puerto Rico, US",
-  "Barceloneta, Puerto Rico, US",
-  "Barranquitas, Puerto Rico, US",
-  "Bayamon, Puerto Rico, US",
-  "Bethel, Alaska, US",
-  "Bristol Bay plus Lake and Peninsula, Alaska, US",
-  "Bristol Bay, Alaska, US",
-  "Cabo Rojo, Puerto Rico, US",
-  "Caguas, Puerto Rico, US",
-  "Camuy, Puerto Rico, US",
-  "Canovanas, Puerto Rico, US",
-  "Carolina, Puerto Rico, US",
-  "Catano, Puerto Rico, US",
-  "Cayey, Puerto Rico, US",
-  "Ceiba, Puerto Rico, US",
-  "Chugach, Alaska, US",
-  "Ciales, Puerto Rico, US",
-  "Cidra, Puerto Rico, US",
-  "Coamo, Puerto Rico, US"
- ],
- "cdc_fips_missing": [],
- "cdc_all_unit_weeks_have_7_days": true,
- "share_unit_weeks_treated": 0.5677027598735784,
- "median_weekly_cases": 27.0,
- "frac_zero_unit_weeks": 0.07427270238658139,
- "n_units_ever_treated_in_window": 2291,
- "n_units_treated_at_window_start": 571,
- "n_units_on_to_off": 82,
- "merged_units": {
-  "C29095": [
-   29095
+  "N": 400,
+  "G": 16,
+  "T_est": 261,
+  "S_pre": 3,
+  "first_presample_week": [
+    2014,
+    50
   ],
-  "U25007": [
-   25007,
-   25019
+  "first_est_week": [
+    2015,
+    1
   ],
-  "UT_Bear River": [
-   49003,
-   49005,
-   49033
+  "last_est_week": [
+    2019,
+    52
   ],
-  "UT_Central Utah": [
-   49023,
-   49027,
-   49031,
-   49039,
-   49041,
-   49055
+  "total_cases_2015_2019": 115129,
+  "total_cases_2014_2019": 139230,
+  "mean_count": 1.1027681992337164,
+  "median_count": 0.0,
+  "iqr_count": [
+    0.0,
+    1.0
   ],
-  "UT_Southeast Utah": [
-   49007,
-   49015,
-   49019
-  ],
-  "UT_Southwest Utah": [
-   49001,
-   49017,
-   49021,
-   49025,
-   49053
-  ],
-  "UT_TriCounty": [
-   49009,
-   49013,
-   49047
-  ],
-  "UT_Weber-Morgan": [
-   49029,
-   49057
-  ]
- }
+  "max_count": 100,
+  "zero_share": 0.588103448275862,
+  "summer_share_lag1": 0.1175383141762452,
+  "all_holiday_share_lag0": 0.25202107279693486,
+  "counties_per_state": {
+    "min": 1,
+    "median": 16.5,
+    "max": 96,
+    "by_state": {
+      "SH": 15,
+      "HH": 1,
+      "NI": 45,
+      "HB": 2,
+      "NW": 53,
+      "HE": 26,
+      "RP": 36,
+      "BW": 44,
+      "BY": 96,
+      "SL": 6,
+      "BE": 1,
+      "BB": 18,
+      "MV": 8,
+      "SN": 13,
+      "ST": 14,
+      "TH": 22
+    }
+  },
+  "n_nuts2": 38,
+  "county_edges": 1043,
+  "county_mean_degree": 5.215,
+  "county_min_degree": 1,
+  "county_max_degree": 12,
+  "state_edges": 29,
+  "state_mean_degree": 3.625,
+  "state_graph_diameter": 5,
+  "total_population_2017": 83094415.58740444,
+  "median_county_pop": 157030.69236259814,
+  "n_imputed_pop_counties": 3,
+  "stagger_by_year": {
+    "2015": {
+      "earliest_start_week": 27,
+      "latest_start_week": 32,
+      "span_weeks": 5,
+      "states": {
+        "SH": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "HH": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "NI": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "HB": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "NW": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "HE": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "RP": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "BW": {
+          "start_week": 31,
+          "end_week": 37,
+          "n_weeks": 7
+        },
+        "BY": {
+          "start_week": 32,
+          "end_week": 37,
+          "n_weeks": 6
+        },
+        "SL": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "BE": {
+          "start_week": 29,
+          "end_week": 35,
+          "n_weeks": 7
+        },
+        "BB": {
+          "start_week": 29,
+          "end_week": 35,
+          "n_weeks": 7
+        },
+        "MV": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "SN": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "ST": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "TH": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        }
+      }
+    },
+    "2016": {
+      "earliest_start_week": 25,
+      "latest_start_week": 31,
+      "span_weeks": 6,
+      "states": {
+        "SH": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "HH": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "NI": {
+          "start_week": 25,
+          "end_week": 30,
+          "n_weeks": 6
+        },
+        "HB": {
+          "start_week": 25,
+          "end_week": 30,
+          "n_weeks": 6
+        },
+        "NW": {
+          "start_week": 28,
+          "end_week": 33,
+          "n_weeks": 6
+        },
+        "HE": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "RP": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "BW": {
+          "start_week": 30,
+          "end_week": 36,
+          "n_weeks": 7
+        },
+        "BY": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "SL": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "BE": {
+          "start_week": 29,
+          "end_week": 35,
+          "n_weeks": 7
+        },
+        "BB": {
+          "start_week": 29,
+          "end_week": 35,
+          "n_weeks": 7
+        },
+        "MV": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "SN": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "ST": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "TH": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        }
+      }
+    },
+    "2017": {
+      "earliest_start_week": 25,
+      "latest_start_week": 31,
+      "span_weeks": 6,
+      "states": {
+        "SH": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "HH": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "NI": {
+          "start_week": 25,
+          "end_week": 30,
+          "n_weeks": 6
+        },
+        "HB": {
+          "start_week": 25,
+          "end_week": 30,
+          "n_weeks": 6
+        },
+        "NW": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "HE": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "RP": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "BW": {
+          "start_week": 30,
+          "end_week": 36,
+          "n_weeks": 7
+        },
+        "BY": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "SL": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "BE": {
+          "start_week": 29,
+          "end_week": 35,
+          "n_weeks": 7
+        },
+        "BB": {
+          "start_week": 29,
+          "end_week": 35,
+          "n_weeks": 7
+        },
+        "MV": {
+          "start_week": 30,
+          "end_week": 35,
+          "n_weeks": 6
+        },
+        "SN": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "ST": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "TH": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        }
+      }
+    },
+    "2018": {
+      "earliest_start_week": 26,
+      "latest_start_week": 31,
+      "span_weeks": 5,
+      "states": {
+        "SH": {
+          "start_week": 28,
+          "end_week": 33,
+          "n_weeks": 6
+        },
+        "HH": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "NI": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "HB": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "NW": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "HE": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "RP": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "BW": {
+          "start_week": 30,
+          "end_week": 36,
+          "n_weeks": 7
+        },
+        "BY": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "SL": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "BE": {
+          "start_week": 27,
+          "end_week": 33,
+          "n_weeks": 7
+        },
+        "BB": {
+          "start_week": 27,
+          "end_week": 33,
+          "n_weeks": 7
+        },
+        "MV": {
+          "start_week": 28,
+          "end_week": 33,
+          "n_weeks": 6
+        },
+        "SN": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "ST": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "TH": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        }
+      }
+    },
+    "2019": {
+      "earliest_start_week": 25,
+      "latest_start_week": 31,
+      "span_weeks": 6,
+      "states": {
+        "SH": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "HH": {
+          "start_week": 26,
+          "end_week": 31,
+          "n_weeks": 6
+        },
+        "NI": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "HB": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "NW": {
+          "start_week": 29,
+          "end_week": 34,
+          "n_weeks": 6
+        },
+        "HE": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "RP": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "BW": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "BY": {
+          "start_week": 31,
+          "end_week": 36,
+          "n_weeks": 6
+        },
+        "SL": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "BE": {
+          "start_week": 25,
+          "end_week": 31,
+          "n_weeks": 7
+        },
+        "BB": {
+          "start_week": 25,
+          "end_week": 31,
+          "n_weeks": 7
+        },
+        "MV": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "SN": {
+          "start_week": 28,
+          "end_week": 33,
+          "n_weeks": 6
+        },
+        "ST": {
+          "start_week": 27,
+          "end_week": 32,
+          "n_weeks": 6
+        },
+        "TH": {
+          "start_week": 28,
+          "end_week": 33,
+          "n_weeks": 6
+        }
+      }
+    }
+  },
+  "checksums": {
+    "rki_varicella_2014_2019.json": {
+      "bytes": 1778770,
+      "sha256": "b55d8973975aba56de69b2f06adc4174e1f136432115efe87a94c06ba4f45d01"
+    },
+    "germany_school_holidays_2014_2019.json": {
+      "bytes": 275326,
+      "sha256": "fc799aa000bd362105c95e2a722ac2a5279abc8d3767b2cf18a97cd721bd008a"
+    },
+    "counties_ags.geojson": {
+      "bytes": 1289615,
+      "sha256": "8a0d0bf29ff31b6e536622613ce6e2f6198a6999bd725a631b4b1707780a6abd"
+    }
+  }
 }

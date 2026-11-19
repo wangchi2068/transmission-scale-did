@@ -1,10 +1,9 @@
 # 传播尺度双重差分（QD-GMM）
 
 论文、LaTeX 源码、实验代码与验证材料。按 *Biometrics* Regular Article 规范拆分为两份独立 PDF：
-- 英文主稿 `main.pdf`（共 32 页）：首页为标题/摘要（不计入限页），正文、Back Matter 与 References 为第 1–19 印刷页，加上 6 页 `endfloat` 排出的图表（不计入限页），计入限页的共 25 页（上限 25，恰好用满）。
-- 网络补充材料 `supporting_information.pdf`（共 43 页）：Web Appendices A–F 与附带文献，与主稿通过 `xr` 双向交叉引用。
-- 中文阅读稿 `paper_zh/main.pdf`（26 页）。
-- 回复信 `response/`：`response-to-reviewers-r1r2.md`（第一、二轮）与 `response-to-reviewers-r3.md`（第三轮小修）。
+- 英文主稿 `main.pdf`：首页为标题/摘要（不计入限页，≤ 225 词），含正文、Back Matter、References 及 `endfloat` 排出的图表（未强行压缩，保留完整限定条件与独立的 Data Availability Statement）。
+- 网络补充材料 `supporting_information.pdf`：Web Appendices A--F（含 Web Tables 1--15 与 Web Figures 1--4）及附带文献，与主稿通过 `xr` 双向交叉引用。
+- 中文阅读稿 `paper_zh/main.pdf`（已与最新英文稿逐节同步）。
 
 ## 目录
 
@@ -13,20 +12,20 @@ QD-GMM_transmission_DiD_2026-11-13/
 ├── main.pdf, main.tex, supporting_information.pdf, supporting_information.tex
 ├── sections/, tables/, figures/
 ├── bibliography.bib, biom.cls, biom.bst, endrotfloat.sty, compile.sh
-├── paper_zh/                  中文阅读稿（结构与英文逐节对应，含最新文献核验）
+├── paper_zh/                  中文阅读稿（结构与英文逐节对应）
 ├── experiment/
-│   ├── code/                  dgp、qdgmm、comparators、psi、simulate、application、make_tables …
+│   ├── code/                  dgp、qdgmm、comparators、psi、simulate、data_prep、application、calibrated_sim_germany、make_figure_germany、make_tables_germany …
 │   ├── theory/                numeric_checks.py（Web Appendix B 的 8 项数值核验）
-│   ├── data/                  raw（JHU、CDC 口罩令、Census 邻接与通勤、ACS）与 processed 面板
-│   ├── analysis/              results.json、metrics.csv、实验报告与设计文档
+│   ├── data/                  raw/germany（RKI SurvStat 水痘、OpenHolidays 16 州学校假期、德国 400 县 AGS 边界）与 processed 面板
+│   ├── analysis/              results.json、germany_application_results.json、germany_calibrated_sim.json …
 │   └── logs/                  运行日志
 ├── verification/
-│   ├── revision/              修订轮新增的应用诊断（区域效应、校准模拟、代际重组、稳健集、事件权重、报告率、总体根），各子目录的 results.json 是正文数字的出处
 │   ├── root_selection/        根选择规则在 9 个独立设计上的验证（18000 次重复）
-│   ├── application/           τ+κ 联合区间、M0-ET 分箱修正、STROBE 清单、少簇检查（删除一州刀切 + 野聚类 bootstrap-t）
-│   └── same_week/             同周传播的匹配模拟（w0 = 0 对 w0 = 0.3，每臂 1000 次）
-├── response/                  两封逐点回复信
-└── scripts/                   构建与质量检查脚本（见下）
+│   ├── same_week/             同周传播的匹配模拟（w0 = 0 对 w0 = 0.3，每臂 1000 次）
+│   ├── revision/common/       qdx.py（分组周效应、满秩得分形式 J_LM / S3、全局求根）
+│   ├── revision/population_roots/ 零传染设计总体多根验证
+│   └── application/           wild_bootstrap.py（得分野 bootstrap-t 与非线性成对集群矩 bootstrap-t）
+└── scripts/                   构建与质量检查脚本
 ```
 
 ## 编译与复现
@@ -44,63 +43,27 @@ xelatex -interaction=nonstopmode main.tex
 xelatex -interaction=nonstopmode main.tex
 xelatex -interaction=nonstopmode supporting_information.tex
 ```
-也可直接执行 `bash compile.sh`（或 `bash compile.sh --clean` 编译并清理中间临时文件），依赖 XITS Math 与 Times New Roman 字体、`xelatex`/`bibtex` 及 `pypdf`。
-
 中文稿：`cd paper_zh && xelatex main && bibtex main && xelatex main && xelatex main`。
 
-实验：见 `experiment/code/README.md`，依赖锁在 `experiment/code/requirements.txt`（Python 3.11）。应用部分可用
-`python -I application.py --quick` 做烟测，应与论文一致：τ = 0.040、κ = −0.506、φ = 0.772、τ+κ = −0.466。
+德国水痘应用一键复现（Python 3.11，见 `experiment/code/README.md`）：
+```bash
+python experiment/code/data_prep.py                 # 校验 SHA-256 并构建 processed/panel.npz
+python experiment/code/application.py               # 生成 germany_application_results.json
+python experiment/code/calibrated_sim_germany.py    # 400 县 x 261 周校准模拟 (R=500 x 2)
+python experiment/code/make_figure_germany.py       # 生成 Figure 3 (fig_03_application.png/.pdf)
+python experiment/code/make_tables_germany.py       # 生成 Table 3 及 Web Appendix F 全部附表
+```
 
 ## 主要结果
 
-- 正溢出核心情景（8 个）：M0 对 τ 的偏倚 −0.002 到 0.001，95% 区间覆盖率 94.5%–95.4%，反馈实施、过度离散与小计数同时在场。
-- 无传染边界情景：局部求解约一半重复选到非相合根；剖面规则把它修回。Oracle 在 T=26 随机实施下覆盖率为 80.2%/80.5%，系无尺度权重 $s_{it}$ 导致的单个州集群极端集中（情景 16 单簇占全样本病例 95 分位达 58.5%）所致；使用 $s_{it}$ 的 M0$'$ 与 M0-GI 保持约 95% 覆盖率。
-- 同周传播匹配实验（w0 = 0 对 0.3，每臂 1000 次）：单元内周内再感染（非线性周内份额 14.5%，A4 跨集群独立性仍成立而条件均值 A1 误设）使 τ 偏倚 −0.033、覆盖率 0.890；τ+κ 偏倚 −0.053、覆盖率 0.783；J 检验 4.9% 对 4.8%，无功效。
-- 应用：政策层面总效应 τ+κ = −0.466（95% 区间 −1.091 到 0.159），来自联合协方差；工作模型被过度识别检验拒绝（J = 17.873，p = 0.0001）。
-- 少簇检查（网络附录 E）：删除一州刀切标准误比夹心大 13%–30%；Mammen 得分野聚类 bootstrap-t 临界值 1.72–1.94（τ+κ 区间 −0.999 到 0.067）；纳入雅可比簇间变异的非线性成对集群矩 bootstrap-t 临界值 1.59（τ）、2.22（κ）、2.44（φ）、2.78（τ+κ），政策层面合计区间 −1.330 到 0.397 仍含零。
-
-## 目录内工具
-
-| 脚本 | 作用 |
-|---|---|
-| `experiment/theory/numeric_checks.py` | Web Appendix B 的 S1、S3、S4、S5、S7、S8 数值核验，8/8 通过 |
-| `verification/root_selection/build_rsel_table.py` | 由 `full.jsonl` 重算 Web Table 7（t 临界值、Multi 列） |
-| `experiment/code/make_tables.py` | 由 `analysis/results.json` 生成正文与应用表 |
-| `scripts/split_app_table.py` | 由 `results.json` 分别生成 Table 3 与敏感性附表（Web Table 8） |
-| `scripts/scan_control_chars.py` | 扫描源文件里被 shell 转义破坏的控制字符 |
-| `scripts/qa_checks.py` | running head 长度、摘要词数、PDF 未解析引用扫描 |
-| `scripts/section_pages.py` | 报告各节起始页与 *Biometrics* 计页总数 |
-
-## 版本说明
-
-`5eaa6a7` 之后的这一版按 2026-11-16 的同行评审意见做了三类改动：
-
-**错误修正**
-- Theorem 3(a) 后的衰减表述改写：上界随 T 增长，不推出衰减速率，也未证明下界。
-- M0-ET 剔除窗口前已暴露的 435 个单位（剩 2656 个单元、37 个州），联合检验 F = 2.089（7, 30），p = 0.076，卡方形式 p = 0.014。
-- 描述统计区分 1768（进入处理的次数）与 1720（改变状态的单位）。
-- 参数空间上界改用 `\bar\Phi`，与工具参考值 `\bar\phi` 分开。
-
-**新增证据**
-- 同周传播匹配实验（`verification/same_week/`），写入正文 3.2.1 节。
-- 边界推断诊断（Oracle 重尾与簇内病例集中度分析）写入正文 3.2 节。
-- Web Table 7 按 t_{G−1} 重算并补 Multi 列；Table 3 以 τ+κ 为首列。
-
-**结构**
-- 方法节四小节（伪真值、异质与动态效应、避免病例数、周内传播与 A4）移入 Web Appendix A.9–A.12，正文保留一段概述。
-- 模拟、应用、讨论、引言的篇幅与语域按 Biometrics 同类论文重写，正文由压缩前的 40 页降到 26 页。
-- 新增 Web Appendix D（数据来源与清洗）；补利益冲突、资助、报告规范声明与 STROBE 清单。
-- 旧的 `paper.pdf`、`paper.html` 已删除，`main.pdf` 是唯一编译产物。
-
-2026-11-18 按第二轮评审（大修 6/10）的意见补做了应用诊断，2026-11-19 再按第三轮评审（小修 7/10）改写了措辞。合并后的当前状态：
-
-- **应用改为对周度工作模型的诊断。** 加入区域 × 周、分区 × 周效应与区域特定 φ 后，$J_{LM}$ 仍在 16.9–17.8，校准 95 分位 6.38–6.66；$J=17.873$ 与 $Q_G=40.64$ 超过全部 600 次校准抽样，$Q_{GI}=27.62$ 被超过 8 次。τ+κ = −0.466（95% 区间 −1.091 到 0.159）因此报为被拒绝模型的伪真值，不作因果解读。
-- **新增 Web Appendix F 与网络表 10–17**：区域效应、按应用校准的模拟（并给出 $J$、$Q$ 的参照分布）、代际分布同周质量重组、Stock–Wright 识别稳健集、事件时间隐含权重、报告率临界点。各表注标明对应的 `verification/revision/*/results.json`。
-- **少簇推断成文。** Web Appendix E 报告删除一州刀切（标准误比夹心大 14%–30%）与两种 bootstrap-t；正文 §4 给出成对集群矩区间 $[-1.330, 0.397]$。
-- **第三轮只改措辞，不动数字。** 讨论的校准覆盖率句限定为"工作模型成立时"，并写出同周情形 τ+κ 覆盖率 0.783；正文补出 τ+κ 投影所依赖的"给定 φ 强识别"条件（φ=0 处条件标准误 2.13）；事件时间写出隐含权重非凸（2.109 至 −0.471）并把 ω 加权对比标为线性化核对；正文补出集群规模 1–254 县与 τ̂ 随 φ̄ 的移动（0.074 到 0.018）；摘要 "regional week effects" 改 "division × week effects"。
-- **排版与一致性。** 0.292 改为 0.291（二次舍入）；表 3 注的均值改为 $e_0$–$e_5$ 的均值；网络附录 C 印出 C.1／C.2 编号；A.12 去掉代码变量名；网络表 11 的 "stress design" 改名 "high-noise design"，避免与同周的 "stress regime" 混淆；主稿与 SI 均零 Overfull、零未定义引用。
-- **篇幅。** 新增披露与为它腾出的删减相抵后，第 1–5 节净增约 170 词（致谢与数据可得性声明合段，利益冲突与资助合用一个标题）；未删任何数字、条件或披露，计入限页仍恰好 25 页。
-
+- **正溢出核心模拟（8 个情景，$R=8000$）**：M0 对 $\tau$ 偏倚 $-0.002$ 至 $0.001$，95\% 区间覆盖率 94.5\%--95.4\%，同时存在反馈实施、过度离散与小计数；常用比较量 M1--M4 与 M0$'$ 均存在偏倚。
+- **无传染边界情景与同周压力测试**：零传染下总体矩存在第二根，M0-G/M0-GI 配合剖面 Stock--Wright $S$ 集控制选根风险；同周传播匹配实验（$w_0=0.3$）将周度 QD-GMM 的有效适用域明确界定在多周代际间隔病原体。
+- **实证应用（德国 400 县、16 联邦州 2015--2019 年周度水痘与交错暑假，115,129 例）**：
+  - 水痘 14 天代际间隔满足周度聚合（$w_0 = 2.6\times 10^{-6}$），且 16 州每年 5--6 周交错轮换暑假提供非吸收式重复开关暴露。
+  - QD-GMM 定位唯一内部传染耦合根 $\hat\phi = 0.325$（95\% CI $0.206$--$0.445$），估计政策层面传播率下降 21.2\%（$\hat\tau+\hat\kappa = -0.238$，SE 0.058，95\% $t_{15}$ 区间 $[-0.362, -0.114]$），与欧洲历史水痘基准（22\%--31\%）一致，对应受处理周避免 2,440 例（SE 670）、全网络避免 2,995 例（SE 900）。
+  - 全部有限簇与识别稳健区间一致不含零：Mammen 得分野 bootstrap-$t$ $[-0.357, -0.120]$、Webb 六点 $[-0.363, -0.113]$、非线性成对集群矩 bootstrap-$t$（999/999 收敛）$[-0.383, -0.094]$、删一州刀切 $[-0.374, -0.103]$（16 次删一范围 $[-0.268, -0.202]$）、Stock--Wright Bonferroni 95\% 投影 $[-0.492, -0.081]$；$S_1(F)$ 95\% 集 $[0.21, 2.33]$ 单一连通且不含零，$S_{3,\mathrm{inv}}(\chi^2)$ 与 $S_{3,\mathrm{oi}}(F)$ 均非空。
+  - 事件时间剖面显示平缓前趋势（$p=0.741$）与零起始周效应（$\hat\tau_0 = -0.008$，排除即时暑期漏报），随后在潜伏期后（$e_1$--$e_5$）持续下降。
+  - 真实数据直接验证定理 3：两步 EpiEstim 对数 $R$ 回归（M2）在 58.8\% 县级零计数下反号为 $+0.064$，而在 38 个 NUTS-2 区域聚合（零计数 2.9\%）下立即反转为 $-0.102$；$\log(Y+1)$ TWFE（M3）严重衰减至 $-0.102$。
 
 ## 投稿前仍需处理
 

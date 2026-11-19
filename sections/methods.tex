@@ -7,7 +7,7 @@ Units $i=1,\dots,N$ (counties) are partitioned into $G$ clusters (states); $g(i)
 cluster of unit $i$ and the cluster sizes $n_g$ are bounded. Weeks are indexed by
 $t=1-S,\dots,T$; weeks $1,\dots,T$ form the estimation window and the $S$ earlier weeks are
 used only to build lags. $Y_{it}$ denotes reported new cases and $D_{it}\in\{0,1\}$ the policy,
-with $D_{it}=0$ for $t\le 0$. When units are already exposed before week $1$, as in Section~\ref{s:application}, the potential outcomes and expectations below condition on $(Y_{\le 0},D_{\le 0})$, and $\mathbf 0$ represents lifting the policy from week $1$ onward. The matrix $W=(W_{ij})$ is a known, non-negative, row-normalised
+with $D_{it}=0$ for $t\le 0$. When units are already exposed before week $1$, the potential outcomes and expectations below condition on $(Y_{\le 0},D_{\le 0})$, and $\mathbf 0$ represents lifting the policy from week $1$ onward. The matrix $W=(W_{ij})$ is a known, non-negative, row-normalised
 spatial weight matrix with zero diagonal, and $\bar D_{it}=\sum_j W_{ij}D_{jt}$ is the share of
 neighbours under the policy. With known weekly generation-interval weights $w_1,\dots,w_S\ge 0$,
 $\sum_s w_s=1$ \citep{wallinga2007generation}, we write
@@ -93,9 +93,9 @@ in ascertainment within the generation window.
 
 Proposition~\ref{prop:ascertainment} assumes deterministic reporting without delays; under binomial
 thinning A1 holds only approximately, and fixed $\omega_i$ approximates the required scaling of
-$\omega^Y_{it}$ when $\omega_i\ll L_{it}$. On a connected contiguity graph such as that of US counties,
+$\omega^Y_{it}$ when $\omega_i\ll L_{it}$. On a connected county contiguity graph,
 $c_i=c_j$ for all neighbours means a nationally homogeneous unit reporting factor, so with $\phi_0>0$
-the proposition covers time trends in testing but neither county differences in ascertainment nor
+the proposition covers common time trends in surveillance but neither county differences in ascertainment nor
 reporting that changes with the policy; Section~\ref{s:application} reports the tipping point for the
 latter.
 
@@ -188,15 +188,19 @@ $\E\{z_{it}D_{i,t+1}u_{it}(\theta_0)\}=-\E\{z_{it}\cov(D_{i,t+1},\varepsilon_{it
 
 Switchers identify $\tau$ directly, with first-order weights proportional to expected cases at
 switching, $s_{it}\mu_{it}\Sw_{i,t+1}$, so large outbreaks carry more weight; treated stayers inform
-$\tau$ only through common week effects, and time-invariant heterogeneous effects $\tau_i$ receive
-non-negative weights (Proposition~\ref{prop:hetero}). Under dynamic effects the pooled estimand is, to
-first order, a weighted sum of event-time effects whose weights sum to one but can be negative
-\citep[Web Appendix~\ref{ss:hetero};][]{goodmanbacon2021did,sun2021estimating}, so we recommend the
-event-time specification M0-ET. Absorbing adoption is needed only for Theorem~\ref{thm:ident}(b) and
-Proposition~\ref{prop:sources}; Theorems~\ref{thm:ident}(a) and \ref{thm:asy} hold for arbitrary binary
-paths. Part (c) shows that lead-placebo tests are \emph{invalid under feedback}: if adoption follows
-elevated cases, the lead moment is negative even under exact specification, so specification testing
-uses the $J$ test of Corollary~\ref{cor:J}.
+$\tau$ only through common week effects. Because $D_{it}\Sw_{i,t+1}=0$, the default instrument
+$s_{it}D_{it}$ relies on staggered adoption ($A_t>0$ and $K_t>0$ in some week $t$): simultaneous
+adoption leaves $\tau$ unidentified by $s_{it}D_{it}$ alone and requires an alternative
+$\F_{t-1}$-measurable predictor of switching, and the earliest cohort of switchers carries zero
+first-order weight when $A_t=0$. Time-invariant heterogeneous effects $\tau_i$ receive
+non-negative weights (Proposition~\ref{prop:hetero}), whereas under dynamic effects the pooled
+estimand is, to first order, a weighted sum of event-time effects whose weights sum to one but can be
+negative \citep[Web Appendix~\ref{ss:hetero};][]{goodmanbacon2021did,sun2021estimating}, so we
+recommend the event-time specification M0-ET. Absorbing adoption is needed only for
+Theorem~\ref{thm:ident}(b) and Proposition~\ref{prop:sources}; Theorems~\ref{thm:ident}(a) and
+\ref{thm:asy} hold for arbitrary binary paths. Part (c) shows that lead-placebo tests are
+\emph{invalid under feedback}: if adoption follows elevated cases, the lead moment is negative even
+under exact specification, so specification testing uses the $J$ test of Corollary~\ref{cor:J}.
 
 \subsection{Estimation and inference}
 \label{ss:estimation}
@@ -246,16 +250,21 @@ Theorem~\ref{thm:asy} covers interior, globally identified cases. Zero contagion
 the boundary and violates A6(i), and in the zero-contagion simulation designs the population moments
 have a second root whose location moves with $\bar\phi$ (Section~\ref{ss:simresults}), violating global
 identification; inference after root selection at the boundary is not covered. Theorem~\ref{thm:asy} is
-also a large-$G$ result: under A4$'$ the dependence radius of Lemma~\ref{lem:lln} is at least 28 cluster
-steps, which exceeds the diameter (11) of the 49-state contiguity graph of Section~\ref{s:application},
-so for that application (L) is an assumption rather than a consequence of A4$'$.
+also a large-$G$ result: under A4$'$ the dependence radius of Lemma~\ref{lem:lln} exceeds the
+diameter (5) of the 16-state contiguity graph of Section~\ref{s:application}, so for that
+application (L) is a high-level assumption rather than a consequence of A4$'$.
 
 Web Appendix~A.9--A.12 adapts known results to the renewal mean: pseudo-true values for two-step
-log-$R$ regression, Poisson fixed effects, $\log(Y+1)$ TWFE and no-spillover QD-GMM
-(Theorem~\ref{thm:bias}); non-negative event-time weights under time-invariant heterogeneity
-(Proposition~\ref{prop:hetero}, Remark~\ref{rem:dynamic}); cases averted propagated through the renewal
-network, with inference on the realised path as a delta-method consequence of Theorem~\ref{thm:asy}
-(Theorem~\ref{thm:psi}); and within-week transmission (Web Appendix~\ref{ss:weekwithin}).
+log-$R$ regression (separating the small-count Jensen gap from a Nickell-type feedback term), Poisson
+fixed effects (classical fixed-$T$ inconsistency under predetermined regressors), $\log(Y+1)$ TWFE
+and no-spillover QD-GMM (Theorem~\ref{thm:bias}); a first-order expansion with $(\kappa,\phi)$ held
+at their true values giving non-negative weights under time-invariant unit heterogeneity
+\citep[Proposition~\ref{prop:hetero};][]{goodmanbacon2021did,dechaisemartin2020twfe}, whereas under
+dynamic effects pooled weights can be negative, motivating the event-time specification
+(Remark~\ref{rem:dynamic}); cases averted propagated through the renewal network, with inference on
+the realised-path target $\psi^\dagger_{\mathcal P}$ as a delta-method consequence of
+Theorem~\ref{thm:asy} (Theorem~\ref{thm:psi}); and within-week transmission
+(Web Appendix~\ref{ss:weekwithin}).
 
 \subsection{Computation, variants and root selection}
 \label{ss:computation}
@@ -274,16 +283,24 @@ only $\Lambda_{it}(\phi)>0$, so fits with $\hat\phi<0$ are possible and are repo
 occurred in about 0.1\% of replications of a zero-contagion design. We pre-specified a
 global search, M0-G: on a 19-point grid $\phi\in[0,3]$ (Web Appendix~\ref{app:supp}),
 $(\gamma,\tau,\kappa)$ are profiled out, adjacent sign changes in the $\phi$-equation are refined
-to roots, $\phi=0$ is added as a boundary candidate, and the candidate minimising the M0-OI
-criterion $Q$ is selected \citep{heyde1998multiple}, with no Wald interval for $\phi$ at the
-boundary. After interim boundary failures, we added a post hoc variant M0-GI, using the same candidates but replacing the M0-OI extras in $Q$
-with $s_{it}N_{it}/\Lambda_{it}(0.05)$ and $s_{it}N_{it}/\Lambda_{it}(2.0)$ ($s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$);
-by Lemma~\ref{lem:moment} valid roots satisfy the moment at any reference value, whereas a
-spurious $\bar\phi$-induced root need not. M0-G and M0-GI are selection heuristics without a stated
-guarantee; inference after selection is not covered by Theorem~\ref{thm:asy}. Confidence sets that do
-not require selection follow from inverting the Stock--Wright $S$ statistic \citep{stock2000weak} over
-a $\phi$ grid, with week effects, $\tau$ and $\kappa$ profiled out, and projecting onto $\tau+\kappa$
+to roots, $\phi=0$ is added as a boundary candidate, and the candidate minimising the M0-OI criterion $Q$ is selected \citep{heyde1998multiple}, with no
+Wald interval for $\phi$ at the boundary. We also evaluate a secondary invariance variant, M0-GI,
+using the same candidates but replacing the M0-OI extras in $Q$ with
+$s_{it}N_{it}/\Lambda_{it}(0.05)$ and $s_{it}N_{it}/\Lambda_{it}(2.0)$
+($s_{it}=1/\{\Lambda_{it}(\bar\phi)+1\}$); by Lemma~\ref{lem:moment} valid roots satisfy the moment
+at any reference value, whereas a spurious $\bar\phi$-induced root need not. When the number of week
+moments exceeds the cluster count $G$ (as in the 261-week, 16-state application of
+Section~\ref{s:application}), the full cluster covariance $\tilde\Omega$ is singular; both
+over-identification testing ($J_{LM}$) and root selection ($S_3$) then use the rank-safe score form
+that orthogonalises the extra moments against the just-identifying moments and inverts only a
+low-dimensional cluster covariance (Web Appendix~\ref{app:diag}). Because inference after
+data-driven root selection at the boundary lies outside Theorem~\ref{thm:asy}, we pair M0-G and
+M0-GI with identification-robust confidence sets for $\phi$ obtained by inverting the profiled
+Stock--Wright $S$ statistic \citep{stock2000weak} over a $\phi$ grid, with week effects, $\tau$ and
+$\kappa$ profiled out (presuming those nuisance parameters are strongly identified at the tested
+$\phi$), together with a Bonferroni projection onto $\tau+\kappa$
 (Web Appendix~\ref{app:diag}). For applied work, we recommend: (1) fit M0; (2) inspect the profiled
-$\phi$-moment and $Q$ over the $[0,3]$ grid; (3) report M0 if there is a single interior crossing, or
-all candidate roots with their $Q$ values; (4) report the $S$ sets for $\phi$ and $\tau+\kappa$; and
-(5) report $J$ with a reference distribution from a simulation calibrated to the application.
+$\phi$-moment and selection criterion over the $[0,3]$ grid; (3) report M0 if there is a single
+interior crossing, or all candidate roots with their criterion values; (4) report the profiled $S$
+set for $\phi$ and the Bonferroni projection for $\tau+\kappa$; and (5) report $J$ (or score-form
+$J_{LM}$) against a calibrated finite-sample reference distribution.

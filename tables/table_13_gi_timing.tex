@@ -1,26 +1,21 @@
 \begin{table}[!t]
 \centering
-\caption{Application under alternative generation-interval discretisations.}
+\caption{Generation-interval sensitivity for the German varicella application (M0, summer holidays lagged one week).}
 \label{tab:rev-gi}
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{3.0pt}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{lrrlll}
+\begin{tabular}{lccrrrr}
 \toprule
-variant & same-week mass & $\hat\phi$ & $\hat\tau+\hat\kappa$ (95\% CI) & $J$ ($p$) & M0-G $\hat\phi$ / $\hat\tau+\hat\kappa$ \\
+generation-interval specification & $(w_1, w_2, w_3)$ & $w_0$ & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $J_{LM,\mathrm{oi}}$ ($p_F$) & $J_{LM,\mathrm{inv}}$ ($p_F$) \\
 \midrule
-ferretti\_base & 0.304 & 0.772 & -0.466 (-1.091, 0.159) & 17.87 ($<$0.001) & same as M0 \\
-ferretti\_fold & 0.304 & 0.820 & -0.463 (-1.103, 0.177) & 17.02 ($<$0.001) & same as M0 \\
-ferretti\_shift\_1.75 & 0.127 & 0.546 & -0.475 (-1.055, 0.104) & 12.60 (0.002) & 0.0013 / -0.044 \\
-ferretti\_shift\_3.5 & 0.031 & 0.305 & -0.474 (-1.012, 0.064) & 9.95 (0.007) & same as M0 \\
-ferretti\_shift\_7 & 0.000 & 0.239 & -0.444 (-0.936, 0.047) & 28.19 ($<$0.001) & 0.0021 / 0.043 \\
-nishiura\_base & 0.393 & 0.608 & -0.474 (-1.064, 0.117) & 15.63 ($<$0.001) & same as M0 \\
-nishiura\_fold & 0.393 & 0.710 & -0.470 (-1.080, 0.140) & 17.91 ($<$0.001) & same as M0 \\
-nishiura\_shift\_1.75 & 0.201 & 0.511 & -0.476 (-1.050, 0.098) & 10.12 (0.006) & 0.0018 / -0.096 \\
-nishiura\_shift\_3.5 & 0.062 & 0.364 & -0.475 (-1.024, 0.073) & 0.67 (0.715) & same as M0 \\
-nishiura\_shift\_7 & 0.000 & 0.190 & -0.451 (-0.947, 0.045) & 28.36 ($<$0.001) & 0.0053 / -0.127 \\
+Vink et al.\ (2014) primary (14.0 d, SD 2.5) & (0.141, 0.720, 0.138) & 2.6e-06 & -0.238 (-0.362, -0.114) & 0.325 (0.206, 0.445) & 9.05 (0.037) & 4.12 (0.183) \\
+Shorter mean (12.0 d, SD 2.5) & (0.335, 0.615, 0.049) & 3.8e-04 & -0.221 (-0.351, -0.091) & 0.476 (0.294, 0.658) & 8.91 (0.038) & 4.61 (0.153) \\
+Longer mean (16.0 d, SD 2.5) & (0.036, 0.653, 0.310) & 2.1e-09 & -0.245 (-0.364, -0.127) & 0.237 (0.114, 0.361) & 8.61 (0.042) & 3.26 (0.253) \\
+Wider dispersion (14.0 d, SD 4.0) & (0.226, 0.591, 0.183) & 8.5e-04 & -0.222 (-0.344, -0.100) & 0.249 (0.088, 0.411) & 9.16 (0.036) & 4.01 (0.191) \\
+Reporting-convolved (14.0 d, SD 6.0) & (0.328, 0.480, 0.192) & 0.0108 & -0.211 (-0.335, -0.086) & 0.317 (0.099, 0.534) & 6.10 (0.092) & 2.50 (0.339) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Generation interval of Ferretti et al.\ (reference) or Nishiura et al., discretised to weeks. \emph{base}: paper's discretisation (same-week mass dropped); \emph{fold}: same-week mass moved into lag 1; \emph{shift}: infector timing shifted by 1.75, 3.5 or 7 days before discretisation, which moves mass out of the same week. Same-week mass is the share of the generation interval within the same week. M0-G column: selected $\hat\phi$ / $\hat\tau+\hat\kappa$ where M0-G picks a root different from M0; M0-GI keeps the M0 root in all variants. $J$: Hansen statistic, $\chi^2_2$. Variants added in revision (post hoc). Source: \texttt{verification/revision/gi\_timing/results.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Lognormal generation intervals discretised onto weekly lags $s=1,2,3$ under a uniform within-week infection day; $w_0$ is the resulting same-week transmission share. All specifications yield a unique interior root and a significant transmission reduction. Under the broader reporting-convolved dispersion (SD 6.0 d), both $J_{LM,\mathrm{oi}}$ and $J_{LM,\mathrm{inv}}$ pass at the 5\% $F_{2,14}$ level. Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
 \end{table}

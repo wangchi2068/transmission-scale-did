@@ -1,106 +1,35 @@
-# Data contract — application (US county mask orders, June–November 2020)
+# Data Contract: German County-Level Weekly Varicella Panel (2015--2019)
 
-Scope: the single empirical illustration pre-specified in the method brief (state/territorial public mask
-orders and weekly county COVID-19 cases). No other outcome, population or research question is added.
-All files are public; all were obtained through the platform data library, route recorded in
-`data/raw/<name>/.route`. Only the CDC dataset-metadata JSON (licence/attribution record, 23 kB) was fetched
-directly with `curl`, because the library had no copy of the metadata endpoint.
+This directory contains the public raw datasets and deterministic processing pipeline for the empirical application in Section 4 of the manuscript (German county-level weekly Varicella surveillance counts and staggered 16-state summer school holidays, 2015--2019, with three pre-sample lag weeks from late 2014).
 
-Downloaded files are treated as untrusted: each source lives in its own directory under `data/raw/`, code
-lives in `src/`, paths are passed as arguments, and readers run under `python3 -I`.
+## Raw Inputs (`experiment/data/raw/germany/`)
 
-## 1. Sources
+| File | Source | License / Access | SHA-256 |
+| --- | --- | --- | --- |
+| `rki_varicella_2014_2019.json` | Robert Koch-Institut (RKI) SurvStat@RKI 2.0 SOAP service (`https://tools.rki.de/SurvStat/SurvStatWebService.svc`), pathogen `[PathogenOut].[KategorieNz].[Krankheit DE].&[Windpocken]`, weekly county counts 2014--2019 and 2017 RKI county reference populations (`Count / Incidence * 1e5`) | Open public health surveillance data (RKI) | `b55d8973975aba56de69b2f06adc4174e1f136432115efe87a94c06ba4f45d01` |
+| `germany_school_holidays_2014_2019.json` | OpenHolidays API (`https://openholidaysapi.org/SchoolHolidays`), official Kultusministerkonferenz (KMK) German federal-state school holiday schedules for all 16 Länder (`DE-BW` through `DE-TH`), 2014--2019 | Open public schedule data | `fc799aa000bd362105c95e2a722ac2a5279abc8d3767b2cf18a97cd721bd008a` |
+| `counties_ags.geojson` | German administrative county polygons keyed by 5-digit Amtlicher Gemeindeschlüssel (AGS), `m-ad/geofeatures-ags-germany` (`geojson/counties.json`) | Open geodata (BKG / GeoBasis-DE derived) | `8a0d0bf29ff31b6e536622613ce6e2f6198a6999bd725a631b4b1707780a6abd` |
 
-| dir (`data/raw/`) | content | publisher / URL | licence | route |
-|---|---|---|---|---|
-| `jhu_confirmed/time_series_covid19_confirmed_US.csv` | cumulative confirmed cases, county × day | JHU CSSE COVID-19 repository, `github.com/CSSEGISandData/COVID-19` (`csse_covid_19_time_series/`) | CC BY 4.0 | platform data library |
-| `jhu_deaths/time_series_covid19_deaths_US.csv` | used only for its `Population` column | same | CC BY 4.0 | platform data library |
-| `cdc_masks/rows.csv` | "U.S. State and Territorial Public Mask Mandates From April 10, 2020 through August 15, 2021 by County by Day", dataset `62d6-pm5i` | CDC, `data.cdc.gov/api/views/62d6-pm5i/rows.csv` | US federal work (public domain); metadata licence field empty; attribution: Mara Howard-Williams, Public Health Law Program, CDC | platform data library |
-| `cdc_masks/metadata_62d6-pm5i.json` | dataset metadata (attribution, description) | `data.cdc.gov/api/views/62d6-pm5i.json` | as above | direct curl (not in library) |
-| `census_adj2010/county_adjacency.txt` | 2010 county adjacency file | US Census Bureau, `www2.census.gov/geo/docs/reference/county_adjacency.txt` | public domain | platform data library |
-| `acs_commuting/table1.xlsx` | ACS 2011–2015 county-to-county commuting flows | US Census Bureau, `www2.census.gov/programs-surveys/demo/tables/metro-micro/2015/commuting-flows-2015/table1.xlsx` | public domain | platform data library |
+## Processing Rules (`experiment/code/data_prep.py`)
 
-Upstream status: JHU stopped updating on 2023-03-10 and the CDC dataset is final, so the files are frozen;
-a checksum mismatch means a corrupted or substituted file and `fetch_data.sh` aborts.
+1. **Spatial units ($N = 400$ counties across $G = 16$ federal states)**:
+   - RKI reports 412 district keys including the 12 administrative boroughs of Berlin (`11001`--`11012`). Berlin's 12 boroughs are summed into a single city-state county unit (`11000`), matching the standard 400-county German Kreise/kreisfreie Städte partition.
+   - Known county boundary consolidations between the GeoJSON vintage and RKI 2017+ AGS codes are reconciled explicitly: Göttingen (`03152` + `03156` $\to$ `03159`), Wartburgkreis/Eisenach (`16056` $\to$ `16063`), and Berlin boroughs (`11*` $\to$ `11000`). All 400 counties match with 0 isolated units.
+   - Two counties share an undirected contiguity edge if their boundary polygons share at least one boundary vertex rounded to $10^{-3}$ degrees (~100 m), yielding 1,043 undirected edges (mean degree 5.21). The spatial weight matrix $W$ is row-normalised.
+2. **Temporal window ($T = 261$ estimation weeks + $S = 3$ pre-sample lag weeks)**:
+   - Estimation weeks: ISO weeks `2015-W01` through `2019-W52` (261 weeks; 2015 has 53 ISO weeks).
+   - Pre-sample weeks for constructing the renewal pressure at `2015-W01` ($S = 3$): `2014-W50`, `2014-W51`, `2014-W52`.
+3. **Policy exposure ($D_{it}$)**:
+   - For each county $i$ in federal state $s(i)$ and ISO week $t$ (Monday--Sunday), let $f_{it} \in [0, 1]$ be the fraction of calendar days covered by state $s(i)$'s official summer school holiday (*Sommerferien*).
+   - Binary indicator $D^{(0)}_{it} = \mathbf{1}\{7 f_{it} \ge 4\}$ (majority of the week in summer holiday).
+   - Primary exposure aligns with Varicella's ~14-day incubation and reporting lag via a 1-week lag: $D_{it} = D^{(0)}_{i,t-1}$ (with lags 0, 2, 3, 4, continuous fraction $f_{i,t-1}$, and full event-time profiles around holiday onset $e \in \{-2, \dots, 7\}$ evaluated directly in the sensitivity suite).
+4. **Background importation ($\omega_i$)**:
+   - Population-proportional background $\omega_i = \text{pop}_i / 10^5$ (with $\times 0.25$ and $\times 4$ sensitivity). Four counties with zero 2017 RKI count (preventing direct `Count / Incidence` population inversion) are assigned the median county population.
+5. **Derived spatial groupings**:
+   - 4 German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE, RP, SL; South: BW, BY; East: BE, BB, SN, ST, TH) for region $\times$ week fixed-effects sensitivity.
+   - 38 NUTS-2 government districts (*Regierungsbezirke* / state-level equivalents from the first two digits of AGS or NUTS-2 prefix) for low-zero spatial aggregation sensitivity.
 
-## 2. Integrity (recorded 2026-11-12; checked by `fetch_data.sh` against `data/checksums.tsv`)
+## Output (`experiment/data/processed/`)
 
-| file | bytes | sha256 |
-|---|---:|---|
-| jhu_confirmed/time_series_covid19_confirmed_US.csv | 17,801,222 | e8fe5837b1a7ce09e6187ef778bf69fdcfa9fcd7015b1ba597f248b0736d8cf3 |
-| jhu_deaths/time_series_covid19_deaths_US.csv | 11,865,683 | 5eab93b48daea1c31051cbcb0701b73d66105babb5f0e98f44c89173d86a37d6 |
-| census_adj2010/county_adjacency.txt | 726,724 | b6df774db9ad5b94c47036379e207dd4622e46ef22c01ca2b7603453a4901014 |
-| cdc_masks/rows.csv | 217,183,558 | 2354fc3169c01a5fff9297ae3a232fc2c441d4c66e191433b6dc6d86d22d70c0 |
-| cdc_masks/metadata_62d6-pm5i.json | 23,334 | d7d3ad8e24714579c7fd275051941443037e843c27e23ed4f43de3fb8dc3cf5c |
-| acs_commuting/table1.xlsx | 7,046,877 | f98b113197b8426fdf707bbffc219a27ae55842222bc67932210c9fe8fc47610 |
-
-## 3. Key raw variables
-
-* JHU: `UID`, `FIPS`, `Admin2`, `Province_State`, `Combined_Key`, daily cumulative columns `M/D/YY`;
-  deaths file: `UID`, `Population`.
-* CDC: `FIPS_State`, `FIPS_County`, `date` (`M/D/YYYY`), `Face_Masks_Required_in_Public`
-  (`Yes`/`No`/`NA`), `order_code`; every county-day of the window is present (checked).
-* Census adjacency: tab-separated, (county name, FIPS, neighbour name, neighbour FIPS), the focal county
-  given on the first line of each block only; read with latin-1.
-* ACS commuting: 7 header rows; residence state/county, workplace state (3-digit) / county, workers.
-
-## 4. Processing rules (`src/data_prep.py`, fixed before any estimation)
-
-1. Contiguous US + DC (Alaska, Hawaii, territories excluded); clusters = 49 "states" (48 + DC).
-2. Window: estimation weeks 2020-06-01 … 2020-11-23 (week starts; T = 26 Monday-start weeks) plus
-   S = 2 pre-sample lag weeks from 2020-05-18 (28 weeks stored).
-3. Weekly cases = difference of cumulative counts at week ends; negative revisions truncated at 0
-   (417 unit-weeks, total truncated mass 4,006 cases).
-4. Reporting units: Utah health districts reported by JHU are merged with their member counties (6 units);
-   Dukes + Nantucket (MA) merged; Kansas City (MO) assigned to Jackson County; Michigan prison rows and
-   "Out of …"/"Unassigned" rows dropped. Cases in the window: 11,751,953 over all JHU rows, 11,528,182 in
-   the analysis units (8,711 in dropped contiguous-US rows; the rest are AK/HI/territories).
-5. Treatment: D_it = 1 if a state/territorial public mask order is in force on ≥ 4 of the 7 days of the
-   week (population-weighted day share for merged units); `Dshare` keeps the continuous share. Opt-outs
-   permitted under state law (notably Kansas) are **not** coded in the CDC data; see §7.
-6. Networks: W_adj = row-normalised symmetric 2010 Census adjacency (two recodes: 46113→46102 Shannon→
-   Oglala Lakota, 51515→51019 Bedford city→Bedford County; Connecticut uses its 8 historical counties in
-   both JHU and the 2010 file); W_comm (sensitivity) = row-normalised C + Cᵀ of ACS commuter counts.
-7. Exposure offset ω_i = pop_i / 10⁵ (importation term; ×0.25 and ×4 sensitivities).
-
-## 5. Processed file `data/processed/panel.npz`
-
-| key | shape / type | meaning |
-|---|---|---|
-| `Y` | (28, 3091) int | weekly new cases |
-| `D` | (28, 3091) {0,1} | mask order indicator (rule 5) |
-| `Dshare` | (28, 3091) [0,1] | share of days under an order |
-| `pop` | (3091,) | JHU population |
-| `state` | (3091,) | state FIPS (cluster) |
-| `units` | (3091,) str | unit id (county FIPS or merged id) |
-| `edges` | (9185, 2) | adjacency pairs i < j |
-| `comm` | (131124, 3) | commuting (i, j, workers) |
-| `week_start` | (28,) | Monday dates |
-
-Verified by `data_prep.py` (`panel_summary.json`) and again at load time by `application.verify`
-(and `tests/test_application_data.py`): 3,091 units, 49 clusters, 28 weeks, Y non-negative integer, D binary,
-pop > 0, no isolated unit, no adjacency FIPS outside the units, no CDC FIPS missing. Descriptives:
-56.8 % of unit-weeks treated; 2,291 units ever treated in the window, 571 treated at its start; 82 units
-switch on→off (D is not strictly absorbing — handled by the estimator, which does not require absorbing
-treatment); median weekly cases 27; 7.4 % zero unit-weeks.
-
-## 6. Generation interval (weekly renewal weights)
-
-Daily generation-interval distributions are discretised to weeks by
-p_s = E_u[F(7(s+1) − u) − F(7s − u)], u ~ U[0, 7) (infection day uniform within the week). Lags s = 1, 2 are
-kept and renormalised to w; the same-week mass (s = 0, not representable in a weekly lagged renewal model)
-and the mass beyond S = 2 are reported in `application_results.json` so that the approximation is visible.
-* Main: Ferretti et al. (2020, Science) Weibull(shape 2.826, scale 5.665) → w ≈ (0.964, 0.036), same-week
-  mass ≈ 0.30.
-* Sensitivity: Nishiura et al. (2020, IJID) serial interval lognormal(mean 4.7, sd 2.9) → w ≈ (0.913,
-  0.087), same-week mass ≈ 0.39; plus a grid w₁ ∈ {0.6, …, 1.0}.
-
-## 7. Known limitations recorded before analysis
-
-* Kansas: county opt-outs from the state order are not in the CDC data, so D overstates treatment there;
-  the pre-specified sensitivity drops Kansas and Texas (whose order also had county exemptions). A
-  Kansas-only "opt-out" sub-analysis is **not** run because the opt-out status is not available in the
-  data obtained.
-* Confirmed cases depend on testing; testing volume is not modelled (absorbed only to the extent captured by
-  unit and week effects).
-* The 2010 adjacency and 2011–2015 commuting flows are pre-pandemic structural networks.
+- `panel.npz`: compressed NumPy archive containing `Y`, `D_summer`, `Dshare_summer`, `D_all`, `Dshare_all`, `pop`, `state`, `cl`, `states`, `region`, `nuts2`, `ags`, `weeks`, `edges`, `W_indptr`, `W_indices`, `W_data`.
+- `panel_summary.json`: machine-readable summary statistics and checksum verification record.

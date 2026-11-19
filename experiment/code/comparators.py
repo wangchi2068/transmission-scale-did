@@ -166,7 +166,8 @@ def poisson_fe(panel: dict, t_idx=None, phi_start: float = 0.3, max_iter: int = 
     except np.linalg.LinAlgError:
         return dict(ok=False, est=est, se=nan_se, reason="singular Hessian at end")
     se = {nm: (float(np.sqrt(max(V[i, i], 0.0))) if i is not None else float("nan")) for nm, i in idx.items()}
-    return dict(ok=ok, est=est, se=se, iters=it, reason=why)
+    Vb = V[np.ix_([Tn - 1, Tn], [Tn - 1, Tn])] if with_kappa else None
+    return dict(ok=ok, est=est, se=se, Vb=Vb, iters=it, reason=why)
 
 
 def poisson_fe_bc(panel: dict, full: dict) -> dict:
@@ -268,7 +269,7 @@ def poisson_qmle(panel: dict, offset: Optional[np.ndarray] = None, max_iter: int
     except np.linalg.LinAlgError:
         return dict(ok=False, est=est, se={n_: float("nan") for n_ in NAMES3}, reason="singular Hessian at end")
     se = {nm: float(np.sqrt(max(V[T + j, T + j], 0.0))) for j, nm in enumerate(NAMES3)}
-    return dict(ok=ok, est=est, se=se, iters=it, reason=why)
+    return dict(ok=ok, est=est, se=se, Vb=V[T:T + 3, T:T + 3], iters=it, reason=why)
 
 
 def _qmle_hessian(mu, r, resid, D, Db):

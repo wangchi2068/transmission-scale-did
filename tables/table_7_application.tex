@@ -1,28 +1,25 @@
 \begin{table}[!t]
 \centering
-\caption{Application: state mask orders and county COVID-19 transmission; point estimates with 95\% confidence intervals ($t_{G-1}$, $G = 49$ states).}
+\caption{Application: staggered German summer school holidays and county-level varicella transmission (2015--2019); point estimates with 95\% confidence intervals ($t_{15}$, $G = 16$ federal states).}
 \label{tab:app}
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
 \begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{llrrrr}
 \toprule
-analysis & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) \\
+sample & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) \\
 \midrule
-main & M0 & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) \\
-main & M0-G & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) \\
-main & M0-GI & -0.466 (-1.091, 0.159) & 0.040 (-0.217, 0.296) & -0.506 (-1.018, 0.006) & 0.772 (0.590, 0.954) \\
-main & M0-OI & -- & -0.025 (-0.251, 0.201) & -0.517 (-0.988, -0.046) & 0.590 (0.474, 0.706) \\
-main & M0$'$ & -- & 0.021 (-2.088, 2.130) & -- & -- \\
-main & M1 & -- & -0.024 (-0.109, 0.061) & -0.069 (-0.163, 0.025) & 0.567 (0.355, 0.779) \\
-main & M1-BC & -- & -0.025 (-0.111, 0.060) & -0.006 (-0.100, 0.088) & 0.073 (-0.139, 0.286) \\
-main & M2 & -- & -0.084 (-0.205, 0.036) & -- & -- \\
-main & M3 & -- & 0.087 (-0.188, 0.361) & -- & -- \\
-main & M4 & -- & 0.004 (-0.030, 0.038) & 0.004 (-0.034, 0.043) & 0.027 (0.020, 0.035) \\
-main (ET sample) & M0 (2656 units) & -0.391 (-1.226, 0.443) & 0.056 (-0.311, 0.423) & -0.447 (-1.050, 0.156) & 0.751 (0.552, 0.950) \\
-main (ET sample) & M0-ET2 (mean $e_0$--$e_5$) & -- & -0.677 (-1.734, 0.380) & -0.579 (-1.408, 0.250) & 0.757 (0.565, 0.949) \\
+Primary (400 counties) & M0 & -0.238 (-0.362, -0.114) & -0.301 (-0.854, 0.253) & 0.062 (-0.535, 0.660) & 0.325 (0.206, 0.445) \\
+Primary (400 counties) & M0-G & -0.238 (-0.362, -0.114) & -0.301 (-0.854, 0.253) & 0.062 (-0.535, 0.660) & 0.325 (0.206, 0.445) \\
+Primary (400 counties) & M0-GI & -0.238 (-0.362, -0.114) & -0.301 (-0.854, 0.253) & 0.062 (-0.535, 0.660) & 0.325 (0.206, 0.445) \\
+Primary (400 counties) & M0$'$ & -- & -0.232 (-0.342, -0.123) & -- & -- \\
+Primary (400 counties) & M1 (Poisson FE) & -0.290 (-0.372, -0.208) & -0.324 (-0.543, -0.104) & 0.034 (-0.195, 0.263) & 0.060 (0.027, 0.093) \\
+Primary (400 counties) & M2 (EpiEstim $\log R$) & -- & 0.064 (0.036, 0.093) & -- & -- \\
+Primary (400 counties) & M3 ($\log(Y+1)$ TWFE) & -- & -0.102 (-0.120, -0.083) & -- & -- \\
+Primary (400 counties) & M4 (Pooled QMLE) & -0.307 (-0.422, -0.193) & -0.260 (-0.426, -0.095) & -0.047 (-0.236, 0.142) & 0.002 (-0.046, 0.051) \\
+NUTS-2 (38 regions) & M0 & -0.146 (-0.280, -0.013) & -0.310 (-0.619, -0.001) & 0.163 (-0.219, 0.546) & 0.400 (-0.008, 0.808) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize US county-week COVID-19 cases, 3091 units in 49 state clusters, 26 weeks (2020-06-01 to 2020-11-23); $D$ = state public mask order. 95\% intervals: cluster (state) sandwich with $t_{G-1}$ critical values ($t_{48}=2.01$). For the policy-level total effect on interior counties, $\tau+\kappa$, the few-cluster pairs bootstrap-$t$ interval (critical value 2.78, Web Appendix E) is $[-1.330, 0.397]$. For the 62\% of counties that are interior, $D=\bar D$, so $\tau$ and $\kappa$ enter through the same regressor and $\tau+\kappa$ is the identifiable policy-level total. On the 2656-unit sample excluding pre-window exposed units (37 clusters), pooled M0 yields $\hat\tau=0.056$ while the dynamic event-time model M0-ET2 yields negative estimates across all seven bins ($-0.343$ to $-0.924$, mean of $e_0$--$e_5$ $-0.677$, joint $F=2.089$, $p=0.076$), a divergence consistent with dynamic weighting (Remark~\ref{rem:dynamic}, X5) but not statistically distinguishable from sampling error (Web Appendix~\ref{app:diag}). Data sources and coding are in Web Appendix D.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Weekly RKI SurvStat varicella cases across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{,}129 cases, plus three pre-sample lag weeks from late 2014); $D$ = state summer school holiday indicator lagged one week to align with varicella's 14-day generation/incubation interval ($w = (0.141, 0.721, 0.138)$, same-week mass $w_0 = 2.6 \times 10^{-6}$). 95\% intervals use the state-clustered sandwich with $t_{15} = 2.13$. Because holidays are set at the state level, $\tau+\kappa$ is the policy-level total for interior counties (primary M0 estimate $-0.238$, a 21.2\% reduction in $R$). Alternative 95\% intervals for M0 $\tau+\kappa$: Mammen score wild bootstrap-$t$ ($B=999$) $[-0.357, -0.120]$; nonlinear pairs cluster bootstrap-$t$ (999/999 converged) $[-0.383, -0.094]$; delete-one-state jackknife $[-0.374, -0.103]$ (leave-one-state-out range $[-0.268, -0.202]$); identification-robust Stock--Wright Bonferroni projection $[-0.492, -0.081]$. Propagated cases averted $\hat\psi^\dagger$: 2,440 (SE 670) during treated county-weeks and 2,995 (SE 900) network-wide. Global search finds a unique interior root at $\hat\phi = 0.325$, so M0, M0-G and M0-GI coincide. Data sources and coding are in Web Appendix D.}
 \end{table}

@@ -1,22 +1,23 @@
 \begin{abstract}
 Panels of reported cases are the standard data for evaluating non-pharmaceutical interventions, yet
-difference-in-differences on case counts rests on assumptions that epidemic data violate:
-transmission is self-exciting, policies respond to rising cases, and units infect one another. We
-place parallel trends on the log reproduction number of a renewal model whose infection pressure is
-imported from neighbouring units, and estimate policy effects by quasi-differenced generalized method
-of moments. The quasi-difference removes unrestricted unit effects, and past-only instruments let
-adoption respond to the epidemic. When same-week transmission across clusters is
-excluded, the ordinary cluster-robust sandwich applies without spatial adjustment and week effects
-profile out in closed form. The design comes with diagnostics: a profiled contagion equation that
-exposes multiple roots, over-identification tests read against a calibrated reference distribution,
-and identification-robust confidence sets. In pre-specified simulations with adoption feedback,
-spillover, overdispersion and small counts, the direct effect has bias between $-0.002$ and $0.001$
-and interval coverage of 94.5\% to 95.4\%. In an application to US state mask orders and county
-COVID-19 cases, the diagnostics reject the weekly working model: the over-identification statistic
-exceeds all calibrated draws, also with division $\times$ week effects, and the robust set for the
-coupling parameter is empty. The policy-level total of
-$-0.47$ (95\% interval $-1.09$ to $0.16$) is therefore a summary of the weekly fit, not a causal
-effect.
+outcome-scale difference-in-differences rests on assumptions that epidemic data violate:
+transmission is self-exciting, policies respond to rising incidence, and units infect one another.
+We place parallel trends on the log reproduction number of a renewal model with imported infection
+pressure from neighbouring units and estimate policy effects by quasi-differenced generalized method
+of moments. The forward quasi-difference eliminates unrestricted unit effects, while past-only
+instruments permit incidence-driven feedback. Excluding unmodelled same-week cross-cluster
+transmission, cluster scores form a martingale difference array across weeks, so the ordinary
+cluster-robust sandwich applies without spatial adjustment and week effects profile out in closed
+form. Built-in diagnostics combine a profiled contagion equation, over-identification tests read
+against calibrated reference distributions, and profiled Stock--Wright identification-robust sets.
+In pre-specified simulations with feedback, spillover, overdispersion and small counts, direct-effect
+bias spans $-0.002$ to $0.001$ with 94.5\%--95.4\% coverage, outperforming standard comparators.
+Applied to German weekly county varicella surveillance (400 counties, 16 states, 2015--2019;
+115{,}129 cases), where varicella's 14-day generation interval satisfies weekly aggregation
+($w_0<10^{-5}$), staggered summer school holidays reduce transmission by 21.2\%
+($\hat\tau+\hat\kappa=-0.238$, 95\% CI $-0.362$ to $-0.114$), corroborated across bootstrap,
+jackknife and identification-robust intervals, whereas two-step log-$R$ regression flips sign under
+sparse counts.
 \end{abstract}
 \begin{keywords}
 Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.
