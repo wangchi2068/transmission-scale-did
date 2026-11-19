@@ -4,7 +4,7 @@
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_03_application.png}
-\caption{Illustrative implementation on German county-level varicella notifications (2015--2019, $N=400$, $G=16$ federal states, $T=261$ weeks). (a) Working-model log-rate contrast ($\hat\tau+\hat\kappa$, or $\hat\tau$) and 95\% intervals across QD-GMM M0 ($t_{15}$, WCR-score Webb6, and pairs cluster bootstrap-$t$), comparators (M0$'$, M1--M4), and NUTS-2 aggregation ($N=38$, reducing zero county-weeks from 58.8\% to 2.9\% and reversing two-step EpiEstim M2 from $+0.064$ to $-0.102$). (b) Profiled Stock--Wright $S_1(\phi)$ curve over $\phi\in[0,3]$ with boundary inset, showing unique interior root $\hat\phi=0.326$ and 95\% $F_{1,15}$ confidence set $[0.21,2.40]$ (shaded).}
+\caption{Illustrative implementation on German county-level varicella notifications (2015--2019, $N=400$, $G=16$ federal states, $T=261$ weeks). (a) Working-model log-rate coefficient ($\hat\tau+\hat\kappa$, or $\hat\tau$) and 95\% intervals across QD-GMM M0 ($t_{15}$, WCR-score Webb6, and pairs cluster bootstrap-$t$), comparators (M0$'$, M1--M4), and NUTS-2 aggregation ($N=38$, reducing zero county-weeks from 58.8\% to 2.9\% and reversing two-step EpiEstim M2 from $+0.064$ to $-0.102$). (b) Profiled Stock--Wright $S_1(\phi)$ curve over $\phi\in[0,3]$ with boundary inset, showing unique interior root $\hat\phi=0.326$ and 95\% $F_{1,15}$ confidence set $[0.21,2.40]$ (shaded).}
 \label{fig:app}
 \end{figure}
 
@@ -33,16 +33,18 @@ five-digit AGS polygons (1{,}043 undirected edges, mean degree 5.22, row-normali
 working model, $D_{it}$ codes a one-week-lagged indicator for a majority of summer holiday days
 ($\ge 4$ of 7 days) in state $g(i)$ (11.8\% of county-weeks), with $\omega_i=\text{population}_i/10^5$
 and inference clustered at the federal-state level ($G=16$). Because exposure is assigned at the
-state level, interior counties satisfy $D_{it}=\bar D_{it}$, making $\tau+\kappa$ the natural
-working-model policy contrast.
+state level, interior counties satisfy $D_{it}=\bar D_{it}$, making $\tau+\kappa$ the baseline
+working-model coefficient.
 
 Without dropping any zero-count county-weeks, QD-GMM M0 ($\bar\phi=0.5$) converges cleanly to a
 unique interior contagion root $\hat\phi=0.326$ (SE $0.0567$, 95\% $t_{15}$ CI $[0.205,0.446]$;
 Figure~\ref{fig:app}(b)), with baseline working-model coefficients $\hat\tau=-0.300$ ($[-0.854,0.254]$),
 $\hat\kappa=0.060$ ($[-0.538,0.659]$), and $\hat\tau+\hat\kappa=-0.239$ (SE $0.0584$, 95\% $t_{15}$
-CI $[-0.364,-0.115]$; Table~\ref{tab:app}). Under profiled Stock--Wright inversion, $S_1(0)=5.78$
-($p_F=0.030$) and the 95\% $F_{1,15}$ set is $[0.21,2.40]$, excluding zero contagion coupling on
-the working specification.
+CI $[-0.364,-0.115]$; Table~\ref{tab:app}). The numerical value $\hat\tau+\hat\kappa=-0.239$ is
+reported strictly as a working-model implementation output and is not interpreted as a causal
+school-holiday effect. Under profiled Stock--Wright inversion, $S_1(0)=5.78$ ($p_F=0.030$) and
+the 95\% $F_{1,15}$ set is $[0.21,2.40]$, excluding zero contagion coupling on the working
+specification.
 
 \subsection{Sparse-count estimator comparison}
 \label{ss:app-comp}

@@ -122,7 +122,7 @@ def build_main_figure(res: dict) -> None:
     ax_a.set_ylim(-0.4, 11.9)
     ax_a.set_xlim(-0.48, 0.56)
     ax_a.set_xticks([-0.4, -0.2, 0.0, 0.15])
-    ax_a.set_xlabel(r"(a) Working-model log-rate contrast ($\hat\tau+\hat\kappa$ or $\hat\tau$)")
+    ax_a.set_xlabel(r"(a) Working-model log-rate coefficient ($\hat\tau+\hat\kappa$ or $\hat\tau$)")
     ax_a.set_title("Sparse-count estimator comparison", pad=8)
 
     # ------------------------------------------------------------------
