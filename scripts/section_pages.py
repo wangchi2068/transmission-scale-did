@@ -6,7 +6,7 @@ SECTIONS = [
     ("Introduction", r"1\.\s*Introduction"),
     ("Methods", r"2\.\s*Methods"),
     ("Simulation Study", r"3\.\s*Simulation Study"),
-    ("Application", r"4\.\s*Application:"),
+    ("Section 4 (Implementation)", r"4\.\s*(?:Application:|Illustrative implementation)"),
     ("Discussion", r"5\.\s*Discussion"),
     ("Back Matter", r"Acknowledgements"),
     ("References", r"^References\b"),

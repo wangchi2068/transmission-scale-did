@@ -755,7 +755,7 @@ quadratic SE $0.0482$ on $\tau+\kappa$). Rather than signalling conservative sta
 indefiniteness illustrates that unshrunk spatial covariance adjustments are unreliable at $G=16$.
 
 
-\section*{Web Appendix F: Sensitivity analyses and diagnostics of the application}
+\section*{Web Appendix F: Additional empirical diagnostics and scope analysis}
 \setreflabel{F}
 \label{app:diag}
 
@@ -842,7 +842,18 @@ onset week already falls to $\hat\tau_0+c_0\hat\kappa=-0.208$ (SE $0.097$, $95\%
 $[-0.416,-0.001]$, $p=0.049$), followed by $-0.358$ to $-0.298$ over weeks $e_1$--$e_5$ and
 reopening recovery at $e_6=-0.141$ ($p=0.100$) and $e_7=-0.089$ ($p=0.286$; weeks 6--7 joint test
 $p_F=0.172$). That immediate total-scale drop in the holiday onset week signals a clinic-visitation
-or reporting shift rather than pure post-incubation biological transmission.
+or reporting shift rather than pure post-incubation biological transmission (Web Figure~\ref{fig:web-diag}(a)).
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_web_05_diagnostics.png}
+\caption{Reporting-timing diagnostics in the German varicella panel. (a) Total-policy scale
+event-time profile $\hat\tau_e+c_e\hat\kappa$ around summer holiday onset ($e=-2,\dots,7$),
+showing flat pre-trends ($p_F=0.765$), an immediate onset drop ($\hat\tau_0+c_0\hat\kappa=-0.208$,
+$p=0.049$), and post-reopening recovery. (b) Non-summer school holiday placebos (Easter, Autumn,
+Winter, Pentecost across lags 0--2), showing the shared lag-0 dip and lag-2 catch-up rebound.}
+\label{fig:web-diag}
+\end{figure}
 
 \input{tables/table_14_event_weights}
 
@@ -852,9 +863,11 @@ $(1-\rho)^{D_{it}}$ on lagged exposure, giving tipping points $\rho^*_{\mathrm{C
 $\rho^*_0=17.9\%$. Under contemporaneous holiday reporting $(1-\rho)^{D_{it}^{(0)}}$, matching zero
 contemporaneous onset drop requires $\rho^*_{\mathrm{on}}=21.5\%$, which leaves the lag-1 M0
 working-model estimate at $+0.007$ (SE $0.063$) and lag-2 M0 at $-0.213$ (SE $0.162$, covering
-zero). The lower panel documents that counterfactual cases averted $\hat\psi^\dagger$ vary more than
-fourfold across $\omega_i$ scalings ($5{,}355$ treated / $15{,}615$ network-wide at $\omega_i\times 0.25$
-vs.\ $1{,}585$ / $1{,}633$ at $\omega_i\times 4.0$).
+zero). This 21.5\% adjustment is a calibration exercise chosen to match the contemporaneous
+onset-week contrast, not an independently identified estimate of reporting-rate change. The lower
+panel documents that counterfactual cases averted $\hat\psi^\dagger$ vary more than fourfold across
+$\omega_i$ scalings ($5{,}355$ treated / $15{,}615$ network-wide at $\omega_i\times 0.25$ vs.\
+$1{,}585$ / $1{,}633$ at $\omega_i\times 4.0$).
 
 \input{tables/table_15_ascertainment}
 
@@ -863,10 +876,11 @@ non-summer school breaks (Easter, Autumn, Winter, Pentecost) at lags 0--2, calen
 summer holidays ($-4$ to $+4$ weeks), and $B=200$ cross-state permutations of the summer holiday
 schedule. Every short non-summer break shows a significant negative notification dip in lag 0
 ($-0.198$ to $-0.497$, all $p<0.05$) followed by a positive lag-2 rebound ($+0.241$, CI
-$[0.119,0.363]$ for Easter; $+0.150$, $[0.054,0.247]$ for Autumn), reproducing a textbook
-reporting-suppression and post-break catch-up pattern. Time shifts $-4$ to $-2$ are positive
-($+0.297$, $+0.249$, $+0.328$), while $-1$ to $+4$ trace lags 0--5. Against 200 cross-state schedule
-permutations, the observed lag-1 estimate ($-0.239$) lies at two-sided $p=0.010$ (permutation mean
-$0.000$, SD $0.089$; lag-2 $p=0.060$).
+$[0.066,0.416]$ for Easter; $+0.150$, $[0.035,0.264]$ for Autumn; Web Figure~\ref{fig:web-diag}(b)),
+reproducing a shared holiday reporting-suppression and post-break catch-up pattern that probes the
+separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$). Time shifts $-4$ to $-2$ are
+positive ($+0.296$, $+0.248$, $+0.328$), while $-1$ to $+4$ trace lags 0--5. Against 200 cross-state
+schedule permutations, the observed lag-1 estimate ($-0.239$) lies at two-sided $p=0.010$
+(permutation mean $0.000$, SD $0.089$; lag-2 $p=0.060$).
 
 \input{tables/table_18_placebos}

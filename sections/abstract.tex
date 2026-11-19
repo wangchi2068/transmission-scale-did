@@ -1,24 +1,23 @@
 \begin{abstract}
-Panels of reported cases are standard for evaluating non-pharmaceutical interventions, yet
-outcome-scale difference-in-differences rests on assumptions epidemic counts violate:
-transmission is self-exciting, policies respond to rising incidence, and units infect one another.
-We place parallel trends on the log reproduction number of a renewal model with imported
-infection pressure and estimate policy effects by quasi-differenced generalized method of moments.
-Forward quasi-differencing removes unrestricted unit effects, while predetermined instruments
-accommodate incidence-driven feedback. Excluding unmodelled same-week cross-cluster transmission,
-cluster scores form a martingale difference array across weeks, validating ordinary cluster-robust
-variance and closed-form week profiling. Diagnostics separate working-model estimates from causal
-effects: profiled contagion equations expose boundary roots, score over-identification tests
-($J_{LM}$) use calibrated null distributions, and profiled Stock--Wright sets bypass root
-selection. Across pre-specified simulations with feedback, spillover, and overdispersion ($R=8000$),
-direct-effect bias spans $-0.002$ to $0.001$ (94.5\%--95.4\% coverage), outperforming comparators,
-while boundary and same-week ($w_0=0.3$) experiments demarcate operating limits. In a post hoc
-stress test on German county varicella data (400 counties, 16 states, 2015--2019; $w_0<10^{-5}$),
-the working model yields $\hat\tau+\hat\kappa=-0.239$ ($t_{15}$ CI $-0.364$ to $-0.115$; WCR-score
-$-0.419$ to $-0.139$), while two-step log-$R$ flips sign under 58.8\% zeros. However, rejected
-over-identification ($p_{\mathrm{cal}}=0.004$), total-scale onset drops ($-0.208$), holiday rebound
-placebos, non-rotating southern states, and regional-seasonal controls bar causal attribution.
+Panels of reported cases are standard for evaluating epidemic policies, yet outcome-scale
+difference-in-differences rests on assumptions infectious-disease counts violate: transmission is
+self-exciting, policies respond to rising incidence, and units infect one another. We place parallel
+trends on the log reproduction number of a renewal model with imported infection pressure and
+estimate policy effects by quasi-differenced generalized method of moments. Forward
+quasi-differencing removes unrestricted unit effects, while predetermined instruments accommodate
+incidence-driven feedback. Excluding unmodelled same-week cross-cluster transmission, cluster
+scores form a martingale difference array across weeks, validating ordinary cluster-robust
+variance and closed-form week profiling. We also develop diagnostics for boundary multiple roots,
+weak identification, temporal aggregation, and finite-cluster inference. Across pre-specified
+simulations with feedback, spillover, and overdispersion ($R=8000$), direct-effect bias spans
+$-0.002$ to $0.001$ (94.5\%--95.4\% coverage), outperforming standard comparators, while boundary
+and same-week ($w_0=0.3$) experiments define the procedure's operating domain. An illustrative
+implementation on German county varicella surveillance data (400 counties, 16 states, 2015--2019;
+58.8\% zeros) demonstrates computation without zero deletion, the small-count sign reversal of
+two-step log-reproduction-number regression, and calibrated coverage improvement from restricted
+score wild bootstrap intervals. Because surveillance counts follow reporting week, this
+implementation is illustrative rather than a causal estimate of school holidays.
 \end{abstract}
 \begin{keywords}
-Causal inference; Diagnostic boundaries; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.
+Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Operating limits; Renewal equation.
 \end{keywords}

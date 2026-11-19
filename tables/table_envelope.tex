@@ -1,0 +1,21 @@
+\begin{table}[!t]
+\centering
+\caption{Operating envelope and diagnostic workflow for weekly QD-GMM across data-generating and observation regimes.}
+\label{tab:envelope}
+\footnotesize
+\setlength{\tabcolsep}{4.0pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{llll}
+\toprule
+regime / data structure & estimator & simulation performance & recommended usage \\
+\midrule
+Multi-week GI, feedback, spillover ($\phi_0>0$) & M0 & bias $-0.002$ to $0.001$; cov.\ 94.5\%--95.4\% & primary causal estimator \\
+Zero/weak contagion boundary ($\phi_0\approx 0$) & M0-GI + $S_1(\phi)$ & raises boundary cov.\ (0.01--0.39 to 0.88--0.95) & profile $[0,3]$; report $S_1$ set \\
+Substantial same-week mass ($w_0\gtrsim 0.3$) & sub-weekly Eq. & weekly M0 bias $\approx -1/6$ of total (cov.\ 0.78) & switch to sub-weekly model \\
+Moderate/unequal clusters (e.g.\ $G=16$) & M0 + WCR-score & calibrated cov.\ 0.934--0.946 (vs.\ 0.902 $t_{15}$) & report WCR-score \& jackknife \\
+Policy-linked ascertainment (violates A7) & working M0 + diag. & shift absorbs reporting change ($\approx -0.35$ in X2) & exploratory working contrast \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Summary of operating limits established across core ($R=8000$), same-week ($R=1000$ per arm), and design-calibrated finite-cluster ($R=500$) experiments. Diagnostics separate regimes in which working-model estimates retain structural causal interpretation from regimes outside the weekly renewal and separable-reporting (Assumption~A7) model.}
+\end{table}

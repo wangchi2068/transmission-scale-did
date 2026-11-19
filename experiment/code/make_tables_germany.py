@@ -68,60 +68,69 @@ def write_table_7(app: dict):
     sw05 = app["stock_wright"]["phi_bar_0.5"]["sets"]["tpk_bonferroni_95"]
     psi = app["primary"]["psi"]
 
+    nuts_m2 = app["nuts2"]["comparators"]["M2"]
+    nuts_m2_ci = (
+        nuts_m2["est"]["tau"] - tc * nuts_m2["se"]["tau"],
+        nuts_m2["est"]["tau"] + tc * nuts_m2["se"]["tau"],
+    )
+
     def _phi_cell(rec):
         if rec["kind"] == "boundary":
             return "0.000 (boundary)"
         return fmt_est_se_ci(rec["est"]["phi"], rec["se"]["phi"], tc)
 
     rows = [
-        ("Primary (400 counties)", "M0",
+        ("Primary (58.8\\% zeros)", "M0",
          fmt_est_ci(m0["est"]["tpk"], *m0["ci_t"]["tpk"]),
          fmt_est_ci(m0["est"]["tau"], *m0["ci_t"]["tau"]),
          fmt_est_ci(m0["est"]["kappa"], *m0["ci_t"]["kappa"]),
          fmt_est_ci(m0["est"]["phi"], *m0["ci_t"]["phi"])),
-        ("Primary (400 counties)", "M0-G",
+        ("Primary (58.8\\% zeros)", "M0-G",
          fmt_est_se_ci(g_m0g["est"]["tpk"], g_m0g["se"]["tpk"], tc),
          fmt_est_se_ci(g_m0g["est"]["tau"], g_m0g["se"]["tau"], tc),
          fmt_est_se_ci(g_m0g["est"]["kappa"], g_m0g["se"]["kappa"], tc),
          _phi_cell(g_m0g)),
-        ("Primary (400 counties)", "M0-GI",
+        ("Primary (58.8\\% zeros)", "M0-GI",
          fmt_est_se_ci(g_m0gi["est"]["tpk"], g_m0gi["se"]["tpk"], tc),
          fmt_est_se_ci(g_m0gi["est"]["tau"], g_m0gi["se"]["tau"], tc),
          fmt_est_se_ci(g_m0gi["est"]["kappa"], g_m0gi["se"]["kappa"], tc),
          _phi_cell(g_m0gi)),
-        ("Primary (400 counties)", r"M0$'$",
+        ("Primary (58.8\\% zeros)", r"M0$'$",
          "--",
          fmt_est_se_ci(comps["M0_prime"]["est"]["tau"], comps["M0_prime"]["se"]["tau"], tc),
          "--", "--"),
-        ("Primary (400 counties)", "M1 (Poisson FE)",
+        ("Primary (58.8\\% zeros)", "M1 (Poisson FE)",
          fmt_est_ci(comps["M1"]["est"]["tpk"], *comps["M1"]["ci_t_tpk"]),
          fmt_est_se_ci(comps["M1"]["est"]["tau"], comps["M1"]["se"]["tau"], tc),
          fmt_est_se_ci(comps["M1"]["est"]["kappa"], comps["M1"]["se"]["kappa"], tc),
          fmt_est_se_ci(comps["M1"]["est"]["phi"], comps["M1"]["se"]["phi"], tc)),
-        ("Primary (400 counties)", r"M2 (EpiEstim $\log R$)",
+        ("Primary (58.8\\% zeros)", r"M2 (EpiEstim $\log R$)",
          "--",
          fmt_est_ci(comps["M2"]["est"]["tau"], *comps["M2"]["ci_t_tau"]),
          "--", "--"),
-        ("Primary (400 counties)", r"M3 ($\log(Y+1)$ TWFE)",
+        ("Primary (58.8\\% zeros)", r"M3 ($\log(Y+1)$ TWFE)",
          "--",
          fmt_est_ci(comps["M3"]["est"]["tau"], *comps["M3"]["ci_t_tau"]),
          "--", "--"),
-        ("Primary (400 counties)", "M4 (Pooled QMLE)",
+        ("Primary (58.8\\% zeros)", "M4 (Pooled QMLE)",
          fmt_est_ci(comps["M4"]["est"]["tpk"], *comps["M4"]["ci_t_tpk"]),
          fmt_est_se_ci(comps["M4"]["est"]["tau"], comps["M4"]["se"]["tau"], tc),
          fmt_est_se_ci(comps["M4"]["est"]["kappa"], comps["M4"]["se"]["kappa"], tc),
          fmt_est_se_ci(comps["M4"]["est"]["phi"], comps["M4"]["se"]["phi"], tc)),
-        ("NUTS-2 (38 regions)", "M0",
+        ("NUTS-2 (2.9\\% zeros)", "M0",
          fmt_est_ci(nuts["est"]["tpk"], *nuts["ci_t"]["tpk"]),
          fmt_est_ci(nuts["est"]["tau"], *nuts["ci_t"]["tau"]),
          fmt_est_ci(nuts["est"]["kappa"], *nuts["ci_t"]["kappa"]),
          fmt_est_ci(nuts["est"]["phi"], *nuts["ci_t"]["phi"])),
+        ("NUTS-2 (2.9\\% zeros)", r"M2 (EpiEstim $\log R$)",
+         "--",
+         fmt_est_ci(nuts_m2["est"]["tau"], *nuts_m2_ci),
+         "--", "--"),
     ]
     body = "\n".join(" & ".join(r) + r" \\" for r in rows)
-    pct_red = (1.0 - math.exp(m0["est"]["tpk"])) * 100.0
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{German varicella stress test (2015--2019): baseline working-model estimates and comparators with state-clustered 95\% intervals ($t_{{15}}$, $G = 16$ federal states).}}
+\caption{{Illustrative estimator comparison in a sparse surveillance panel (German varicella, 2015--2019; $N=400$ counties, $G=16$ states, $T=261$ weeks).}}
 \label{{tab:app}}
 \footnotesize
 \setlength{{\tabcolsep}}{{3.5pt}}
@@ -134,7 +143,7 @@ sample & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 cases, plus three pre-sample lag weeks); $D$ = state summer holiday indicator lagged one week; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{{-6}}$). Under state-level exposure, $\tau+\kappa$ is the policy-level working-model contrast (M0 estimate ${m0['est']['tpk']:.3f}$, ${pct_red:.1f}\%$ multiplicative shift). Sensitivity intervals for M0 $\tau+\kappa$ ($t_{{15}}$ under-covers in Web Table~\ref{{tab:rev-calsim}}): WCR-score Webb6 $[{wcr_w['ci'][0]:.3f}, {wcr_w['ci'][1]:.3f}]$ ($p(0)={wcr_w['p_at_zero']:.3f}$); WCR-score Rademacher $[{wcr_r['ci'][0]:.3f}, {wcr_r['ci'][1]:.3f}]$; unrestricted score wild (Mammen) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$ (range $[{jk['tpk_range'][0]:.3f}, {jk['tpk_range'][1]:.3f}]$); Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. Over-identification rejects lagged working-model moments ($J_{{LM,\mathrm{{oi}}}}={m0['J_LM_oi']['stat']:.2f}$, $p_{{\chi^2}}={m0['J_LM_oi']['p_chi2']:.3f}$, $p_F={m0['J_LM_oi']['p_F']:.3f}$), while $J_{{LM,\mathrm{{inv}}}}={m0['J_LM_inv']['stat']:.2f}$ ($p_F={m0['J_LM_inv']['p_F']:.3f}$). Conditional counterfactual $\hat\psi^\dagger$: {psi['treated']['est']:,.0f} (SE {psi['treated']['se']:,.0f}) treated county-weeks and {psi['network']['est']:,.0f} (SE {psi['network']['se']:,.0f}) network-wide. Global search yields a single interior root at $\hat\phi={m0['est']['phi']:.3f}$; $S_{{3,\mathrm{{oi}}}}$ slightly favours the $\phi=0$ boundary over the interior root while $S_{{3,\mathrm{{inv}}}}$ selects the interior root. See Web Appendices~D--F for full diagnostics limiting causal interpretation.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 notifications, plus three pre-sample lag weeks); $D$ = one-week-lagged state summer holiday indicator; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{{-6}}$). Working-model finite-cluster 95\% intervals for M0 $\tau+\kappa$: WCR-score Webb6 $[{wcr_w['ci'][0]:.3f}, {wcr_w['ci'][1]:.3f}]$; WCR-score Rademacher $[{wcr_r['ci'][0]:.3f}, {wcr_r['ci'][1]:.3f}]$; unrestricted score wild (Mammen) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$; Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. These working-model contrasts illustrate estimation, small-count sign reversal in M2 ($+0.064$ to $-0.102$), and finite-cluster calibration rather than causal holiday effects; full calendar, placebo, over-identification, and seasonal diagnostics appear in Web Appendices~D--F.}}
 \end{{table}}
 """
     (TAB_DIR / "table_7_application.tex").write_text(tex, encoding="utf-8")

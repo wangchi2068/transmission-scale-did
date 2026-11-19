@@ -35,47 +35,37 @@ moments remove multiplicative unit effects under predetermined regressors
 but have not been integrated with renewal transmission, spatial contagion and formal validity
 diagnostics.
 
-This paper develops quasi-differenced generalized method of moments (QD-GMM) on the transmission
-scale together with explicit identification and failure-mode diagnostics. Rather than assuming
-weekly surveillance panels can always recover structural causal effects, we characterize precisely
-when transmission parameters are point-identified and when diagnostics downgrade estimates to
-pseudo-true values of a rejected working model. Parallel trends are placed on the log reproduction
-number of a renewal equation whose infection pressure imports cases from neighbouring units; a
-forward quasi-difference eliminates unrestricted unit effects; instruments built solely from the
-observed past permit incidence-driven feedback; and policy spillovers enter through the share of
-treated neighbours. Three methodological results follow. First, under cross-cluster conditions
-excluding unmodelled same-week cross-cluster transmission, cluster scores form a martingale
-difference array across weeks despite lagged inter-cluster contagion, so the ordinary
+This paper develops quasi-differenced generalized method of moments (QD-GMM) on the
+renewal-transmission scale together with a formal operating-domain and diagnostic toolkit for
+epidemic policy evaluation. Parallel trends are placed on the log reproduction number of a renewal
+equation whose infection pressure imports cases from neighbouring units; a forward
+quasi-difference eliminates unrestricted unit effects; instruments built solely from the observed
+past permit incidence-driven feedback; and policy spillovers enter through the share of treated
+neighbours. Three methodological contributions follow. First, under cross-cluster timing
+conditions excluding unmodelled same-week cross-cluster transmission, cluster scores form a
+martingale difference array across weeks despite lagged inter-cluster contagion, so the ordinary
 cluster-robust sandwich applies without spatial HAC adjustment and week effects profile out in
-closed form. Second, across pre-specified simulations with feedback adoption, spillover,
-overdispersion and small counts ($R=8000$), QD-GMM recovers direct effects with bias between
-$-0.002$ and $0.001$ and 95\% coverage of 94.5\% to 95.4\% where outcome-scale, Poisson
-fixed-effects and two-step log-$R$ comparators fail, while boundary ($\phi_0=0$) and same-week
-($w_0=0.3$) experiments demarcate the estimator's domain of validity. Third, built-in
-diagnostics---profiled contagion curves that reveal multiple roots, over-identification tests
-($J$ or rank-safe score-form $J_{LM}$) calibrated against finite-sample null distributions,
-Stock--Wright identification-robust sets, total-policy-scale event-time profiles and
-ascertainment-confounding checks---detect specification and surveillance failures directly from
-observed data.
+closed form. Second, across pre-specified simulations spanning feedback adoption, network
+spillover, overdispersion and small counts ($R=8000$), QD-GMM recovers direct effects with bias
+between $-0.002$ and $0.001$ and 95\% coverage of 94.5\% to 95.4\% where outcome-scale, Poisson
+fixed-effects and two-step log-$R$ comparators fail. Third, boundary ($\phi_0=0$), same-week
+($w_0=0.3$) and diagnostic experiments---profiled contagion curves, score-form over-identification
+tests ($J_{LM}$), Stock--Wright identification-robust sets and restricted score wild cluster
+bootstrap calibration---define the estimator's operating envelope and detect when weekly renewal or
+separable-reporting assumptions break down.
 
-We stress-test this framework on five years of German county-level weekly varicella
-(\emph{Windpocken}) notifications (400 counties, 16 states, 2015--2019; 115{,}129 cases) paired
-with federal-state school holiday calendars
-\citep{cauchemez2008school,jackson2014varicella,adda2016economic,vonbismarckosten2022schools,isphording2021schools}.
-Varicella's 14-day mean serial interval \citep{vink2014serial} keeps within-week transmission
-negligible ($w_0=2.6\times 10^{-6}$), while sparse county counts (58.8\% zeros) test Theorem~3's
-predictions for standard comparators. On the empirical data, two-step EpiEstim log-$R$ regression
-flips sign to $+0.064$ before reverting to $-0.102$ at NUTS-2 aggregation (2.9\% zeros), and
-$\log(Y+1)$ TWFE attenuates to $-0.102$. Under the baseline QD-GMM working model, the policy-level
-contrast is negative ($\hat\tau+\hat\kappa=-0.239$, 95\% $t_{15}$ CI $-0.364$ to $-0.115$;
-restricted score wild bootstrap $-0.419$ to $-0.139$) with an interior coupling root
-$\hat\phi=0.326$. Yet the framework's diagnostics prevent taking this working-model contrast as an
-unconfounded 21.3\% causal reduction: $J_{LM,\mathrm{oi}}$ rejects lagged working-model moments
-($p_{\mathrm{cal}}=0.004$), total-scale event-time estimates show an immediate $-0.208$ onset-week
-drop ($p=0.049$) inconsistent with notification weeks and a 14-day incubation lag, short non-summer
-holidays display the classic reporting-suppression and lag-2 rebound echo, the two largest
-southern states (Baden-W\"urttemberg and Bavaria) never rotate their start timing, and dropping
-both states or absorbing four-region $\times$ week effects yields intervals covering zero.
-Sections~\ref{s:methods}--\ref{s:discussion} present the theory, simulations, German stress test
-and scope; Web Appendices~A--F provide proofs, adapted comparator results, numerical checks,
-supplementary simulations, data provenance, few-cluster calibration and full diagnostics.
+We illustrate the procedure using five years of German county-level weekly varicella
+notifications (400 counties, 16 federal states, 2015--2019; 58.8\% zero county-weeks;
+\citealp{faensen2006survnet,vink2014serial,cauchemez2008school,jackson2014varicella}). In this
+sparse panel, QD-GMM computes cleanly without dropping zeros and recovers an interior coupling
+estimate, whereas two-step EpiEstim log-$R$ regression exhibits the small-count sign reversal
+predicted by Theorem~\ref{thm:bias} before inverting upon spatial aggregation to NUTS-2 regions
+(2.9\% zeros). Design-calibrated simulations with $G=16$ unequal states further demonstrate how
+null-imposed restricted score bootstrap intervals (WCR-score) improve finite-cluster coverage over
+standard $t_{15}$ approximations. Because the public surveillance stream follows reporting week
+rather than symptom onset and observation processes vary around school holidays, we treat this
+application strictly as an illustrative sparse-count implementation rather than a causal estimate
+of school holiday effects. Sections~\ref{s:methods}--\ref{s:discussion} present the model,
+simulations, illustrative implementation and operating scope; Web Appendices~A--F provide proofs,
+adapted comparator results, numerical checks, supplementary simulations, data provenance,
+few-cluster inference and full empirical diagnostics.

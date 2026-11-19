@@ -1,6 +1,6 @@
 \begin{table}[!t]
 \centering
-\caption{German varicella stress test (2015--2019): baseline working-model estimates and comparators with state-clustered 95\% intervals ($t_{15}$, $G = 16$ federal states).}
+\caption{Illustrative estimator comparison in a sparse surveillance panel (German varicella, 2015--2019; $N=400$ counties, $G=16$ states, $T=261$ weeks).}
 \label{tab:app}
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
@@ -9,17 +9,18 @@
 \toprule
 sample & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) \\
 \midrule
-Primary (400 counties) & M0 & -0.239 (-0.364, -0.115) & -0.300 (-0.854, 0.254) & 0.060 (-0.538, 0.659) & 0.326 (0.205, 0.446) \\
-Primary (400 counties) & M0-G & -0.215 (-0.330, -0.101) & -0.294 (-0.858, 0.270) & 0.079 (-0.527, 0.685) & 0.000 (boundary) \\
-Primary (400 counties) & M0-GI & -0.239 (-0.364, -0.115) & -0.300 (-0.854, 0.254) & 0.060 (-0.538, 0.659) & 0.326 (0.205, 0.446) \\
-Primary (400 counties) & M0$'$ & -- & -0.233 (-0.343, -0.124) & -- & -- \\
-Primary (400 counties) & M1 (Poisson FE) & -0.290 (-0.372, -0.208) & -0.324 (-0.543, -0.105) & 0.034 (-0.195, 0.263) & 0.058 (0.026, 0.090) \\
-Primary (400 counties) & M2 (EpiEstim $\log R$) & -- & 0.064 (0.036, 0.093) & -- & -- \\
-Primary (400 counties) & M3 ($\log(Y+1)$ TWFE) & -- & -0.102 (-0.120, -0.083) & -- & -- \\
-Primary (400 counties) & M4 (Pooled QMLE) & -0.307 (-0.422, -0.193) & -0.261 (-0.426, -0.095) & -0.047 (-0.236, 0.142) & 0.001 (-0.046, 0.049) \\
-NUTS-2 (38 regions) & M0 & -0.147 (-0.280, -0.013) & -0.309 (-0.617, -0.001) & 0.162 (-0.220, 0.544) & 0.400 (-0.005, 0.805) \\
+Primary (58.8\% zeros) & M0 & -0.239 (-0.364, -0.115) & -0.300 (-0.854, 0.254) & 0.060 (-0.538, 0.659) & 0.326 (0.205, 0.446) \\
+Primary (58.8\% zeros) & M0-G & -0.215 (-0.330, -0.101) & -0.294 (-0.858, 0.270) & 0.079 (-0.527, 0.685) & 0.000 (boundary) \\
+Primary (58.8\% zeros) & M0-GI & -0.239 (-0.364, -0.115) & -0.300 (-0.854, 0.254) & 0.060 (-0.538, 0.659) & 0.326 (0.205, 0.446) \\
+Primary (58.8\% zeros) & M0$'$ & -- & -0.233 (-0.343, -0.124) & -- & -- \\
+Primary (58.8\% zeros) & M1 (Poisson FE) & -0.290 (-0.372, -0.208) & -0.324 (-0.543, -0.105) & 0.034 (-0.195, 0.263) & 0.058 (0.026, 0.090) \\
+Primary (58.8\% zeros) & M2 (EpiEstim $\log R$) & -- & 0.064 (0.036, 0.093) & -- & -- \\
+Primary (58.8\% zeros) & M3 ($\log(Y+1)$ TWFE) & -- & -0.102 (-0.120, -0.083) & -- & -- \\
+Primary (58.8\% zeros) & M4 (Pooled QMLE) & -0.307 (-0.422, -0.193) & -0.261 (-0.426, -0.095) & -0.047 (-0.236, 0.142) & 0.001 (-0.046, 0.049) \\
+NUTS-2 (2.9\% zeros) & M0 & -0.147 (-0.280, -0.013) & -0.309 (-0.617, -0.001) & 0.162 (-0.220, 0.544) & 0.400 (-0.005, 0.805) \\
+NUTS-2 (2.9\% zeros) & M2 (EpiEstim $\log R$) & -- & -0.102 (-0.150, -0.055) & -- & -- \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{,}129 cases, plus three pre-sample lag weeks); $D$ = state summer holiday indicator lagged one week; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{-6}$). Under state-level exposure, $\tau+\kappa$ is the policy-level working-model contrast (M0 estimate $-0.239$, $21.3\%$ multiplicative shift). Sensitivity intervals for M0 $\tau+\kappa$ ($t_{15}$ under-covers in Web Table~\ref{tab:rev-calsim}): WCR-score Webb6 $[-0.419, -0.139]$ ($p(0)=0.002$); WCR-score Rademacher $[-0.429, -0.119]$; unrestricted score wild (Mammen) $[-0.358, -0.121]$; pairs cluster bootstrap-$t$ (999/999 converged) $[-0.385, -0.094]$; delete-one-state jackknife $[-0.375, -0.104]$ (range $[-0.269, -0.203]$); Stock--Wright Bonferroni projection $[-0.493, -0.081]$. Over-identification rejects lagged working-model moments ($J_{LM,\mathrm{oi}}=9.12$, $p_{\chi^2}=0.010$, $p_F=0.036$), while $J_{LM,\mathrm{inv}}=4.10$ ($p_F=0.184$). Conditional counterfactual $\hat\psi^\dagger$: 2,453 (SE 673) treated county-weeks and 3,012 (SE 904) network-wide. Global search yields a single interior root at $\hat\phi=0.326$; $S_{3,\mathrm{oi}}$ slightly favours the $\phi=0$ boundary over the interior root while $S_{3,\mathrm{inv}}$ selects the interior root. See Web Appendices~D--F for full diagnostics limiting causal interpretation.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{,}129 notifications, plus three pre-sample lag weeks); $D$ = one-week-lagged state summer holiday indicator; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{-6}$). Working-model finite-cluster 95\% intervals for M0 $\tau+\kappa$: WCR-score Webb6 $[-0.419, -0.139]$; WCR-score Rademacher $[-0.429, -0.119]$; unrestricted score wild (Mammen) $[-0.358, -0.121]$; pairs cluster bootstrap-$t$ (999/999 converged) $[-0.385, -0.094]$; delete-one-state jackknife $[-0.375, -0.104]$; Stock--Wright Bonferroni projection $[-0.493, -0.081]$. These working-model contrasts illustrate estimation, small-count sign reversal in M2 ($+0.064$ to $-0.102$), and finite-cluster calibration rather than causal holiday effects; full calendar, placebo, over-identification, and seasonal diagnostics appear in Web Appendices~D--F.}
 \end{table}
