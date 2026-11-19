@@ -1,27 +1,47 @@
 \begin{table}[!t]
 \centering
-\caption{Holiday-linked ascertainment tipping-point analysis: M0 refitted after undoing a proportional reporting change $(1-\rho)^{D_{it}}$ during summer holidays.}
+\caption{Ascertainment sensitivity (lagged-$D$ tipping points and contemporaneous-$D^{(0)}$ onset-moment matching) and sensitivity of $\hat\psi^\dagger$ to background importation $\omega_i$.}
 \label{tab:rev-ascert}
 \footnotesize
-\setlength{\tabcolsep}{4.0pt}
+\setlength{\tabcolsep}{3.5pt}
 \begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{rrrr}
 \toprule
+\multicolumn{4}{l}{\emph{(a) Lagged-$D$ tipping-point grid: $Y^*_{it} = Y_{it}/(1-\rho)^{D_{it}}$}} \\
 $\rho$ & $|\log(1-\rho)|$ & $\hat\tau+\hat\kappa$ (95\% $t_{15}$ CI) & $\hat\phi$ (SE) \\
 \midrule
--0.20 & 0.182 & -0.456 (-0.589, -0.324) & 0.330 (0.058) \\
--0.10 & 0.095 & -0.353 (-0.481, -0.224) & 0.328 (0.057) \\
--0.00 & 0.000 & -0.238 (-0.362, -0.114) & 0.325 (0.056) \\
-+0.05 & 0.051 & -0.176 (-0.298, -0.055) & 0.323 (0.055) \\
-+0.10 & 0.105 & -0.111 (-0.231, 0.009) & 0.322 (0.055) \\
-+0.15 & 0.163 & -0.041 (-0.159, 0.076) & 0.320 (0.054) \\
-+0.20 & 0.223 & 0.033 (-0.083, 0.149) & 0.318 (0.053) \\
-+0.30 & 0.357 & 0.198 (0.085, 0.311) & 0.312 (0.051) \\
-+0.40 & 0.511 & 0.392 (0.279, 0.505) & 0.306 (0.048) \\
-$\rho^*_{\mathrm{CI}} = +0.093$ & 0.098 & -0.120 (-0.240, -0.000) & 0.322 (0.055) \\
-$\rho^*_0 = +0.178$ & 0.196 & -0.000 (-0.117, 0.117) & 0.319 (0.053) \\
+-0.20 & 0.182 & -0.457 (-0.590, -0.324) & 0.331 (0.059) \\
+-0.10 & 0.095 & -0.354 (-0.482, -0.225) & 0.328 (0.058) \\
+-0.00 & 0.000 & -0.239 (-0.364, -0.115) & 0.326 (0.057) \\
++0.05 & 0.051 & -0.178 (-0.300, -0.055) & 0.324 (0.056) \\
++0.10 & 0.105 & -0.112 (-0.232, 0.008) & 0.322 (0.055) \\
++0.15 & 0.163 & -0.042 (-0.160, 0.076) & 0.321 (0.054) \\
++0.20 & 0.223 & 0.032 (-0.084, 0.148) & 0.318 (0.053) \\
++0.30 & 0.357 & 0.197 (0.083, 0.310) & 0.314 (0.051) \\
++0.40 & 0.511 & 0.391 (0.277, 0.504) & 0.307 (0.049) \\
+$\rho^*_{\mathrm{CI}} = +0.094$ & 0.099 & -0.120 (-0.241, -0.000) & 0.323 (0.055) \\
+$\rho^*_0 = +0.179$ & 0.197 & -0.000 (-0.117, 0.117) & 0.319 (0.054) \\
+\midrule
+\multicolumn{4}{l}{\emph{(b) Contemporaneous-$D^{(0)}$ reporting adjustment: $Y^*_{it} = Y_{it}/(1-\rho)^{D^{(0)}_{it}}$}} \\
+$\rho$ & onset moment & lag-1 $\hat\tau+\hat\kappa$ (95\% CI) & lag-2 $\hat\tau+\hat\kappa$ (95\% CI) \\
+\midrule
+0.00 & -0.1686 & -0.239 (-0.364, -0.115) & -0.331 (-0.714, 0.052) \\
+0.05 & -0.1360 & -0.188 (-0.312, -0.063) & -0.308 (-0.684, 0.068) \\
+0.10 & -0.1000 & -0.133 (-0.259, -0.007) & -0.284 (-0.652, 0.084) \\
+0.15 & -0.0599 & -0.075 (-0.204, 0.054) & -0.259 (-0.619, 0.101) \\
+0.20 & -0.0149 & -0.013 (-0.145, 0.120) & -0.232 (-0.583, 0.119) \\
+0.25 & +0.0358 & 0.054 (-0.084, 0.192) & -0.203 (-0.545, 0.138) \\
+0.30 & +0.0935 & 0.125 (-0.019, 0.269) & -0.173 (-0.504, 0.158) \\
+$\rho^*_{\mathrm{on}} = 0.215$ / $0.234$ & 0.0000 & 0.007 (-0.127, 0.142) & -0.213 (-0.557, 0.132) \\
+\midrule
+\multicolumn{4}{l}{\emph{(c) Sensitivity of conditional cases averted $\hat\psi^\dagger$ to background importation $\omega_i$}} \\
+scaling & $\hat\phi$ & treated $\hat\psi^\dagger$ (SE) & network $\hat\psi^\dagger$ (SE) \\
+\midrule
+$\omega_i \times 1.00$ (primary) & 0.326 & 2,453 (673) & 3,012 (904) \\
+$\omega_i \times 0.25$ & 0.618 & 5,355 (1,457) & 15,615 (4,930) \\
+$\omega_i \times 4.00$ & 0.037 & 1,585 (491) & 1,633 (550) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Under $Y_{it} = c_i c_t (1-\rho)^{D_{it}} I_{it}$, $\rho > 0$ represents reduced case ascertainment during summer holidays (e.g.\ fewer clinic visits while travelling); counts are corrected via $Y^*_{it} = Y_{it} / (1-\rho)^{D_{it}}$ before rebuilding infection pressures and refitting M0. The 95\% upper confidence limit crosses zero only at $\rho^*_{\mathrm{CI}} =$ 9.3\%, and the point estimate reaches zero only at $\rho^*_0 =$ 17.8\%. Combined with the null onset-week estimate ($e=0$, Web Table~\ref{tab:rev-event}), plausible holiday reporting fluctuations cannot account for the estimated transmission drop. Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize In Panel (b), matching the holiday-onset moment to zero requires a 21.5\% contemporaneous reporting reduction, which eliminates the lag-1 effect ($+0.007$, SE $0.063$) while leaving an imprecise negative lag-2 estimate ($-0.213$, SE $0.162$, covering zero). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
 \end{table}

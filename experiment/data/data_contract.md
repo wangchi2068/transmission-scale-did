@@ -1,35 +1,34 @@
 # Data Contract: German County-Level Weekly Varicella Panel (2015--2019)
 
-This directory contains the public raw datasets and deterministic processing pipeline for the empirical application in Section 4 of the manuscript (German county-level weekly Varicella surveillance counts and staggered 16-state summer school holidays, 2015--2019, with three pre-sample lag weeks from late 2014).
+This directory contains the public raw datasets, automated download script (`fetch_germany.py`), and deterministic processing pipeline for the empirical stress test in the manuscript (German county-level weekly Varicella surveillance counts and staggered 16-state school holidays, 2015--2019, with three pre-sample lag weeks from late 2014).
+
+## Download & Line-Ending Stability
+
+- Run `python experiment/data/fetch_germany.py` to download all three raw files directly from the public RKI SurvStat@RKI 2.0 SOAP 1.2 WebService, OpenHolidays API, and GitHub county GeoJSON repository, or `python experiment/data/fetch_germany.py --check` to verify local files.
+- `.gitattributes` marks `experiment/data/raw/**` as `binary`, ensuring Git preserves exact LF (`\n`) bytes and identical SHA-256 checksums across Linux, macOS, and Windows checkouts.
 
 ## Raw Inputs (`experiment/data/raw/germany/`)
 
-| File | Source | License / Access | SHA-256 |
-| --- | --- | --- | --- |
-| `rki_varicella_2014_2019.json` | Robert Koch-Institut (RKI) SurvStat@RKI 2.0 SOAP service (`https://tools.rki.de/SurvStat/SurvStatWebService.svc`), pathogen `[PathogenOut].[KategorieNz].[Krankheit DE].&[Windpocken]`, weekly county counts 2014--2019 and 2017 RKI county reference populations (`Count / Incidence * 1e5`) | Open public health surveillance data (RKI) | `b55d8973975aba56de69b2f06adc4174e1f136432115efe87a94c06ba4f45d01` |
-| `germany_school_holidays_2014_2019.json` | OpenHolidays API (`https://openholidaysapi.org/SchoolHolidays`), official Kultusministerkonferenz (KMK) German federal-state school holiday schedules for all 16 Länder (`DE-BW` through `DE-TH`), 2014--2019 | Open public schedule data | `fc799aa000bd362105c95e2a722ac2a5279abc8d3767b2cf18a97cd721bd008a` |
-| `counties_ags.geojson` | German administrative county polygons keyed by 5-digit Amtlicher Gemeindeschlüssel (AGS), `m-ad/geofeatures-ags-germany` (`geojson/counties.json`) | Open geodata (BKG / GeoBasis-DE derived) | `8a0d0bf29ff31b6e536622613ce6e2f6198a6999bd725a631b4b1707780a6abd` |
+| File | Source & Query Specification | Access | Bytes (LF) | SHA-256 |
+| --- | --- | --- | ---: | --- |
+| `rki_varicella_2014_2019.json` | RKI SurvStat@RKI 2.0 SOAP 1.2 (`https://tools.rki.de/SurvStat/SurvStatWebService.svc`), Cube `SurvStat`, Pathogen `[PathogenOut].[KategorieNz].[Krankheit DE].&[Windpocken]`, Column `[ReportingDate].[Week].[Week]` (*Meldewoche*, notification week; symptom-onset week is not exposed by the public SurvStat web service), Row `[DeutschlandNodes].[Kreise71Web].[CountyKey71]`, Measure `[Measures].[FallCount_71_Web]` (all notified cases without `[ReferenzDefinition]` restriction) and `[Measures].[Inzidenz_71_Web]` for 2017 reference populations (`Count / Incidence * 1e5`), plus 2015/2018 RKI incidence-denominator fallback for the three counties reporting zero cases in 2017 (`09188`, `09763`, `16069`). | Public RKI surveillance data | 2,475,214 | `0735f0211c4d51389a20cb93dbcd4d5b48f8f7790d1c68176c8841c12d0b2489` |
+| `germany_school_holidays_2014_2019.json` | OpenHolidays API (`https://openholidaysapi.org/SchoolHolidays`), official Kultusministerkonferenz (KMK) German federal-state school holiday schedules (Summer, Easter, Autumn, Winter, Pentecost, Christmas) for all 16 Länder (`DE-SH` through `DE-TH`), 2014--2019. | Public schedule data | 261,944 | `4f51fd93e04f0f7ae37a5d78aea0966d12f74acf15b7293a795f155826fb695e` |
+| `counties_ags.geojson` | German 5-digit Amtlicher Gemeindeschlüssel (AGS) administrative county polygons from `m-ad/geofeatures-ags-germany` (`geojson/counties.json`). | Open geodata (BKG / GeoBasis-DE derived) | 1,289,615 | `8a0d0bf29ff31b6e536622613ce6e2f6198a6999bd725a631b4b1707780a6abd` |
 
-## Processing Rules (`experiment/code/data_prep.py`)
+## Surveillance Context & Processing Rules (`experiment/code/data_prep.py`)
 
-1. **Spatial units ($N = 400$ counties across $G = 16$ federal states)**:
-   - RKI reports 412 district keys including the 12 administrative boroughs of Berlin (`11001`--`11012`). Berlin's 12 boroughs are summed into a single city-state county unit (`11000`), matching the standard 400-county German Kreise/kreisfreie Städte partition.
-   - Known county boundary consolidations between the GeoJSON vintage and RKI 2017+ AGS codes are reconciled explicitly: Göttingen (`03152` + `03156` $\to$ `03159`), Wartburgkreis/Eisenach (`16056` $\to$ `16063`), and Berlin boroughs (`11*` $\to$ `11000`). All 400 counties match with 0 isolated units.
-   - Two counties share an undirected contiguity edge if their boundary polygons share at least one boundary vertex rounded to $10^{-3}$ degrees (~100 m), yielding 1,043 undirected edges (mean degree 5.21). The spatial weight matrix $W$ is row-normalised.
-2. **Temporal window ($T = 261$ estimation weeks + $S = 3$ pre-sample lag weeks)**:
-   - Estimation weeks: ISO weeks `2015-W01` through `2019-W52` (261 weeks; 2015 has 53 ISO weeks).
-   - Pre-sample weeks for constructing the renewal pressure at `2015-W01` ($S = 3$): `2014-W50`, `2014-W51`, `2014-W52`.
-3. **Policy exposure ($D_{it}$)**:
-   - For each county $i$ in federal state $s(i)$ and ISO week $t$ (Monday--Sunday), let $f_{it} \in [0, 1]$ be the fraction of calendar days covered by state $s(i)$'s official summer school holiday (*Sommerferien*).
-   - Binary indicator $D^{(0)}_{it} = \mathbf{1}\{7 f_{it} \ge 4\}$ (majority of the week in summer holiday).
-   - Primary exposure aligns with Varicella's ~14-day incubation and reporting lag via a 1-week lag: $D_{it} = D^{(0)}_{i,t-1}$ (with lags 0, 2, 3, 4, continuous fraction $f_{i,t-1}$, and full event-time profiles around holiday onset $e \in \{-2, \dots, 7\}$ evaluated directly in the sensitivity suite).
-4. **Background importation ($\omega_i$)**:
-   - Population-proportional background $\omega_i = \text{pop}_i / 10^5$ (with $\times 0.25$ and $\times 4$ sensitivity). Four counties with zero 2017 RKI count (preventing direct `Count / Incidence` population inversion) are assigned the median county population.
-5. **Derived spatial groupings**:
-   - 4 German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE, RP, SL; South: BW, BY; East: BE, BB, SN, ST, TH) for region $\times$ week fixed-effects sensitivity.
-   - 38 NUTS-2 government districts (*Regierungsbezirke* / state-level equivalents from the first two digits of AGS or NUTS-2 prefix) for low-zero spatial aggregation sensitivity.
-
-## Output (`experiment/data/processed/`)
-
-- `panel.npz`: compressed NumPy archive containing `Y`, `D_summer`, `Dshare_summer`, `D_all`, `Dshare_all`, `pop`, `state`, `cl`, `states`, `region`, `nuts2`, `ags`, `weeks`, `edges`, `W_indptr`, `W_indices`, `W_data`.
-- `panel_summary.json`: machine-readable summary statistics and checksum verification record.
+1. **Notification regime & date dimension**:
+   - Nationwide mandatory physician/laboratory reporting of varicella (*Windpocken*) under the German *Infektionsschutzgesetz* took effect on 29 March 2013 (replacing prior state-only mandates in several eastern Länder); our estimation window begins in January 2015 (`2015-W01`), less than two years after national rollout, which motivates checking 2016--2019 subsamples alongside state linear trends.
+   - Weekly counts are indexed by RKI notification week (`ReportingDate` / *Meldewoche*), not symptom-onset date, which is unavailable in the public SurvStat web service. Notification delays combine with the ~14-day serial interval when interpreting event-time profiles.
+2. **Spatial units ($N = 400$ counties across $G = 16$ federal states, post-July 2021 RKI Kreise classification)**:
+   - RKI reports 412 district keys including the 12 administrative boroughs of Berlin (`11001`--`11012`). Berlin's 12 boroughs are summed into city-state county unit `11000`, yielding the standard 400-county partition.
+   - Administrative mergers reconciling the earlier GeoJSON boundary vintage to the post-July 2021 RKI `Kreise71Web` key set: Göttingen (`03152` + `03156` $\to$ `03159`, effective 1 November 2016), Wartburgkreis / Eisenach (`16056` $\to$ `16063`, effective 1 July 2021), and Berlin boroughs (`11*` $\to$ `11000`). All 400 counties match with zero isolated units.
+   - Two counties share an undirected contiguity edge if their boundary polygons share at least one boundary vertex rounded to $10^{-3}$ degrees ($\approx 100$ m), yielding 1,043 undirected county edges (mean degree 5.215) and 29 state-contiguity edges (diameter 5). Weight matrix $W$ is row-normalised.
+3. **Temporal window ($T = 261$ estimation weeks + $S = 3$ pre-sample lag weeks)**:
+   - Estimation weeks: ISO weeks `2015-W01` through `2019-W52` ($T = 261$; 2015 has 53 ISO weeks). Pre-sample lag weeks: `2014-W50` through `2014-W52`.
+4. **Policy & placebo exposures**:
+   - Let $f_{it} \in [0, 1]$ be the fraction of ISO week $t$ (Monday--Sunday) covered by state $s(i)$'s official summer holiday (*Sommerferien*). Primary binary exposure sets $D^{(0)}_{it} = \mathbf{1}\{7 f_{it} \ge 4\}$ lagged one week ($D_{it} = D^{(0)}_{i,t-1}$; 11.8% treated county-weeks). Threshold variants ($\ge 3$, $\ge 5$ days), continuous $f_{it}$, lags 0--4, all school holidays, and short-holiday placebos (Easter, Autumn, Winter, Pentecost) are built identically and stored in `panel.npz`.
+   - Note on summer rotation: 14 states rotate summer start dates across ISO weeks 25--31 over 2015--2019, whereas Baden-Württemberg (`08`, 44 counties) and Bavaria (`09`, 96 counties) always begin last (ranks 15--16, ISO weeks 30--31) in all five years.
+5. **Background importation ($\omega_i$) & regional groupings**:
+   - $\omega_i = \text{population}_i / 10^5$ using official RKI 2017 county denominators (and official RKI 2015/2018 denominators for `09188`, `09763`, `16069`; 0 median-imputed counties, national total 82.89 million).
+   - 4 German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE, RP, SL; South: BW, BY; East: BE, BB, SN, ST, TH) and 38 NUTS-2 government districts (*Regierungsbezirke*).

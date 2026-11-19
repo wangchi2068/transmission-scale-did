@@ -1,37 +1,37 @@
 \begin{table}[!t]
 \centering
-\caption{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R=500$): finite-cluster interval coverage and null reference distributions of $J_{LM}$ and $S_3$.}
+\caption{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R=500$): finite-cluster interval coverage (including restricted score wild bootstrap) and null reference distributions of $J_{LM}$ and $S_3$.}
 \label{tab:rev-calsim}
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{3.0pt}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{llrrrrrr}
+\begin{tabular}{llrrrrrrrr}
 \toprule
-design & parameter & bias & emp.\ SD & mean SE & cov.\ $t_{15}$ & cov.\ wild (M) & cov.\ wild (W6) \\
+design & parameter & bias & emp.\ SD & mean SE & $t_{15}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) \\
 \midrule
-\multicolumn{8}{l}{\emph{(a) Interval performance, M0}} \\
-cal & $\tau+\kappa$ & -0.005 & 0.084 & 0.071 & 0.892 & 0.864 & 0.890 \\
- & $\tau$ & -0.009 & 0.186 & 0.179 & 0.930 & 0.896 & 0.926 \\
- & $\kappa$ & 0.005 & 0.191 & 0.190 & 0.936 & 0.914 & 0.936 \\
- & $\phi$ & 0.012 & 0.056 & 0.052 & 0.930 & 0.896 & 0.920 \\
-high-noise & $\tau+\kappa$ & -0.019 & 0.132 & 0.111 & 0.902 & 0.850 & 0.894 \\
- & $\tau$ & 0.003 & 0.229 & 0.211 & 0.940 & 0.912 & 0.936 \\
- & $\kappa$ & -0.022 & 0.232 & 0.215 & 0.928 & 0.900 & 0.928 \\
- & $\phi$ & 0.021 & 0.061 & 0.073 & 0.950 & 0.920 & 0.938 \\
+\multicolumn{10}{l}{\emph{(a) Interval performance, M0 ($G = 16$ unequal state clusters)}} \\
+cal & $\tau+\kappa$ & -0.003 & 0.080 & 0.069 & 0.902 & 0.872 & 0.894 & 0.936 & 0.934 \\
+ & $\tau$ & -0.004 & 0.198 & 0.177 & 0.930 & 0.864 & 0.920 & -- & -- \\
+ & $\kappa$ & 0.000 & 0.203 & 0.186 & 0.932 & 0.904 & 0.924 & -- & -- \\
+ & $\phi$ & 0.005 & 0.054 & 0.051 & 0.934 & 0.914 & 0.928 & -- & -- \\
+high-noise & $\tau+\kappa$ & -0.016 & 0.136 & 0.113 & 0.904 & 0.866 & 0.894 & 0.946 & 0.946 \\
+ & $\tau$ & 0.002 & 0.219 & 0.210 & 0.948 & 0.914 & 0.942 & -- & -- \\
+ & $\kappa$ & -0.019 & 0.229 & 0.215 & 0.934 & 0.896 & 0.922 & -- & -- \\
+ & $\phi$ & 0.025 & 0.060 & 0.070 & 0.952 & 0.922 & 0.950 & -- & -- \\
 \midrule
-\multicolumn{8}{l}{\emph{(b) Finite-sample null distributions of over-identification and root-selection statistics}} \\
-design & statistic & mean & q95 & q99 & max & application & exceed ($p_{\mathrm{cal}}$) \\
+\multicolumn{10}{l}{\emph{(b) Finite-sample null distributions of over-identification and root-selection statistics}} \\
+design & statistic & mean & q95 & q99 & max & application & \multicolumn{3}{r}{exceed ($p_{\mathrm{cal}}$)} \\
 \midrule
-cal & $J_{LM,\mathrm{oi}}$ & 1.90 & 4.72 & 6.63 & 7.80 & 9.05 & 0/500 (0.002) \\
- & $J_{LM,\mathrm{inv}}$ & 1.94 & 4.71 & 6.35 & 7.27 & 4.12 & 44/500 (0.090) \\
- & $S_{3,\mathrm{oi}}$ & 2.37 & 5.87 & 7.34 & 8.11 & 9.05 & 0/500 (0.002) \\
- & $S_{3,\mathrm{inv}}$ & 2.38 & 5.63 & 7.15 & 8.94 & 4.27 & 71/500 (0.144) \\
-high-noise & $J_{LM,\mathrm{oi}}$ & 1.94 & 4.84 & 6.13 & 9.19 & 9.05 & 1/500 (0.004) \\
- & $J_{LM,\mathrm{inv}}$ & 1.95 & 4.98 & 6.96 & 8.07 & 4.12 & 42/500 (0.086) \\
- & $S_{3,\mathrm{oi}}$ & 2.49 & 5.87 & 7.79 & 9.58 & 9.05 & 2/500 (0.006) \\
- & $S_{3,\mathrm{inv}}$ & 2.50 & 5.85 & 7.80 & 9.61 & 4.27 & 77/500 (0.156) \\
+cal & $J_{LM,\mathrm{oi}}$ & 2.02 & 5.33 & 7.27 & 9.19 & 9.12 & \multicolumn{3}{r}{1/500 (0.004)} \\
+ & $J_{LM,\mathrm{inv}}$ & 1.89 & 4.59 & 6.92 & 7.52 & 4.10 & \multicolumn{3}{r}{43/500 (0.088)} \\
+ & $S_{3,\mathrm{oi}}$ & 2.46 & 6.12 & 7.99 & 9.89 & 9.11 & \multicolumn{3}{r}{1/500 (0.004)} \\
+ & $S_{3,\mathrm{inv}}$ & 2.32 & 5.34 & 7.39 & 9.20 & 4.26 & \multicolumn{3}{r}{68/500 (0.138)} \\
+high-noise & $J_{LM,\mathrm{oi}}$ & 2.04 & 5.18 & 6.99 & 7.41 & 9.12 & \multicolumn{3}{r}{0/500 (0.002)} \\
+ & $J_{LM,\mathrm{inv}}$ & 1.96 & 5.02 & 6.65 & 8.72 & 4.10 & \multicolumn{3}{r}{45/500 (0.092)} \\
+ & $S_{3,\mathrm{oi}}$ & 2.60 & 6.29 & 7.61 & 9.58 & 9.11 & \multicolumn{3}{r}{2/500 (0.006)} \\
+ & $S_{3,\mathrm{inv}}$ & 2.51 & 6.06 & 7.44 & 9.41 & 4.26 & \multicolumn{3}{r}{77/500 (0.156)} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Calibrated DGP uses the observed 400-county German network, 261-week summer holiday schedule, Vink et al.\ (2014) generation weights, truth set to the primary M0 estimate ($\tau=-0.301$, $\kappa=0.062$, $\phi=0.325$), NB2 shape $k=4.96$ and state $\times$ week log-normal shock SD $\sigma=0.202$ (\emph{cal}), or $k/2$ and $2\sigma$ (\emph{high-noise}). Unique interior root in 100.0\% (\emph{cal}) and 100.0\% (\emph{high-noise}) of draws. Coverage uses nominal 95\% $t_{15}$ sandwich and score wild bootstrap-$t$ with Mammen (M) and Webb 6-point (W6) weights ($B=399$; MCSE $\approx 0.010$). Panel (b): $p_{\mathrm{cal}} = (\text{exceed} + 1)/(R_{\mathrm{ok}} + 1)$. Source: \texttt{experiment/analysis/germany\_calibrated\_sim.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) weights, truth set to primary M0 ($\tau=-0.300$, $\kappa=0.060$, $\phi=0.326$), NB2 $k=4.96$ and state $\times$ week log-normal shock SD $\sigma=0.202$ (\emph{cal}), or $k/2$ and $2\sigma$ (\emph{high-noise}). Unique interior root in 100.0\% (\emph{cal}) and 100.0\% (\emph{high-noise}). For $\tau+\kappa$ in \emph{cal}, sandwich SEs understate empirical SD by 14.5\% (mean SE / emp.\ SD = 0.855); both $t_{15}$ and unrestricted wild score bootstrap under-cover, whereas restricted score wild bootstrap (WCR-score; $B=399$) restores near-nominal coverage. Source: \texttt{experiment/analysis/germany\_calibrated\_sim.json}.}
 \end{table}

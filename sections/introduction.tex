@@ -1,79 +1,81 @@
 \section{Introduction}
 \label{s:intro}
 
-Panels of reported cases by county or region are the standard data for evaluating non-pharmaceutical
+Panels of reported cases by county or region are standard for evaluating non-pharmaceutical
 interventions such as school closures, mobility restrictions and community mandates. In practice,
-intervention effects are commonly estimated by event studies, two-way fixed-effects regressions of
-case growth or log cases, regional comparisons and synthetic controls
-\citep{hsiang2020anticontagion,chernozhukov2021masks,mitze2020masks}, all importing the
-difference-in-differences logic of policy evaluation \citep{callaway2021did,roth2023trending,haber2021impact}.
-Epidemic data strain that logic in three places at once, because transmission generates the
-dependence that outcome-scale designs treat as noise. Weekly cases arise from earlier cases through
-the generation interval \citep{wallinga2004different,fraser2007estimating,wallinga2007generation},
-so parallel trends in counts or log counts fail even without any policy
-\citep{gauthier2021twfe,feng2024parallel}. Policy adoption often responds to rising incidence, so
-treatment depends on past outcomes and conventional unit fixed effects lose their justification
-\citep{imai2019fixed,zhang2025timevarying}. Units are also spatially coupled: infections cross
-borders and neighbours' interventions alter contact patterns
-\citep{hudgens2008interference,halloran2016dependent,aronow2017exposure}, shifting policy estimates
-when spillovers are ignored \citep{enriquez2025spillovers}.
+effects are commonly estimated by event studies, two-way fixed-effects regressions of case growth
+or log cases, regional comparisons and synthetic controls
+\citep{hsiang2020anticontagion,chernozhukov2021masks,mitze2020masks}, importing the
+difference-in-differences logic of policy evaluation
+\citep{callaway2021did,roth2023trending,haber2021impact}. Epidemic data strain that logic on
+three fronts simultaneously, because transmission generates the dependence that outcome-scale
+designs treat as error. Weekly cases arise from earlier cases through the generation interval
+\citep{wallinga2004different,fraser2007estimating,wallinga2007generation}, so parallel trends in
+counts or log counts fail even under no policy \citep{gauthier2021twfe,feng2024parallel}. Policy
+adoption often responds to rising incidence, invalidating strict exogeneity and conventional unit
+fixed effects \citep{imai2019fixed,zhang2025timevarying}. Finally, units are spatially coupled:
+infections cross borders and neighbours' interventions alter contact patterns
+\citep{hudgens2008interference,halloran2016dependent,aronow2017exposure}, biasing estimates when
+spillovers are omitted \citep{enriquez2025spillovers}.
 
-Existing approaches each address part of this problem. \citet{feng2024parallel} place parallel
-trends on cohort-based log effective reproduction numbers, but omit spillovers and rely on
-first-step reproduction-number estimates that suffer from small-count Jensen bias and
+Existing approaches each resolve one piece of this structure. \citet{feng2024parallel} place
+parallel trends on cohort-based log effective reproduction numbers, omitting spillovers and relying
+on first-step reproduction-number estimates subject to small-count Jensen bias and
 generation-interval distortions \citep{gostic2020practical}. Semi-mechanistic renewal models in
 Bayesian \citep{flaxman2020npi,brauner2021npi,bhatt2023semimech} or frequentist form
 \citep{bong2024frequentist,bong2024augmented}, SIR-motivated unconfoundedness
 \citep{callaway2023pandemic} and structural growth models \citep{chernozhukov2021masks} condition on
 the observed past rather than eliminating unrestricted unit effects. Spatio-temporal count models
 \citep{held2005hhh,meyer2014powerlaw,alaimo2024poissonar} capture contagion coupling without
-addressing feedback adoption. Spatial and network difference-in-differences designs
-\citep{kosfeld2021spatial,butts2021spatial,forastiere2021network,xu2023did,sun2025didnetwork} allow
-regional spillovers on the outcome scale without renewal dynamics or feedback adoption.
-Quasi-differenced sequential moments remove multiplicative unit effects under predetermined
-regressors
+incidence-driven policy feedback, whereas spatial and network difference-in-differences designs
+\citep{kosfeld2021spatial,butts2021spatial,forastiere2021network,xu2023did,sun2025didnetwork}
+model spillovers on the outcome scale without renewal dynamics. Quasi-differenced sequential
+moments remove multiplicative unit effects under predetermined regressors
 \citep{chamberlain1992sequential,wooldridge1997multiplicative,windmeijer2000moment,blundell2002count}
-but have not been combined with renewal transmission and spatial contagion.
+but have not been integrated with renewal transmission, spatial contagion and formal validity
+diagnostics.
 
-This paper integrates renewal dynamics, spatial contagion, policy spillovers and unrestricted unit
-effects into a single quasi-differenced generalized method of moments (QD-GMM) design equipped with
-built-in diagnostics. Parallel trends are placed on the log reproduction number of a renewal
-equation whose infection pressure imports cases from neighbouring units; a forward quasi-difference
-eliminates unrestricted unit effects; instruments constructed solely from the observed past permit
-incidence-driven feedback; and policy spillovers enter through the share of treated neighbours.
-Three methodological results follow. First, under cross-cluster conditions that exclude unmodelled
-same-week cross-cluster transmission, the moment contributions form a martingale difference array
-across weeks despite lagged inter-cluster contagion, so the ordinary cluster-robust sandwich applies
-without spatial HAC adjustment and week effects profile out in closed form. Second, across
-pre-specified simulations with feedback adoption, spillover, overdispersion and small counts
-($R=8000$), QD-GMM recovers direct effects with bias between $-0.002$ and $0.001$ and 95\% interval
-coverage of 94.5\% to 95.4\%, where outcome-scale, Poisson fixed-effects and two-step log-$R$
-comparators are biased; a matched same-week experiment ($w_0=0.3$) further demarcates the weekly
-model's operating domain to pathogens with multi-week generation intervals. Third, the design ships
-with practical diagnostics: a profiled contagion equation that exposes multiple roots,
-over-identification tests ($J$ or rank-safe score-form $J_{LM}$) read against calibrated
-finite-sample reference distributions, and profiled Stock--Wright identification-robust confidence
-sets.
+This paper develops quasi-differenced generalized method of moments (QD-GMM) on the transmission
+scale together with explicit identification and failure-mode diagnostics. Rather than assuming
+weekly surveillance panels can always recover structural causal effects, we characterize precisely
+when transmission parameters are point-identified and when diagnostics downgrade estimates to
+pseudo-true values of a rejected working model. Parallel trends are placed on the log reproduction
+number of a renewal equation whose infection pressure imports cases from neighbouring units; a
+forward quasi-difference eliminates unrestricted unit effects; instruments built solely from the
+observed past permit incidence-driven feedback; and policy spillovers enter through the share of
+treated neighbours. Three methodological results follow. First, under cross-cluster conditions
+excluding unmodelled same-week cross-cluster transmission, cluster scores form a martingale
+difference array across weeks despite lagged inter-cluster contagion, so the ordinary
+cluster-robust sandwich applies without spatial HAC adjustment and week effects profile out in
+closed form. Second, across pre-specified simulations with feedback adoption, spillover,
+overdispersion and small counts ($R=8000$), QD-GMM recovers direct effects with bias between
+$-0.002$ and $0.001$ and 95\% coverage of 94.5\% to 95.4\% where outcome-scale, Poisson
+fixed-effects and two-step log-$R$ comparators fail, while boundary ($\phi_0=0$) and same-week
+($w_0=0.3$) experiments demarcate the estimator's domain of validity. Third, built-in
+diagnostics---profiled contagion curves that reveal multiple roots, over-identification tests
+($J$ or rank-safe score-form $J_{LM}$) calibrated against finite-sample null distributions,
+Stock--Wright identification-robust sets, total-policy-scale event-time profiles and
+ascertainment-confounding checks---detect specification and surveillance failures directly from
+observed data.
 
-We demonstrate the framework on a five-year panel of weekly county-level varicella (chickenpox)
-surveillance across Germany's 400 counties and 16 federal states (2015--2019, 115{,}129 cases),
-exploiting Germany's staggered state summer school holiday calendar as a recurring natural
-experiment \citep{cauchemez2008school,jackson2014varicella}. Varicella's 14-day generation interval
-\citep{vink2014serial} places negligible transmission within a single week ($w_0 = 2.6\times 10^{-6}$),
-placing the application squarely within the weekly model's domain of validity while exercising the
-theory on non-absorbing, recurrent exposures. QD-GMM locates a unique interior contagion coupling
-($\hat\phi = 0.325$, 95\% CI $0.206$ to $0.445$) and estimates a policy-level transmission reduction
-of $\hat\tau+\hat\kappa = -0.238$ (a 21.2\% reduction in $R$; 95\% $t_{15}$ CI $-0.362$ to $-0.114$),
-consistent with historical European varicella benchmarks \citep{jackson2014varicella} and implying
-2{,}440 (SE 670) cases averted during holiday weeks and 2{,}995 (SE 900) network-wide. The effect
-remains strictly negative across score wild bootstrap-$t$, nonlinear pairs cluster bootstrap-$t$,
-delete-one-state jackknife, NUTS-2 spatial aggregation and the identification-robust Stock--Wright
-Bonferroni projection ($-0.492$ to $-0.081$). Event-time estimates show flat pre-trends ($p=0.74$)
-and a null onset week ($-0.008$), ruling out an immediate holiday under-reporting artifact, followed
-by a post-incubation decline. In sharp contrast, standard comparators empirically confirm
-Theorem~\ref{thm:bias}: two-step EpiEstim log-$R$ regression flips to the wrong sign ($+0.064$)
-under 58.8\% county-week zeros---and reverses to $-0.102$ once zeros fall to 2.9\% at NUTS-2
-aggregation---while $\log(Y+1)$ TWFE is attenuated to $-0.102$. Sections~\ref{s:methods}--\ref{s:discussion}
-present the theory, simulations, application and scope; Web Appendices~A--F give proofs, adapted
-comparator results, numerical checks, supplementary simulations, data provenance, few-cluster
-inference and diagnostics.
+We stress-test this framework on five years of German county-level weekly varicella
+(\emph{Windpocken}) notifications (400 counties, 16 states, 2015--2019; 115{,}129 cases) paired
+with federal-state school holiday calendars
+\citep{cauchemez2008school,jackson2014varicella,adda2016economic,vonbismarckosten2022schools,isphording2021schools}.
+Varicella's 14-day mean serial interval \citep{vink2014serial} keeps within-week transmission
+negligible ($w_0=2.6\times 10^{-6}$), while sparse county counts (58.8\% zeros) test Theorem~3's
+predictions for standard comparators. On the empirical data, two-step EpiEstim log-$R$ regression
+flips sign to $+0.064$ before reverting to $-0.102$ at NUTS-2 aggregation (2.9\% zeros), and
+$\log(Y+1)$ TWFE attenuates to $-0.102$. Under the baseline QD-GMM working model, the policy-level
+contrast is negative ($\hat\tau+\hat\kappa=-0.239$, 95\% $t_{15}$ CI $-0.364$ to $-0.115$;
+restricted score wild bootstrap $-0.419$ to $-0.139$) with an interior coupling root
+$\hat\phi=0.326$. Yet the framework's diagnostics prevent taking this working-model contrast as an
+unconfounded 21.3\% causal reduction: $J_{LM,\mathrm{oi}}$ rejects lagged working-model moments
+($p_{\mathrm{cal}}=0.004$), total-scale event-time estimates show an immediate $-0.208$ onset-week
+drop ($p=0.049$) inconsistent with notification weeks and a 14-day incubation lag, short non-summer
+holidays display the classic reporting-suppression and lag-2 rebound echo, the two largest
+southern states (Baden-W\"urttemberg and Bavaria) never rotate their start timing, and dropping
+both states or absorbing four-region $\times$ week effects yields intervals covering zero.
+Sections~\ref{s:methods}--\ref{s:discussion} present the theory, simulations, German stress test
+and scope; Web Appendices~A--F provide proofs, adapted comparator results, numerical checks,
+supplementary simulations, data provenance, few-cluster calibration and full diagnostics.

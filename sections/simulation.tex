@@ -34,9 +34,16 @@ true $\alpha_i$. Intervals use $t_{G-1}$ critical values clustered by state, and
 bias within 2 MCSE of zero for $(\tau,\kappa,\phi)$ and coverage in $[93\%,97\%]$ under feedback.
 
 All 25 core, null and misspecification scenarios and primary estimators (M0, M0-OI, M0-ET, M0$'$,
-M0-G and comparators M1--M4) were pre-specified. M0-GI is evaluated as a secondary invariance-based
-root-selection diagnostic on the identical $R=8000$ data sets and independently validated alongside
-population-root checks and the same-week stress test in Web Appendix~\ref{app:supp}.
+and comparators M1--M4) were pre-specified. Departures from the protocol: (i) the unit-effect spread
+was quartered to keep $T=26$ counts realistic; (ii) replications rose from 1000 to 8000 so that
+2~MCSE fell below 0.01; (iii) an offset error in M1 (and M1-BC) was corrected after the pilot, and
+fewer Poisson fixed-effects variants were retained; (iv) M0-G was added after the pilot revealed
+root multiplicity, before the full runs; and (v) M0-GI was added after interim boundary failures
+and is post hoc, evaluated on the identical data sets. The validation designs of Web
+Appendix~\ref{app:rsel}, the population root checks of Web Appendix~\ref{app:poproots}, the
+same-week stress test of Section~\ref{ss:sameweek}, and essentially all choices in the German
+varicella empirical application and calibrated finite-cluster simulation of
+Section~\ref{s:application} were introduced post hoc during revision and are labelled accordingly.
 
 \subsection{Results}
 \label{ss:simresults}
@@ -68,10 +75,11 @@ severely (Web Table~\ref{tab:sim-null}). Under positive spillover all 8000 repli
 root and M0, M0-G and M0-GI coincide. When $\phi_0=\kappa_0=0$, which lies outside
 Theorem~\ref{thm:asy}, multiple interior roots appear in 47.2\% to 51.7\% of runs, trapping local M0
 at bias 0.132 to 0.469 and coverage 0.6\% to 38.8\% (Figure~\ref{fig:roots}). The second root is a property of the population moments: it appears in all 40 large-$N$ draws of
-the four zero-contagion designs and moves with $\bar\phi$ (Web Table~\ref{tab:rev-poproots}). At the
-boundary, M0-G selects $\phi=0$ in 28.6\% to 44.8\% of runs (coverage 52.9\% to 71.0\%), whereas the
-invariance rule M0-GI selects it in 63.7\% to 80.9\% of runs, reducing bias to 0.000--0.052 and
-raising coverage to 87.5\%--95.2\% (Table~\ref{tab:sim-m0gi}). On nine independent validation designs
+the four zero-contagion designs and moves with $\bar\phi$ (Web Table~\ref{tab:rev-poproots}). The
+selection rules are heuristics without a stated guarantee. Added after the pilot, M0-G selects
+$\phi=0$ in 28.6\% to 44.8\% of runs (coverage 52.9\% to 71.0\%), whereas the post hoc invariance
+rule M0-GI selects it in 63.7\% to 80.9\% of runs, reducing bias to 0.000--0.052 and raising
+coverage to 87.5\%--95.2\% (Table~\ref{tab:sim-m0gi}). On nine independent validation designs
 ($R=2000$ each; Web Appendix~\ref{app:rsel}), M0-GI restores coverage from 0.377 to 0.893 at
 $\phi_0=0$ but selects the boundary in 56\% to 79\% of runs at $\phi_0=0.05$, lowering coverage from
 0.960--0.970 to 0.921--0.935; the rules differ by at most 0.001 at $\phi_0=0.15$.

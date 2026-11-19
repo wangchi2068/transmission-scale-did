@@ -1,57 +1,19 @@
 \section{Discussion}
 \label{s:discussion}
 
-Placing parallel trends on the log reproduction number with imported infection pressure, and
-eliminating unrestricted unit effects by forward quasi-differencing, yields a difference-in-differences
-design that accommodates self-exciting transmission, incidence-driven policy feedback and lagged
-spatial contagion while retaining closed-form week profiling and the ordinary cluster-robust
-sandwich. Across 25 pre-specified simulation scenarios spanning feedback adoption, spillover,
-overdispersion and small counts, QD-GMM recovers direct and spillover effects with negligible bias
-and nominal coverage where count, log-count, Poisson fixed-effects and two-step reproduction-number
-comparators fail, and directly identifies the policy-level total $\tau+\kappa$ when interventions
-are enacted above the reporting unit.
+Placing parallel trends on the log reproduction number with imported infection pressure and eliminating unrestricted unit effects via forward quasi-differencing delivers a DiD estimator that handles self-exciting transmission, incidence-driven policy feedback, and lagged spatial contagion while retaining closed-form week profiling and cluster-robust sandwich inference.
+Across 25 pre-specified simulation scenarios covering feedback, spillovers, overdispersion, and small counts, QD-GMM achieves essentially zero bias and nominal coverage where outcome-scale, Poisson fixed-effects, and two-step $R$ regressions fail systematically; when policies operate at the reporting-unit level or above, the policy-level total $\tau+\kappa$ remains directly identified.
 
-The German county-level varicella application demonstrates this framework in its intended operating
-regime. Varicella's 14-day generation interval satisfies weekly aggregation ($w_0=2.6\times 10^{-6}$),
-and staggered six-week summer school holidays across 16 federal states provide recurring,
-non-absorbing exposure variation. QD-GMM identifies a unique interior contagion coupling
-($\hat\phi=0.325$) and a 21.2\% reduction in transmission ($\hat\tau+\hat\kappa=-0.238$, 95\%
-$t_{15}$ CI $-0.362$ to $-0.114$), matching European varicella benchmarks \citep{jackson2014varicella}
-and corresponding to 2{,}440 cases averted in treated county-weeks and 2{,}995 network-wide. The
-finding holds across score wild bootstrap-$t$, nonlinear pairs cluster bootstrap-$t$,
-delete-one-state jackknife, NUTS-2 spatial aggregation and the identification-robust Stock--Wright
-Bonferroni projection ($-0.492$ to $-0.081$), while event-time estimates exhibit flat pre-trends and
-a null onset week ($-0.008$) followed by a post-incubation drop. Equally instructive, standard
-comparators reproduce Theorem~\ref{thm:bias} on real data: two-step EpiEstim log-$R$ regression
-flips to the wrong sign ($+0.064$) under 58.8\% county zeros before reverting to $-0.102$ at NUTS-2
-aggregation (2.9\% zeros), and $\log(Y+1)$ TWFE is attenuated to $-0.102$.
+Applying the framework to Germany's 2015--2019 county-level varicella notifications clarifies both what the estimator solves and what surveillance diagnostics expose.
+On the methodological side, county-week data with 58.8\% zeros immediately induce Theorem~\ref{thm:bias}'s small-count sign flip in two-step EpiEstim log-$R$ DiD ($+0.064$ at county level versus $-0.102$ at NUTS-2 aggregation) and strong attenuation in $\log(Y+1)$ TWFE ($-0.102$), whereas QD-GMM avoids zero deletion and recovers an interior contagion parameter $\hat\phi=0.326$.
+On the substantive side, however, the German stress test reveals three forces that prevent interpreting the baseline $-0.239$ summer coefficient as a clean biological causal estimate of varicella school closure effects:
+(i) identification relies heavily on non-rotating southern calendars in Bavaria and Baden-W\"urttemberg (dropping them leaves lag-1 at $-0.211$ $[-0.431,0.008]$ and lag-2 at $+0.033$), and four-region $\times$ week controls absorb most rotating variation;
+(ii) lag-instrument over-identification rejects ($J_{LM,\mathrm{oi}}=9.12$, $p_F=0.036$, calibrated $p=0.004$) through one-week-lagged growth ($6.74$, $p_F=0.020$), $S_{3,\mathrm{oi}}$ marginally prefers the $\phi=0$ boundary, and the $\chi^2$ joint set $S_{3,\mathrm{oi}}(\chi^2)$ is empty; and
+(iii) SurvStat@RKI records reporting week (\emph{Meldewoche}) rather than symptom onset \citep{faensen2006survnet,siedler2010varicella,reuss2010varicella}: the immediate onset-week total-scale drop ($-0.208$ at $e_0$, $p=0.049$) and negative lag-0 dips followed by positive lag-2 rebounds across non-summer school breaks point to holiday ascertainment compression and post-break catch-up notifications that a contemporaneous 21.5\% onset-zeroing adjustment suffices to eliminate at lag 1 ($+0.007$, SE $0.063$).
 
-Three practical conditions define the scope of weekly QD-GMM. First, global identification relies on
-a unique interior root for $\phi$: at the zero-contagion boundary ($\phi_0=0$), the population
-moments can admit a second $\bar\phi$-dependent root. Inspecting the profiled $\phi$-equation over
-$[0,3]$ and reporting Stock--Wright identification-robust sets alongside M0-G and M0-GI protects
-against spurious roots without assuming strong identification of $\phi$ \citep{stock2000weak}.
-Second, weekly aggregation requires that within-week transmission be small: the matched stress
-experiment ($w_0=0.3$; Section~\ref{ss:sameweek}) shows that substantial same-week renewal biases
-weekly policy totals by roughly one-sixth while leaving $J$ unpowered. Weekly QD-GMM is therefore
-well suited to multi-week generation-interval pathogens such as varicella, measles or mumps, whereas
-fast-generation pathogens such as SARS-CoV-2 require sub-weekly estimating equations that also model
-day-of-week reporting and notification delays \citep{lison2024nowcast}. Third, Theorem~\ref{thm:asy}
-is a large-$G$ result: with $G=16$ unequal state clusters (1 to 96 counties), calibrated simulations
-show mild under-coverage of $t_{15}$ for $\tau+\kappa$ (0.892--0.902), so corroborating sandwich
-intervals with nonlinear pairs cluster bootstrap, delete-one-cluster jackknife and identification-robust
-projections is important whenever clusters are moderate in number or heterogeneous in size
-\citep{mackinnon2017wild,ferman2019inference,canay2021wild}. Similarly, in sparse-count settings
-where mean incidence is comparable to the background term $\omega_i$, sensitivity to $\omega_i$ and
-score-form over-identification diagnostics ($J_{LM,\mathrm{inv}}$, $J_{LM,\mathrm{oi}}$) should be
-inspected to separate short-run reporting noise from structural misspecification.
+Three scope conditions govern weekly QD-GMM in practice.
+First is root uniqueness and diagnostic disclosure: because boundary roots at $\phi_0=0$ can coexist with interior solutions, practitioners should profile $[0,3]$, cross-check M0-G and M0-GI against Stock--Wright identification-robust sets \citep{stock2000weak,andrews2012identification,kleibergen2005testing}, and treat $J_{LM,\mathrm{oi}}$ rejections and empty $\chi^2$ over-identification sets as genuine flags against strict specification validity.
+Second is temporal aggregation and reporting cadence: Section~\ref{ss:sameweek} shows that weekly QD-GMM suits multi-week serial intervals (varicella, measles, mumps) only when incidence is measured near infection/onset or when ascertainment varies smoothly, whereas fast pathogens ($w_0\gtrsim 0.3$) or reporting-week surveillance streams subject to holiday clinic shifts require sub-weekly estimating equations with weekday and reporting-delay structure \citep{lison2024nowcast}.
+Third is finite-cluster inference: Theorem~\ref{thm:asy} is a large-$G$ result; in our $G=16$ unequal-state calibration, $t_{15}$ intervals undercover $\tau+\kappa$ at 0.902 (repaired to 0.934--0.946 by WCR-score wild cluster bootstrap), and unshrunk cross-cluster spatial adjustments (Remark~\ref{rem:testable}) can turn indefinite, making null-imposed WCR-score, nonlinear pairs bootstrap, and delete-cluster jackknife essential companions whenever $G$ is moderate \citep{kline2012score,mackinnon2017wild,ferman2019inference,canay2021wild}.
 
-Framing parallel trends on $\log R$ \citep{roth2023parallel} separates local from imported infection
-pressure \citep{elenev2025staggered} and complements unconfoundedness approaches
-\citep{callaway2023pandemic}. By turning routine county-week surveillance counts into
-transmission-scale policy estimates with standard clustered inference and transparent falsification
-diagnostics, QD-GMM provides a practical causal tool for infectious-disease epidemiology. Natural
-extensions include sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback},
-likelihood-based feedback models \citep{bonhomme2025feedback}, sub-weekly estimating equations,
-reporting-independent signals such as wastewater surveillance \citep{goldstein2024wastewater}, and
-joint estimation of generation intervals and reporting processes \citep{goldwasser2026rt}.
+Framing parallel trends on the log reproduction number \citep{roth2023parallel} separates local from imported force of infection \citep{elenev2025staggered} and complements unconfoundedness approaches \citep{callaway2023pandemic}. Natural extensions include sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood feedback models \citep{bonhomme2025feedback}, sub-weekly nowcasted estimating equations, reporting-invariant wastewater surveillance \citep{goldstein2024wastewater}, and joint estimation of serial intervals, vaccination uptake, and reporting processes \citep{siedler2010varicella,suzuki2023varicella,goldwasser2026rt}.

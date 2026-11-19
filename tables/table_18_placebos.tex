@@ -1,0 +1,48 @@
+\begin{table}[!t]
+\centering
+\caption{Placebo and randomisation diagnostics: non-summer school holidays (lags 0--2), time-shifted summer calendars, and cross-state schedule permutations.}
+\label{tab:rev-placebo}
+\footnotesize
+\setlength{\tabcolsep}{3.0pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrr}
+\toprule
+\multicolumn{6}{l}{\emph{(a) Non-summer school holiday placebos (M0, lags 0--2)}} \\
+holiday & lag & $\hat\tau+\hat\kappa$ (95\% $t_{15}$ CI) & $p_t$ & $\hat\phi$ (95\% CI) & $J_{LM,\mathrm{oi}}$ ($p_F$) \\
+\midrule
+Easter & 0 & -0.266 (-0.478, -0.055) & 0.0171 & 0.329 (0.206, 0.451) & 9.08 (0.036) \\
+ & 1 & 0.053 (-0.141, 0.247) & 0.5694 & 0.327 (0.208, 0.447) & 9.17 (0.035) \\
+ & 2 & 0.241 (0.066, 0.416) & 0.0102 & 0.329 (0.209, 0.449) & 9.15 (0.036) \\
+Autumn & 0 & -0.299 (-0.409, -0.189) & 0.0000 & 0.326 (0.208, 0.443) & 9.14 (0.036) \\
+ & 1 & -0.077 (-0.209, 0.055) & 0.2341 & 0.330 (0.210, 0.450) & 9.15 (0.036) \\
+ & 2 & 0.150 (0.035, 0.264) & 0.0141 & 0.334 (0.214, 0.454) & 9.14 (0.036) \\
+Winter & 0 & -0.198 (-0.326, -0.071) & 0.0047 & 0.330 (0.200, 0.460) & 9.08 (0.036) \\
+ & 1 & 0.008 (-0.181, 0.197) & 0.9268 & 0.330 (0.207, 0.453) & 9.06 (0.037) \\
+ & 2 & 0.097 (-0.064, 0.258) & 0.2197 & 0.329 (0.208, 0.450) & 9.18 (0.035) \\
+Pentecost & 0 & -0.497 (-0.611, -0.383) & 0.0000 & 0.334 (0.205, 0.462) & 9.12 (0.036) \\
+ & 1 & -0.115 (-0.404, 0.175) & 0.4110 & 0.330 (0.209, 0.450) & 9.26 (0.035) \\
+ & 2 & 0.068 (-0.100, 0.236) & 0.4014 & 0.330 (0.210, 0.449) & 9.14 (0.036) \\
+\midrule
+\multicolumn{6}{l}{\emph{(b) Time-shifted summer schedules relative to primary lag-1 alignment ($\Delta t \in \{-4,\dots,+4\}$)}} \\
+calendar shift & \multicolumn{2}{r}{$\hat\tau+\hat\kappa$ (95\% $t_{15}$ CI)} & $p_t$ & $\hat\phi$ (95\% CI) & $J_{LM,\mathrm{oi}}$ ($p_F$) \\
+\midrule
+-4 wk (lead 4) & \multicolumn{2}{r}{0.296 (0.110, 0.482)} & 0.0040 & 0.337 (0.217, 0.456) & 9.12 (0.036) \\
+-3 wk (lead 3) & \multicolumn{2}{r}{0.248 (0.029, 0.466)} & 0.0287 & 0.328 (0.207, 0.448) & 9.16 (0.036) \\
+-2 wk (lead 2) & \multicolumn{2}{r}{0.328 (0.150, 0.505)} & 0.0013 & 0.337 (0.214, 0.459) & 9.31 (0.034) \\
+-1 wk (lead 1) & \multicolumn{2}{r}{-0.142 (-0.233, -0.051)} & 0.0046 & 0.325 (0.206, 0.444) & 9.17 (0.036) \\
++0 wk (lag 1) & \multicolumn{2}{r}{-0.239 (-0.364, -0.115)} & 0.0009 & 0.326 (0.205, 0.446) & 9.12 (0.036) \\
++1 wk (lag 2) & \multicolumn{2}{r}{-0.331 (-0.714, 0.052)} & 0.0854 & 0.326 (0.204, 0.448) & 8.97 (0.038) \\
++2 wk (lag 3) & \multicolumn{2}{r}{-0.541 (-0.822, -0.260)} & 0.0009 & 0.338 (0.216, 0.461) & 9.40 (0.033) \\
++3 wk (lag 4) & \multicolumn{2}{r}{-0.345 (-0.511, -0.179)} & 0.0005 & 0.325 (0.204, 0.446) & 9.24 (0.035) \\
++4 wk (lag 5) & \multicolumn{2}{r}{-0.182 (-0.338, -0.027)} & 0.0245 & 0.335 (0.216, 0.455) & 9.12 (0.036) \\
+\midrule
+\multicolumn{6}{l}{\emph{(c) Cross-state randomisation test (permuting the 16 states' summer schedules across states, B=200)}} \\
+specification & observed & perm.\ mean (SD) & [5th, 95th] & \multicolumn{2}{r}{$p$ (1-sided / 2-sided)} \\
+\midrule
+Summer perm. (lag 1) & -0.239 & -0.000 (0.089) & [-0.149, +0.150] & \multicolumn{2}{r}{0.005 / 0.010} \\
+Summer perm. (lag 2) & -0.331 & -0.016 (0.145) & [-0.340, +0.172] & \multicolumn{2}{r}{0.060 / 0.060} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) confirms that state-calendar alignment drives the lag-1 contrast ($p_{\mathrm{2-sided}} = 0.010$) rather than generic national calendar curves alone, while Panel (b) reveals positive pre-holiday slopes at shifts $-4$ to $-2$ weeks and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
+\end{table}

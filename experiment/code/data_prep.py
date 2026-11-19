@@ -27,8 +27,8 @@ RAW_DIR = DATA_DIR / "raw" / "germany"
 OUT_DIR = DATA_DIR / "processed"
 
 EXPECTED_SHA256 = {
-    "rki_varicella_2014_2019.json": "b55d8973975aba56de69b2f06adc4174e1f136432115efe87a94c06ba4f45d01",
-    "germany_school_holidays_2014_2019.json": "fc799aa000bd362105c95e2a722ac2a5279abc8d3767b2cf18a97cd721bd008a",
+    "rki_varicella_2014_2019.json": "0735f0211c4d51389a20cb93dbcd4d5b48f8f7790d1c68176c8841c12d0b2489",
+    "germany_school_holidays_2014_2019.json": "4f51fd93e04f0f7ae37a5d78aea0966d12f74acf15b7293a795f155826fb695e",
     "counties_ags.geojson": "8a0d0bf29ff31b6e536622613ce6e2f6198a6999bd725a631b4b1707780a6abd",
 }
 
@@ -168,7 +168,7 @@ def graph_diameter(adj: np.ndarray) -> int:
 
 
 def build_holiday_matrices(hol_json: dict, weeks: list[tuple[int, int]], ags_list: list[str],
-                           ags_state: dict[str, str], holiday_filter: str | None):
+                           ags_state: dict[str, str], holiday_filter: str | None, min_days: int = 4):
     hol_days = defaultdict(set)
     for st_code, srec in hol_json.items():
         for h in srec["holidays"]:
@@ -196,7 +196,7 @@ def build_holiday_matrices(hol_json: dict, weeks: list[tuple[int, int]], ags_lis
             st = ags_state[a]
             cnt = sum(1 for dd in days if dd in hol_days[st])
             Dshare[t, i] = cnt / 7.0
-            D[t, i] = 1.0 if cnt >= 4 else 0.0
+            D[t, i] = 1.0 if cnt >= min_days else 0.0
     return D, Dshare
 
 
@@ -235,12 +235,22 @@ def main():
         _, ags = extract_ags(k)
         if ags in ags_idx:
             pop[ags_idx[ags]] += float(rec["pop"])
+    for k, rec in rki.get("population_fallback", {}).items():
+        _, ags = extract_ags(k)
+        if ags in ags_idx and pop[ags_idx[ags]] <= 0:
+            pop[ags_idx[ags]] = float(rec["pop"])
     n_imputed_pop = int((pop <= 0).sum())
     med_pop = float(np.median(pop[pop > 0]))
     pop = np.where(pop > 0, pop, med_pop)
 
-    D_sum_all, Dshare_sum_all = build_holiday_matrices(hol, weeks, ags_list, ags_state, "summer")
-    D_any_all, Dshare_any_all = build_holiday_matrices(hol, weeks, ags_list, ags_state, None)
+    D_sum_all, Dshare_sum_all = build_holiday_matrices(hol, weeks, ags_list, ags_state, "summer", 4)
+    D_sum_3d_all, _ = build_holiday_matrices(hol, weeks, ags_list, ags_state, "summer", 3)
+    D_sum_5d_all, _ = build_holiday_matrices(hol, weeks, ags_list, ags_state, "summer", 5)
+    D_any_all, Dshare_any_all = build_holiday_matrices(hol, weeks, ags_list, ags_state, None, 4)
+    D_east_all, _ = build_holiday_matrices(hol, weeks, ags_list, ags_state, "easter", 4)
+    D_aut_all, _ = build_holiday_matrices(hol, weeks, ags_list, ags_state, "autumn", 4)
+    D_win_all, _ = build_holiday_matrices(hol, weeks, ags_list, ags_state, "winter", 4)
+    D_pent_all, _ = build_holiday_matrices(hol, weeks, ags_list, ags_state, "pentecost", 4)
 
     W, edges, deg = build_adjacency(RAW_DIR / "counties_ags.geojson", ags_list)
 
@@ -267,9 +277,15 @@ def main():
     start_idx = idx_2015_w1 - 3  # 2014-W50
     Y = Y_all[start_idx:]
     D_summer = D_sum_all[start_idx:]
+    D_summer_3d = D_sum_3d_all[start_idx:]
+    D_summer_5d = D_sum_5d_all[start_idx:]
     Dshare_summer = Dshare_sum_all[start_idx:]
     D_all = D_any_all[start_idx:]
     Dshare_all = Dshare_any_all[start_idx:]
+    D_easter = D_east_all[start_idx:]
+    D_autumn = D_aut_all[start_idx:]
+    D_winter = D_win_all[start_idx:]
+    D_pentecost = D_pent_all[start_idx:]
     weeks_win = weeks[start_idx:]
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -277,9 +293,15 @@ def main():
         OUT_DIR / "panel.npz",
         Y=Y,
         D_summer=D_summer,
+        D_summer_3d=D_summer_3d,
+        D_summer_5d=D_summer_5d,
         Dshare_summer=Dshare_summer,
         D_all=D_all,
         Dshare_all=Dshare_all,
+        D_easter=D_easter,
+        D_autumn=D_autumn,
+        D_winter=D_winter,
+        D_pentecost=D_pentecost,
         Y_full_2014_2019=Y_all,
         D_summer_full=D_sum_all,
         D_all_full=D_any_all,

@@ -1,19 +1,19 @@
 \begin{table}[!t]
 \centering
-\caption{German varicella application: identification-robust profiled Stock--Wright confidence sets for $\phi$ and Bonferroni 95\% projection for $\tau+\kappa$.}
+\caption{Identification-robust profiled Stock--Wright confidence sets for $\phi$ (including empty $\chi^2$ and uninformative full-grid $F$ sets) and Bonferroni 95\% projection for $\tau+\kappa$.}
 \label{tab:rev-robust}
 \footnotesize
-\setlength{\tabcolsep}{3.2pt}
+\setlength{\tabcolsep}{2.4pt}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{rlllll}
+\begin{tabular}{rlllllll}
 \toprule
-$\bar\phi$ & $S_1(F)$ 95\% set & $S_1(\chi^2)$ 95\% set & $S_{3,\mathrm{inv}}(\chi^2)$ 95\% set & $S_{3,\mathrm{oi}}(F)$ 95\% set & $\tau+\kappa$ (Bonferroni 95\%) \\
+$\bar\phi$ & $S_1(F)$ & $S_1(\chi^2)$ & $S_{3,\mathrm{inv}}(\chi^2)$ & $S_{3,\mathrm{inv}}(F)$ & $S_{3,\mathrm{oi}}(\chi^2)$ & $S_{3,\mathrm{oi}}(F)$ & $\tau+\kappa$ (Bonf.\ 95\%) \\
 \midrule
-0.25 & [0.17, 3.00] & [0.18, 1.08] & [0.04, 2.39] & [0.00, 3.00] & (-0.503, -0.082) \\
-0.5 & [0.21, 2.33] & [0.23, 0.98] & [0.04, 2.61] & [0.00, 3.00] & (-0.492, -0.081) \\
-1 & [0.25, 1.55] & [0.28, 0.97] & [0.00, 2.86] & [0.00, 3.00] & (-0.476, -0.078) \\
+0.25 & [0.17, 3.00] & [0.18, 1.10] & [0.04, 2.38] & [0.00, 3.00] & empty & [0.00, 3.00] & (-0.504, -0.083) \\
+0.5 & [0.21, 2.40] & [0.23, 1.00] & [0.04, 2.60] & [0.00, 3.00] & empty & [0.00, 3.00] & (-0.493, -0.081) \\
+1 & [0.25, 1.57] & [0.28, 0.98] & [0.00, 2.85] & [0.00, 3.00] & empty & [0.00, 3.00] & (-0.477, -0.079) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Profiled Stock--Wright $S$ statistics evaluated on 304 values of $\phi \in [0, 3]$ ($G = 16$ states), with week effects and $(\tau, \kappa)$ profiled out via their just-identifying moments (presuming strong identification of $(\delta, \tau, \kappa)$ at the tested $\phi$). Small-sample $F$ reference uses $S(G-d)/\{\,d(G-1)\,\} \sim F_{d, G-d}$. Across all three reference values $\bar\phi$, $S_1(F)$ and $S_1(\chi^2)$ form a single connected interior interval excluding $\phi = 0$ (at $\phi=0$, $\bar\phi=0.5$: $S_1 = 5.78$, $p_F = 0.030$), both $S_{3,\mathrm{inv}}$ and $S_{3,\mathrm{oi}}(F)$ are non-empty, and the Bonferroni 95\% projection for $\tau+\kappa$ (union of 97.5\% conditional $t_{15}$ intervals over the 97.5\% $S_1(F)$ set for $\phi$) strictly excludes zero. Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Profiled Stock--Wright statistics evaluated on 304 grid values $\phi\in[0,3]$ ($G=16$ states), presuming strong identification of $(\delta,\tau,\kappa)$ at each tested $\phi$. Notice: $S_{3,\mathrm{oi}}(\chi^2)$ is empty across all three $\bar\phi$ (reflecting the rejected $J_{LM,\mathrm{oi}}$ over-identifying test), while $S_{3,\mathrm{inv}}(F)$, $S_{3,\mathrm{oi}}(F)$, and the 97.5\% $S_1(F)$ set used in the Bonferroni union all span the entire grid $[0.00,3.00]$. At $\phi=0$, $\bar\phi=0.5$: $S_1=5.78$ ($p_F=0.030$). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
 \end{table}

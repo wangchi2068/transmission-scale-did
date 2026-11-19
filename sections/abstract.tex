@@ -1,24 +1,24 @@
 \begin{abstract}
-Panels of reported cases are the standard data for evaluating non-pharmaceutical interventions, yet
-outcome-scale difference-in-differences rests on assumptions that epidemic data violate:
+Panels of reported cases are standard for evaluating non-pharmaceutical interventions, yet
+outcome-scale difference-in-differences rests on assumptions epidemic counts violate:
 transmission is self-exciting, policies respond to rising incidence, and units infect one another.
-We place parallel trends on the log reproduction number of a renewal model with imported infection
-pressure from neighbouring units and estimate policy effects by quasi-differenced generalized method
-of moments. The forward quasi-difference eliminates unrestricted unit effects, while past-only
-instruments permit incidence-driven feedback. Excluding unmodelled same-week cross-cluster
-transmission, cluster scores form a martingale difference array across weeks, so the ordinary
-cluster-robust sandwich applies without spatial adjustment and week effects profile out in closed
-form. Built-in diagnostics combine a profiled contagion equation, over-identification tests read
-against calibrated reference distributions, and profiled Stock--Wright identification-robust sets.
-In pre-specified simulations with feedback, spillover, overdispersion and small counts, direct-effect
-bias spans $-0.002$ to $0.001$ with 94.5\%--95.4\% coverage, outperforming standard comparators.
-Applied to German weekly county varicella surveillance (400 counties, 16 states, 2015--2019;
-115{,}129 cases), where varicella's 14-day generation interval satisfies weekly aggregation
-($w_0<10^{-5}$), staggered summer school holidays reduce transmission by 21.2\%
-($\hat\tau+\hat\kappa=-0.238$, 95\% CI $-0.362$ to $-0.114$), corroborated across bootstrap,
-jackknife and identification-robust intervals, whereas two-step log-$R$ regression flips sign under
-sparse counts.
+We place parallel trends on the log reproduction number of a renewal model with imported
+infection pressure and estimate policy effects by quasi-differenced generalized method of moments.
+Forward quasi-differencing removes unrestricted unit effects, while predetermined instruments
+accommodate incidence-driven feedback. Excluding unmodelled same-week cross-cluster transmission,
+cluster scores form a martingale difference array across weeks, validating ordinary cluster-robust
+variance and closed-form week profiling. Diagnostics separate working-model estimates from causal
+effects: profiled contagion equations expose boundary roots, score over-identification tests
+($J_{LM}$) use calibrated null distributions, and profiled Stock--Wright sets bypass root
+selection. Across pre-specified simulations with feedback, spillover, and overdispersion ($R=8000$),
+direct-effect bias spans $-0.002$ to $0.001$ (94.5\%--95.4\% coverage), outperforming comparators,
+while boundary and same-week ($w_0=0.3$) experiments demarcate operating limits. In a post hoc
+stress test on German county varicella data (400 counties, 16 states, 2015--2019; $w_0<10^{-5}$),
+the working model yields $\hat\tau+\hat\kappa=-0.239$ ($t_{15}$ CI $-0.364$ to $-0.115$; WCR-score
+$-0.419$ to $-0.139$), while two-step log-$R$ flips sign under 58.8\% zeros. However, rejected
+over-identification ($p_{\mathrm{cal}}=0.004$), total-scale onset drops ($-0.208$), holiday rebound
+placebos, non-rotating southern states, and regional-seasonal controls bar causal attribution.
 \end{abstract}
 \begin{keywords}
-Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.
+Causal inference; Diagnostic boundaries; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.
 \end{keywords}

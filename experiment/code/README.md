@@ -22,6 +22,7 @@ German county varicella / school-holiday coding are in `../data/data_contract.md
 ## Reproducing the German Varicella Application
 
 ```bash
+python experiment/data/fetch_germany.py --check   # or run without --check to re-download
 python experiment/code/data_prep.py
 python experiment/code/application.py
 python experiment/code/calibrated_sim_germany.py

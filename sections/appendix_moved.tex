@@ -199,10 +199,14 @@ effect estimates drift with time since exposure \citep{janvin2025depletion}.
 \label{rem:testable}
 Lemma~\ref{lem:mds} implies that moment contributions of adjacent clusters are uncorrelated,
 which can be checked directly. In the application, the correlations of the state score
-contributions over the 29 adjacent German state pairs are 0.173 ($\tau$), 0.118 ($\kappa$) and $-0.115$
-($\phi$); adding the adjacent-pair cross-products to $\hat\Omega$ reduces the SE of
-$\hat\tau+\hat\kappa$ from 0.0582 to 0.0486 and that of $\hat\phi$ from 0.0561 to 0.0356, showing
-that the ordinary state-clustered sandwich is slightly conservative here. The
+contributions over the 29 adjacent German state pairs are 0.175 ($\tau$), 0.119 ($\kappa$) and $-0.123$
+($\phi$). Adding the adjacent-pair cross-products to $\hat\Omega$ produces a non-positive-semidefinite
+adjusted covariance matrix ($\min\mathrm{eig}=-0.020$, with negative variance entries for $\tau$ and
+$\kappa$), even as the formal quadratic form for $\hat\tau+\hat\kappa$ drops from 0.0584 to 0.0482
+and for $\hat\phi$ from 0.0567 to 0.0352; because this sample-analogue HAC matrix is indefinite, it
+provides no basis for treating the ordinary state-clustered sandwich as conservative (consistent with
+the calibrated simulation in Web Table~\ref{tab:rev-calsim}, where sandwich SEs under-state empirical
+SD by roughly 16\%). The
 $J$ test of Corollary~\ref{cor:J}, in the spirit of \citet{arellano1991tests}, checks the
 multiplicative renewal structure against extra predetermined instruments. A sensitivity analysis
 lagging $D$ by one week checks sensitivity to policy-timing alignment. Sequential ignorability

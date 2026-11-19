@@ -1,5 +1,5 @@
 """Generate all main-text and Supporting Information LaTeX tables for the
-German Varicella + staggered summer school holidays application.
+German Varicella empirical stress test (2015--2019).
 
 Reads:  experiment/analysis/germany_application_results.json
         experiment/analysis/germany_calibrated_sim.json
@@ -11,10 +11,12 @@ Writes: tables/table_7_application.tex
         tables/table_14_event_weights.tex
         tables/table_15_ascertainment.tex
         tables/table_16_robust_sets.tex
+        tables/table_18_placebos.tex
 """
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +39,20 @@ def fmt_ivs(ivs: list) -> str:
     return r" $\cup$ ".join(f"[{a:.2f}, {b:.2f}]" for a, b in ivs)
 
 
+def _row_m0(lbl: str, r: dict) -> str:
+    if not r.get("ok"):
+        return f"{lbl} & \\multicolumn{{6}}{{c}}{{did not converge}} \\\\"
+    return " & ".join([
+        lbl,
+        fmt_est_ci(r["est"]["tpk"], *r["ci_t"]["tpk"]),
+        fmt_est_ci(r["est"]["tau"], *r["ci_t"]["tau"]),
+        fmt_est_ci(r["est"]["kappa"], *r["ci_t"]["kappa"]),
+        fmt_est_ci(r["est"]["phi"], *r["ci_t"]["phi"]),
+        f"{r['J_LM_oi']['stat']:.2f} ({r['J_LM_oi']['p_F']:.3f})",
+        f"{r['J_LM_inv']['stat']:.2f} ({r['J_LM_inv']['p_F']:.3f})",
+    ]) + r" \\"
+
+
 def write_table_7(app: dict):
     m0 = app["primary"]["M0"]
     tc = m0["tcrit"]
@@ -44,11 +60,18 @@ def write_table_7(app: dict):
     g_m0gi = app["global_roots"]["M0_GI"]
     comps = app["comparators"]
     nuts = app["nuts2"]["M0"]
+    wcr_w = app["primary"]["wcr_webb6"]
+    wcr_r = app["primary"]["wcr_rademacher"]
     wild_m = app["primary"]["wild_mammen"]["ci_tpk"]
     pairs = app["primary"]["pairs_bootstrap"]
     jk = app["primary"]["jackknife"]
     sw05 = app["stock_wright"]["phi_bar_0.5"]["sets"]["tpk_bonferroni_95"]
     psi = app["primary"]["psi"]
+
+    def _phi_cell(rec):
+        if rec["kind"] == "boundary":
+            return "0.000 (boundary)"
+        return fmt_est_se_ci(rec["est"]["phi"], rec["se"]["phi"], tc)
 
     rows = [
         ("Primary (400 counties)", "M0",
@@ -60,12 +83,12 @@ def write_table_7(app: dict):
          fmt_est_se_ci(g_m0g["est"]["tpk"], g_m0g["se"]["tpk"], tc),
          fmt_est_se_ci(g_m0g["est"]["tau"], g_m0g["se"]["tau"], tc),
          fmt_est_se_ci(g_m0g["est"]["kappa"], g_m0g["se"]["kappa"], tc),
-         fmt_est_se_ci(g_m0g["est"]["phi"], g_m0g["se"]["phi"], tc)),
+         _phi_cell(g_m0g)),
         ("Primary (400 counties)", "M0-GI",
          fmt_est_se_ci(g_m0gi["est"]["tpk"], g_m0gi["se"]["tpk"], tc),
          fmt_est_se_ci(g_m0gi["est"]["tau"], g_m0gi["se"]["tau"], tc),
          fmt_est_se_ci(g_m0gi["est"]["kappa"], g_m0gi["se"]["kappa"], tc),
-         fmt_est_se_ci(g_m0gi["est"]["phi"], g_m0gi["se"]["phi"], tc)),
+         _phi_cell(g_m0gi)),
         ("Primary (400 counties)", r"M0$'$",
          "--",
          fmt_est_se_ci(comps["M0_prime"]["est"]["tau"], comps["M0_prime"]["se"]["tau"], tc),
@@ -95,10 +118,10 @@ def write_table_7(app: dict):
          fmt_est_ci(nuts["est"]["phi"], *nuts["ci_t"]["phi"])),
     ]
     body = "\n".join(" & ".join(r) + r" \\" for r in rows)
-    pct_red = (1.0 - float(__import__("math").exp(m0["est"]["tpk"]))) * 100.0
+    pct_red = (1.0 - math.exp(m0["est"]["tpk"])) * 100.0
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Application: staggered German summer school holidays and county-level varicella transmission (2015--2019); point estimates with 95\% confidence intervals ($t_{{15}}$, $G = 16$ federal states).}}
+\caption{{German varicella stress test (2015--2019): baseline working-model estimates and comparators with state-clustered 95\% intervals ($t_{{15}}$, $G = 16$ federal states).}}
 \label{{tab:app}}
 \footnotesize
 \setlength{{\tabcolsep}}{{3.5pt}}
@@ -111,7 +134,7 @@ sample & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella cases across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 cases, plus three pre-sample lag weeks from late 2014); $D$ = state summer school holiday indicator lagged one week to align with varicella's 14-day generation/incubation interval ($w = (0.141, 0.721, 0.138)$, same-week mass $w_0 = 2.6 \times 10^{{-6}}$). 95\% intervals use the state-clustered sandwich with $t_{{15}} = {tc:.2f}$. Because holidays are set at the state level, $\tau+\kappa$ is the policy-level total for interior counties (primary M0 estimate ${m0['est']['tpk']:.3f}$, a {pct_red:.1f}\% reduction in $R$). Alternative 95\% intervals for M0 $\tau+\kappa$: Mammen score wild bootstrap-$t$ ($B=999$) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; nonlinear pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$ (leave-one-state-out range $[{jk['tpk_range'][0]:.3f}, {jk['tpk_range'][1]:.3f}]$); identification-robust Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. Propagated cases averted $\hat\psi^\dagger$: {psi['treated']['est']:,.0f} (SE {psi['treated']['se']:,.0f}) during treated county-weeks and {psi['network']['est']:,.0f} (SE {psi['network']['se']:,.0f}) network-wide. Global search finds a unique interior root at $\hat\phi = {m0['est']['phi']:.3f}$, so M0, M0-G and M0-GI coincide. Data sources and coding are in Web Appendix D.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 cases, plus three pre-sample lag weeks); $D$ = state summer holiday indicator lagged one week; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{{-6}}$). Under state-level exposure, $\tau+\kappa$ is the policy-level working-model contrast (M0 estimate ${m0['est']['tpk']:.3f}$, ${pct_red:.1f}\%$ multiplicative shift). Sensitivity intervals for M0 $\tau+\kappa$ ($t_{{15}}$ under-covers in Web Table~\ref{{tab:rev-calsim}}): WCR-score Webb6 $[{wcr_w['ci'][0]:.3f}, {wcr_w['ci'][1]:.3f}]$ ($p(0)={wcr_w['p_at_zero']:.3f}$); WCR-score Rademacher $[{wcr_r['ci'][0]:.3f}, {wcr_r['ci'][1]:.3f}]$; unrestricted score wild (Mammen) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$ (range $[{jk['tpk_range'][0]:.3f}, {jk['tpk_range'][1]:.3f}]$); Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. Over-identification rejects lagged working-model moments ($J_{{LM,\mathrm{{oi}}}}={m0['J_LM_oi']['stat']:.2f}$, $p_{{\chi^2}}={m0['J_LM_oi']['p_chi2']:.3f}$, $p_F={m0['J_LM_oi']['p_F']:.3f}$), while $J_{{LM,\mathrm{{inv}}}}={m0['J_LM_inv']['stat']:.2f}$ ($p_F={m0['J_LM_inv']['p_F']:.3f}$). Conditional counterfactual $\hat\psi^\dagger$: {psi['treated']['est']:,.0f} (SE {psi['treated']['se']:,.0f}) treated county-weeks and {psi['network']['est']:,.0f} (SE {psi['network']['se']:,.0f}) network-wide. Global search yields a single interior root at $\hat\phi={m0['est']['phi']:.3f}$; $S_{{3,\mathrm{{oi}}}}$ slightly favours the $\phi=0$ boundary over the interior root while $S_{{3,\mathrm{{inv}}}}$ selects the interior root. See Web Appendices~D--F for full diagnostics limiting causal interpretation.}}
 \end{{table}}
 """
     (TAB_DIR / "table_7_application.tex").write_text(tex, encoding="utf-8")
@@ -121,6 +144,7 @@ def write_table_7b(app: dict):
     m0 = app["primary"]["M0"]
     s = app["sensitivities"]
     by_yr = app["by_year"]
+    reg = app["regional_fe"]
     ah = app["all_holidays"]
     nuts = app["nuts2"]["M0"]
 
@@ -134,37 +158,33 @@ def write_table_7b(app: dict):
         ("Summer holiday lag 2", s["summer_lag_2"]),
         ("Summer holiday lag 3", s["summer_lag_3"]),
         ("Summer holiday lag 4", s["summer_lag_4"]),
+        (r"Summer $\ge 3$ days (lag 1)", s["summer_min3d_lag1"]),
+        (r"Summer $\ge 3$ days (lag 2)", s["summer_min3d_lag2"]),
+        (r"Summer $\ge 5$ days (lag 1)", s["summer_min5d_lag1"]),
+        (r"Summer $\ge 5$ days (lag 2)", s["summer_min5d_lag2"]),
         ("Continuous holiday share (lag 1)", s["summer_Dshare_lag1"]),
+        ("Continuous holiday share (lag 2)", s["summer_Dshare_lag2"]),
         ("Single year: 2015 ($T=53$)", by_yr["2015"]),
         ("Single year: 2016 ($T=52$)", by_yr["2016"]),
         ("Single year: 2017 ($T=52$)", by_yr["2017"]),
         ("Single year: 2018 ($T=52$)", by_yr["2018"]),
         ("Single year: 2019 ($T=52$)", by_yr["2019"]),
+        ("Pooled 2016--2019 (drop 2015, lag 1)", reg["y2016_2019_lag1"]),
         ("All school holidays 2015--2019 (lag 0)", ah["all_2015_2019_lag0"]),
         ("All school holidays 2015--2019 (lag 1)", ah["all_2015_2019_lag1"]),
+        ("All school holidays 2015--2019 (lag 2)", ah["all_2015_2019_lag2"]),
         ("All school holidays 2017--2018 (lag 0)", ah["all_2017_2018_lag0"]),
-        ("NUTS-2 regions ($N=38$, 2.9\% zeros)", nuts),
+        (r"NUTS-2 regions ($N=38$, 2.9\% zeros)", nuts),
     ]
-    lines = []
-    for lbl, r in specs:
-        lines.append(" & ".join([
-            lbl,
-            fmt_est_ci(r["est"]["tpk"], *r["ci_t"]["tpk"]),
-            fmt_est_ci(r["est"]["tau"], *r["ci_t"]["tau"]),
-            fmt_est_ci(r["est"]["kappa"], *r["ci_t"]["kappa"]),
-            fmt_est_ci(r["est"]["phi"], *r["ci_t"]["phi"]),
-            f"{r['J_LM_oi']['stat']:.2f} ({r['J_LM_oi']['p_F']:.3f})",
-            f"{r['J_LM_inv']['stat']:.2f} ({r['J_LM_inv']['p_F']:.3f})",
-        ]) + r" \\")
-    body = "\n".join(lines)
+    body = "\n".join(_row_m0(lbl, r) for lbl, r in specs)
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Sensitivity analyses of the German varicella application (M0, state-clustered $t_{{15}}$ 95\% CIs and score-form over-identification tests $J_{{LM}}$ with $F_{{2,14}}$ $p$-values).}}
+\caption{{Temporal, threshold, background, and subsample sensitivity specifications for the German varicella panel (M0, state-clustered $t_{{G-1}}$ 95\% CIs and score-form $J_{{LM}}$ tests with $F_{{2,G-2}}$ $p$-values).}}
 \label{{tab:app-all}}
 \footnotesize
 \setlength{{\tabcolsep}}{{3.0pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
-\renewcommand{{\arraystretch}}{{0.88}}\begin{{tabular}}{{lrrrrrr}}
+\renewcommand{{\arraystretch}}{{0.86}}\begin{{tabular}}{{lrrrrrr}}
 \toprule
 specification & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $J_{{LM,\mathrm{{oi}}}}$ ($p_F$) & $J_{{LM,\mathrm{{inv}}}}$ ($p_F$) \\
 \midrule
@@ -172,7 +192,7 @@ specification & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\k
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Primary specification is Table~\ref{{tab:app}}. $J_{{LM,\mathrm{{oi}}}}$ tests the two lagged predetermined moments (lagged imported share and lagged one-week log growth); $J_{{LM,\mathrm{{inv}}}}$ tests reference-value invariance ($\phi_r \in \{{0.05, 2.0\}}$); $p_F$ uses the finite-cluster $F_{{2,14}}$ reference $J_{{LM}}(G-2)/\{{\,2(G-1)\,\}}$. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Primary specification is Table~\ref{{tab:app}}. $J_{{LM,\mathrm{{oi}}}}$ tests lagged imported share and lagged one-week log growth; $J_{{LM,\mathrm{{inv}}}}$ tests reference-value invariance ($\phi_r \in \{{0.05, 2.0\}}$). Note substantial sensitivity across years (three of five single years cover zero), lag 2 (covers zero), and all school holidays at lag 1 (covers zero). At NUTS-2 aggregation, overall $J_{{LM,\mathrm{{oi}}}}$ is $7.18$ ($p_F=0.065$) while its 1-df lagged-growth component remains elevated ($4.97$, $p_F=0.042$). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_7b_application_sensitivity.tex").write_text(tex, encoding="utf-8")
@@ -186,35 +206,33 @@ def write_table_11(app: dict):
         (r"East/West $\times$ week FE (lag 1)", reg["east_west_x_week_lag1"]),
         (r"4-region $\times$ week FE (lag 1)", reg["four_region_x_week_lag1"]),
         (r"4-region $\times$ week FE (lag 2)", reg["four_region_x_week_lag2"]),
+        ("Drop non-rotating BW \\& BY ($N=260, G=14$, lag 1)", reg["drop_bw_by_lag1"]),
+        ("Drop non-rotating BW \\& BY ($N=260, G=14$, lag 2)", reg["drop_bw_by_lag2"]),
+        (r"4-region $\times$ week + Drop BW \& BY (lag 1)", reg["reg4_drop_bw_by_lag1"]),
+        ("Pooled 2016--2019 + Drop BW \\& BY (lag 1)", reg["y2016_2019_drop_bw_by_lag1"]),
+        ("State linear trends (16 states, lag 1)", reg["state_trends_lag1"]),
+        ("State linear trends (16 states, lag 2)", reg["state_trends_lag2"]),
+        ("State 1-harmonic seasonal curves (lag 1)", reg["state_harmonics1_lag1"]),
+        ("State 1-harmonic seasonal curves (lag 2)", reg["state_harmonics1_lag2"]),
+        ("State 1-harm.\\ + trends + Drop BW \\& BY (lag 1)", reg["state_harm1_trends_drop_bw_by_lag1"]),
     ]
-    lines = []
-    for lbl, r in specs:
-        lines.append(" & ".join([
-            lbl,
-            fmt_est_ci(r["est"]["tpk"], *r["ci_t"]["tpk"]),
-            fmt_est_ci(r["est"]["tau"], *r["ci_t"]["tau"]),
-            fmt_est_ci(r["est"]["kappa"], *r["ci_t"]["kappa"]),
-            fmt_est_ci(r["est"]["phi"], *r["ci_t"]["phi"]),
-            f"{r['J_LM_oi']['stat']:.2f} ({r['J_LM_oi']['p_F']:.3f})",
-            f"{r['J_LM_inv']['stat']:.2f} ({r['J_LM_inv']['p_F']:.3f})",
-        ]) + r" \\")
-    body = "\n".join(lines)
+    body = "\n".join(_row_m0(lbl, r) for lbl, r in specs)
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{German varicella application with regional $\times$ week fixed effects (M0, $G = 16$ federal states, $t_{{15}}$ 95\% CIs).}}
+\caption{{Regional week-effect controls, exclusion of non-rotating southern states (Baden-W\"urttemberg and Bavaria), state trends, and state seasonal harmonics (M0, state-clustered $t_{{G-1}}$ 95\% CIs).}}
 \label{{tab:rev-regional}}
 \footnotesize
-\setlength{{\tabcolsep}}{{3.2pt}}
+\setlength{{\tabcolsep}}{{3.0pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
 \begin{{tabular}}{{lrrrrrr}}
 \toprule
-week-effect structure & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $J_{{LM,\mathrm{{oi}}}}$ ($p_F$) & $J_{{LM,\mathrm{{inv}}}}$ ($p_F$) \\
+specification & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $J_{{LM,\mathrm{{oi}}}}$ ($p_F$) & $J_{{LM,\mathrm{{inv}}}}$ ($p_F$) \\
 \midrule
 {body}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Four German macro-regions: North (SH, HH, NI, HB, MV), West (NW, HE, RP, SL), South (BW, BY) and East (BE, BB, SN, ST, TH); East/West contrasts the five eastern states plus Berlin against the ten western states. Week effects are profiled in closed form within each region. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Four macro-regions: North (SH, HH, NI, HB, MV), West (NW, HE, RP, SL), South (BW, BY) and East (BE, BB, SN, ST, TH). Baden-W\"urttemberg (08, 44 counties) and Bavaria (09, 96 counties) start summer holidays last (ISO weeks 30--31) in all five years without rotation. Dropping BW and BY leaves 14 rotating states ($N=260$ counties): the lag-1 interval widens to cover zero, and the lag-2 estimate collapses near zero. Four-region $\times$ week fixed effects likewise include zero at both lags. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_11_regional.tex").write_text(tex, encoding="utf-8")
@@ -226,6 +244,8 @@ def write_table_12(cal: dict):
         block = cal[tag]["params"]
         for i, (pk, plbl) in enumerate([("tpk", r"$\tau+\kappa$"), ("tau", r"$\tau$"), ("kappa", r"$\kappa$"), ("phi", r"$\phi$")]):
             p = block[pk]
+            w6_c = f"{p['cov_wcr_webb6']:.3f}" if "cov_wcr_webb6" in p else "--"
+            wr_c = f"{p['cov_wcr_rademacher']:.3f}" if "cov_wcr_rademacher" in p else "--"
             lines_a.append(" & ".join([
                 lbl if i == 0 else "",
                 plbl,
@@ -235,6 +255,8 @@ def write_table_12(cal: dict):
                 f"{p['cov_t15']:.3f}",
                 f"{p['cov_wild_mam']:.3f}",
                 f"{p['cov_wild_web']:.3f}",
+                w6_c,
+                wr_c,
             ]) + r" \\")
     lines_b = []
     for tag, lbl in [("calibrated", "cal"), ("high_noise", "high-noise")]:
@@ -260,28 +282,51 @@ def write_table_12(cal: dict):
     r_tot = cal["R"]
     rc_cal = cal["calibrated"]["root_counts"]
     rc_hn = cal["high_noise"]["root_counts"]
+    tpk_cal = cal["calibrated"]["params"]["tpk"]
+    lines_b_fixed = []
+    for tag, lbl in [("calibrated", "cal"), ("high_noise", "high-noise")]:
+        block = cal[tag]["diagnostics"]
+        for i, (dk, dlbl) in enumerate([
+            ("j_oi", r"$J_{LM,\mathrm{oi}}$"),
+            ("j_inv", r"$J_{LM,\mathrm{inv}}$"),
+            ("s3_oi", r"$S_{3,\mathrm{oi}}$"),
+            ("s3_inv", r"$S_{3,\mathrm{inv}}$"),
+        ]):
+            d = block[dk]
+            lines_b_fixed.append(" & ".join([
+                lbl if i == 0 else "",
+                dlbl,
+                f"{d['mean']:.2f}",
+                f"{d['q95']:.2f}",
+                f"{d['q99']:.2f}",
+                f"{d['max']:.2f}",
+                f"{d['obs']:.2f}",
+                rf"\multicolumn{{3}}{{r}}{{{d['exceed_count']}/{d['n']} ({d['p_calibrated']:.3f})}}",
+            ]) + r" \\")
+    body_a = "\n".join(lines_a)
+    body_b = "\n".join(lines_b_fixed)
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R={r_tot}$): finite-cluster interval coverage and null reference distributions of $J_{{LM}}$ and $S_3$.}}
+\caption{{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R={r_tot}$): finite-cluster interval coverage (including restricted score wild bootstrap) and null reference distributions of $J_{{LM}}$ and $S_3$.}}
 \label{{tab:rev-calsim}}
 \footnotesize
-\setlength{{\tabcolsep}}{{3.5pt}}
+\setlength{{\tabcolsep}}{{3.0pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
-\begin{{tabular}}{{llrrrrrr}}
+\begin{{tabular}}{{llrrrrrrrr}}
 \toprule
-design & parameter & bias & emp.\ SD & mean SE & cov.\ $t_{{15}}$ & cov.\ wild (M) & cov.\ wild (W6) \\
+design & parameter & bias & emp.\ SD & mean SE & $t_{{15}}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) \\
 \midrule
-\multicolumn{{8}}{{l}}{{\emph{{(a) Interval performance, M0}}}} \\
-{chr(10).join(lines_a)}
+\multicolumn{{10}}{{l}}{{\emph{{(a) Interval performance, M0 ($G = 16$ unequal state clusters)}}}} \\
+{body_a}
 \midrule
-\multicolumn{{8}}{{l}}{{\emph{{(b) Finite-sample null distributions of over-identification and root-selection statistics}}}} \\
-design & statistic & mean & q95 & q99 & max & application & exceed ($p_{{\mathrm{{cal}}}}$) \\
+\multicolumn{{10}}{{l}}{{\emph{{(b) Finite-sample null distributions of over-identification and root-selection statistics}}}} \\
+design & statistic & mean & q95 & q99 & max & application & \multicolumn{{3}}{{r}}{{exceed ($p_{{\mathrm{{cal}}}}$)}} \\
 \midrule
-{chr(10).join(lines_b)}
+{body_b}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Calibrated DGP uses the observed 400-county German network, 261-week summer holiday schedule, Vink et al.\ (2014) generation weights, truth set to the primary M0 estimate ($\tau={c_cal['beta_true'][0]:.3f}$, $\kappa={c_cal['beta_true'][1]:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$), NB2 shape $k={c_cal['k_nb']:.2f}$ and state $\times$ week log-normal shock SD $\sigma={c_cal['sig_sw']:.3f}$ (\emph{{cal}}), or $k/2$ and $2\sigma$ (\emph{{high-noise}}). Unique interior root in {100*rc_cal['share_unique']:.1f}\% (\emph{{cal}}) and {100*rc_hn['share_unique']:.1f}\% (\emph{{high-noise}}) of draws. Coverage uses nominal 95\% $t_{{15}}$ sandwich and score wild bootstrap-$t$ with Mammen (M) and Webb 6-point (W6) weights ($B=399$; MCSE $\approx 0.010$). Panel (b): $p_{{\mathrm{{cal}}}} = (\text{{exceed}} + 1)/(R_{{\mathrm{{ok}}}} + 1)$. Source: \texttt{{experiment/analysis/germany\_calibrated\_sim.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) weights, truth set to primary M0 ($\tau={c_cal['beta_true'][0]:.3f}$, $\kappa={c_cal['beta_true'][1]:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$), NB2 $k={c_cal['k_nb']:.2f}$ and state $\times$ week log-normal shock SD $\sigma={c_cal['sig_sw']:.3f}$ (\emph{{cal}}), or $k/2$ and $2\sigma$ (\emph{{high-noise}}). Unique interior root in {100*rc_cal['share_unique']:.1f}\% (\emph{{cal}}) and {100*rc_hn['share_unique']:.1f}\% (\emph{{high-noise}}). For $\tau+\kappa$ in \emph{{cal}}, sandwich SEs understate empirical SD by {100*(1-tpk_cal['se_ratio']):.1f}\% (mean SE / emp.\ SD = {tpk_cal['se_ratio']:.3f}); both $t_{{15}}$ and unrestricted wild score bootstrap under-cover, whereas restricted score wild bootstrap (WCR-score; $B=399$) restores near-nominal coverage. Source: \texttt{{experiment/analysis/germany\_calibrated\_sim.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_12_calibrated_sim.tex").write_text(tex, encoding="utf-8")
@@ -301,7 +346,7 @@ def write_table_13(app: dict):
         rec = gis[k]
         g = rec["gi"]
         f = rec["fit"]
-        w_str = f"({g['w'][0]:.3f}, {g['w'][1]:.3f}, {g['w'][2]:.3f})"
+        w_str = f"({g['w'][0]:.4f}, {g['w'][1]:.4f}, {g['w'][2]:.4f})"
         w0_str = f"{g['w0']:.1e}" if g["w0"] < 1e-3 else f"{g['w0']:.4f}"
         lines.append(" & ".join([
             lbl, w_str, w0_str,
@@ -312,20 +357,20 @@ def write_table_13(app: dict):
         ]) + r" \\")
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Generation-interval sensitivity for the German varicella application (M0, summer holidays lagged one week).}}
+\caption{{Generation-interval and reporting-dispersion sensitivity for the German varicella panel (M0, summer holidays lagged one week).}}
 \label{{tab:rev-gi}}
 \footnotesize
-\setlength{{\tabcolsep}}{{3.0pt}}
+\setlength{{\tabcolsep}}{{2.8pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
 \begin{{tabular}}{{lccrrrr}}
 \toprule
-generation-interval specification & $(w_1, w_2, w_3)$ & $w_0$ & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $J_{{LM,\mathrm{{oi}}}}$ ($p_F$) & $J_{{LM,\mathrm{{inv}}}}$ ($p_F$) \\
+interval specification & $(w_1, w_2, w_3)$ & $w_0$ & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) & $J_{{LM,\mathrm{{oi}}}}$ ($p_F$) & $J_{{LM,\mathrm{{inv}}}}$ ($p_F$) \\
 \midrule
 {chr(10).join(lines)}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Lognormal generation intervals discretised onto weekly lags $s=1,2,3$ under a uniform within-week infection day; $w_0$ is the resulting same-week transmission share. All specifications yield a unique interior root and a significant transmission reduction. Under the broader reporting-convolved dispersion (SD 6.0 d), both $J_{{LM,\mathrm{{oi}}}}$ and $J_{{LM,\mathrm{{inv}}}}$ pass at the 5\% $F_{{2,14}}$ level. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Following \citet{{vink2014serial}} (pooled varicella serial interval: mean 14.0 d, SD $\approx 2.5$ d), weights discretise our assumed lognormal density onto weekly lags $s=1,2,3$ under a uniform within-week infection day; $w_0$ is the resulting same-week share (three-decimal main-text rounding $0.141, 0.720, 0.138$ omits 0.001 in rounding). Passing $J_{{LM,\mathrm{{oi}}}}$ only at SD 6.0 d indicates sensitivity to lag dispersion and reporting delays. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_13_gi_timing.tex").write_text(tex, encoding="utf-8")
@@ -339,36 +384,36 @@ def write_table_14(app: dict):
     for k in ks:
         nm = f"e{k}"
         cL = evL["coefs"][nm]
-        sL = fmt_est_ci(cL["est"], *cL["ci"])
-        if nm in evN["coefs"]:
-            cN = evN["coefs"][nm]
-            sN = fmt_est_ci(cN["est"], *cN["ci"])
-        else:
-            sN = "--"
-        role = "Pre-trend lead" if k < 0 else ("Onset week (incubation)" if k == 0 else ("Holiday weeks (post-incubation)" if k <= 5 else "Reopening / tail"))
-        lines.append(f"$e = {k:+d}$ & {role} & {sL} & {sN} \\\\")
-    for nm, lbl in [("kappa", r"Neighbour holiday ($\hat\kappa$)"), ("phi", r"Contagion coupling ($\hat\phi$)")]:
+        tL = evL["total_scale"][nm]
+        s_dir = fmt_est_ci(cL["est"], *cL["ci"])
+        s_tot = f"{fmt_est_ci(tL['est'], *tL['ci'])} [{tL['p_t']:.3f}]"
+        s_nolead = fmt_est_ci(evN["total_scale"][nm]["est"], *evN["total_scale"][nm]["ci"]) if nm in evN["total_scale"] else "--"
+        role = "Pre-trend lead" if k < 0 else ("Onset week" if k == 0 else ("Holiday weeks" if k <= 5 else "Reopening"))
+        lines.append(f"$e = {k:+d}$ & {role} & {s_dir} & {s_tot} & {s_nolead} \\\\")
+    for nm, lbl in [("kappa", r"Neighbour control ($\hat\kappa$)"), ("phi", r"Contagion coupling ($\hat\phi$)")]:
         cL = evL["coefs"][nm]
         cN = evN["coefs"][nm]
-        lines.append(f"{lbl} & Control / structural & {fmt_est_ci(cL['est'], *cL['ci'])} & {fmt_est_ci(cN['est'], *cN['ci'])} \\\\")
+        lines.append(f"{lbl} & Control / structural & {fmt_est_ci(cL['est'], *cL['ci'])} & -- & {fmt_est_ci(cN['est'], *cN['ci'])} \\\\")
     pw = evL["pretrend_wald"]
-    postw = evL["post_wald_e1_e5"]
+    ptot = evL["post_total_wald_e1_e5"]
+    rtot = evL["reopen_total_wald_e6_e7"]
+    e0t = evL["total_scale"]["e0"]
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Event-time dynamic profile around German summer school holiday onset ($e = -2, \dots, 7$ weeks, controlling for neighbour holiday share $\bar D_{{it}}$, $t_{{15}}$ 95\% CIs).}}
+\caption{{Event-time dynamic profile around German summer holiday onset ($e = -2, \dots, 7$): direct bin coefficients $\hat\tau_e$ versus total-policy scale effects $\hat\tau_e + c_e\hat\kappa$ ($t_{{15}}$ 95\% CIs).}}
 \label{{tab:rev-event}}
 \footnotesize
-\setlength{{\tabcolsep}}{{4.0pt}}
+\setlength{{\tabcolsep}}{{3.5pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
-\begin{{tabular}}{{llrr}}
+\begin{{tabular}}{{llrrr}}
 \toprule
-event week / parameter & biological / timing role & with pre-trend leads & without leads \\
+event week & timing role & direct $\hat\tau_e$ (with leads) & total $\hat\tau_e + c_e\hat\kappa$ (with leads) [$p_t$] & total (no leads) \\
 \midrule
 {chr(10).join(lines)}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Indicators $\mathbf 1\{{t - t_{{0,i}} = e\}}$ mark weeks relative to each state's summer holiday onset $t_{{0,i}}$ across 2015--2019 (typical holiday duration 6 weeks). Pre-trend joint Wald test ($H_0\colon \tau_{{-2}}=\tau_{{-1}}=0$): $\chi^2_2 = {pw['stat']:.2f}$ ($p = {pw['p_chi2']:.3f}$, $F_{{2,14}}$ $p = {pw['p_F']:.3f}$). Onset week $e=0$ is indistinguishable from zero, ruling out an immediate holiday under-reporting drop, followed by a post-incubation decline across $e=1,\dots,5$ (joint Wald $\chi^2_5 = {postw['stat']:.2f}$, $p = {postw['p_chi2']:.3f}$, $F_{{5,11}}$ $p = {postw['p_F']:.3f}$). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Because $\bar D_{{it}}\approx D_{{it}}$ inside states ($c_e \in [0.94, 0.97]$ for $e=0,\dots,5$), $\hat\tau_e$ isolates only within-border contrasts while total policy scale $\hat\tau_e + c_e\hat\kappa$ matches $\tau+\kappa$. Pre-trend joint test ($e_{{-2}}=e_{{-1}}=0$): $\chi^2_2 = {pw['stat']:.2f}$ ($p={pw['p_chi2']:.3f}$, $p_F={pw['p_F']:.3f}$). On the total-policy scale, onset week $e=0$ already drops to ${e0t['est']:.3f}$ (SE {e0t['se']:.3f}, $p_t={e0t['p_t']:.3f}$), followed by $e=1,\dots,5$ ($F_{{5,11}}$ $p_F={ptot['p_F']:.3f}$, $\chi^2_5={ptot['stat']:.2f}$ $p={ptot['p_chi2']:.3f}$) and non-positive reopening weeks $e=6,7$ ($p_F={rtot['p_F']:.3f}$). Immediate onset decline before the 14-day incubation window prevents ruling out holiday-linked reporting drops. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_14_event_weights.tex").write_text(tex, encoding="utf-8")
@@ -378,9 +423,9 @@ def write_table_15(app: dict):
     asc = app["ascertainment"]
     keep_rhos = {-0.20, -0.10, 0.00, 0.05, 0.10, 0.15, 0.20, 0.30, 0.40}
     rows_g = [r for r in asc["grid"] if r["ok"] and round(r["rho"], 2) in keep_rhos]
-    lines = []
+    lines_a = []
     for r in rows_g:
-        lines.append(" & ".join([
+        lines_a.append(" & ".join([
             f"{r['rho']:+.2f}",
             f"{r['bound_log_shift']:.3f}",
             fmt_est_ci(r["est"]["tpk"], r["lo"], r["hi"]),
@@ -390,28 +435,66 @@ def write_table_15(app: dict):
     r_0 = asc["rho_star_tpk_zero"]
     if r_hi is not None:
         f_hi = asc["rho_star_upper_ci_zero_fit"]
-        lines.append(rf"$\rho^*_{{\mathrm{{CI}}}} = {r_hi:+.3f}$ & {f_hi['bound_log_shift']:.3f} & {fmt_est_ci(f_hi['est']['tpk'], f_hi['lo'], f_hi['hi'])} & {f_hi['est']['phi']:.3f} ({f_hi['se']['phi']:.3f}) \\")
+        lines_a.append(rf"$\rho^*_{{\mathrm{{CI}}}} = {r_hi:+.3f}$ & {f_hi['bound_log_shift']:.3f} & {fmt_est_ci(f_hi['est']['tpk'], f_hi['lo'], f_hi['hi'])} & {f_hi['est']['phi']:.3f} ({f_hi['se']['phi']:.3f}) \\")
     if r_0 is not None:
         f_0 = asc["rho_star_tpk_zero_fit"]
-        lines.append(rf"$\rho^*_0 = {r_0:+.3f}$ & {f_0['bound_log_shift']:.3f} & {fmt_est_ci(f_0['est']['tpk'], f_0['lo'], f_0['hi'])} & {f_0['est']['phi']:.3f} ({f_0['se']['phi']:.3f}) \\")
-    note_hi = f"{100*r_hi:.1f}\\%" if r_hi is not None else "beyond grid"
-    note_0 = f"{100*r_0:.1f}\\%" if r_0 is not None else "beyond grid"
+        lines_a.append(rf"$\rho^*_0 = {r_0:+.3f}$ & {f_0['bound_log_shift']:.3f} & {fmt_est_ci(f_0['est']['tpk'], f_0['lo'], f_0['hi'])} & {f_0['est']['phi']:.3f} ({f_0['se']['phi']:.3f}) \\")
+
+    # Panel (b): Contemporaneous-D0 correction & onset-moment zeroing
+    lines_b = []
+    for r1, r2 in zip(asc["contemp_grid_lag1"], asc["contemp_grid_lag2"]):
+        lines_b.append(" & ".join([
+            f"{r1['rho']:.2f}",
+            f"{r1['m_onset']:+.4f}",
+            fmt_est_ci(r1["est"]["tpk"], r1["lo"], r1["hi"]),
+            fmt_est_ci(r2["est"]["tpk"], r2["lo"], r2["hi"]),
+        ]) + r" \\")
+    f_on1 = asc["fit_at_onset_zero_lag1"]
+    f_on2 = asc["fit_at_onset_zero_lag2"]
+    if f_on1 and f_on2:
+        lines_b.append(" & ".join([
+            rf"$\rho^*_{{\mathrm{{on}}}} = {asc['rho_star_onset_zero_lag1']:.3f}$ / ${asc['rho_star_onset_zero_lag2']:.3f}$",
+            "0.0000",
+            fmt_est_ci(f_on1["est"]["tpk"], f_on1["lo"], f_on1["hi"]),
+            fmt_est_ci(f_on2["est"]["tpk"], f_on2["lo"], f_on2["hi"]),
+        ]) + r" \\")
+
+    # Panel (c): psi sensitivity to omega
+    psi0 = app["primary"]["psi"]
+    om_psi = app["primary"]["omega_psi_sensitivity"]
+    lines_c = [
+        f"$\\omega_i \\times 1.00$ (primary) & {app['primary']['M0']['est']['phi']:.3f} & {psi0['treated']['est']:,.0f} ({psi0['treated']['se']:,.0f}) & {psi0['network']['est']:,.0f} ({psi0['network']['se']:,.0f}) \\\\",
+        f"$\\omega_i \\times 0.25$ & {app['sensitivities']['omega_x_0.25']['est']['phi']:.3f} & {om_psi['omega_x_0.25']['treated']['est']:,.0f} ({om_psi['omega_x_0.25']['treated']['se']:,.0f}) & {om_psi['omega_x_0.25']['network']['est']:,.0f} ({om_psi['omega_x_0.25']['network']['se']:,.0f}) \\\\",
+        f"$\\omega_i \\times 4.00$ & {app['sensitivities']['omega_x_4']['est']['phi']:.3f} & {om_psi['omega_x_4']['treated']['est']:,.0f} ({om_psi['omega_x_4']['treated']['se']:,.0f}) & {om_psi['omega_x_4']['network']['est']:,.0f} ({om_psi['omega_x_4']['network']['se']:,.0f}) \\\\",
+    ]
+
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Holiday-linked ascertainment tipping-point analysis: M0 refitted after undoing a proportional reporting change $(1-\rho)^{{D_{{it}}}}$ during summer holidays.}}
+\caption{{Ascertainment sensitivity (lagged-$D$ tipping points and contemporaneous-$D^{{(0)}}$ onset-moment matching) and sensitivity of $\hat\psi^\dagger$ to background importation $\omega_i$.}}
 \label{{tab:rev-ascert}}
 \footnotesize
-\setlength{{\tabcolsep}}{{4.0pt}}
+\setlength{{\tabcolsep}}{{3.5pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
 \begin{{tabular}}{{rrrr}}
 \toprule
+\multicolumn{{4}}{{l}}{{\emph{{(a) Lagged-$D$ tipping-point grid: $Y^*_{{it}} = Y_{{it}}/(1-\rho)^{{D_{{it}}}}$}}}} \\
 $\rho$ & $|\log(1-\rho)|$ & $\hat\tau+\hat\kappa$ (95\% $t_{{15}}$ CI) & $\hat\phi$ (SE) \\
 \midrule
-{chr(10).join(lines)}
+{chr(10).join(lines_a)}
+\midrule
+\multicolumn{{4}}{{l}}{{\emph{{(b) Contemporaneous-$D^{{(0)}}$ reporting adjustment: $Y^*_{{it}} = Y_{{it}}/(1-\rho)^{{D^{{(0)}}_{{it}}}}$}}}} \\
+$\rho$ & onset moment & lag-1 $\hat\tau+\hat\kappa$ (95\% CI) & lag-2 $\hat\tau+\hat\kappa$ (95\% CI) \\
+\midrule
+{chr(10).join(lines_b)}
+\midrule
+\multicolumn{{4}}{{l}}{{\emph{{(c) Sensitivity of conditional cases averted $\hat\psi^\dagger$ to background importation $\omega_i$}}}} \\
+scaling & $\hat\phi$ & treated $\hat\psi^\dagger$ (SE) & network $\hat\psi^\dagger$ (SE) \\
+\midrule
+{chr(10).join(lines_c)}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Under $Y_{{it}} = c_i c_t (1-\rho)^{{D_{{it}}}} I_{{it}}$, $\rho > 0$ represents reduced case ascertainment during summer holidays (e.g.\ fewer clinic visits while travelling); counts are corrected via $Y^*_{{it}} = Y_{{it}} / (1-\rho)^{{D_{{it}}}}$ before rebuilding infection pressures and refitting M0. The 95\% upper confidence limit crosses zero only at $\rho^*_{{\mathrm{{CI}}}} =$ {note_hi}, and the point estimate reaches zero only at $\rho^*_0 =$ {note_0}. Combined with the null onset-week estimate ($e=0$, Web Table~\ref{{tab:rev-event}}), plausible holiday reporting fluctuations cannot account for the estimated transmission drop. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize In Panel (b), matching the holiday-onset moment to zero requires a {100*asc['rho_star_onset_zero_lag1']:.1f}\% contemporaneous reporting reduction, which eliminates the lag-1 effect (${f_on1['est']['tpk']:+.3f}$, SE ${f_on1['se']['tpk']:.3f}$) while leaving an imprecise negative lag-2 estimate (${f_on2['est']['tpk']:+.3f}$, SE ${f_on2['se']['tpk']:.3f}$, covering zero). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_15_ascertainment.tex").write_text(tex, encoding="utf-8")
@@ -428,29 +511,111 @@ def write_table_16(app: dict):
             fmt_ivs(st["S1_F_95"]),
             fmt_ivs(st["S1_chi2_95"]),
             fmt_ivs(st["S3_inv_chi2_95"]),
+            fmt_ivs(st["S3_inv_F_95"]),
+            fmt_ivs(st["S3_oi_chi2_95"]),
             fmt_ivs(st["S3_oi_F_95"]),
             f"({bp[0]:.3f}, {bp[1]:.3f})",
         ]) + r" \\")
     s0 = sw["phi_bar_0.5"]["S1_at_0"]
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{German varicella application: identification-robust profiled Stock--Wright confidence sets for $\phi$ and Bonferroni 95\% projection for $\tau+\kappa$.}}
+\caption{{Identification-robust profiled Stock--Wright confidence sets for $\phi$ (including empty $\chi^2$ and uninformative full-grid $F$ sets) and Bonferroni 95\% projection for $\tau+\kappa$.}}
 \label{{tab:rev-robust}}
 \footnotesize
-\setlength{{\tabcolsep}}{{3.2pt}}
+\setlength{{\tabcolsep}}{{2.4pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
-\begin{{tabular}}{{rlllll}}
+\begin{{tabular}}{{rlllllll}}
 \toprule
-$\bar\phi$ & $S_1(F)$ 95\% set & $S_1(\chi^2)$ 95\% set & $S_{{3,\mathrm{{inv}}}}(\chi^2)$ 95\% set & $S_{{3,\mathrm{{oi}}}}(F)$ 95\% set & $\tau+\kappa$ (Bonferroni 95\%) \\
+$\bar\phi$ & $S_1(F)$ & $S_1(\chi^2)$ & $S_{{3,\mathrm{{inv}}}}(\chi^2)$ & $S_{{3,\mathrm{{inv}}}}(F)$ & $S_{{3,\mathrm{{oi}}}}(\chi^2)$ & $S_{{3,\mathrm{{oi}}}}(F)$ & $\tau+\kappa$ (Bonf.\ 95\%) \\
 \midrule
 {chr(10).join(lines)}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Profiled Stock--Wright $S$ statistics evaluated on 304 values of $\phi \in [0, 3]$ ($G = 16$ states), with week effects and $(\tau, \kappa)$ profiled out via their just-identifying moments (presuming strong identification of $(\delta, \tau, \kappa)$ at the tested $\phi$). Small-sample $F$ reference uses $S(G-d)/\{{\,d(G-1)\,\}} \sim F_{{d, G-d}}$. Across all three reference values $\bar\phi$, $S_1(F)$ and $S_1(\chi^2)$ form a single connected interior interval excluding $\phi = 0$ (at $\phi=0$, $\bar\phi=0.5$: $S_1 = {s0['S1']:.2f}$, $p_F = {s0['S1_p_F']:.3f}$), both $S_{{3,\mathrm{{inv}}}}$ and $S_{{3,\mathrm{{oi}}}}(F)$ are non-empty, and the Bonferroni 95\% projection for $\tau+\kappa$ (union of 97.5\% conditional $t_{{15}}$ intervals over the 97.5\% $S_1(F)$ set for $\phi$) strictly excludes zero. Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Profiled Stock--Wright statistics evaluated on 304 grid values $\phi\in[0,3]$ ($G=16$ states), presuming strong identification of $(\delta,\tau,\kappa)$ at each tested $\phi$. Notice: $S_{{3,\mathrm{{oi}}}}(\chi^2)$ is empty across all three $\bar\phi$ (reflecting the rejected $J_{{LM,\mathrm{{oi}}}}$ over-identifying test), while $S_{{3,\mathrm{{inv}}}}(F)$, $S_{{3,\mathrm{{oi}}}}(F)$, and the 97.5\% $S_1(F)$ set used in the Bonferroni union all span the entire grid $[0.00,3.00]$. At $\phi=0$, $\bar\phi=0.5$: $S_1={s0['S1']:.2f}$ ($p_F={s0['S1_p_F']:.3f}$). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_16_robust_sets.tex").write_text(tex, encoding="utf-8")
+
+
+def write_table_18_placebos(app: dict):
+    pl = app["placebos"]
+    oh = pl["other_holidays"]
+    lines_a = []
+    for hkey, hlbl in [("easter", "Easter"), ("autumn", "Autumn"), ("winter", "Winter"), ("pentecost", "Pentecost")]:
+        for lg in (0, 1, 2):
+            r = oh[hkey][f"lag_{lg}"]
+            lines_a.append(" & ".join([
+                hlbl if lg == 0 else "",
+                str(lg),
+                fmt_est_ci(r["est"]["tpk"], *r["ci_t"]["tpk"]),
+                f"{r['p_t_tpk'] if 'p_t_tpk' in r else 2*__import__('scipy').stats.t.sf(abs(r['est']['tpk']/r['se']['tpk']), 15):.4f}",
+                fmt_est_ci(r["est"]["phi"], *r["ci_t"]["phi"]),
+                f"{r['J_LM_oi']['stat']:.2f} ({r['J_LM_oi']['p_F']:.3f})",
+            ]) + r" \\")
+    ts = pl["time_shifts"]
+    lines_b = []
+    for sh in (-4, -3, -2, -1, 0, 1, 2, 3, 4):
+        r = ts[f"shift_{sh:+d}"]
+        pval = 2 * __import__("scipy").stats.t.sf(abs(r["est"]["tpk"] / r["se"]["tpk"]), 15)
+        lines_b.append(" & ".join([
+            f"{sh:+d} wk (eff lag {1+sh:+d})" if sh >= 0 else f"{sh:+d} wk (lead {-sh} wk)",
+            fmt_est_ci(r["est"]["tpk"], *r["ci_t"]["tpk"]),
+            f"{pval:.4f}",
+            fmt_est_ci(r["est"]["phi"], *r["ci_t"]["phi"]),
+            f"{r['J_LM_oi']['stat']:.2f} ({r['J_LM_oi']['p_F']:.3f})",
+        ]) + r" \\")
+    pm = pl["state_permutations"]
+    lines_b_fixed = []
+    for sh in (-4, -3, -2, -1, 0, 1, 2, 3, 4):
+        r = ts[f"shift_{sh:+d}"]
+        pval = 2 * __import__("scipy").stats.t.sf(abs(r["est"]["tpk"] / r["se"]["tpk"]), 15)
+        lbl = f"{sh:+d} wk (lag {1+sh})" if sh >= 0 else f"{sh:+d} wk (lead {-sh})"
+        lines_b_fixed.append(" & ".join([
+            lbl,
+            rf"\multicolumn{{2}}{{r}}{{{fmt_est_ci(r['est']['tpk'], *r['ci_t']['tpk'])}}}",
+            f"{pval:.4f}",
+            fmt_est_ci(r["est"]["phi"], *r["ci_t"]["phi"]),
+            f"{r['J_LM_oi']['stat']:.2f} ({r['J_LM_oi']['p_F']:.3f})",
+        ]) + r" \\")
+    lines_c_fixed = []
+    for key, lbl in [("lag1", "Summer perm. (lag 1)"), ("lag2", "Summer perm. (lag 2)")]:
+        p = pm[key]
+        lines_c_fixed.append(f"{lbl} & {p['obs_tpk']:+.3f} & {p['mean']:+.3f} ({p['sd']:.3f}) & [{p['q05']:+.3f}, {p['q95']:+.3f}] & \\multicolumn{{2}}{{r}}{{{p['p_one_sided']:.3f} / {p['p_two_sided']:.3f}}} \\\\")
+    body_a = "\n".join(lines_a)
+    body_b = "\n".join(lines_b_fixed)
+    body_c = "\n".join(lines_c_fixed)
+
+    tex = rf"""\begin{{table}}[!t]
+\centering
+\caption{{Placebo and randomisation diagnostics: non-summer school holidays (lags 0--2), time-shifted summer calendars, and cross-state schedule permutations.}}
+\label{{tab:rev-placebo}}
+\footnotesize
+\setlength{{\tabcolsep}}{{3.0pt}}
+\begin{{adjustbox}}{{max width=\linewidth}}
+\begin{{tabular}}{{lrrrrr}}
+\toprule
+\multicolumn{{6}}{{l}}{{\emph{{(a) Non-summer school holiday placebos (M0, lags 0--2)}}}} \\
+holiday & lag & $\hat\tau+\hat\kappa$ (95\% $t_{{15}}$ CI) & $p_t$ & $\hat\phi$ (95\% CI) & $J_{{LM,\mathrm{{oi}}}}$ ($p_F$) \\
+\midrule
+{body_a}
+\midrule
+\multicolumn{{6}}{{l}}{{\emph{{(b) Time-shifted summer schedules relative to primary lag-1 alignment ($\Delta t \in \{{-4,\dots,+4\}}$)}}}} \\
+calendar shift & \multicolumn{{2}}{{r}}{{$\hat\tau+\hat\kappa$ (95\% $t_{{15}}$ CI)}} & $p_t$ & $\hat\phi$ (95\% CI) & $J_{{LM,\mathrm{{oi}}}}$ ($p_F$) \\
+\midrule
+{body_b}
+\midrule
+\multicolumn{{6}}{{l}}{{\emph{{(c) Cross-state randomisation test (permuting the 16 states' summer schedules across states, B=200)}}}} \\
+specification & observed & perm.\ mean (SD) & [5th, 95th] & \multicolumn{{2}}{{r}}{{$p$ (1-sided / 2-sided)}} \\
+\midrule
+{body_c}
+\bottomrule
+\end{{tabular}}
+\end{{adjustbox}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) confirms that state-calendar alignment drives the lag-1 contrast ($p_{{\mathrm{{2-sided}}}} = {pm['lag1']['p_two_sided']:.3f}$) rather than generic national calendar curves alone, while Panel (b) reveals positive pre-holiday slopes at shifts $-4$ to $-2$ weeks and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\end{{table}}
+"""
+    (TAB_DIR / "table_18_placebos.tex").write_text(tex, encoding="utf-8")
 
 
 def main():
@@ -464,7 +629,8 @@ def main():
     write_table_14(app)
     write_table_15(app)
     write_table_16(app)
-    print("Generated all 8 German Varicella application LaTeX tables in tables/.")
+    write_table_18_placebos(app)
+    print("Generated all 9 German Varicella application LaTeX tables in tables/.")
 
 
 if __name__ == "__main__":

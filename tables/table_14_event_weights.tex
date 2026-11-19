@@ -1,28 +1,28 @@
 \begin{table}[!t]
 \centering
-\caption{Event-time dynamic profile around German summer school holiday onset ($e = -2, \dots, 7$ weeks, controlling for neighbour holiday share $\bar D_{it}$, $t_{15}$ 95\% CIs).}
+\caption{Event-time dynamic profile around German summer holiday onset ($e = -2, \dots, 7$): direct bin coefficients $\hat\tau_e$ versus total-policy scale effects $\hat\tau_e + c_e\hat\kappa$ ($t_{15}$ 95\% CIs).}
 \label{tab:rev-event}
 \footnotesize
-\setlength{\tabcolsep}{4.0pt}
+\setlength{\tabcolsep}{3.5pt}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{llrr}
+\begin{tabular}{llrrr}
 \toprule
-event week / parameter & biological / timing role & with pre-trend leads & without leads \\
+event week & timing role & direct $\hat\tau_e$ (with leads) & total $\hat\tau_e + c_e\hat\kappa$ (with leads) [$p_t$] & total (no leads) \\
 \midrule
-$e = -2$ & Pre-trend lead & 0.048 (-0.097, 0.194) & -- \\
-$e = -1$ & Pre-trend lead & 0.063 (-0.133, 0.259) & -- \\
-$e = +0$ & Onset week (incubation) & -0.008 (-0.273, 0.257) & -0.033 (-0.273, 0.206) \\
-$e = +1$ & Holiday weeks (post-incubation) & -0.153 (-0.376, 0.069) & -0.177 (-0.374, 0.020) \\
-$e = +2$ & Holiday weeks (post-incubation) & -0.156 (-0.524, 0.212) & -0.177 (-0.515, 0.161) \\
-$e = +3$ & Holiday weeks (post-incubation) & -0.171 (-0.367, 0.025) & -0.190 (-0.373, -0.006) \\
-$e = +4$ & Holiday weeks (post-incubation) & -0.097 (-0.383, 0.188) & -0.110 (-0.376, 0.156) \\
-$e = +5$ & Holiday weeks (post-incubation) & -0.097 (-0.293, 0.100) & -0.105 (-0.297, 0.087) \\
-$e = +6$ & Reopening / tail & -0.104 (-0.268, 0.059) & -0.108 (-0.266, 0.050) \\
-$e = +7$ & Reopening / tail & -0.082 (-0.249, 0.085) & -0.083 (-0.248, 0.081) \\
-Neighbour holiday ($\hat\kappa$) & Control / structural & -0.211 (-0.443, 0.021) & -0.209 (-0.440, 0.022) \\
-Contagion coupling ($\hat\phi$) & Control / structural & 0.322 (0.202, 0.442) & 0.322 (0.202, 0.443) \\
+$e = -2$ & Pre-trend lead & 0.046 (-0.098, 0.191) & 0.040 (-0.104, 0.185) [0.563] & -- \\
+$e = -1$ & Pre-trend lead & 0.064 (-0.132, 0.259) & 0.052 (-0.147, 0.251) [0.585] & -- \\
+$e = +0$ & Onset week & -0.009 (-0.275, 0.256) & -0.208 (-0.416, -0.001) [0.049] & -0.231 (-0.387, -0.076) \\
+$e = +1$ & Holiday weeks & -0.155 (-0.377, 0.068) & -0.358 (-0.572, -0.144) [0.003] & -0.379 (-0.550, -0.209) \\
+$e = +2$ & Holiday weeks & -0.157 (-0.524, 0.211) & -0.360 (-0.732, 0.012) [0.057] & -0.379 (-0.712, -0.045) \\
+$e = +3$ & Holiday weeks & -0.170 (-0.365, 0.025) & -0.374 (-0.576, -0.171) [0.001] & -0.390 (-0.568, -0.211) \\
+$e = +4$ & Holiday weeks & -0.098 (-0.383, 0.188) & -0.302 (-0.533, -0.071) [0.014] & -0.312 (-0.516, -0.109) \\
+$e = +5$ & Holiday weeks & -0.096 (-0.293, 0.100) & -0.298 (-0.487, -0.109) [0.004] & -0.304 (-0.482, -0.126) \\
+$e = +6$ & Reopening & -0.105 (-0.268, 0.058) & -0.141 (-0.313, 0.031) [0.100] & -0.145 (-0.310, 0.021) \\
+$e = +7$ & Reopening & -0.082 (-0.249, 0.086) & -0.089 (-0.260, 0.082) [0.286] & -0.090 (-0.259, 0.078) \\
+Neighbour control ($\hat\kappa$) & Control / structural & -0.211 (-0.443, 0.022) & -- & -0.209 (-0.440, 0.023) \\
+Contagion coupling ($\hat\phi$) & Control / structural & 0.322 (0.201, 0.444) & -- & 0.323 (0.201, 0.444) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Indicators $\mathbf 1\{t - t_{0,i} = e\}$ mark weeks relative to each state's summer holiday onset $t_{0,i}$ across 2015--2019 (typical holiday duration 6 weeks). Pre-trend joint Wald test ($H_0\colon \tau_{-2}=\tau_{-1}=0$): $\chi^2_2 = 0.60$ ($p = 0.741$, $F_{2,14}$ $p = 0.760$). Onset week $e=0$ is indistinguishable from zero, ruling out an immediate holiday under-reporting drop, followed by a post-incubation decline across $e=1,\dots,5$ (joint Wald $\chi^2_5 = 13.91$, $p = 0.016$, $F_{5,11}$ $p = 0.151$). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Because $\bar D_{it}\approx D_{it}$ inside states ($c_e \in [0.94, 0.97]$ for $e=0,\dots,5$), $\hat\tau_e$ isolates only within-border contrasts while total policy scale $\hat\tau_e + c_e\hat\kappa$ matches $\tau+\kappa$. Pre-trend joint test ($e_{-2}=e_{-1}=0$): $\chi^2_2 = 0.59$ ($p=0.746$, $p_F=0.765$). On the total-policy scale, onset week $e=0$ already drops to $-0.208$ (SE 0.097, $p_t=0.049$), followed by $e=1,\dots,5$ ($F_{5,11}$ $p_F=0.012$, $\chi^2_5=34.73$ $p=0.000$) and non-positive reopening weeks $e=6,7$ ($p_F=0.172$). Immediate onset decline before the 14-day incubation window prevents ruling out holiday-linked reporting drops. Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
 \end{table}

@@ -91,9 +91,11 @@ def _run_one(args):
     tpk_se = tsum(Vb, 0, 1)
     tpk_true = float(beta_true[0] + beta_true[1])
 
-    # Score wild bootstrap-t (B=399, Mammen & Webb6)
+    # Score wild bootstrap-t (B=399, Mammen & Webb6) + WCR-score (Webb6 & Rademacher)
     wm = WB.score_wild_bootstrap(inf["infl_b"], 399, seed_base + 100000 + r, "mammen")
     ww = WB.score_wild_bootstrap(inf["infl_b"], 399, seed_base + 200000 + r, "webb6")
+    pw_w6 = app.wcr_score_p_tpk0(X, eh, float(beta_true[0] + beta_true[1]), 399, seed_base + 300000 + r, "webb6")
+    pw_rad = app.wcr_score_p_tpk0(X, eh, float(beta_true[0] + beta_true[1]), 399, seed_base + 400000 + r, "rademacher")
 
     # Over-identification statistics
     mX = X.moments(eh, extra=True)
@@ -102,7 +104,7 @@ def _run_one(args):
     s3_oi = app.score_s3_at_beta(X, eh, [0, 1])["S3"]
     s3_inv = app.score_s3_at_beta(X, eh, [2, 3])["S3"]
 
-    # Check root multiplicity on compact grid for first 200 draws (or all 500 if fast)
+    # Check root multiplicity on compact grid
     grid_chk = np.array([0.0, 0.05, 0.15, 0.3, 0.5, 0.8, 1.2, 2.0, 3.0])
     cands, _ = X.global_roots(grid_chk)
     n_int = sum(1 for c in cands if c[0] == "interior")
@@ -118,6 +120,8 @@ def _run_one(args):
         cov_t=(err <= tc * ses).tolist(),
         cov_wild_mam=(err <= np.asarray(wm["q95"]) * ses).tolist(),
         cov_wild_web=(err <= np.asarray(ww["q95"]) * ses).tolist(),
+        cov_wcr_web=bool(pw_w6 > 0.05) if np.isfinite(pw_w6) else False,
+        cov_wcr_rad=bool(pw_rad > 0.05) if np.isfinite(pw_rad) else False,
         j_oi=float(j_oi),
         j_inv=float(j_inv),
         s3_oi=float(s3_oi),
@@ -160,12 +164,14 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
     cov_t = np.array([r["cov_t"] for r in ok_res])
     cov_wm = np.array([r["cov_wild_mam"] for r in ok_res])
     cov_ww = np.array([r["cov_wild_web"] for r in ok_res])
+    cov_wcr_w = float(np.mean([r["cov_wcr_web"] for r in ok_res]))
+    cov_wcr_r = float(np.mean([r["cov_wcr_rad"] for r in ok_res]))
     trues = np.array([beta_true[0], beta_true[1], beta_true[2], beta_true[0] + beta_true[1]])
     names = ["tau", "kappa", "phi", "tpk"]
     params = {}
     for k, nm in enumerate(names):
         b = vals[:, k] - trues[k]
-        params[nm] = dict(
+        rec_p = dict(
             true=float(trues[k]),
             bias=float(b.mean()),
             rmse=float(np.sqrt((b ** 2).mean())),
@@ -176,6 +182,10 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
             cov_wild_mam=float(cov_wm[:, k].mean()),
             cov_wild_web=float(cov_ww[:, k].mean()),
         )
+        if nm == "tpk":
+            rec_p["cov_wcr_webb6"] = cov_wcr_w
+            rec_p["cov_wcr_rademacher"] = cov_wcr_r
+        params[nm] = rec_p
     diag = {}
     for key in ("j_oi", "j_inv", "s3_oi", "s3_inv"):
         arr = np.array([r[key] for r in ok_res if np.isfinite(r[key])])
@@ -266,7 +276,7 @@ def main():
         summ["seconds"] = round(time.time() - t1, 2)
         out[tag] = summ
         p_tpk = summ["params"]["tpk"]
-        print(f"  [{tag}] {summ['R_ok']}/{R} ok in {summ['seconds']}s | tpk: bias={p_tpk['bias']:+.4f}, RMSE={p_tpk['rmse']:.4f}, t15={p_tpk['cov_t15']:.3f}, wildM={p_tpk['cov_wild_mam']:.3f}, wildW={p_tpk['cov_wild_web']:.3f} | unique_root={summ['root_counts']['share_unique']:.3f}", flush=True)
+        print(f"  [{tag}] {summ['R_ok']}/{R} ok in {summ['seconds']}s | tpk: bias={p_tpk['bias']:+.4f}, RMSE={p_tpk['rmse']:.4f}, t15={p_tpk['cov_t15']:.3f}, wildM={p_tpk['cov_wild_mam']:.3f}, wildW={p_tpk['cov_wild_web']:.3f}, WCR_W6={p_tpk['cov_wcr_webb6']:.3f}, WCR_Rad={p_tpk['cov_wcr_rademacher']:.3f} | unique_root={summ['root_counts']['share_unique']:.3f}", flush=True)
         for dk in ("j_oi", "j_inv", "s3_oi", "s3_inv"):
             dd = summ["diagnostics"][dk]
             print(f"      {dk:6s}: obs={dd['obs']:.2f}, null mean={dd['mean']:.2f}, q95={dd['q95']:.2f}, p_cal={dd['p_calibrated']:.3f}", flush=True)

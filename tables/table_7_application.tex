@@ -1,6 +1,6 @@
 \begin{table}[!t]
 \centering
-\caption{Application: staggered German summer school holidays and county-level varicella transmission (2015--2019); point estimates with 95\% confidence intervals ($t_{15}$, $G = 16$ federal states).}
+\caption{German varicella stress test (2015--2019): baseline working-model estimates and comparators with state-clustered 95\% intervals ($t_{15}$, $G = 16$ federal states).}
 \label{tab:app}
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
@@ -9,17 +9,17 @@
 \toprule
 sample & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\kappa$ (95\% CI) & $\hat\phi$ (95\% CI) \\
 \midrule
-Primary (400 counties) & M0 & -0.238 (-0.362, -0.114) & -0.301 (-0.854, 0.253) & 0.062 (-0.535, 0.660) & 0.325 (0.206, 0.445) \\
-Primary (400 counties) & M0-G & -0.238 (-0.362, -0.114) & -0.301 (-0.854, 0.253) & 0.062 (-0.535, 0.660) & 0.325 (0.206, 0.445) \\
-Primary (400 counties) & M0-GI & -0.238 (-0.362, -0.114) & -0.301 (-0.854, 0.253) & 0.062 (-0.535, 0.660) & 0.325 (0.206, 0.445) \\
-Primary (400 counties) & M0$'$ & -- & -0.232 (-0.342, -0.123) & -- & -- \\
-Primary (400 counties) & M1 (Poisson FE) & -0.290 (-0.372, -0.208) & -0.324 (-0.543, -0.104) & 0.034 (-0.195, 0.263) & 0.060 (0.027, 0.093) \\
+Primary (400 counties) & M0 & -0.239 (-0.364, -0.115) & -0.300 (-0.854, 0.254) & 0.060 (-0.538, 0.659) & 0.326 (0.205, 0.446) \\
+Primary (400 counties) & M0-G & -0.215 (-0.330, -0.101) & -0.294 (-0.858, 0.270) & 0.079 (-0.527, 0.685) & 0.000 (boundary) \\
+Primary (400 counties) & M0-GI & -0.239 (-0.364, -0.115) & -0.300 (-0.854, 0.254) & 0.060 (-0.538, 0.659) & 0.326 (0.205, 0.446) \\
+Primary (400 counties) & M0$'$ & -- & -0.233 (-0.343, -0.124) & -- & -- \\
+Primary (400 counties) & M1 (Poisson FE) & -0.290 (-0.372, -0.208) & -0.324 (-0.543, -0.105) & 0.034 (-0.195, 0.263) & 0.058 (0.026, 0.090) \\
 Primary (400 counties) & M2 (EpiEstim $\log R$) & -- & 0.064 (0.036, 0.093) & -- & -- \\
 Primary (400 counties) & M3 ($\log(Y+1)$ TWFE) & -- & -0.102 (-0.120, -0.083) & -- & -- \\
-Primary (400 counties) & M4 (Pooled QMLE) & -0.307 (-0.422, -0.193) & -0.260 (-0.426, -0.095) & -0.047 (-0.236, 0.142) & 0.002 (-0.046, 0.051) \\
-NUTS-2 (38 regions) & M0 & -0.146 (-0.280, -0.013) & -0.310 (-0.619, -0.001) & 0.163 (-0.219, 0.546) & 0.400 (-0.008, 0.808) \\
+Primary (400 counties) & M4 (Pooled QMLE) & -0.307 (-0.422, -0.193) & -0.261 (-0.426, -0.095) & -0.047 (-0.236, 0.142) & 0.001 (-0.046, 0.049) \\
+NUTS-2 (38 regions) & M0 & -0.147 (-0.280, -0.013) & -0.309 (-0.617, -0.001) & 0.162 (-0.220, 0.544) & 0.400 (-0.005, 0.805) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Weekly RKI SurvStat varicella cases across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{,}129 cases, plus three pre-sample lag weeks from late 2014); $D$ = state summer school holiday indicator lagged one week to align with varicella's 14-day generation/incubation interval ($w = (0.141, 0.721, 0.138)$, same-week mass $w_0 = 2.6 \times 10^{-6}$). 95\% intervals use the state-clustered sandwich with $t_{15} = 2.13$. Because holidays are set at the state level, $\tau+\kappa$ is the policy-level total for interior counties (primary M0 estimate $-0.238$, a 21.2\% reduction in $R$). Alternative 95\% intervals for M0 $\tau+\kappa$: Mammen score wild bootstrap-$t$ ($B=999$) $[-0.357, -0.120]$; nonlinear pairs cluster bootstrap-$t$ (999/999 converged) $[-0.383, -0.094]$; delete-one-state jackknife $[-0.374, -0.103]$ (leave-one-state-out range $[-0.268, -0.202]$); identification-robust Stock--Wright Bonferroni projection $[-0.492, -0.081]$. Propagated cases averted $\hat\psi^\dagger$: 2,440 (SE 670) during treated county-weeks and 2,995 (SE 900) network-wide. Global search finds a unique interior root at $\hat\phi = 0.325$, so M0, M0-G and M0-GI coincide. Data sources and coding are in Web Appendix D.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{,}129 cases, plus three pre-sample lag weeks); $D$ = state summer holiday indicator lagged one week; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{-6}$). Under state-level exposure, $\tau+\kappa$ is the policy-level working-model contrast (M0 estimate $-0.239$, $21.3\%$ multiplicative shift). Sensitivity intervals for M0 $\tau+\kappa$ ($t_{15}$ under-covers in Web Table~\ref{tab:rev-calsim}): WCR-score Webb6 $[-0.419, -0.139]$ ($p(0)=0.002$); WCR-score Rademacher $[-0.429, -0.119]$; unrestricted score wild (Mammen) $[-0.358, -0.121]$; pairs cluster bootstrap-$t$ (999/999 converged) $[-0.385, -0.094]$; delete-one-state jackknife $[-0.375, -0.104]$ (range $[-0.269, -0.203]$); Stock--Wright Bonferroni projection $[-0.493, -0.081]$. Over-identification rejects lagged working-model moments ($J_{LM,\mathrm{oi}}=9.12$, $p_{\chi^2}=0.010$, $p_F=0.036$), while $J_{LM,\mathrm{inv}}=4.10$ ($p_F=0.184$). Conditional counterfactual $\hat\psi^\dagger$: 2,453 (SE 673) treated county-weeks and 3,012 (SE 904) network-wide. Global search yields a single interior root at $\hat\phi=0.326$; $S_{3,\mathrm{oi}}$ slightly favours the $\phi=0$ boundary over the interior root while $S_{3,\mathrm{inv}}$ selects the interior root. See Web Appendices~D--F for full diagnostics limiting causal interpretation.}
 \end{table}
