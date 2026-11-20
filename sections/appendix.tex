@@ -631,15 +631,17 @@ induced by the reference value, and global identification (A6(iv)) fails in thes
 \label{app:data}
 
 The application uses three public raw files stored under \path{experiment/data/raw/germany/}
-(archived snapshot extracted on 2026-11-19 at
-\url{https://github.com/wangchi2068/transmission-scale-did}), retrievable via the download script
-\path{experiment/data/fetch_germany.py} (which writes volatile run-date metadata separately to
-\texttt{fetch\_metadata.json} so canonical re-downloads reproduce the archived LF SHA-256 checksums
-in \path{experiment/data/checksums.tsv} when upstream records remain unchanged, with
-\path{.gitattributes} locking raw data files as binary), and processed deterministically by
+(archived snapshot extracted on 2026-11-19 for surveillance/holidays and 2026-11-20 for BKG VG250
+boundaries at \url{https://github.com/wangchi2068/transmission-scale-did}), retrievable via the
+download script \path{experiment/data/fetch_germany.py} (which stages downloads in a temporary
+directory, writes volatile run-date metadata separately to \texttt{fetch\_metadata.json}, and
+promotes files only upon canonical LF SHA-256 verification against \path{experiment/data/checksums.tsv},
+with \path{.gitattributes} locking raw data files as binary), and processed deterministically by
 \path{experiment/code/data_prep.py}. Source licences are public SurvStat@RKI 2.0 open surveillance
-data, OpenHolidays public API (MIT / open data compiling official KMK schedules), and BKG /
-GeoBasis-DE Data licence Germany via \texttt{geofeatures-ags-germany} (see also
+data, OpenHolidays public API (Open Data Commons Open Database License, ODbL-1.0,
+\texttt{openpotato/openholidaysapi.data} compiling official KMK schedules), and official BKG VG250
+(\texttt{vg250:vg250\_krs}, Data licence Germany -- attribution -- Version 2.0,
+\texttt{dl-de/by-2-0}, \textcopyright{} GeoBasis-DE / BKG; see also
 \path{experiment/data/data_contract.md}).
 
 \begin{enumerate}
@@ -661,7 +663,7 @@ for the three counties with zero reported cases in 2017: Starnberg \texttt{09188
 \texttt{09763}, and Hildburghausen \texttt{16069}; zero imputed counties; total national population
 82.89 million), entering solely through $\omega_i=\text{population}_i/10^5$.
 \item \emph{Exposure.} Official federal-state school holiday schedules (Kultusministerkonferenz)
-for 2014--2019 were obtained via the OpenHolidays API (MIT / open data) for all 16 German states (\texttt{DE-SH}
+for 2014--2019 were obtained via the OpenHolidays API (ODbL-1.0, attributing OpenHolidays / KMK) for all 16 German states (\texttt{DE-SH}
 through \texttt{DE-TH}), covering summer, Easter, autumn, winter, Pentecost, and Christmas
 holidays. For each county $i$ and ISO week $t$ (Monday--Sunday), $D^{(0)}_{it}=1$ if at least four
 of the seven days fall inside the state's summer school holiday (\emph{Sommerferien}), and
@@ -673,15 +675,16 @@ total-policy event-time profile around holiday onset (Web Appendix~\ref{app:diag
 14 federal states rotate their summer holiday start weeks across ISO weeks 25--31 over 2015--2019,
 Baden-W\"urttemberg (\texttt{08}, 44 counties) and Bavaria (\texttt{09}, 96 counties) always start
 last (ranks 15--16, ISO weeks 30--31) in all five years without rotation.
-\item \emph{Spatial network and groupings.} County contiguity comes from 5-digit Amtlicher
-Gemeindeschl\"ussel (AGS) administrative polygons mapped to RKI's post-July 2021 county partition by
-reconciling G\"ottingen (\texttt{03152}+\texttt{03156}$\to$\texttt{03159}, November 2016),
-Wartburgkreis/Eisenach (\texttt{16056}$\to$\texttt{16063}, July 2021), and Berlin boroughs
-($\to$\texttt{11000}) for an exact 400/400 match with zero isolated counties. Counties sharing at
-least one boundary vertex (rounded to $10^{-3}$ degrees, $\approx 100$ m) are connected, yielding
-1{,}043 undirected county edges (mean degree 5.22, range 1--12; row-normalised $W$) and 29
-undirected state-contiguity edges (mean 3.63 neighbouring states, graph diameter 5). Sensitivity
-analyses group counties into four German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE,
+\item \emph{Spatial network and groupings.} County contiguity comes from official 5-digit Amtlicher
+Gemeindeschl\"ussel (AGS) land polygons (\texttt{gf=4}, BKG VG250 \texttt{vg250:vg250\_krs},
+\texttt{dl-de/by-2-0}) matching RKI's post-July 2021 400-county partition directly (retaining
+reconciliations for G\"ottingen \texttt{03152}+\texttt{03156}$\to$\texttt{03159}, Wartburgkreis
+\texttt{16056}$\to$\texttt{16063}, and Berlin \texttt{11*}$\to$\texttt{11000} for generality) for an
+exact 400/400 match with zero isolated counties. Counties sharing at least one boundary vertex
+(rounded to $10^{-3}$ degrees, $\approx 100$ m) are connected, yielding 1{,}044 undirected county
+edges (mean degree 5.22, range 1--12; row-normalised $W$; adding the Pinneberg \texttt{01056}--Stade
+\texttt{03359} lower-Elbe border relative to the prior 1{,}043-edge graph) and 29 undirected
+state-contiguity edges (mean 3.63 neighbouring states, graph diameter 5). Sensitivity analyses group counties into four German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE,
 RP, SL; South: BW, BY; East: BE, BB, SN, ST, TH) and aggregate counts into Germany's 38 NUTS-2
 government districts (\emph{Regierungsbezirke} and single-district states).
 \item \emph{Working generation-interval surrogate.} Following the systematic review of
@@ -914,9 +917,9 @@ short non-summer break shows a significant negative notification dip in lag 0 ($
 all $p<0.05$) followed by a positive lag-2 rebound ($+0.241$, CI $[0.066,0.416]$ for Easter;
 $+0.150$, $[0.035,0.264]$ for Autumn; Web Figure~\ref{fig:web-diag}(b)), reproducing a shared
 holiday reporting-suppression and post-break catch-up pattern that directly probes the
-separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$; alongside vaccination uptake
-heterogeneity spanning early rollout and the 2015--2019 panel window,
-\citealp{siedler2010varicella,reuss2010varicella,rieck2020impfquoten}, and state-level holiday
+separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$; alongside regional
+vaccination uptake differences documented during early rollout and in RKI-KV / 2018 school-entry
+snapshots, \citealp{siedler2010varicella,reuss2010varicella,rieck2020impfquoten}, and state-level holiday
 confounding discussed in \citealp{vonbismarckosten2022schools}). Shifted-calendar pre-window
 indicators at leads $3,2,1$ are positive ($+0.296$, $+0.248$, $+0.328$; contrasting with the
 event-time bin check in F.5 that controls explicitly for holiday duration rather than overlapping
