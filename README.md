@@ -1,9 +1,9 @@
 # 传播尺度双重差分（QD-GMM）
 
 论文、LaTeX 源码、实验代码与验证材料。当前仓库为未按期刊 25 页正文限制压缩的完整工作稿（正式投稿版将根据目标期刊要求另行排版），以方法理论、25 组预设模拟、适用包络界定与稀疏真实面板说明性实现为主线，完整德国水痘敏感性与诊断透明归档于网络支持材料：
-- 英文主稿 `main.pdf`（共 38 页；Sections 1--5 + Back Matter + References 共 30 页，含 `endfloat` 排出的 Figure 1--3 与 Table 1--4）：首页为标题/摘要（205 词，≤ 225），完整保留方案与偏离披露（Protocol & Departures）、适用包络指南表（Table 3）以及德国稀疏水痘面板说明性实现（§4，Table 4）。
+- 英文主稿 `main.pdf`（共 39 页；Sections 1--5 + Back Matter + References 共 31 页，含 `endfloat` 排出的 Figure 1--3 与 Table 1--4）：首页为标题/摘要（213 词，≤ 225），完整保留方案与偏离披露（Protocol & Departures）、适用包络指南表（Table 3）以及德国稀疏水痘面板说明性实现（§4，Table 4）。
 - 网络补充材料 `supporting_information.pdf`（共 50 页）：Web Appendices A--F（含 Web Tables 1--16 与 Web Figures 1--5）及附带文献，与主稿通过 `xr` 双向交叉引用。
-- 中文阅读稿 `paper_zh/main.pdf`（共 26 页，已与最新英文稿逐节同步）。
+- 中文阅读稿 `paper_zh/main.pdf`（共 27 页，已与最新英文稿逐节同步）。
 
 ## 目录
 
@@ -17,7 +17,7 @@ QD-GMM_transmission_DiD_2026-11-13/
 ├── experiment/
 │   ├── code/                  dgp、qdgmm、comparators、psi、simulate、data_prep、application、calibrated_sim_germany、make_figure_germany、make_tables_germany …
 │   ├── theory/                numeric_checks.py（Web Appendix B 的 8 项数值核验）
-│   ├── data/                  fetch_germany.py（RKI SurvStat@RKI 2.0 / OpenHolidays / AGS GeoJSON 下载与校验脚本）、checksums.tsv、data_contract.md、raw/germany 与 processed 面板
+│   ├── data/                  fetch_germany.py（RKI SurvStat@RKI 2.0 / OpenHolidays ODbL-1.0 / BKG VG250 dl-de/by-2-0 下载与校验脚本）、checksums.tsv、data_contract.md、raw/germany 与 processed 面板
 │   ├── analysis/              results.json、germany_application_results.json、germany_calibrated_sim.json …
 │   └── logs/                  运行日志
 ├── verification/
@@ -26,7 +26,7 @@ QD-GMM_transmission_DiD_2026-11-13/
 │   ├── revision/common/       qdx.py（分组周效应、满秩得分形式 J_LM / S3、全局求根）
 │   ├── revision/population_roots/ 零传染设计总体多根验证
 │   └── application/           wild_bootstrap.py（得分野 bootstrap-t 与非线性成对集群矩 bootstrap-t）
-├── response/                  各轮审稿意见回复（r1r2、r3、r4、r5）
+├── response/                  各轮审稿意见回复（r1r2 至 r8）
 └── scripts/                   scan_control_chars.py、qa_checks.py、section_pages.py
 ```
 
@@ -41,13 +41,13 @@ python scripts/qa_checks.py
 python scripts/section_pages.py
 ```
 
-德国水痘面板与图表复现（Python 3.11，见 `experiment/code/README.md` 与 `experiment/data/data_contract.md`；存档 SurvStat 数据提取日期 **2026-11-19**，易变运行日期写入 `fetch_metadata.json` 使规范化重下载与存档 SHA-256 一致；`calibrated_sim_germany.py` 默认最多启用 16 个工作进程）：
+德国水痘面板与图表复现（Python 3.11，见 `experiment/code/README.md` 与 `experiment/data/data_contract.md`；存档 SurvStat 数据提取日期 **2026-11-19**，官方 BKG VG250 县界按 `dl-de/by-2-0` 与 OpenHolidays 按 `ODbL-1.0` 发布，易变运行日期写入 `fetch_metadata.json` 使规范化重下载与存档 SHA-256 一致；`calibrated_sim_germany.py` 默认最多启用 18 个工作进程）：
 ```bash
 python experiment/data/fetch_germany.py --check            # 校验 2026-11-19 提取的 LF 原始文件与 SHA-256（3/3 OK）
 python experiment/data/fetch_germany.py --verify-download  # 从公共接口在线重下载并规范化比对存档 SHA-256（3/3 OK）
 python experiment/code/data_prep.py                        # 校验 SHA-256（0 个插补县）并生成 processed/panel.npz
 python experiment/code/application.py                      # 生成 germany_application_results.json
-python experiment/code/calibrated_sim_germany.py           # 400 县 x 261 周校准模拟 (R=500 x 2，含 WCR-score、统一刀切、嵌套 pairs R=200/B=199 与 M2 先验敏感性/NUTS-2 全局检查)
+python experiment/code/calibrated_sim_germany.py           # 400 县 x 261 周校准模拟 (R=500 x 2，含 WCR-score、统一刀切、全量嵌套 pairs R=500/B=199 与 M2 先验敏感性/NUTS-2 全局检查)
 python experiment/code/make_figure_germany.py              # 生成 Figure 3 (fig_03_application) 与 Web Figure 5 (fig_web_05_diagnostics)
 python experiment/code/make_tables_germany.py              # 动态生成 Table 3--4 及 Web Appendix F 全部附表（共 10 张表）
 ```
@@ -56,11 +56,11 @@ python experiment/code/make_tables_germany.py              # 动态生成 Table 
 
 - **正溢出核心模拟（8 个情景，$R=8000$）**：M0 对 $\tau$ 偏倚 $-0.002$ 至 $0.001$，95\% 区间覆盖率 94.5\%--95.4\%，同时存在反馈实施、过度离散与小计数；常用比较量 M1--M4 与 M0$'$ 均存在偏倚。
 - **适用边界与使用指南（Table 3 Operating Envelope）**：零传染边界下总体矩存在第二根，M0-G/M0-GI（第 3 节 *Departures from the protocol* 显式披露为修订事后规则）在边界降低偏倚与提高覆盖率，但在 $\phi_0\in[0.05,0.10]$ 存在 0.90--0.93 覆盖代价；同周传播匹配实验（$w_0=0.3$）将周度 QD-GMM 的有效适用域界定在多周代际间隔病原体；非暑期假期安慰剂直接检出对假设 A7 可分离报告约束（$c_{it}=c_i c_t$）的偏离（设计 X2 下报告偏移亦使 $\hat\phi$ 上偏 $+0.42$）。
-- **稀疏监测计数说明性实现（德国 400 县、16 联邦州 2015--2019 年水痘面板，115,129 例，事后分析）**：
-  - **稀疏面板可计算性**：在 58.8\% 县周为零计数的面板上无需剔除任何零观测，局部 M0 收敛至唯一内部根 $\hat\phi=0.326$（$S_1(F)=[0.21,2.40]$），而预设全局规则 M0-G 在 $S_{3,\mathrm{oi}}$ 下落于 $\phi=0$ 边界（$\hat\tau+\hat\kappa=-0.215$）。
-  - **两步法小计数符号反转（实测对比 + 已知真值校准模拟）**：真实面板中 M2（EpiEstim）在县级为 $+0.064$、NUTS-2 聚合（零计数 2.9\%）为 $-0.102$；在**按德国设计校准的已知真值模拟（Web Table 11(c)）**中，县级 54.5\%--57.8\% 零计数使 M2 偏倚达 $+0.224$（高噪声 $+0.227$；22.8\%/32.6\% 抽样翻正），聚合到 NUTS-2 后 M2 偏倚降为 $+0.076$（$+0.083$），而 M0 偏倚保持 $-0.003$（县级）与 $+0.013$（NUTS-2）。
-  - **有限簇设计校准**：在**按德国 400 县 $\times$ 16 州设计校准的模拟**（$R=500\times 2$，覆盖率 MCSE $\approx 0.010$）中，常规 $t_{15}$ 覆盖率为 0.902（SE 比值 0.855），WCR-score 改善覆盖率至 0.934--0.946，删一州刀切 $t_{15}$ 覆盖率为 0.964--0.966。
-  - **工作模型数值输出与完整诊断归档**：德国面板下工作模型基线系数 $\hat\tau+\hat\kappa = -0.239$（WCR-score Webb6 $[-0.419,-0.139]$）仅作非因果运行输出报告，因数据按报告周（*Meldewoche*）记录且假期间违背 A7；完整诊断（事件时间、非暑期安慰剂、过度识别、邻近州非正定协方差、非轮换南部州及季节/报告率敏感性检验）透明归档于 Web Appendices E--F。
+- **稀疏监测计数说明性实现（德国 BKG VG250 400 县、16 联邦州 2015--2019 年水痘面板，115,129 例，事后分析）**：
+  - **稀疏面板可计算性**：在 58.8\% 县周为零计数的面板上无需剔除任何零观测，局部 M0 收敛至唯一内部根 $\hat\phi=0.327$（$S_1(F)=[0.21,2.45]$），而预设全局规则 M0-G 在 $S_{3,\mathrm{oi}}$ 下落于 $\phi=0$ 边界（$\hat\tau+\hat\kappa=-0.216$）。
+  - **两步法小计数符号反转（实测对比 + 已知真值校准模拟）**：真实面板中 M2（EpiEstim）在县级为 $+0.064$、NUTS-2 聚合（零计数 2.9\%）为 $-0.102$；在**按德国设计校准的维持工作模型已知真值模拟（Web Table 11(c)）**中，县级 54.5\%--57.8\% 零计数使 M2 偏倚达 $+0.227$（高噪声 $+0.227$；23.6\%/32.2\% 抽样翻正，主要由先验伪计数主导），聚合到 NUTS-2 后 M2 偏倚降为 $+0.079$（$+0.080$），而 M0 偏倚保持 $-0.006$（县级）与 $+0.010$（NUTS-2 全局 $\phi\ge 0$ 规则；但实证 M2 相对校准分布仍高出 $+1.93$ 至 $+4.33$ 个 SD 并呈先验非单调性，反映报告机制等模拟外因素）。
+  - **有限簇设计校准**：在**按德国 400 县 $\times$ 16 州设计校准的模拟**（$R=500\times 2$，0.95 处覆盖率 MCSE $\approx 0.010$）中，常规 $t_{15}$ 覆盖率为 0.898/0.888（SE 比值 0.850/0.838），WCR-score 改善覆盖率至 0.928--0.942，统一删一州刀切 $t_{15}$ 覆盖率为 0.956（两臂），全量嵌套成对聚类 bootstrap-$t$（$R=500, B=199$）覆盖率为 0.932/0.946。
+  - **工作模型数值输出与完整诊断归档**：德国面板下工作模型基线系数 $\hat\tau+\hat\kappa = -0.240$（WCR-score Webb6 $[-0.420,-0.140]$）仅作非因果运行输出报告，因数据按报告周（*Meldewoche*）记录且假期间违背 A7；完整诊断（事件时间、非暑期安慰剂、过度识别、邻近州非正定协方差、非轮换南部州及季节/报告率敏感性检验）透明归档于 Web Appendices E--F。
 
 ## 投稿前仍需处理
 

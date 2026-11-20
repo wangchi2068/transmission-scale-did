@@ -29,7 +29,7 @@ OUT_DIR = DATA_DIR / "processed"
 EXPECTED_SHA256 = {
     "rki_varicella_2014_2019.json": "0735f0211c4d51389a20cb93dbcd4d5b48f8f7790d1c68176c8841c12d0b2489",
     "germany_school_holidays_2014_2019.json": "4f51fd93e04f0f7ae37a5d78aea0966d12f74acf15b7293a795f155826fb695e",
-    "counties_ags.geojson": "8a0d0bf29ff31b6e536622613ce6e2f6198a6999bd725a631b4b1707780a6abd",
+    "counties_ags.geojson": "5003586e2c43f803828b106bb7de11b58079529cb78bf76649e3d2ec703acacc",
 }
 
 STATE_ABBR = {
@@ -54,14 +54,21 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def verify_checksums() -> dict:
+def verify_checksums(raw_dir: Path = RAW_DIR) -> dict:
     verified = {}
+    mismatches = []
     for fname, expected in EXPECTED_SHA256.items():
-        p = RAW_DIR / fname
+        p = raw_dir / fname
+        if not p.exists():
+            mismatches.append(f"{fname}: missing (expected {expected})")
+            continue
         actual = sha256_file(p)
         if actual != expected:
-            raise RuntimeError(f"Checksum mismatch for {fname}: got {actual}, expected {expected}")
-        verified[fname] = dict(bytes=p.stat().st_size, sha256=actual)
+            mismatches.append(f"{fname}: got {actual}, expected {expected}")
+        else:
+            verified[fname] = dict(bytes=p.stat().st_size, sha256=actual)
+    if mismatches:
+        raise RuntimeError("Checksum verification failed:\n  " + "\n  ".join(mismatches))
     return verified
 
 
@@ -105,7 +112,7 @@ def build_adjacency(geo_path: Path, ags_list: list[str]):
                     yield ring
 
     for feat in gj["features"]:
-        raw = str(feat.get("id") or "").strip()
+        raw = str(feat.get("properties", {}).get("ags") or feat.get("id") or "").strip()
         if raw.isdigit():
             raw = raw.zfill(5)[:5]
         # Known AGS consolidations

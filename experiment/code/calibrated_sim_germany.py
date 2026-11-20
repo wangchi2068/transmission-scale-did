@@ -40,6 +40,7 @@ import wild_bootstrap as WB
 from qdx import QDX, inv_extras, oi_extras, tsum
 
 OUT_PATH = ROOT / "experiment" / "analysis" / "germany_calibrated_sim.json"
+CO_STARTS = [[-0.3, 0.0, 0.3], [-0.2, -0.1, 0.5], [0.0, 0.0, 0.5]]
 NUTS_STARTS = [[-0.3, 0.0, 0.3], [-0.2, -0.1, 0.5], [0.0, 0.0, 0.5], [0.0, 0.0, 0.05]]
 JK_STARTS = [[-0.3, 0.0, 0.3], [0.0, 0.0, 0.5]]
 
@@ -52,7 +53,7 @@ def _init_worker(state_dict):
 
 
 def _pairs_bootstrap_fast(mod: qdgmm.QDModel, beta_hat: np.ndarray, B: int, seed: int) -> dict:
-    """Fast vectorized pairs cluster bootstrap-t on cluster moments matching WB.pairs_moment_bootstrap."""
+    """Fast active-state pairs cluster bootstrap-t matching WB.pairs_moment_bootstrap."""
     rng = np.random.default_rng(seed)
     G, Tm1, N = mod.G, mod.T - 1, mod.N
     Y0, Y1 = mod.Y[:-1], mod.Y[1:]
@@ -60,44 +61,62 @@ def _pairs_bootstrap_fast(mod: qdgmm.QDModel, beta_hat: np.ndarray, B: int, seed
     X0, X1 = mod.X[0], mod.X[1]
     dX0, dX1 = mod.dX[0], mod.dX[1]
     Z = np.stack(mod.Zpar, axis=0)
+    M = Z.shape[0]
     s, cl, fscale = mod.s, mod.cl, mod.fscale
     cl_mat = (cl[:, None] == np.arange(G)[None, :]).astype(float)
     sY0 = s * Y0
-    Z_Y0 = np.einsum("mtn,tn->mn", Z, Y0)
+    Z_Y0 = (Z * Y0[None, :, :]).sum(1)
+    idx_t = np.arange(Tm1)
     ts = []
     fails = 0
     for _ in range(B):
         m_g = rng.multinomial(G, np.full(G, 1.0 / G)).astype(float)
         w_unit = m_g[cl]
-        den = (sY0 * w_unit).sum(1)
+        act = w_unit > 0
+        wa = w_unit[act]
+        den = sY0[:, act] @ wa
         if np.any(den <= 0):
             fails += 1
             continue
-        ws = w_unit[None, :] * s
-        wZ = w_unit[None, None, :] * Z
-        rhs = (Z_Y0 * w_unit[None, :]).sum(1)
+        sa = s[:, act]
+        wsa = sa * wa[None, :]
+        Za = Z[:, :, act]
+        Zwa = Za * wa[None, None, :]
+        rhs = Z_Y0[:, act] @ wa
+        Y0a, Y1a = Y0[:, act], Y1[:, act]
+        La, Nba, oma = L[:, act], Nb[:, act], om[act]
+        X0a, X1a = X0[:, act], X1[:, act]
+        dX0a, dX1a = dX0[:, act], dX1[:, act]
+        Na = int(act.sum())
+        dX01_f = np.vstack([dX0a.ravel(), dX1a.ravel()])
 
         def prof_w(beta):
-            lam = L + beta[2] * Nb + om
+            lam = La + beta[2] * Nba + oma
             if np.any(lam <= 0) or not np.all(np.isfinite(beta)):
                 return np.full(3, 1e6 * fscale), np.eye(3)
-            eta = beta[0] * X0 + beta[1] * X1
-            q_ = np.exp(np.clip(eta[:-1] - eta[1:], -50, 50)) * lam[:-1] / lam[1:]
-            Yq = Y1 * q_
-            num = (ws * Yq).sum(1)
+            eta = beta[0] * X0a + beta[1] * X1a
+            q_ = np.exp(np.clip(eta[:-1] - eta[1:], -50, 50)) * (lam[:-1] / lam[1:])
+            Yq = Y1a * q_
+            num = (wsa * Yq).sum(1)
             if np.any(num <= 0):
                 return np.full(3, 1e6 * fscale), np.eye(3)
             Ed = num / den
             Yr = Yq / Ed[:, None]
-            F = ((wZ * Yr[None, :, :]).sum((1, 2)) - rhs) / N
-            r = Nb / lam
+            ZwaY = Zwa * Yr[None, :, :]
+            cm = ZwaY.sum(2)
+            F = (cm.sum(1) - rhs) / N
+            r = Nba / lam
             rr = r[:-1] - r[1:]
-            sYr = ws * Yr
+            sYr = wsa * Yr
             a = sYr.sum(1)
-            dxs = np.stack([dX0, dX1, rr], axis=0)
-            bb = np.einsum("tn,ptn->tp", sYr, dxs)
-            cm = np.einsum("mtn,tn->mt", wZ, Yr)
-            H = np.einsum("mtn,tn,ptn->mp", wZ, Yr, dxs)
+            bb = np.empty((Tm1, 3))
+            bb[:, 0] = (sYr * dX0a).sum(1)
+            bb[:, 1] = (sYr * dX1a).sum(1)
+            bb[:, 2] = (sYr * rr).sum(1)
+            ZwaY_f = ZwaY.reshape(M, -1)
+            H = np.empty((M, 3))
+            H[:, :2] = ZwaY_f @ dX01_f.T
+            H[:, 2] = ZwaY_f @ rr.ravel()
             Jp = (H - cm @ (bb / a[:, None])) / N
             return F, Jp
 
@@ -107,30 +126,38 @@ def _pairs_bootstrap_fast(mod: qdgmm.QDModel, beta_hat: np.ndarray, B: int, seed
             fails += 1
             continue
         bx = sol.x
-        lam = L + bx[2] * Nb + om
-        eta = bx[0] * X0 + bx[1] * X1
-        q_ = np.exp(np.clip(eta[:-1] - eta[1:], -50, 50)) * lam[:-1] / lam[1:]
-        Yq = Y1 * q_
-        Ed = (ws * Yq).sum(1) / den
+        lam = La + bx[2] * Nba + oma
+        eta = bx[0] * X0a + bx[1] * X1a
+        q_ = np.exp(np.clip(eta[:-1] - eta[1:], -50, 50)) * (lam[:-1] / lam[1:])
+        Yq = Y1a * q_
+        Ed = (wsa * Yq).sum(1) / den
         Yr = Yq / Ed[:, None]
-        v = Yr - Y0
-        rr = (Nb / lam)[:-1] - (Nb / lam)[1:]
-        dxs = np.stack([dX0, dX1, rr], axis=0)
-        gw = (s * v) @ cl_mat
-        gz = np.einsum("mtn,ng->mg", Z * v[None, :, :], cl_mat)
-        gg = np.vstack([gw, gz])
-        sYr = ws * Yr
+        va = Yr - Y0a
+        rr = (Nba / lam)[:-1] - (Nba / lam)[1:]
+        act_g = m_g > 0
+        cl_a = cl_mat[np.ix_(act, act_g)]
+        gw_a = (sa * va) @ cl_a
+        gz_a = ((Za * va[None, :, :]).reshape(M * Tm1, Na) @ cl_a).reshape(M, Tm1, -1).sum(1)
+        gg_a = np.vstack([gw_a, gz_a])
+        sYr = wsa * Yr
         a = sYr.sum(1)
-        bb = np.einsum("tn,ptn->tp", sYr, dxs)
-        cm = np.einsum("mtn,tn->mt", wZ, Yr)
-        H = np.einsum("mtn,tn,ptn->mp", wZ, Yr, dxs)
+        bb = np.empty((Tm1, 3))
+        bb[:, 0] = (sYr * dX0a).sum(1)
+        bb[:, 1] = (sYr * dX1a).sum(1)
+        bb[:, 2] = (sYr * rr).sum(1)
+        ZwaY = Zwa * Yr[None, :, :]
+        cm = ZwaY.sum(2)
+        ZwaY_f = ZwaY.reshape(M, -1)
+        H = np.empty((M, 3))
+        H[:, :2] = ZwaY_f @ dX01_f.T
+        H[:, 2] = ZwaY_f @ rr.ravel()
         J = np.zeros((Tm1 + 3, Tm1 + 3))
-        J[np.arange(Tm1), np.arange(Tm1)] = -a
+        J[idx_t, idx_t] = -a
         J[:Tm1, Tm1:] = bb
         J[Tm1:, :Tm1] = -cm
         J[Tm1:, Tm1:] = H
         Gam_b = J / G
-        Om_b = (gg * m_g[None, :]) @ gg.T / G
+        Om_b = (gg_a * m_g[act_g][None, :]) @ gg_a.T / G
         try:
             Gi_b = np.linalg.inv(Gam_b)
         except np.linalg.LinAlgError:
@@ -190,7 +217,7 @@ def _run_one(args):
     exo, _ = oi_extras(ps, phi_bar=0.5)
     exi, _ = inv_extras(ps)
     X = QDX(ps, {"tau": ps["D"], "kappa": ps["Db"]}, phi_bar=0.5, extras=exo + exi)
-    eh, ok, _ = X.fit(starts=[beta_true, [-0.2, 0.0, 0.3], [0.0, 0.0, 0.5]])
+    eh, ok, _ = X.fit(starts=CO_STARTS)
     if not ok:
         return dict(ok=False)
     inf = X.inference(eh)
@@ -236,14 +263,16 @@ def _run_one(args):
         jk_se = np.nan
         cov_jk = False
 
-    # Comparators under known truth: county M2 (default + weaker priors + noise-free L check), M3, and NUTS-2 M0 & M2
+    # Comparators under known truth: county M2 (default + moderate/weak/ultralow priors + noise-free L check), M3, and NUTS-2 M0 & M2
     m2_c = cmp.m2_logr_did(ps)
+    m2_c_mod = cmp.twfe_ols(cmp.cori_log_r(ps, a=0.25, b=5.0), ps["D"], ps["cl"], G)
     m2_c_weak = cmp.twfe_ols(cmp.cori_log_r(ps, a=0.1, b=5.0), ps["D"], ps["cl"], G)
     m2_c_ultralow = cmp.twfe_ols(cmp.cori_log_r(ps, a=0.01, b=100.0), ps["D"], ps["cl"], G)
     lr_nf = np.log((1.0 + mu_mat) / (0.2 + ps["L"]))
     m2_c_nf = cmp.twfe_ols(lr_nf, ps["D"], ps["cl"], G)
     m3_c = cmp.m3_logy_twfe(ps)
     m2_c_tau = float(m2_c["est"]["tau"]) if m2_c.get("ok") else np.nan
+    m2_c_mod_tau = float(m2_c_mod["est"]["tau"]) if m2_c_mod.get("ok") else np.nan
     m2_c_weak_tau = float(m2_c_weak["est"]["tau"]) if m2_c_weak.get("ok") else np.nan
     m2_c_ultra_tau = float(m2_c_ultralow["est"]["tau"]) if m2_c_ultralow.get("ok") else np.nan
     m2_c_nf_tau = float(m2_c_nf["est"]["tau"]) if m2_c_nf.get("ok") else np.nan
@@ -256,6 +285,19 @@ def _run_one(args):
     eh2, ok2, _ = X2.fit(starts=NUTS_STARTS)
     m0_n2_tpk = float(eh2[0] + eh2[1]) if ok2 else np.nan
     m0_n2_phi = float(eh2[2]) if ok2 else np.nan
+    m0_n2_nonneg_tpk = m0_n2_tpk if (ok2 and eh2[2] >= 0.0) else np.nan
+    m0_n2_nonneg_phi = m0_n2_phi if (ok2 and eh2[2] >= 0.0) else np.nan
+    m0_n2_neg_phi = bool(ok2 and eh2[2] < 0.0)
+    if ok2:
+        m0_n2_fail_kind = "ok"
+    else:
+        F2_end, _ = X2.profiled_eq(eh2)
+        if np.max(np.abs(F2_end)) >= 1e5 * X2.fscale:
+            m0_n2_fail_kind = "lam_nonpos"
+        elif eh2[2] < 0.0:
+            m0_n2_fail_kind = "tol_neg_phi"
+        else:
+            m0_n2_fail_kind = "tol_other"
 
     grid_chk = np.array([0.0, 0.05, 0.15, 0.3, 0.5, 0.8, 1.2, 2.0, 3.0])
     cands2, _ = X2.global_roots(grid_chk)
@@ -315,12 +357,17 @@ def _run_one(args):
         c_zero_share=c_zero_share,
         n2_zero_share=n2_zero_share,
         m2_county=m2_c_tau,
+        m2_county_mod=m2_c_mod_tau,
         m2_county_weak=m2_c_weak_tau,
         m2_county_ultralow=m2_c_ultra_tau,
         m2_county_noisefree=m2_c_nf_tau,
         m3_county=m3_c_tau,
         m0_nuts2_tpk=m0_n2_tpk,
         m0_nuts2_phi=m0_n2_phi,
+        m0_nuts2_nonneg_tpk=m0_n2_nonneg_tpk,
+        m0_nuts2_nonneg_phi=m0_n2_nonneg_phi,
+        m0_nuts2_neg_phi=m0_n2_neg_phi,
+        m0_nuts2_fail_kind=m0_n2_fail_kind,
         m0_nuts2_glob_tpk=m0_n2_glob_tpk,
         m0_nuts2_glob_phi=m0_n2_glob_phi,
         m0_nuts2_glob_bnd=m0_n2_glob_bnd,
@@ -366,6 +413,7 @@ def _summ_est(arr: np.ndarray, truth: float) -> dict:
     return dict(
         n=int(len(v)),
         mean=float(v.mean()),
+        sd=float(v.std(ddof=1)),
         bias=float(b.mean()),
         bias_mcse=float(b.std(ddof=1) / np.sqrt(len(v))),
         rmse=float(np.sqrt((b ** 2).mean())),
@@ -428,6 +476,7 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
         nuts2_zero_share=float(np.mean([r["n2_zero_share"] for r in ok_res])),
         M0_county=_summ_est(vals[:, 3], tpk_true),
         M2_county=_summ_est(m2_c_arr, tpk_true),
+        M2_county_mod=_summ_est(np.array([r["m2_county_mod"] for r in ok_res]), tpk_true),
         M2_county_weak=_summ_est(np.array([r["m2_county_weak"] for r in ok_res]), tpk_true),
         M2_county_ultralow=_summ_est(np.array([r["m2_county_ultralow"] for r in ok_res]), tpk_true),
         M2_county_noisefree=_summ_est(m2_c_nf_arr, tpk_true),
@@ -435,6 +484,14 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
         M3_county=_summ_est(np.array([r["m3_county"] for r in ok_res]), tpk_true),
         M0_nuts2_tpk=_summ_est(np.array([r["m0_nuts2_tpk"] for r in ok_res]), tpk_true),
         M0_nuts2_phi=_summ_est(np.array([r["m0_nuts2_phi"] for r in ok_res]), float(beta_true[2])),
+        M0_nuts2_nonneg_tpk=_summ_est(np.array([r["m0_nuts2_nonneg_tpk"] for r in ok_res]), tpk_true),
+        M0_nuts2_nonneg_phi=_summ_est(np.array([r["m0_nuts2_nonneg_phi"] for r in ok_res]), float(beta_true[2])),
+        M0_nuts2_neg_phi_count=int(sum(1 for r in ok_res if r.get("m0_nuts2_neg_phi"))),
+        M0_nuts2_fail_reasons=dict(
+            lam_nonpos=int(sum(1 for r in ok_res if r.get("m0_nuts2_fail_kind") == "lam_nonpos")),
+            tol_neg_phi=int(sum(1 for r in ok_res if r.get("m0_nuts2_fail_kind") == "tol_neg_phi")),
+            tol_other=int(sum(1 for r in ok_res if r.get("m0_nuts2_fail_kind") == "tol_other")),
+        ),
         M0_nuts2_global_tpk=_summ_est(np.array([r["m0_nuts2_glob_tpk"] for r in ok_res]), tpk_true),
         M0_nuts2_global_phi=_summ_est(np.array([r["m0_nuts2_glob_phi"] for r in ok_res]), float(beta_true[2])),
         M0_nuts2_global_boundary_share=float(np.mean([r["m0_nuts2_glob_bnd"] for r in ok_res])),
@@ -479,9 +536,9 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--R", type=int, default=500)
-    ap.add_argument("--r-pairs", type=int, default=200)
+    ap.add_argument("--r-pairs", type=int, default=500)
     ap.add_argument("--b-pairs", type=int, default=199)
-    ap.add_argument("--workers", type=int, default=max(1, min(os.cpu_count() or 4, 16)))
+    ap.add_argument("--workers", type=int, default=max(1, min(os.cpu_count() or 4, 18)))
     args = ap.parse_args()
 
     t0 = time.time()
@@ -575,18 +632,38 @@ def main():
         calibration=dict(k_nb=cal["k_nb"], sig_sw=cal["sig_sw"], beta_true=beta_true.tolist()),
         obs_stats=obs_stats,
     )
+    ckpts = []
     for tag, seed_base, k_mult, s_mult in [
         ("calibrated", 2026111900, 1.0, 1.0),
         ("high_noise", 2026121900, 0.5, 2.0),
     ]:
-        t1 = time.time()
-        tasks = [(r, seed_base, cal["k_nb"] * k_mult, cal["sig_sw"] * s_mult, r_pairs, b_pairs) for r in range(R)]
-        with ProcessPoolExecutor(max_workers=n_workers, initializer=_init_worker, initargs=(state_dict,)) as ex:
-            results = list(ex.map(_run_one, tasks, chunksize=1))
-        summ = summarise_runs(results, beta_true, obs_stats)
-        summ["k_nb"] = float(cal["k_nb"] * k_mult)
-        summ["sig_sw"] = float(cal["sig_sw"] * s_mult)
-        summ["seconds"] = round(time.time() - t1, 2)
+        ckpt_path = OUT_PATH.parent / f".ckpt_cal_{tag}_R{R}_P{r_pairs}_B{b_pairs}.json"
+        ckpts.append(ckpt_path)
+        k_val = float(cal["k_nb"] * k_mult)
+        s_val = float(cal["sig_sw"] * s_mult)
+        summ = None
+        if ckpt_path.exists():
+            ck = json.loads(ckpt_path.read_text(encoding="utf-8"))
+            if (
+                ck.get("beta_true") == beta_true.tolist()
+                and abs(ck.get("k_nb", -1.0) - k_val) < 1e-12
+                and abs(ck.get("sig_sw", -1.0) - s_val) < 1e-12
+            ):
+                summ = ck["summ"]
+                print(f"  [{tag}] loaded checkpoint {ckpt_path.name}", flush=True)
+        if summ is None:
+            t1 = time.time()
+            tasks = [(r, seed_base, k_val, s_val, r_pairs, b_pairs) for r in range(R)]
+            with ProcessPoolExecutor(max_workers=n_workers, initializer=_init_worker, initargs=(state_dict,)) as ex:
+                results = list(ex.map(_run_one, tasks, chunksize=1))
+            summ = summarise_runs(results, beta_true, obs_stats)
+            summ["k_nb"] = k_val
+            summ["sig_sw"] = s_val
+            summ["seconds"] = round(time.time() - t1, 2)
+            ckpt_path.write_text(
+                json.dumps(dict(beta_true=beta_true.tolist(), k_nb=k_val, sig_sw=s_val, summ=summ), indent=2),
+                encoding="utf-8",
+            )
         out[tag] = summ
         p_tpk = summ["params"]["tpk"]
         cc = summ["comparators"]
@@ -595,13 +672,16 @@ def main():
             f"t15={p_tpk['cov_t15']:.3f}, JK={p_tpk['cov_jackknife']:.3f} ({p_tpk['jk_ok']}), "
             f"WCR_W6={p_tpk['cov_wcr_webb6']:.3f}, WCR_Rad={p_tpk['cov_wcr_rademacher']:.3f}, "
             f"Pairs={p_tpk['cov_pairs']:.3f} (n={p_tpk['n_pairs']}) | "
-            f"M2_c={cc['M2_county']['bias']:+.3f} (weak={cc['M2_county_weak']['bias']:+.3f}), "
-            f"M0_n2 n={cc['M0_nuts2_tpk']['n']} (glob bnd={cc['M0_nuts2_global_boundary_share']:.2f})",
+            f"M2_c={cc['M2_county']['bias']:+.3f} (mod={cc['M2_county_mod']['bias']:+.3f}, weak={cc['M2_county_weak']['bias']:+.3f}), "
+            f"M0_n2 n={cc['M0_nuts2_tpk']['n']} (neg_phi={cc['M0_nuts2_neg_phi_count']}, glob_bnd={cc['M0_nuts2_global_boundary_share']:.2f})",
             flush=True,
         )
 
     out["total_seconds"] = round(time.time() - t0, 2)
     OUT_PATH.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    for p in ckpts:
+        if p.exists():
+            p.unlink()
     print(f"Saved {OUT_PATH} in {out['total_seconds']}s")
 
 

@@ -12,4 +12,5 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 experiment/data/raw/germany/fetch_metadata.json
+experiment/analysis/.ckpt_*.json
 

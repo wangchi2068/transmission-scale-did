@@ -31,13 +31,18 @@ supplementary robustness check \citep{kline2012score,ferman2019inference,canay20
 On sparse German varicella surveillance counts, the framework demonstrates practical
 implementation behaviour: QD-GMM handles 58.8\% zeros without dropping county-weeks and remains
 negative across county and NUTS-2 scales where two-step EpiEstim shifts from $+0.064$ to
-$-0.102$ ($-0.239$ vs.\ $-0.147$ for M0), while design-calibrated simulations confirm coverage
-improvements from WCR-score under the maintained working model. Framing parallel trends on the log
-reproduction number reflects multiplicative epidemic growth, whose scale sensitivity under
-functional-form shifts is highlighted by \citet{roth2023parallel}, separates local from imported
-force of infection, parallels recent staggered-adoption frameworks with cross-unit policy spillovers
-\citep{elenev2025staggered}, and complements unconfoundedness approaches
-\citep{callaway2023pandemic}. Natural methodological extensions include sequential efficiency bounds
+$-0.102$ ($-0.240$ vs.\ $-0.147$ for M0), while design-calibrated simulations show coverage
+improvements from WCR-score and jackknife under the maintained working model. Framing parallel trends on the log
+reproduction number addresses the functional-form sensitivity identified by \citet{roth2023parallel}:
+under renewal dynamics, interventions scale transmission multiplicatively through
+$\Lambda_{it}(\phi_0)$ rather than adding linearly to case counts, so parallel trends on
+$\log R_{it}$ remain invariant to baseline incidence levels ($e^{\alpha_i}$) and separate local
+from imported force of infection; in the German panel, pre-window event bins on this scale are
+flat ($p_F=0.763$), whereas overlapping shifted indicators and short-holiday placebos show that
+holiday reporting shifts violate Assumption~A7. The framework further parallels recent
+staggered-adoption models with cross-unit policy spillovers \citep{elenev2025staggered} and
+complements unconfoundedness approaches \citep{callaway2023pandemic}. Natural methodological
+extensions include sequential efficiency bounds
 \citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood feedback models
 \citep{bonhomme2025feedback}, sub-weekly nowcasted estimating equations, reporting-invariant
 wastewater signals \citep{goldstein2024wastewater}, and joint modelling of serial intervals,

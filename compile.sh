@@ -31,12 +31,13 @@ bibtex main >/dev/null
 xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null
 xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null
 
-echo "[4/5] Final xr sync pass on supporting_information.tex..."
+echo "[4/5] Final xr sync pass on supporting_information.tex and main.tex..."
 xelatex -interaction=nonstopmode -halt-on-error supporting_information.tex >/dev/null
+xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null
 
 if [ -f paper_zh/main.tex ]; then
     echo "[5/5] Compiling Chinese companion paper_zh/main.tex..."
-    (cd paper_zh && xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null && bibtex main >/dev/null && xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null && xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null)
+    (cd paper_zh && xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null && bibtex main >/dev/null && xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null && xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null && xelatex -interaction=nonstopmode -halt-on-error main.tex >/dev/null)
 fi
 
 if [ -n "$PY" ]; then

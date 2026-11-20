@@ -16,11 +16,14 @@ Fetches the three public raw datasets into experiment/data/raw/germany/ with LF 
          Note: SurvStat@RKI 2.0 public web service exposes only ReportingDate (not symptom-onset date).
   2. germany_school_holidays_2014_2019.json
      Source: OpenHolidays API (https://openholidaysapi.org/SchoolHolidays), DE-BW .. DE-TH, 2014--2019.
+     Licence: Open Data Commons Open Database License (ODbL-1.0), openpotato/openholidaysapi.data.
   3. counties_ags.geojson
-     Source: https://raw.githubusercontent.com/m-ad/geofeatures-ags-germany/master/geojson/counties.json
+     Source: Official BKG VG250 WFS (https://sgx.geodatenzentrum.de/wfs_vg250, layer vg250:vg250_krs, gf=4).
+     Licence: Data licence Germany - attribution - Version 2.0 (dl-de/by-2-0); (c) GeoBasis-DE / BKG.
 
 Usage:
-  python experiment/data/fetch_germany.py          # download all three files
+  python experiment/data/fetch_germany.py          # download to staging dir, verify all 3 SHA-256, update archive on match
+  python experiment/data/fetch_germany.py --verify-download  # fail cleanly without touching archive on any mismatch
   python experiment/data/fetch_germany.py --check  # verify local files match expected checksums
 """
 from __future__ import annotations
@@ -29,6 +32,8 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
+import tempfile
 import time
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -39,7 +44,11 @@ RAW_DIR = Path(__file__).resolve().parent / "raw" / "germany"
 
 SURVSTAT_URL = "https://tools.rki.de/SurvStat/SurvStatWebService.svc"
 OPENHOLIDAYS_URL = "https://openholidaysapi.org/SchoolHolidays"
-GEOJSON_URL = "https://raw.githubusercontent.com/m-ad/geofeatures-ags-germany/master/geojson/counties.json"
+GEOJSON_URL = (
+    "https://sgx.geodatenzentrum.de/wfs_vg250"
+    "?service=WFS&version=2.0.0&request=GetFeature"
+    "&typeNames=vg250:vg250_krs&outputFormat=application/json&srsName=EPSG:4326"
+)
 
 STATE_MAP = [
     ("01", "DE-SH", "Schleswig-Holstein"),
@@ -229,45 +238,72 @@ def fetch_holidays(out_path: Path):
 
 
 def fetch_geojson(out_path: Path):
-    print("Downloading 5-digit AGS German county polygons...", flush=True)
-    raw = _http_get(GEOJSON_URL, timeout=60).replace(b"\r\n", b"\n")
-    out_path.write_bytes(raw)
-    print(f"Wrote {out_path} ({out_path.stat().st_size} bytes)", flush=True)
+    print("Downloading official BKG VG250 county boundaries (vg250:vg250_krs, gf=4)...", flush=True)
+    gj = json.loads(_http_get(GEOJSON_URL, timeout=60).decode("utf-8"))
+    feats = [f for f in gj["features"] if f.get("properties", {}).get("gf") == 4]
+    feats.sort(key=lambda f: str(f.get("properties", {}).get("ags", "")))
+    if len(feats) != 400:
+        raise RuntimeError(f"Expected 400 land counties (gf=4) from BKG VG250, got {len(feats)}")
+    for f in feats:
+        f["id"] = str(f["properties"]["ags"])
+    clean_gj = {
+        "type": "FeatureCollection",
+        "name": "vg250_krs_gf4",
+        "licence": "Data licence Germany - attribution - Version 2.0 (dl-de/by-2-0); (c) GeoBasis-DE / BKG",
+        "crs": gj.get("crs"),
+        "bbox": gj.get("bbox"),
+        "features": feats,
+    }
+    out_path.write_bytes(json.dumps(clean_gj, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+    print(f"Wrote {out_path} ({out_path.stat().st_size} bytes, {len(feats)} counties)", flush=True)
 
 
-def check_local(strict: bool = True):
+def check_dir(raw_dir: Path = RAW_DIR) -> dict:
     import sys
     sys_path_code = str(ROOT / "experiment" / "code")
     if sys_path_code not in sys.path:
         sys.path.insert(0, sys_path_code)
     import data_prep
-    verified = data_prep.verify_checksums()
+    verified = data_prep.verify_checksums(raw_dir)
     for k, v in verified.items():
         print(f"  OK  {k:40s}  {v['bytes']:>9d} bytes  {v['sha256']}")
+    return verified
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="Verify local raw files against checksums")
     ap.add_argument("--verify-download", action="store_true", help="Fail if freshly downloaded files differ from archived checksums")
+    ap.add_argument("--update-archive", action="store_true", help="Promote downloaded files into archive even if SHA-256 changed")
     args = ap.parse_args()
     if args.check:
-        check_local()
+        check_dir(RAW_DIR)
         return
     RAW_DIR.mkdir(parents=True, exist_ok=True)
-    fetch_rki(RAW_DIR / "rki_varicella_2014_2019.json")
-    fetch_holidays(RAW_DIR / "germany_school_holidays_2014_2019.json")
-    fetch_geojson(RAW_DIR / "counties_ags.geojson")
-    try:
-        check_local()
-        print(f"All downloaded files match archived SHA-256 (baseline {ARCHIVE_EXTRACTION_DATE}).")
-    except RuntimeError as exc:
-        if args.verify_download:
-            raise
-        print(
-            f"NOTE: Fresh upstream fetch differs from {ARCHIVE_EXTRACTION_DATE} archive checksum "
-            f"(upstream records, boundary geometry, or holidays may have changed since the archived snapshot):\n  {exc}"
-        )
+    with tempfile.TemporaryDirectory(prefix="fetch_germany_") as tmp:
+        tmp_dir = Path(tmp)
+        fetch_rki(tmp_dir / "rki_varicella_2014_2019.json")
+        fetch_holidays(tmp_dir / "germany_school_holidays_2014_2019.json")
+        fetch_geojson(tmp_dir / "counties_ags.geojson")
+        try:
+            check_dir(tmp_dir)
+            for fname in ("rki_varicella_2014_2019.json", "germany_school_holidays_2014_2019.json", "counties_ags.geojson", "fetch_metadata.json"):
+                if (tmp_dir / fname).exists():
+                    shutil.copy2(tmp_dir / fname, RAW_DIR / fname)
+            print(f"All downloaded files match archived SHA-256 (baseline {ARCHIVE_EXTRACTION_DATE}).")
+        except RuntimeError as exc:
+            if args.update_archive and not args.verify_download:
+                for fname in ("rki_varicella_2014_2019.json", "germany_school_holidays_2014_2019.json", "counties_ags.geojson", "fetch_metadata.json"):
+                    if (tmp_dir / fname).exists():
+                        shutil.copy2(tmp_dir / fname, RAW_DIR / fname)
+                print(f"Updated archive files from fresh fetch (checksums changed):\n  {exc}")
+                return
+            if args.verify_download:
+                raise RuntimeError(f"Fresh download rejected; archived files in {RAW_DIR} left untouched:\n  {exc}") from exc
+            raise RuntimeError(
+                f"NOTE: Fresh upstream fetch differs from {ARCHIVE_EXTRACTION_DATE} archive checksums; "
+                f"archived files in {RAW_DIR} were NOT overwritten (pass --update-archive to replace):\n  {exc}"
+            ) from exc
 
 
 if __name__ == "__main__":
