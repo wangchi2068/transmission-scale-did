@@ -143,7 +143,7 @@ sample & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 notifications, plus three pre-sample lag weeks); $D$ = one-week-lagged state summer holiday indicator; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{{-6}}$). Working-model finite-cluster 95\% intervals for M0 $\tau+\kappa$: WCR-score Webb6 $[{wcr_w['ci'][0]:.3f}, {wcr_w['ci'][1]:.3f}]$; WCR-score Rademacher $[{wcr_r['ci'][0]:.3f}, {wcr_r['ci'][1]:.3f}]$; unrestricted score wild (Mammen) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$; Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. These working-model coefficients illustrate numerical computation, small-count sign reversal in M2 ($+0.064$ to $-0.102$), and finite-cluster calibration rather than causal school-holiday effects; full calendar, placebo, over-identification, and seasonal diagnostics appear in Web Appendices~D--F.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 notifications, plus three pre-sample lag weeks); $D$ = one-week-lagged state summer holiday indicator; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{{-6}}$, log-normal working surrogate fitted to Vink et al.\ 2014 serial interval moments). Working-model finite-cluster 95\% intervals for M0 $\tau+\kappa$: WCR-score Webb6 $[{wcr_w['ci'][0]:.3f}, {wcr_w['ci'][1]:.3f}]$; WCR-score Rademacher $[{wcr_r['ci'][0]:.3f}, {wcr_r['ci'][1]:.3f}]$; unrestricted score wild (Mammen) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$; Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. These working-model coefficients illustrate numerical computation, small-count sign reversal in M2 ($+0.064$ to $-0.102$), and finite-cluster calibration rather than causal school-holiday effects; full calendar, placebo, over-identification, and seasonal diagnostics appear in Web Appendices~D--F.}}
 \end{{table}}
 """
     (TAB_DIR / "table_7_application.tex").write_text(tex, encoding="utf-8")
@@ -186,6 +186,8 @@ def write_table_7b(app: dict):
         (r"NUTS-2 regions ($N=38$, 2.9\% zeros)", nuts),
     ]
     body = "\n".join(_row_m0(lbl, r) for lbl, r in specs)
+    j_n2 = nuts["J_LM_oi"]
+    jg_n2 = nuts["J_LM_oi_components"]["lag_growth"]
     tex = rf"""\begin{{table}}[!t]
 \centering
 \caption{{Temporal, threshold, background, and subsample sensitivity specifications for the German varicella panel (M0, state-clustered $t_{{G-1}}$ 95\% CIs and score-form $J_{{LM}}$ tests with $F_{{2,G-2}}$ $p$-values).}}
@@ -201,7 +203,7 @@ specification & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat\k
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Primary specification is Table~\ref{{tab:app}}. $J_{{LM,\mathrm{{oi}}}}$ tests lagged imported share and lagged one-week log growth; $J_{{LM,\mathrm{{inv}}}}$ tests reference-value invariance ($\phi_r \in \{{0.05, 2.0\}}$). Note substantial sensitivity across years (three of five single years cover zero), lag 2 (covers zero), and all school holidays at lag 1 (covers zero). At NUTS-2 aggregation, overall $J_{{LM,\mathrm{{oi}}}}$ is $7.18$ ($p_F=0.065$) while its 1-df lagged-growth component remains elevated ($4.97$, $p_F=0.042$). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Primary specification is Table~\ref{{tab:app}}. $J_{{LM,\mathrm{{oi}}}}$ tests lagged imported share and lagged one-week log growth; $J_{{LM,\mathrm{{inv}}}}$ tests reference-value invariance ($\phi_r \in \{{0.05, 2.0\}}$). Note substantial sensitivity across years (three of five single years cover zero), lag 2 (covers zero), and all school holidays at lag 1 (covers zero). At NUTS-2 aggregation, overall $J_{{LM,\mathrm{{oi}}}}$ is ${j_n2['stat']:.2f}$ ($p_F={j_n2['p_F']:.3f}$) while its 1-df lagged-growth component remains elevated (${jg_n2['stat']:.2f}$, $p_F={jg_n2['p_F']:.3f}$). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_7b_application_sensitivity.tex").write_text(tex, encoding="utf-8")
@@ -255,6 +257,7 @@ def write_table_12(cal: dict):
             p = block[pk]
             w6_c = f"{p['cov_wcr_webb6']:.3f}" if "cov_wcr_webb6" in p else "--"
             wr_c = f"{p['cov_wcr_rademacher']:.3f}" if "cov_wcr_rademacher" in p else "--"
+            jk_c = f"{p['cov_jackknife']:.3f}" if "cov_jackknife" in p else "--"
             lines_a.append(" & ".join([
                 lbl if i == 0 else "",
                 plbl,
@@ -266,26 +269,7 @@ def write_table_12(cal: dict):
                 f"{p['cov_wild_web']:.3f}",
                 w6_c,
                 wr_c,
-            ]) + r" \\")
-    lines_b = []
-    for tag, lbl in [("calibrated", "cal"), ("high_noise", "high-noise")]:
-        block = cal[tag]["diagnostics"]
-        for i, (dk, dlbl) in enumerate([
-            ("j_oi", r"$J_{LM,\mathrm{oi}}$"),
-            ("j_inv", r"$J_{LM,\mathrm{inv}}$"),
-            ("s3_oi", r"$S_{3,\mathrm{oi}}$"),
-            ("s3_inv", r"$S_{3,\mathrm{inv}}$"),
-        ]):
-            d = block[dk]
-            lines_b.append(" & ".join([
-                lbl if i == 0 else "",
-                dlbl,
-                f"{d['mean']:.2f}",
-                f"{d['q95']:.2f}",
-                f"{d['q99']:.2f}",
-                f"{d['max']:.2f}",
-                f"{d['obs']:.2f}",
-                f"{d['exceed_count']}/{d['n']} ({d['p_calibrated']:.3f})",
+                jk_c,
             ]) + r" \\")
     c_cal = cal["calibration"]
     r_tot = cal["R"]
@@ -310,32 +294,56 @@ def write_table_12(cal: dict):
                 f"{d['q99']:.2f}",
                 f"{d['max']:.2f}",
                 f"{d['obs']:.2f}",
-                rf"\multicolumn{{3}}{{r}}{{{d['exceed_count']}/{d['n']} ({d['p_calibrated']:.3f})}}",
+                rf"\multicolumn{{4}}{{r}}{{{d['exceed_count']}/{d['n']} ({d['p_calibrated']:.3f})}}",
             ]) + r" \\")
+
+    lines_c = []
+    for tag, lbl in [("calibrated", "cal"), ("high_noise", "high-noise")]:
+        cc = cal[tag]["comparators"]
+        c_zs = f"{100 * cc['county_zero_share']:.1f}\\%"
+        n2_zs = f"{100 * cc['nuts2_zero_share']:.1f}\\%"
+        for i, (m_lbl, lvl, rec, extra) in enumerate([
+            ("M0", f"county ({c_zs} zeros)", cc["M0_county"], "--"),
+            ("M2 (EpiEstim)", f"county ({c_zs} zeros)", cc["M2_county"], f"pos: {100*cc['M2_county_pos_share']:.1f}\\%"),
+            (r"M3 ($\log(Y+1)$ TWFE)", f"county ({c_zs} zeros)", cc["M3_county"], "--"),
+            ("M0", f"NUTS-2 ({n2_zs} zeros)", cc["M0_nuts2_tpk"], f"$\\hat\\phi$: {cc['M0_nuts2_phi']['mean']:.3f}"),
+            ("M2 (EpiEstim)", f"NUTS-2 ({n2_zs} zeros)", cc["M2_nuts2"], f"neg: {100*cc['M2_nuts2_neg_share']:.1f}\\%"),
+        ]):
+            lines_c.append(
+                f"{lbl if i == 0 else ''} & {m_lbl} & \\multicolumn{{2}}{{l}}{{{lvl}}} & "
+                f"{rec['mean']:.3f} & {rec['bias']:+.3f} ({rec['bias_mcse']:.3f}) & {rec['rmse']:.3f} & "
+                f"\\multicolumn{{4}}{{r}}{{{extra}}} \\\\"
+            )
     body_a = "\n".join(lines_a)
     body_b = "\n".join(lines_b_fixed)
+    body_c = "\n".join(lines_c)
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R={r_tot}$): finite-cluster interval coverage (including restricted score wild bootstrap) and null reference distributions of $J_{{LM}}$ and $S_3$.}}
+\caption{{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R={r_tot}$): finite-cluster interval coverage, null reference distributions of $J_{{LM}}$ and $S_3$, and comparator distortion under known truth ($\tau+\kappa={tpk_cal['true']:.3f}$).}}
 \label{{tab:rev-calsim}}
 \footnotesize
-\setlength{{\tabcolsep}}{{3.0pt}}
+\setlength{{\tabcolsep}}{{2.6pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
-\begin{{tabular}}{{llrrrrrrrr}}
+\begin{{tabular}}{{llrrrrrrrrr}}
 \toprule
-design & parameter & bias & emp.\ SD & mean SE & $t_{{15}}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) \\
+design & parameter & bias & emp.\ SD & mean SE & $t_{{15}}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) & JK ($t_{{15}}$) \\
 \midrule
-\multicolumn{{10}}{{l}}{{\emph{{(a) Interval performance, M0 ($G = 16$ unequal state clusters)}}}} \\
+\multicolumn{{11}}{{l}}{{\emph{{(a) Interval performance, M0 ($G = 16$ unequal state clusters; Monte Carlo SE on coverage $\approx 0.010$ at $R={r_tot}$)}}}} \\
 {body_a}
 \midrule
-\multicolumn{{10}}{{l}}{{\emph{{(b) Finite-sample null distributions of over-identification and root-selection statistics}}}} \\
-design & statistic & mean & q95 & q99 & max & application & \multicolumn{{3}}{{r}}{{exceed ($p_{{\mathrm{{cal}}}}$)}} \\
+\multicolumn{{11}}{{l}}{{\emph{{(b) Finite-sample null distributions of over-identification and root-selection statistics}}}} \\
+design & statistic & mean & q95 & q99 & max & application & \multicolumn{{4}}{{r}}{{exceed ($p_{{\mathrm{{cal}}}}$)}} \\
 \midrule
 {body_b}
+\midrule
+\multicolumn{{11}}{{l}}{{\emph{{(c) Comparator and spatial aggregation performance against known generating truth ($\tau+\kappa={tpk_cal['true']:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$)}}}} \\
+design & method & \multicolumn{{2}}{{l}}{{level (zero share)}} & mean & bias (MCSE) & RMSE & \multicolumn{{4}}{{r}}{{sign / $\hat\phi$ note}} \\
+\midrule
+{body_c}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) weights, truth set to primary M0 ($\tau={c_cal['beta_true'][0]:.3f}$, $\kappa={c_cal['beta_true'][1]:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$), NB2 $k={c_cal['k_nb']:.2f}$ and state $\times$ week log-normal shock SD $\sigma={c_cal['sig_sw']:.3f}$ (\emph{{cal}}), or $k/2$ and $2\sigma$ (\emph{{high-noise}}). Unique interior root in {100*rc_cal['share_unique']:.1f}\% (\emph{{cal}}) and {100*rc_hn['share_unique']:.1f}\% (\emph{{high-noise}}). For $\tau+\kappa$ in \emph{{cal}}, sandwich SEs understate empirical SD by {100*(1-tpk_cal['se_ratio']):.1f}\% (mean SE / emp.\ SD = {tpk_cal['se_ratio']:.3f}); both $t_{{15}}$ and unrestricted wild score bootstrap under-cover, whereas restricted score wild bootstrap (WCR-score; $B=399$) restores near-nominal coverage. Source: \texttt{{experiment/analysis/germany\_calibrated\_sim.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) working weights, truth set to primary M0 ($\tau={c_cal['beta_true'][0]:.3f}$, $\kappa={c_cal['beta_true'][1]:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$), NB2 $k={c_cal['k_nb']:.2f}$ and state $\times$ week log-normal shock SD $\sigma={c_cal['sig_sw']:.3f}$ (\emph{{cal}}), or $k/2$ and $2\sigma$ (\emph{{high-noise}}). Unique interior root in {100*rc_cal['share_unique']:.1f}\% (\emph{{cal}}) and {100*rc_hn['share_unique']:.1f}\% (\emph{{high-noise}}). For $\tau+\kappa$ in \emph{{cal}}, sandwich SEs understate empirical SD by {100*(1-tpk_cal['se_ratio']):.1f}\% (mean SE / emp.\ SD = {tpk_cal['se_ratio']:.3f}); both $t_{{15}}$ and unrestricted wild score under-cover, whereas restricted score wild bootstrap (WCR-score; $B=399$) and delete-one-state jackknife (JK) cover closer to 0.95. Panel~(c) quantifies exact M2 (EpiEstim $\log R$) Jensen bias against known truth at simulated county vs.\ NUTS-2 zero rates alongside M0's own aggregation shift. Source: \texttt{{experiment/analysis/germany\_calibrated\_sim.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_12_calibrated_sim.tex").write_text(tex, encoding="utf-8")
@@ -366,7 +374,7 @@ def write_table_13(app: dict):
         ]) + r" \\")
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Generation-interval and reporting-dispersion sensitivity for the German varicella panel (M0, summer holidays lagged one week).}}
+\caption{{Working generation-interval surrogate (Vink et al., 2014 serial interval) and reporting-dispersion sensitivity for the German varicella panel (M0, summer holidays lagged one week).}}
 \label{{tab:rev-gi}}
 \footnotesize
 \setlength{{\tabcolsep}}{{2.8pt}}
@@ -579,7 +587,7 @@ def write_table_18_placebos(app: dict):
     for sh in (-4, -3, -2, -1, 0, 1, 2, 3, 4):
         r = ts[f"shift_{sh:+d}"]
         pval = 2 * __import__("scipy").stats.t.sf(abs(r["est"]["tpk"] / r["se"]["tpk"]), 15)
-        lbl = f"{sh:+d} wk (lag {1+sh})" if sh >= 0 else f"{sh:+d} wk (lead {-sh})"
+        lbl = f"{sh:+d} wk (lag {1+sh})" if 1 + sh >= 0 else f"{sh:+d} wk (lead {-(1+sh)})"
         lines_b_fixed.append(" & ".join([
             lbl,
             rf"\multicolumn{{2}}{{r}}{{{fmt_est_ci(r['est']['tpk'], *r['ci_t']['tpk'])}}}",
@@ -621,7 +629,7 @@ specification & observed & perm.\ mean (SD) & [5th, 95th] & \multicolumn{{2}}{{r
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) confirms that state-calendar alignment drives the lag-1 contrast ($p_{{\mathrm{{2-sided}}}} = {pm['lag1']['p_two_sided']:.3f}$) rather than generic national calendar curves alone, while Panel (b) reveals positive pre-holiday slopes at shifts $-4$ to $-2$ weeks and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) permutes whole state schedules ($B=200$, minimum attainable two-sided $p=0.010$; exchangeability is imperfect because BW and BY never rotate, and schedule permutations reflect both contact and reporting changes aligned with holiday calendars). Panel (b) reveals positive pre-window slopes at overlapping calendar shifts $-4$ to $-2$ weeks (leads 3--1) and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{{experiment/analysis/germany\_application\_results.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_18_placebos.tex").write_text(tex, encoding="utf-8")

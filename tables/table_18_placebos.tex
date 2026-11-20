@@ -26,10 +26,10 @@ Pentecost & 0 & -0.497 (-0.611, -0.383) & 0.0000 & 0.334 (0.205, 0.462) & 9.12 (
 \multicolumn{6}{l}{\emph{(b) Time-shifted summer schedules relative to primary lag-1 alignment ($\Delta t \in \{-4,\dots,+4\}$)}} \\
 calendar shift & \multicolumn{2}{r}{$\hat\tau+\hat\kappa$ (95\% $t_{15}$ CI)} & $p_t$ & $\hat\phi$ (95\% CI) & $J_{LM,\mathrm{oi}}$ ($p_F$) \\
 \midrule
--4 wk (lead 4) & \multicolumn{2}{r}{0.296 (0.110, 0.482)} & 0.0040 & 0.337 (0.217, 0.456) & 9.12 (0.036) \\
--3 wk (lead 3) & \multicolumn{2}{r}{0.248 (0.029, 0.466)} & 0.0287 & 0.328 (0.207, 0.448) & 9.16 (0.036) \\
--2 wk (lead 2) & \multicolumn{2}{r}{0.328 (0.150, 0.505)} & 0.0013 & 0.337 (0.214, 0.459) & 9.31 (0.034) \\
--1 wk (lead 1) & \multicolumn{2}{r}{-0.142 (-0.233, -0.051)} & 0.0046 & 0.325 (0.206, 0.444) & 9.17 (0.036) \\
+-4 wk (lead 3) & \multicolumn{2}{r}{0.296 (0.110, 0.482)} & 0.0040 & 0.337 (0.217, 0.456) & 9.12 (0.036) \\
+-3 wk (lead 2) & \multicolumn{2}{r}{0.248 (0.029, 0.466)} & 0.0287 & 0.328 (0.207, 0.448) & 9.16 (0.036) \\
+-2 wk (lead 1) & \multicolumn{2}{r}{0.328 (0.150, 0.505)} & 0.0013 & 0.337 (0.214, 0.459) & 9.31 (0.034) \\
+-1 wk (lag 0) & \multicolumn{2}{r}{-0.142 (-0.233, -0.051)} & 0.0046 & 0.325 (0.206, 0.444) & 9.17 (0.036) \\
 +0 wk (lag 1) & \multicolumn{2}{r}{-0.239 (-0.364, -0.115)} & 0.0009 & 0.326 (0.205, 0.446) & 9.12 (0.036) \\
 +1 wk (lag 2) & \multicolumn{2}{r}{-0.331 (-0.714, 0.052)} & 0.0854 & 0.326 (0.204, 0.448) & 8.97 (0.038) \\
 +2 wk (lag 3) & \multicolumn{2}{r}{-0.541 (-0.822, -0.260)} & 0.0009 & 0.338 (0.216, 0.461) & 9.40 (0.033) \\
@@ -44,5 +44,5 @@ Summer perm. (lag 2) & -0.331 & -0.016 (0.145) & [-0.340, +0.172] & \multicolumn
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) confirms that state-calendar alignment drives the lag-1 contrast ($p_{\mathrm{2-sided}} = 0.010$) rather than generic national calendar curves alone, while Panel (b) reveals positive pre-holiday slopes at shifts $-4$ to $-2$ weeks and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) permutes whole state schedules ($B=200$, minimum attainable two-sided $p=0.010$; exchangeability is imperfect because BW and BY never rotate, and schedule permutations reflect both contact and reporting changes aligned with holiday calendars). Panel (b) reveals positive pre-window slopes at overlapping calendar shifts $-4$ to $-2$ weeks (leads 3--1) and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
 \end{table}

@@ -49,7 +49,7 @@ STATE_MAP = [
     ("05", "DE-NW", "Nordrhein-Westfalen"),
     ("06", "DE-HE", "Hessen"),
     ("07", "DE-RP", "Rheinland-Pfalz"),
-    ("08", "DE-BW", "Baden-Wuerttemberg"),
+    ("08", "DE-BW", "Baden-Württemberg"),
     ("09", "DE-BY", "Bayern"),
     ("10", "DE-SL", "Saarland"),
     ("11", "DE-BE", "Berlin"),
@@ -57,9 +57,10 @@ STATE_MAP = [
     ("13", "DE-MV", "Mecklenburg-Vorpommern"),
     ("14", "DE-SN", "Sachsen"),
     ("15", "DE-ST", "Sachsen-Anhalt"),
-    ("16", "DE-TH", "Thueringen"),
+    ("16", "DE-TH", "Thüringen"),
 ]
 
+ARCHIVE_EXTRACTION_DATE = "2026-11-19"
 NS_MDX = {"b": "http://schemas.datacontract.org/2004/07/Rki.SurvStat.WebService.Contracts.Mdx"}
 
 
@@ -124,31 +125,36 @@ def _parse_olap(xml_bytes: bytes):
     root = ET.fromstring(xml_bytes)
     cols = []
     for c in root.findall(".//b:QueryResultColumn", NS_MDX):
-        cid = c.findtext("b:Id", "", NS_MDX)
+        cid = c.findtext("b:ColumnName", "", NS_MDX) or c.findtext("b:Id", "", NS_MDX)
         ccap = c.findtext("b:Caption", "", NS_MDX)
         cols.append([cid, ccap])
     rows = {}
     for r in root.findall(".//b:QueryResultRow", NS_MDX):
-        rid = r.findtext("b:Id", "", NS_MDX)
+        rid = r.findtext("b:RowName", "", NS_MDX) or r.findtext("b:Id", "", NS_MDX)
         rcap = r.findtext("b:Caption", "", NS_MDX)
         vals = []
         for s in r.findall("b:Values/b:string", NS_MDX):
             txt = (s.text or "").strip()
             vals.append(float(txt.replace(",", ".")) if txt else 0.0)
-        rows[rid] = {"caption": rcap, "values": vals}
+        if rid:
+            rows[rid] = {"caption": rcap, "values": vals}
     return cols, rows
 
 
 def fetch_rki(out_path: Path):
+    import datetime
     print("Downloading RKI SurvStat@RKI 2.0 weekly varicella (2014--2019)...", flush=True)
     years_data = {}
+    grand_total = 0
     for yr in range(2014, 2020):
         cols, rows = _parse_olap(_soap_olap(yr, "[Measures].[FallCount_71_Web]", "[ReportingDate].[Week].[Week]"))
-        years_data[str(yr)] = {
-            "cols": cols,
-            "rows": {k: {"caption": v["caption"], "counts": [int(round(x)) for x in v["values"]]} for k, v in rows.items()},
-        }
-        print(f"  {yr}: {len(cols)} weeks, total={sum(sum(v['counts']) for v in years_data[str(yr)]['rows'].values())}", flush=True)
+        yr_rows = {k: {"caption": v["caption"], "counts": [int(round(x)) for x in v["values"]]} for k, v in rows.items()}
+        yr_tot = sum(sum(v["counts"]) for v in yr_rows.values())
+        if len(yr_rows) < 400 or yr_tot == 0:
+            raise RuntimeError(f"SurvStat OLAP parse returned empty/incomplete year {yr}: n_rows={len(yr_rows)}, total={yr_tot}")
+        grand_total += yr_tot
+        years_data[str(yr)] = {"cols": cols, "rows": yr_rows}
+        print(f"  {yr}: {len(cols)} weeks, {len(yr_rows)} counties, total={yr_tot}", flush=True)
 
     pop_2017 = {}
     _, c17 = _parse_olap(_soap_olap(2017, "[Measures].[FallCount_71_Web]", "[ReportingDate].[WeekYear].[WeekYear]"))
@@ -177,14 +183,17 @@ def fetch_rki(out_path: Path):
                 still.append(rid)
         missing_rids = still
 
+    import datetime
     payload = {
         "disease": "[PathogenOut].[KategorieNz].[Krankheit DE].&[Windpocken]",
+        "extracted_date": datetime.date.today().isoformat(),
+        "archive_baseline_date": ARCHIVE_EXTRACTION_DATE,
         "years": years_data,
         "population_2017": pop_2017,
         "population_fallback": pop_fallback,
     }
     out_path.write_bytes(json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8"))
-    print(f"Wrote {out_path} ({out_path.stat().st_size} bytes)", flush=True)
+    print(f"Wrote {out_path} ({out_path.stat().st_size} bytes, total={grand_total})", flush=True)
 
 
 def fetch_holidays(out_path: Path):
@@ -196,7 +205,6 @@ def fetch_holidays(out_path: Path):
             url = f"{OPENHOLIDAYS_URL}?countryIsoCode=DE&languageIsoCode=EN&validFrom={yr}-01-01&validTo={yr}-12-31&subdivisionCode={iso}"
             arr = json.loads(_http_get(url).decode("utf-8"))
             items.extend(arr)
-        # Deduplicate by holiday id preserving order
         seen = set()
         uniq = []
         for it in items:
@@ -204,7 +212,7 @@ def fetch_holidays(out_path: Path):
                 seen.add(it["id"])
                 uniq.append(it)
         out[code] = {"iso": iso, "name": name, "holidays": uniq}
-    out_path.write_bytes(json.dumps(out, ensure_ascii=False, indent=2).encode("utf-8"))
+    out_path.write_bytes(json.dumps(out, ensure_ascii=False, indent=1).encode("utf-8"))
     print(f"Wrote {out_path} ({out_path.stat().st_size} bytes)", flush=True)
 
 
@@ -215,10 +223,11 @@ def fetch_geojson(out_path: Path):
     print(f"Wrote {out_path} ({out_path.stat().st_size} bytes)", flush=True)
 
 
-def check_local():
-    sys_path_code = str(ROOT / "experiment" / "code")
+def check_local(strict: bool = True):
     import sys
-    sys.path.insert(0, sys_path_code)
+    sys_path_code = str(ROOT / "experiment" / "code")
+    if sys_path_code not in sys.path:
+        sys.path.insert(0, sys_path_code)
     import data_prep
     verified = data_prep.verify_checksums()
     for k, v in verified.items():
@@ -228,6 +237,7 @@ def check_local():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="Verify local raw files against checksums")
+    ap.add_argument("--verify-download", action="store_true", help="Fail if freshly downloaded files differ from archived checksums")
     args = ap.parse_args()
     if args.check:
         check_local()
@@ -236,6 +246,16 @@ def main():
     fetch_rki(RAW_DIR / "rki_varicella_2014_2019.json")
     fetch_holidays(RAW_DIR / "germany_school_holidays_2014_2019.json")
     fetch_geojson(RAW_DIR / "counties_ags.geojson")
+    try:
+        check_local()
+        print(f"All downloaded files match archived SHA-256 (baseline {ARCHIVE_EXTRACTION_DATE}).")
+    except RuntimeError as exc:
+        if args.verify_download:
+            raise
+        print(
+            f"NOTE: Fresh upstream fetch differs from {ARCHIVE_EXTRACTION_DATE} archive checksum "
+            f"(expected when SurvStat updates retroactive case corrections):\n  {exc}"
+        )
 
 
 if __name__ == "__main__":

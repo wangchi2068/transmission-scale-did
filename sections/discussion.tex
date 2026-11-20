@@ -27,11 +27,15 @@ calibrations show $t_{G-1}$ under-coverage and unshrunk border-pair adjustments
 (Remark~\ref{rem:testable}) can become indefinite, making null-imposed WCR-score wild bootstrap,
 pairs cluster bootstrap, and jackknife checks essential \citep{kline2012score,ferman2019inference,canay2021wild}.
 
-On sparse German varicella surveillance counts, the framework demonstrates clear computational and
-comparative advantages: QD-GMM handles 58.8\% zeros without dropping county-weeks and avoids the
-two-step EpiEstim small-count sign reversal ($+0.064$ at county level vs.\ $-0.102$ at NUTS-2
-aggregation), while WCR-score improves finite-cluster calibration. Natural methodological
-extensions include sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback},
-likelihood feedback models \citep{bonhomme2025feedback}, sub-weekly nowcasted estimating
-equations, reporting-invariant wastewater signals \citep{goldstein2024wastewater}, and joint
-modelling of serial intervals, vaccination uptake, and reporting delays \citep{siedler2010varicella,suzuki2023varicella,goldwasser2026rt}.
+On sparse German varicella surveillance counts, the framework demonstrates practical
+implementation behaviour: QD-GMM handles 58.8\% zeros without dropping county-weeks and preserves
+a negative working contrast where two-step EpiEstim flips sign across county and NUTS-2 scales
+($+0.064$ vs.\ $-0.102$), while design-calibrated simulations confirm coverage improvements from
+WCR-score. Framing parallel trends on the log reproduction number \citep{roth2023parallel}
+separates local from imported force of infection \citep{elenev2025staggered} and complements
+unconfoundedness approaches \citep{callaway2023pandemic}. Natural methodological extensions include
+sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood
+feedback models \citep{bonhomme2025feedback}, sub-weekly nowcasted estimating equations,
+reporting-invariant wastewater signals \citep{goldstein2024wastewater}, and joint modelling of
+serial intervals, vaccination uptake, and reporting delays
+\citep{siedler2010varicella,suzuki2023varicella,goldwasser2026rt}.

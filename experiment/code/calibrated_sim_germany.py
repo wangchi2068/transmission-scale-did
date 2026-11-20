@@ -1,8 +1,9 @@
 """Calibrated simulation on the exact German Varicella 400-county x 261-week design (R = 500).
 
 Evaluates finite-sample inference under G = 16 state clusters (sandwich t_15, score wild
-bootstrap-t with Mammen and Webb6 weights), root multiplicity, and calibrated null reference
-distributions for J_LM(oi), J_LM(inv), S3(oi), and S3(inv).
+bootstrap-t, WCR-score Webb6/Rademacher, and delete-one-state jackknife), comparator bias
+under known truth (M2 EpiEstim log-R at county vs. NUTS-2 aggregation, and M3 TWFE), root
+multiplicity, and calibrated null reference distributions for J_LM and S3.
 
 Reads:  experiment/data/processed/panel.npz, experiment/analysis/germany_application_results.json
 Writes: experiment/analysis/germany_calibrated_sim.json
@@ -22,6 +23,7 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 import numpy as np
+import scipy.sparse as sps
 from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,8 +32,8 @@ sys.path.insert(0, str(ROOT / "verification" / "revision" / "common"))
 sys.path.insert(0, str(ROOT / "verification" / "application"))
 
 import application as app
+import comparators as cmp
 import dgp
-import qdgmm
 import wild_bootstrap as WB
 from qdx import QDX, inv_extras, oi_extras, tsum
 
@@ -61,6 +63,8 @@ def _run_one(args):
     T_sim = st["T_sim"]
     N = st["N"]
     tc = st["tc"]
+    jk_pre = st["jk_pre"]
+    nuts_agg = st["nuts_agg"]
 
     rng = np.random.default_rng(seed_base + r)
     Ys = np.zeros((3 + T_sim, N), dtype=float)
@@ -91,11 +95,44 @@ def _run_one(args):
     tpk_se = tsum(Vb, 0, 1)
     tpk_true = float(beta_true[0] + beta_true[1])
 
-    # Score wild bootstrap-t (B=399, Mammen & Webb6) + WCR-score (Webb6 & Rademacher)
+    # Score wild bootstrap-t (B=399) + WCR-score (Webb6 & Rademacher)
     wm = WB.score_wild_bootstrap(inf["infl_b"], 399, seed_base + 100000 + r, "mammen")
     ww = WB.score_wild_bootstrap(inf["infl_b"], 399, seed_base + 200000 + r, "webb6")
-    pw_w6 = app.wcr_score_p_tpk0(X, eh, float(beta_true[0] + beta_true[1]), 399, seed_base + 300000 + r, "webb6")
-    pw_rad = app.wcr_score_p_tpk0(X, eh, float(beta_true[0] + beta_true[1]), 399, seed_base + 400000 + r, "rademacher")
+    pw_w6 = app.wcr_score_p_tpk0(X, eh, tpk_true, 399, seed_base + 300000 + r, "webb6")
+    pw_rad = app.wcr_score_p_tpk0(X, eh, tpk_true, 399, seed_base + 400000 + r, "rademacher")
+
+    # Delete-one-state jackknife (G=16) for tpk
+    jk_tpks = []
+    for keep, Dg, Wg, om_g, cl_inv in jk_pre:
+        ps_g = dgp.build_panel(Ys[:, keep], Dg, Wg, om_g, cl_inv, w=w, S=3)
+        Xg = QDX(ps_g, {"tau": ps_g["D"], "kappa": ps_g["Db"]}, phi_bar=0.5)
+        eh_g, ok_g, _ = Xg.fit(starts=[eh, beta_true])
+        if ok_g:
+            jk_tpks.append(float(eh_g[0] + eh_g[1]))
+    if len(jk_tpks) == G:
+        jk_arr = np.array(jk_tpks)
+        jk_se = float(np.sqrt(((G - 1.0) / G) * np.sum((jk_arr - jk_arr.mean()) ** 2)))
+        cov_jk = bool(abs(tpk - tpk_true) <= tc * jk_se)
+    else:
+        jk_se = np.nan
+        cov_jk = False
+
+    # Comparators under known truth: county M2, county M3, and NUTS-2 M0 & M2
+    m2_c = cmp.m2_logr_did(ps)
+    m3_c = cmp.m3_logy_twfe(ps)
+    m2_c_tau = float(m2_c["est"]["tau"]) if m2_c.get("ok") else np.nan
+    m3_c_tau = float(m3_c["est"]["tau"]) if m3_c.get("ok") else np.nan
+    c_zero_share = float((ps["Y"] == 0).mean())
+
+    Y2s = Ys @ nuts_agg["A_sum"]
+    p2 = dgp.build_panel(Y2s, nuts_agg["D2l"], nuts_agg["W2"], nuts_agg["om2"], nuts_agg["cl2"], w=w, S=3)
+    X2 = QDX(p2, {"tau": p2["D"], "kappa": p2["Db"]}, phi_bar=0.5)
+    eh2, ok2, _ = X2.fit(starts=[eh, beta_true])
+    m0_n2_tpk = float(eh2[0] + eh2[1]) if ok2 else np.nan
+    m0_n2_phi = float(eh2[2]) if ok2 else np.nan
+    m2_n2 = cmp.m2_logr_did(p2)
+    m2_n2_tau = float(m2_n2["est"]["tau"]) if m2_n2.get("ok") else np.nan
+    n2_zero_share = float((p2["Y"] == 0).mean())
 
     # Over-identification statistics
     mX = X.moments(eh, extra=True)
@@ -122,6 +159,16 @@ def _run_one(args):
         cov_wild_web=(err <= np.asarray(ww["q95"]) * ses).tolist(),
         cov_wcr_web=bool(pw_w6 > 0.05) if np.isfinite(pw_w6) else False,
         cov_wcr_rad=bool(pw_rad > 0.05) if np.isfinite(pw_rad) else False,
+        jk_se=float(jk_se),
+        cov_jackknife=cov_jk,
+        jk_ok=(len(jk_tpks) == G),
+        c_zero_share=c_zero_share,
+        n2_zero_share=n2_zero_share,
+        m2_county=m2_c_tau,
+        m3_county=m3_c_tau,
+        m0_nuts2_tpk=m0_n2_tpk,
+        m0_nuts2_phi=m0_n2_phi,
+        m2_nuts2=m2_n2_tau,
         j_oi=float(j_oi),
         j_inv=float(j_inv),
         s3_oi=float(s3_oi),
@@ -156,6 +203,18 @@ def calibrate_dgp(panel: dict, beta: np.ndarray) -> dict:
     return dict(ea=ea, eg=eg, k_nb=k_nb, sig_sw=sig_sw)
 
 
+def _summ_est(arr: np.ndarray, truth: float) -> dict:
+    v = arr[np.isfinite(arr)]
+    b = v - truth
+    return dict(
+        n=int(len(v)),
+        mean=float(v.mean()),
+        bias=float(b.mean()),
+        bias_mcse=float(b.std(ddof=1) / np.sqrt(len(v))),
+        rmse=float(np.sqrt((b ** 2).mean())),
+    )
+
+
 def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict) -> dict:
     ok_res = [r for r in res_list if r["ok"]]
     R_ok = len(ok_res)
@@ -166,7 +225,11 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
     cov_ww = np.array([r["cov_wild_web"] for r in ok_res])
     cov_wcr_w = float(np.mean([r["cov_wcr_web"] for r in ok_res]))
     cov_wcr_r = float(np.mean([r["cov_wcr_rad"] for r in ok_res]))
-    trues = np.array([beta_true[0], beta_true[1], beta_true[2], beta_true[0] + beta_true[1]])
+    jk_ok = [r for r in ok_res if r.get("jk_ok")]
+    cov_jk = float(np.mean([r["cov_jackknife"] for r in jk_ok]))
+    mean_jk_se = float(np.mean([r["jk_se"] for r in jk_ok]))
+    tpk_true = float(beta_true[0] + beta_true[1])
+    trues = np.array([beta_true[0], beta_true[1], beta_true[2], tpk_true])
     names = ["tau", "kappa", "phi", "tpk"]
     params = {}
     for k, nm in enumerate(names):
@@ -185,7 +248,27 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
         if nm == "tpk":
             rec_p["cov_wcr_webb6"] = cov_wcr_w
             rec_p["cov_wcr_rademacher"] = cov_wcr_r
+            rec_p["cov_jackknife"] = cov_jk
+            rec_p["mean_jk_se"] = mean_jk_se
+            rec_p["jk_se_ratio"] = float(mean_jk_se / vals[:, k].std(ddof=1))
+            rec_p["jk_ok"] = int(len(jk_ok))
         params[nm] = rec_p
+
+    comparators = dict(
+        truth_tpk=tpk_true,
+        truth_phi=float(beta_true[2]),
+        county_zero_share=float(np.mean([r["c_zero_share"] for r in ok_res])),
+        nuts2_zero_share=float(np.mean([r["n2_zero_share"] for r in ok_res])),
+        M0_county=_summ_est(vals[:, 3], tpk_true),
+        M2_county=_summ_est(np.array([r["m2_county"] for r in ok_res]), tpk_true),
+        M3_county=_summ_est(np.array([r["m3_county"] for r in ok_res]), tpk_true),
+        M0_nuts2_tpk=_summ_est(np.array([r["m0_nuts2_tpk"] for r in ok_res]), tpk_true),
+        M0_nuts2_phi=_summ_est(np.array([r["m0_nuts2_phi"] for r in ok_res]), float(beta_true[2])),
+        M2_nuts2=_summ_est(np.array([r["m2_nuts2"] for r in ok_res]), tpk_true),
+        M2_county_pos_share=float(np.mean(np.array([r["m2_county"] for r in ok_res]) > 0)),
+        M2_nuts2_neg_share=float(np.mean(np.array([r["m2_nuts2"] for r in ok_res]) < 0)),
+    )
+
     diag = {}
     for key in ("j_oi", "j_inv", "s3_oi", "s3_inv"):
         arr = np.array([r[key] for r in ok_res if np.isfinite(r[key])])
@@ -207,6 +290,7 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
         R_total=len(res_list),
         R_ok=R_ok,
         params=params,
+        comparators=comparators,
         diagnostics=diag,
         root_counts=dict(
             zero=int((n_ints == 0).sum()),
@@ -237,20 +321,53 @@ def main():
     )
 
     D_full = app.lag_matrix(d["D_summer"], 1)
+    G = int(panel["G"])
+    cl = d["cl"]
+    W = d["W"]
+    omega = d["pop"] / 1e5
+    jk_pre = []
+    for g in range(G):
+        keep = cl != g
+        Wg = W[keep][:, keep]
+        rs = np.asarray(Wg.sum(1)).ravel()
+        Wg = sps.diags(np.where(rs > 0, 1.0 / np.maximum(rs, 1.0), 0.0)) @ Wg
+        _, cl_inv = np.unique(cl[keep], return_inverse=True)
+        jk_pre.append((keep, D_full[:, keep], Wg, omega[keep], cl_inv))
+
+    n2 = d["nuts2"]
+    K = int(n2.max()) + 1
+    A_sum = np.zeros((d["Y"].shape[1], K), float)
+    for k in range(K):
+        A_sum[n2 == k, k] = 1.0
+    D2 = np.stack([d["D_summer"][:, n2 == k].mean(1) for k in range(K)], 1)
+    D2 = (D2 >= 0.5).astype(float)
+    D2l = app.lag_matrix(D2, 1)
+    pop2 = np.array([d["pop"][n2 == k].sum() for k in range(K)])
+    cl2 = np.array([int(cl[n2 == k][0]) for k in range(K)], dtype=int)
+    A2 = np.zeros((K, K), float)
+    for i, j in d["edges"]:
+        if n2[i] != n2[j]:
+            A2[n2[i], n2[j]] = 1.0
+            A2[n2[j], n2[i]] = 1.0
+    W2 = sps.csr_matrix(A2 / np.maximum(A2.sum(1)[:, None], 1.0))
+    nuts_agg = dict(A_sum=A_sum, D2l=D2l, W2=W2, om2=pop2 / 1e5, cl2=cl2)
+
     state_dict = dict(
         Y_pre=d["Y"][:3],
         D_full=D_full,
-        W=d["W"],
-        omega=d["pop"] / 1e5,
-        cl=d["cl"],
+        W=W,
+        omega=omega,
+        cl=cl,
         w=w,
         ea=cal["ea"],
         eg=cal["eg"],
         beta_true=beta_true,
-        G=int(panel["G"]),
+        G=G,
         T_sim=int(panel["Y"].shape[0]),
         N=int(panel["Y"].shape[1]),
-        tc=float(stats.t.ppf(0.975, int(panel["G"]) - 1)),
+        tc=float(stats.t.ppf(0.975, G - 1)),
+        jk_pre=jk_pre,
+        nuts_agg=nuts_agg,
     )
 
     R = 500
@@ -276,10 +393,15 @@ def main():
         summ["seconds"] = round(time.time() - t1, 2)
         out[tag] = summ
         p_tpk = summ["params"]["tpk"]
-        print(f"  [{tag}] {summ['R_ok']}/{R} ok in {summ['seconds']}s | tpk: bias={p_tpk['bias']:+.4f}, RMSE={p_tpk['rmse']:.4f}, t15={p_tpk['cov_t15']:.3f}, wildM={p_tpk['cov_wild_mam']:.3f}, wildW={p_tpk['cov_wild_web']:.3f}, WCR_W6={p_tpk['cov_wcr_webb6']:.3f}, WCR_Rad={p_tpk['cov_wcr_rademacher']:.3f} | unique_root={summ['root_counts']['share_unique']:.3f}", flush=True)
-        for dk in ("j_oi", "j_inv", "s3_oi", "s3_inv"):
-            dd = summ["diagnostics"][dk]
-            print(f"      {dk:6s}: obs={dd['obs']:.2f}, null mean={dd['mean']:.2f}, q95={dd['q95']:.2f}, p_cal={dd['p_calibrated']:.3f}", flush=True)
+        cc = summ["comparators"]
+        print(
+            f"  [{tag}] {summ['R_ok']}/{R} ok in {summ['seconds']}s | tpk: bias={p_tpk['bias']:+.4f}, "
+            f"t15={p_tpk['cov_t15']:.3f}, JK={p_tpk['cov_jackknife']:.3f}, WCR_W6={p_tpk['cov_wcr_webb6']:.3f}, "
+            f"WCR_Rad={p_tpk['cov_wcr_rademacher']:.3f} | zero={cc['county_zero_share']:.3f}->{cc['nuts2_zero_share']:.3f} | "
+            f"M2_c bias={cc['M2_county']['bias']:+.3f} (pos={cc['M2_county_pos_share']:.2f}), "
+            f"M2_n2 bias={cc['M2_nuts2']['bias']:+.3f}, M0_n2 bias={cc['M0_nuts2_tpk']['bias']:+.3f}",
+            flush=True,
+        )
 
     out["total_seconds"] = round(time.time() - t0, 2)
     OUT_PATH.write_text(json.dumps(out, indent=2), encoding="utf-8")

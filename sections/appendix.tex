@@ -630,17 +630,19 @@ induced by the reference value, and global identification (A6(iv)) fails in thes
 \setreflabel{D}
 \label{app:data}
 
-The application uses three public raw files stored under \path{experiment/data/raw/germany/},
-retrievable via the reproducible download script \path{experiment/data/fetch_germany.py}, verified
-by their LF SHA-256 checksums in \path{experiment/data/checksums.tsv} (with
-\path{.gitattributes} locking raw data files as binary to prevent cross-platform line-ending drift),
-and processed deterministically by \path{experiment/code/data_prep.py} (documented in
+The application uses three public raw files stored under \path{experiment/data/raw/germany/}
+(archived snapshot extracted on 2026-11-19 at
+\url{https://github.com/wangchi2068/transmission-scale-did}), retrievable via the download script
+\path{experiment/data/fetch_germany.py}, verified by their LF SHA-256 checksums in
+\path{experiment/data/checksums.tsv} (with \path{.gitattributes} locking raw data files as binary
+to prevent cross-platform line-ending drift), and processed deterministically by
+\path{experiment/code/data_prep.py} (documented with source licences and exact query syntax in
 \path{experiment/data/data_contract.md}).
 
 \begin{enumerate}
 \item \emph{Cases, notification regime, and populations.} Weekly mandatory varicella
 (\emph{Windpocken}) notification counts by German county (\emph{Kreis}/\emph{kreisfreie Stadt})
-for 2014--2019 were retrieved from the Robert Koch-Institut SurvStat@RKI 2.0 SOAP 1.2 service
+for 2014--2019 were retrieved on 2026-11-19 from the Robert Koch-Institut SurvStat@RKI 2.0 SOAP 1.2 service
 \citep{faensen2006survnet} under cube \texttt{SurvStat}, pathogen filter
 \texttt{[PathogenOut].[KategorieNz].[Krankheit DE].\&[Windpocken]}, weekly notification week
 (\texttt{[ReportingDate].[Week].[Week]}, \emph{Meldewoche}), and measure
@@ -679,12 +681,14 @@ undirected state-contiguity edges (mean 3.63 neighbouring states, graph diameter
 analyses group counties into four German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE,
 RP, SL; South: BW, BY; East: BE, BB, SN, ST, TH) and aggregate counts into Germany's 38 NUTS-2
 government districts (\emph{Regierungsbezirke} and single-district states).
-\item \emph{Generation interval.} Following the systematic review of \citet{vink2014serial} (pooled
-varicella serial interval: mean 14.0 days, SD $\approx 2.5$ days fitted with normal densities), we
-discretise our chosen lognormal working density with those moments onto weekly lags $s=1,2,3$ under
-a uniform within-week infection day, giving $w=(0.1414,0.7205,0.1381)$ (main-text three-decimal
-display $0.141,0.720,0.138$), same-week mass $w_0=2.6\times 10^{-6}$, and tail mass beyond week 3
-of $0.0016$.
+\item \emph{Working generation-interval surrogate.} Following the systematic review of
+\citet{vink2014serial} (pooled varicella \emph{serial interval}: mean 14.0 days, SD $\approx 2.5$
+days fitted with normal densities), we use those moments in a lognormal working density to
+approximate weekly \emph{generation-interval} weights at lags $s=1,2,3$ under a uniform within-week
+infection day (noting that serial and generation intervals share similar means here while differing
+in dispersion), giving $w=(0.1414,0.7205,0.1381)$ (main-text three-decimal display
+$0.141,0.720,0.138$), same-week mass $w_0=2.6\times 10^{-6}$, and tail mass beyond week 3 of
+$0.0016$.
 \end{enumerate}
 
 The estimation window runs from ISO week 2015-W01 through 2019-W52 ($T=261$ weeks, 115{,}129 cases;
@@ -737,15 +741,23 @@ draw (999/999 converge). Accounting for both score and Jacobian variability acro
 gives critical values of 2.242 ($\tau$), 2.366 ($\kappa$), 2.439 ($\phi$) and 2.489 ($\tau+\kappa$),
 yielding $[-0.385,-0.094]$ for $\tau+\kappa$.
 
-\emph{Calibrated finite-cluster coverage.} Web Table~\ref{tab:rev-calsim} evaluates $t_{15}$,
-unrestricted wild score, and null-imposed WCR-score intervals ($B=399$ per draw) on the exact
-German 400-county, 261-week design ($R=500$ draws each in calibrated and high-noise arms). Under
-the baseline calibrated design ($k=4.96$, $\sigma=0.2025$), $t_{15}$ coverage is 0.930--0.934 for
+\emph{Calibrated finite-cluster coverage and comparator distortion.} Web Table~\ref{tab:rev-calsim}
+evaluates $t_{15}$, unrestricted wild score, null-imposed WCR-score ($B=399$ per draw), and
+delete-one-state jackknife $t_{15}$ intervals alongside M2 and M3 under known truth
+($\tau+\kappa=-0.239$, $\phi=0.326$) on the exact German 400-county, 261-week design ($R=500$ draws
+each in calibrated and high-noise arms; Monte Carlo SE on coverage $\approx 0.010$). Under the
+baseline calibrated design ($k=4.96$, $\sigma=0.2025$), $t_{15}$ coverage is 0.930--0.934 for
 $\tau$, $\kappa$ and $\phi$, but drops to 0.902 for $\tau+\kappa$ because the clustered sandwich SE
 averages 85.5\% of the true Monte Carlo SD (SE ratio $0.855$; high-noise SE ratio $0.830$,
 coverage 0.904). Unrestricted score wild intervals remain undercovering (0.872 Mammen, 0.894 Webb6),
-whereas WCR-score restores near-nominal coverage: 0.936 (Webb6) and 0.934 (Rademacher) in the
-calibrated arm, and 0.946 under both weight distributions in the high-noise arm.
+whereas WCR-score restores coverage to 0.936 (Webb6) and 0.934 (Rademacher; 0.946 under both in
+high-noise), and delete-one-state jackknife $t_{15}$ covers at 0.966 (0.964 high-noise; mean JK SE
+ratio 1.155 calibrated, 1.135 high-noise). Pairs bootstrap coverage was not simulated because each
+multinomial draw requires nested nonlinear GMM optimisation across 1{,}000 panels. Under known truth
+in Web Table~\ref{tab:rev-calsim}(c), simulated county zero shares (54.5\% calibrated, 57.8\%
+high-noise) induce a positive M2 bias of $+0.224$ ($+0.227$ high-noise; positive estimates in
+22.8\% and 32.6\% of draws), which drops by two-thirds to $+0.076$ ($+0.083$) under NUTS-2
+aggregation (2.3\%--3.6\% zeros) while NUTS-2 M0 bias remains $+0.013$ ($-0.008$).
 
 \emph{Unshrunk adjacent-state covariance (Remark~\ref{rem:testable}).} Adding the 29 shared-border
 state-pair score cross-terms to $\hat\Omega$ yields cluster score correlations of $+0.175$ ($\tau$),
@@ -773,7 +785,7 @@ lags 0--4, continuous holiday fractions, $\ge 3$-day and $\ge 5$-day holiday thr
 lag-2 specification, individual calendar years 2015--2019, all school holidays and spatial
 aggregation to 38 NUTS-2 regions. Several patterns highlight diagnostic boundaries: under $\omega_i$
 scaling, $\hat\phi$ varies markedly ($0.618$ at $\omega_i\times 0.25$ vs.\ $0.037$ at $\omega_i\times 4.0$,
-where $J_{LM,\mathrm{oi}}$ falls to $1.81$, $p_F=0.431$); across single calendar years, 2015 is
+where $J_{LM,\mathrm{oi}}$ falls to $1.81$, $p_F=0.451$); across single calendar years, 2015 is
 positive ($+0.046$) and 2017 marginally rejects reference-value invariance ($J_{LM,\mathrm{inv}}=8.01$,
 $p_F=0.050$), while 2016, 2018 and 2019 pass both $J_{LM}$ tests ($p_F\ge 0.070$); NUTS-2
 aggregation (2.9\% zeros) yields a weaker policy contrast ($-0.147$, $[-0.280,-0.013]$) with
@@ -786,9 +798,9 @@ the lag-1 estimate to $-0.081$ ($[-0.183,0.021]$) and shifts lag 2 to $+0.060$ (
 \emph{F.1 Regional $\times$ week fixed effects, southern non-rotation, and state trends.} Web
 Table~\ref{tab:rev-regional} assesses sensitivity to regional shocks and the non-rotating calendars
 of Bavaria (BY) and Baden-W\"urttemberg (BW). East/West $\times$ week effects leave the lag-1
-contrast at $-0.217$ ($[-0.323,-0.112]$), state-specific linear time trends give $-0.315$
-($[-0.471,-0.160]$ at lag 1; $-0.373$ at lag 2), and state-specific one-harmonic seasonal curves
-give $-0.224$ ($[-0.371,-0.077]$ at lag 1; $-0.318$, $[-0.694,0.057]$ at lag 2). However,
+coefficient at $-0.217$ ($[-0.323,-0.112]$), state-specific linear time trends give $-0.315$
+($[-0.550,-0.081]$ at lag 1; $-0.373$ at lag 2), and state-specific one-harmonic seasonal curves
+give $-0.224$ ($[-0.352,-0.096]$ at lag 1; $-0.318$, $[-0.694,0.057]$ at lag 2). However,
 four-region $\times$ week effects attenuate lag 1 to $-0.169$ ($[-0.376,0.038]$) and lag 2 to
 $-0.072$ ($[-0.348,0.204]$), and simultaneously dropping non-rotating BW and BY ($N=260$, $G=14$)
 attenuates lag 1 to $-0.211$ ($[-0.431,0.008]$) and reverses lag 2 to $+0.033$ ($[-0.158,0.224]$).
@@ -796,12 +808,13 @@ attenuates lag 1 to $-0.211$ ($[-0.431,0.008]$) and reverses lag 2 to $+0.033$ (
 \input{tables/table_11_regional}
 
 \emph{F.2 Application-calibrated simulation.} The calibrated generator retains the observed
-400-county German network, 261-week summer holiday schedule and Vink et al.\ (2014) log-normal
-generation weights, sets truth to the primary M0 estimate ($\tau=-0.300$, $\kappa=0.060$,
+400-county German network, 261-week summer holiday schedule and Vink et al.\ (2014) working
+surrogate weights, sets truth to the primary M0 estimate ($\tau=-0.300$, $\kappa=0.060$,
 $\phi=0.326$), and matches the empirical negative binomial dispersion ($k=4.96$) and state $\times$
 week log-normal shock SD ($\sigma=0.2025$); a high-noise variant halves $k$ and doubles $\sigma$
-($R=500$ draws each). Web Table~\ref{tab:rev-calsim} reports interval coverage and finite-sample null
-reference distributions. All 1{,}000 draws converge to a unique interior root. In the observed panel,
+($R=500$ draws each). Web Table~\ref{tab:rev-calsim} reports interval coverage (including WCR-score
+and jackknife), finite-sample null reference distributions, and known-truth comparator performance in
+Panel~(c). All 1{,}000 draws converge to a unique interior root. In the observed panel,
 reference-value invariance passes ($J_{LM,\mathrm{inv}}=4.10$, calibrated $p=0.088$;
 $S_{3,\mathrm{inv}}=4.26$, calibrated $p=0.138$), whereas $J_{LM,\mathrm{oi}}=9.12$ clearly exceeds
 the calibrated 95th percentile ($5.33$, calibrated $p=0.004$; high-noise q95 $=5.18$, $p=0.002$)
@@ -810,12 +823,12 @@ component passes ($1.13$, $p_F=0.304$).
 
 \input{tables/table_12_calibrated_sim}
 
-\emph{F.3 Generation-interval sensitivity.} Web Table~\ref{tab:rev-gi} varies the log-normal
-varicella generation-interval mean (12--16 days) and dispersion (SD 2.5--6.0 days). Same-week mass
-$w_0$ stays below $0.001$ for SD $\le 4.0$ days and $0.011$ at SD 6.0 days (approximating
-reporting-delay convolution). Across all five distributions, $\hat\tau+\hat\kappa$ remains in
-$[-0.247,-0.212]$, and under the broader reporting-convolved SD 6.0 days $J_{LM,\mathrm{oi}}$
-falls to $6.11$ ($p_F=0.091$) with $J_{LM,\mathrm{inv}}$ $p_F=0.325$.
+\emph{F.3 Working generation-interval surrogate sensitivity.} Web Table~\ref{tab:rev-gi} varies
+the log-normal surrogate mean (12--16 days) and dispersion (SD 2.5--6.0 days). Same-week mass
+$w_0$ stays below $0.001$ for SD $\le 4.0$ days and $0.011$ at SD 6.0 days (approximating broader
+dispersion or reporting-delay convolution). Across all five distributions, $\hat\tau+\hat\kappa$
+remains in $[-0.247,-0.212]$, and under SD 6.0 days $J_{LM,\mathrm{oi}}$ falls to $6.11$
+($p_F=0.091$) with $J_{LM,\mathrm{inv}}$ $p_F=0.325$.
 
 \input{tables/table_13_gi_timing}
 
@@ -836,20 +849,23 @@ limited finite-cluster power under $F$ inversion.
 \emph{F.5 Event-time dynamic profile on total-policy scale.} Web Table~\ref{tab:rev-event} reports
 event-time indicators $e=-2,\dots,7$ around state summer holiday onset both for raw direct
 coefficients $\hat\tau_e$ and on the policy-level total scale $\hat\tau_e+c_e\hat\kappa$ (where
-$c_e$ averages $\bar D_{it}$ inside event bin $e$). Pre-trend leads are flat ($e_{-2}=+0.040$,
-$e_{-1}=+0.052$; $\chi^2_2=0.59$, $p=0.746$, $p_F=0.765$), but on the identified total scale the
-onset week already falls to $\hat\tau_0+c_0\hat\kappa=-0.208$ (SE $0.097$, $95\%$ CI
-$[-0.416,-0.001]$, $p=0.049$), followed by $-0.358$ to $-0.298$ over weeks $e_1$--$e_5$ and
-reopening recovery at $e_6=-0.141$ ($p=0.100$) and $e_7=-0.089$ ($p=0.286$; weeks 6--7 joint test
-$p_F=0.172$). That immediate total-scale drop in the holiday onset week signals a clinic-visitation
-or reporting shift rather than pure post-incubation biological transmission (Web Figure~\ref{fig:web-diag}(a)).
+$c_e$ averages $\bar D_{it}$ inside event bin $e$). Pre-trend event bins are near zero
+($e_{-2}=+0.040$, $e_{-1}=+0.052$; $\chi^2_2=0.59$, $p=0.746$, $p_F=0.765$), whereas overlapping
+shifted summer-schedule indicators at $-4$ to $-2$ weeks show positive contrasts
+(F.7; Web Table~\ref{tab:rev-placebo}). On the identified total scale, the holiday onset week falls
+immediately to $\hat\tau_0+c_0\hat\kappa=-0.208$ (SE $0.097$, $95\%$ CI $[-0.416,-0.001]$,
+$p=0.049$), spanning $-0.374$ to $-0.298$ over weeks $e_1$--$e_5$ and recovering at
+$e_6=-0.141$ ($p=0.100$) and $e_7=-0.089$ ($p=0.286$; weeks 6--7 joint test $p_F=0.172$). That
+immediate total-scale drop in the holiday onset week signals a clinic-visitation or reporting shift
+rather than pure post-incubation biological transmission (Web Figure~\ref{fig:web-diag}(a)).
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_web_05_diagnostics.png}
 \caption{Reporting-timing diagnostics in the German varicella panel. (a) Total-policy scale
 event-time profile $\hat\tau_e+c_e\hat\kappa$ around summer holiday onset ($e=-2,\dots,7$),
-showing flat pre-trends ($p_F=0.765$), an immediate onset drop ($\hat\tau_0+c_0\hat\kappa=-0.208$,
+showing near-zero onset-adjacent leads ($p_F=0.765$; cf.\ positive pre-window calendar shifts in
+Web Table~\ref{tab:rev-placebo}), an immediate onset drop ($\hat\tau_0+c_0\hat\kappa=-0.208$,
 $p=0.049$), and post-reopening recovery. (b) Non-summer school holiday placebos (Easter, Autumn,
 Winter, Pentecost across lags 0--2), showing the shared lag-0 dip and lag-2 catch-up rebound.}
 \label{fig:web-diag}
@@ -873,14 +889,21 @@ $1{,}585$ / $1{,}633$ at $\omega_i\times 4.0$).
 
 \emph{F.7 Placebos and randomisation diagnostics.} Web Table~\ref{tab:rev-placebo} evaluates
 non-summer school breaks (Easter, Autumn, Winter, Pentecost) at lags 0--2, calendar time shifts of
-summer holidays ($-4$ to $+4$ weeks), and $B=200$ cross-state permutations of the summer holiday
-schedule. Every short non-summer break shows a significant negative notification dip in lag 0
-($-0.198$ to $-0.497$, all $p<0.05$) followed by a positive lag-2 rebound ($+0.241$, CI
-$[0.066,0.416]$ for Easter; $+0.150$, $[0.035,0.264]$ for Autumn; Web Figure~\ref{fig:web-diag}(b)),
-reproducing a shared holiday reporting-suppression and post-break catch-up pattern that probes the
-separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$). Time shifts $-4$ to $-2$ are
-positive ($+0.296$, $+0.248$, $+0.328$), while $-1$ to $+4$ trace lags 0--5. Against 200 cross-state
-schedule permutations, the observed lag-1 estimate ($-0.239$) lies at two-sided $p=0.010$
-(permutation mean $0.000$, SD $0.089$; lag-2 $p=0.060$).
+summer holidays ($-4$ to $+4$ weeks relative to baseline lag-1 alignment, so shifts $-4,-3,-2,-1$
+align with leads $3,2,1$ and lag $0$), and $B=200$ cross-state permutations of the summer holiday
+schedule (conditional on state schedules; note that strict state exchangeability fails because BW
+and BY never rotate, and randomisation over calendar timing does not by itself separate reporting
+from transmission because both track holiday dates; \citealp{vonbismarckosten2022schools}). Every
+short non-summer break shows a significant negative notification dip in lag 0 ($-0.198$ to $-0.497$,
+all $p<0.05$) followed by a positive lag-2 rebound ($+0.241$, CI $[0.066,0.416]$ for Easter;
+$+0.150$, $[0.035,0.264]$ for Autumn; Web Figure~\ref{fig:web-diag}(b)), reproducing a shared
+holiday reporting-suppression and post-break catch-up pattern that directly probes the
+separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$; alongside the vaccination-era
+regime described in \citealp{siedler2010varicella,reuss2010varicella}). Shifted-calendar pre-window
+indicators at leads $3,2,1$ are positive ($+0.296$, $+0.248$, $+0.328$; contrasting with the
+event-time bin check in F.5 that controls explicitly for holiday duration rather than overlapping
+indicator shifts), while $-1$ to $+4$ trace lags 0--5. Against 200 cross-state schedule
+permutations, the observed lag-1 coefficient ($-0.239$) lies at two-sided $p=0.010$ (minimum
+attainable two-sided value at $B=200$; permutation mean $0.000$, SD $0.089$; lag-2 $p=0.060$).
 
 \input{tables/table_18_placebos}
