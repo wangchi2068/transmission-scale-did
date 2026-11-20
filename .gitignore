@@ -11,4 +11,5 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ipynb_checkpoints/
+experiment/data/raw/germany/fetch_metadata.json
 

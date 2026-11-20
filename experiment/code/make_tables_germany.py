@@ -143,7 +143,7 @@ sample & method & $\hat\tau+\hat\kappa$ (95\% CI) & $\hat\tau$ (95\% CI) & $\hat
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 notifications, plus three pre-sample lag weeks); $D$ = one-week-lagged state summer holiday indicator; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{{-6}}$, log-normal working surrogate fitted to Vink et al.\ 2014 serial interval moments). Working-model finite-cluster 95\% intervals for M0 $\tau+\kappa$: WCR-score Webb6 $[{wcr_w['ci'][0]:.3f}, {wcr_w['ci'][1]:.3f}]$; WCR-score Rademacher $[{wcr_r['ci'][0]:.3f}, {wcr_r['ci'][1]:.3f}]$; unrestricted score wild (Mammen) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$; Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. These working-model coefficients illustrate numerical computation, small-count sign reversal in M2 ($+0.064$ to $-0.102$), and finite-cluster calibration rather than causal school-holiday effects; full calendar, placebo, over-identification, and seasonal diagnostics appear in Web Appendices~D--F.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Weekly RKI SurvStat varicella notifications across 400 German counties in $G = 16$ federal states, 261 estimation weeks (ISO 2015-W01 to 2019-W52, 115{{,}}129 notifications, plus three pre-sample lag weeks); $D$ = one-week-lagged state summer holiday indicator; $w = (0.141, 0.720, 0.138)$ ($w_0 = 2.6 \times 10^{{-6}}$, log-normal working surrogate fitted to Vink et al.\ 2014 serial interval moments). Working-model finite-cluster 95\% intervals for M0 $\tau+\kappa$: WCR-score Webb6 $[{wcr_w['ci'][0]:.3f}, {wcr_w['ci'][1]:.3f}]$; WCR-score Rademacher $[{wcr_r['ci'][0]:.3f}, {wcr_r['ci'][1]:.3f}]$; unrestricted score wild (Mammen) $[{wild_m[0]:.3f}, {wild_m[1]:.3f}]$; pairs cluster bootstrap-$t$ ({pairs['ok']}/{pairs['B']} converged) $[{pairs['ci_tpk'][0]:.3f}, {pairs['ci_tpk'][1]:.3f}]$; delete-one-state jackknife $[{jk['ci_tpk'][0]:.3f}, {jk['ci_tpk'][1]:.3f}]$; Stock--Wright Bonferroni projection $[{sw05[0]:.3f}, {sw05[1]:.3f}]$. These working-model coefficients illustrate numerical computation, M2 aggregation shifts ($+0.064$ to $-0.102$, driven primarily by EpiEstim Gamma(1,5) prior pseudo-counts under small expected counts; weak prior $a=0.1$ gives ${comps['M2_prior_sensitivity']['weak_a0.1_b5']['tau']:+.3f}$ at county level), and finite-cluster calibration rather than causal school-holiday effects; full calendar, placebo, over-identification, and seasonal diagnostics appear in Web Appendices~D--F.}}
 \end{{table}}
 """
     (TAB_DIR / "table_7_application.tex").write_text(tex, encoding="utf-8")
@@ -258,6 +258,7 @@ def write_table_12(cal: dict):
             w6_c = f"{p['cov_wcr_webb6']:.3f}" if "cov_wcr_webb6" in p else "--"
             wr_c = f"{p['cov_wcr_rademacher']:.3f}" if "cov_wcr_rademacher" in p else "--"
             jk_c = f"{p['cov_jackknife']:.3f}" if "cov_jackknife" in p else "--"
+            pr_c = f"{p['cov_pairs']:.3f}" if ("cov_pairs" in p and math.isfinite(p["cov_pairs"])) else "--"
             lines_a.append(" & ".join([
                 lbl if i == 0 else "",
                 plbl,
@@ -270,12 +271,16 @@ def write_table_12(cal: dict):
                 w6_c,
                 wr_c,
                 jk_c,
+                pr_c,
             ]) + r" \\")
     c_cal = cal["calibration"]
     r_tot = cal["R"]
+    r_pairs = cal.get("R_pairs", 200)
+    b_pairs = cal.get("B_pairs", 199)
     rc_cal = cal["calibrated"]["root_counts"]
     rc_hn = cal["high_noise"]["root_counts"]
     tpk_cal = cal["calibrated"]["params"]["tpk"]
+    tpk_hn = cal["high_noise"]["params"]["tpk"]
     lines_b_fixed = []
     for tag, lbl in [("calibrated", "cal"), ("high_noise", "high-noise")]:
         block = cal[tag]["diagnostics"]
@@ -294,7 +299,7 @@ def write_table_12(cal: dict):
                 f"{d['q99']:.2f}",
                 f"{d['max']:.2f}",
                 f"{d['obs']:.2f}",
-                rf"\multicolumn{{4}}{{r}}{{{d['exceed_count']}/{d['n']} ({d['p_calibrated']:.3f})}}",
+                rf"\multicolumn{{5}}{{r}}{{{d['exceed_count']}/{d['n']} ({d['p_calibrated']:.3f})}}",
             ]) + r" \\")
 
     lines_c = []
@@ -303,47 +308,53 @@ def write_table_12(cal: dict):
         c_zs = f"{100 * cc['county_zero_share']:.1f}\\%"
         n2_zs = f"{100 * cc['nuts2_zero_share']:.1f}\\%"
         for i, (m_lbl, lvl, rec, extra) in enumerate([
-            ("M0", f"county ({c_zs} zeros)", cc["M0_county"], "--"),
-            ("M2 (EpiEstim)", f"county ({c_zs} zeros)", cc["M2_county"], f"pos: {100*cc['M2_county_pos_share']:.1f}\\%"),
-            (r"M3 ($\log(Y+1)$ TWFE)", f"county ({c_zs} zeros)", cc["M3_county"], "--"),
-            ("M0", f"NUTS-2 ({n2_zs} zeros)", cc["M0_nuts2_tpk"], f"$\\hat\\phi$: {cc['M0_nuts2_phi']['mean']:.3f}"),
-            ("M2 (EpiEstim)", f"NUTS-2 ({n2_zs} zeros)", cc["M2_nuts2"], f"neg: {100*cc['M2_nuts2_neg_share']:.1f}\\%"),
+            ("M0", f"county ({c_zs} zeros)", cc["M0_county"], f"$n={cc['M0_county']['n']}/{r_tot}$"),
+            ("M2 (EpiEstim, $a=1,b=5$)", f"county ({c_zs} zeros)", cc["M2_county"], f"pos: {100*cc['M2_county_pos_share']:.1f}\\%"),
+            ("M2 (weak prior $a=0.1$)", f"county ({c_zs} zeros)", cc["M2_county_weak"], "halves bias"),
+            ("M2 (noise-free $Y=\\mu$, $a=1$)", f"county (deterministic)", cc["M2_county_noisefree"], f"noise/0 share: {cc['M2_county_noise_zero_component']:+.3f}"),
+            (r"M3 ($\log(Y+1)$ TWFE)", f"county ({c_zs} zeros)", cc["M3_county"], "outcome slope"),
+            ("M0 (unconstrained)", f"NUTS-2 ({n2_zs} zeros)", cc["M0_nuts2_tpk"], f"$n={cc['M0_nuts2_tpk']['n']}$, $\\hat\\phi$: {cc['M0_nuts2_phi']['mean']:.3f}"),
+            (r"M0 (global $\phi\ge 0$)", f"NUTS-2 ({n2_zs} zeros)", cc["M0_nuts2_global_tpk"], f"$n={cc['M0_nuts2_global_tpk']['n']}$, bnd: {100*cc['M0_nuts2_global_boundary_share']:.1f}\\%, $\\hat\\phi$: {cc['M0_nuts2_global_phi']['mean']:.3f}"),
+            ("M2 (EpiEstim, $a=1,b=5$)", f"NUTS-2 ({n2_zs} zeros)", cc["M2_nuts2"], f"neg: {100*cc['M2_nuts2_neg_share']:.1f}\\%"),
+            ("M2 (weak prior $a=0.1$)", f"NUTS-2 ({n2_zs} zeros)", cc["M2_nuts2_weak"], "near-zero bias"),
         ]):
             lines_c.append(
                 f"{lbl if i == 0 else ''} & {m_lbl} & \\multicolumn{{2}}{{l}}{{{lvl}}} & "
                 f"{rec['mean']:.3f} & {rec['bias']:+.3f} ({rec['bias_mcse']:.3f}) & {rec['rmse']:.3f} & "
-                f"\\multicolumn{{4}}{{r}}{{{extra}}} \\\\"
+                f"\\multicolumn{{5}}{{r}}{{{extra}}} \\\\"
             )
     body_a = "\n".join(lines_a)
     body_b = "\n".join(lines_b_fixed)
     body_c = "\n".join(lines_c)
+    cc_cal = cal["calibrated"]["comparators"]
+    cc_hn = cal["high_noise"]["comparators"]
     tex = rf"""\begin{{table}}[!t]
 \centering
-\caption{{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R={r_tot}$): finite-cluster interval coverage, null reference distributions of $J_{{LM}}$ and $S_3$, and comparator distortion under known truth ($\tau+\kappa={tpk_cal['true']:.3f}$).}}
+\caption{{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R={r_tot}$; nested pairs $R={r_pairs}, B={b_pairs}$): finite-cluster interval coverage, null reference distributions of $J_{{LM}}$ and $S_3$, and comparator distortion under known truth ($\tau+\kappa={tpk_cal['true']:.3f}$).}}
 \label{{tab:rev-calsim}}
 \footnotesize
-\setlength{{\tabcolsep}}{{2.6pt}}
+\setlength{{\tabcolsep}}{{2.4pt}}
 \begin{{adjustbox}}{{max width=\linewidth}}
-\begin{{tabular}}{{llrrrrrrrrr}}
+\begin{{tabular}}{{llrrrrrrrrrr}}
 \toprule
-design & parameter & bias & emp.\ SD & mean SE & $t_{{15}}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) & JK ($t_{{15}}$) \\
+design & parameter & bias & emp.\ SD & mean SE & $t_{{15}}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) & JK ($t_{{15}}$) & Pairs ($t$) \\
 \midrule
-\multicolumn{{11}}{{l}}{{\emph{{(a) Interval performance, M0 ($G = 16$ unequal state clusters; Monte Carlo SE on coverage $\approx 0.010$ at $R={r_tot}$)}}}} \\
+\multicolumn{{12}}{{l}}{{\emph{{(a) Interval performance, M0 ($G = 16$ unequal state clusters; MCSE on coverage $\approx 0.010$ at $R={r_tot}$, $\approx 0.020$ for Pairs at $R={r_pairs}$)}}}} \\
 {body_a}
 \midrule
-\multicolumn{{11}}{{l}}{{\emph{{(b) Finite-sample null distributions of over-identification and root-selection statistics}}}} \\
-design & statistic & mean & q95 & q99 & max & application & \multicolumn{{4}}{{r}}{{exceed ($p_{{\mathrm{{cal}}}}$)}} \\
+\multicolumn{{12}}{{l}}{{\emph{{(b) Finite-sample null distributions of over-identification and root-selection statistics}}}} \\
+design & statistic & mean & q95 & q99 & max & application & \multicolumn{{5}}{{r}}{{exceed ($p_{{\mathrm{{cal}}}}$)}} \\
 \midrule
 {body_b}
 \midrule
-\multicolumn{{11}}{{l}}{{\emph{{(c) Comparator and spatial aggregation performance against known generating truth ($\tau+\kappa={tpk_cal['true']:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$)}}}} \\
-design & method & \multicolumn{{2}}{{l}}{{level (zero share)}} & mean & bias (MCSE) & RMSE & \multicolumn{{4}}{{r}}{{sign / $\hat\phi$ note}} \\
+\multicolumn{{12}}{{l}}{{\emph{{(c) Comparator and spatial aggregation performance against known generating truth ($\tau+\kappa={tpk_cal['true']:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$)}}}} \\
+design & method & \multicolumn{{2}}{{l}}{{level (zero share)}} & mean & bias (MCSE) & RMSE & \multicolumn{{5}}{{r}}{{convergence / mechanism note}} \\
 \midrule
 {body_c}
 \bottomrule
 \end{{tabular}}
 \end{{adjustbox}}
-\par\smallskip\parbox{{\linewidth}}{{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) working weights, truth set to primary M0 ($\tau={c_cal['beta_true'][0]:.3f}$, $\kappa={c_cal['beta_true'][1]:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$), NB2 $k={c_cal['k_nb']:.2f}$ and state $\times$ week log-normal shock SD $\sigma={c_cal['sig_sw']:.3f}$ (\emph{{cal}}), or $k/2$ and $2\sigma$ (\emph{{high-noise}}). Unique interior root in {100*rc_cal['share_unique']:.1f}\% (\emph{{cal}}) and {100*rc_hn['share_unique']:.1f}\% (\emph{{high-noise}}). For $\tau+\kappa$ in \emph{{cal}}, sandwich SEs understate empirical SD by {100*(1-tpk_cal['se_ratio']):.1f}\% (mean SE / emp.\ SD = {tpk_cal['se_ratio']:.3f}); both $t_{{15}}$ and unrestricted wild score under-cover, whereas restricted score wild bootstrap (WCR-score; $B=399$) and delete-one-state jackknife (JK) cover closer to 0.95. Panel~(c) quantifies exact M2 (EpiEstim $\log R$) Jensen bias against known truth at simulated county vs.\ NUTS-2 zero rates alongside M0's own aggregation shift. Source: \texttt{{experiment/analysis/germany\_calibrated\_sim.json}}.}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) working weights, truth set to primary M0 ($\tau={c_cal['beta_true'][0]:.3f}$, $\kappa={c_cal['beta_true'][1]:.3f}$, $\phi={c_cal['beta_true'][2]:.3f}$), NB2 $k={c_cal['k_nb']:.2f}$ and state $\times$ week log-normal shock SD $\sigma={c_cal['sig_sw']:.3f}$ (\emph{{cal}}), or $k/2$ and $2\sigma$ (\emph{{high-noise}}). All rates assume the maintained working model (Assumption~A7 and parallel trends hold). County M0 achieves {rc_cal['one']}/{r_tot} ({100*rc_cal['share_unique']:.1f}\%, \emph{{cal}}) and {rc_hn['one']}/{r_tot} ({100*rc_hn['share_unique']:.1f}\%, \emph{{high-noise}}) unique interior convergence; sandwich SEs understate $\tau+\kappa$ SD by {100*(1-tpk_cal['se_ratio']):.1f}\% (SE ratio {tpk_cal['se_ratio']:.3f}; {tpk_hn['se_ratio']:.3f} high-noise). Unified delete-one-state jackknife (JK; 500/500 converged) is slightly conservative (SE ratio {tpk_cal['jk_se_ratio']:.3f} \emph{{cal}}, {tpk_hn['jk_se_ratio']:.3f} \emph{{high-noise}}), WCR-score ($B=399$) covers at {min(tpk_cal['cov_wcr_webb6'], tpk_cal['cov_wcr_rademacher']):.3f}--{max(tpk_hn['cov_wcr_webb6'], tpk_hn['cov_wcr_rademacher']):.3f}, and nested pairs cluster bootstrap-$t$ ($R={r_pairs}, B={b_pairs}$; $\approx {tpk_cal['pairs_mean_ok']:.0f}/{b_pairs}$ inner convergence) covers at {tpk_cal['cov_pairs']:.3f} (\emph{{cal}}) and {tpk_hn['cov_pairs']:.3f} (\emph{{high-noise}}). In Panel~(c), county M2 positive bias under default EpiEstim prior ($+0.224$ \emph{{cal}}) is driven primarily by prior pseudo-counts under small expected counts (noise-free $Y=\mu$ gives $+0.212$; noise/zero realizations add only $+0.012$; weakening prior to $a=0.1$ drops bias to $+0.099$), while M3 estimates the $\log(Y+1)$ TWFE slope rather than $\tau+\kappa$. At NUTS-2, unconstrained M0 converges on {cc_cal['M0_nuts2_tpk']['n']}/{r_tot} (\emph{{cal}}) and {cc_hn['M0_nuts2_tpk']['n']}/{r_tot} (\emph{{high-noise}}) draws (failures cross $\Lambda(\phi)\le 0$; $\hat\phi$ bias {cc_cal['M0_nuts2_phi']['bias']:+.3f} and {cc_hn['M0_nuts2_phi']['bias']:+.3f}), whereas global grid search ($\phi\ge 0$) resolves 500/500 draws with {100*cc_cal['M0_nuts2_global_boundary_share']:.1f}\% (\emph{{cal}}) and {100*cc_hn['M0_nuts2_global_boundary_share']:.1f}\% (\emph{{high-noise}}) selecting $\phi=0$. Source: \texttt{{experiment/analysis/germany\_calibrated\_sim.json}}.}}
 \end{{table}}
 """
     (TAB_DIR / "table_12_calibrated_sim.tex").write_text(tex, encoding="utf-8")
@@ -635,9 +646,71 @@ specification & observed & perm.\ mean (SD) & [5th, 95th] & \multicolumn{{2}}{{r
     (TAB_DIR / "table_18_placebos.tex").write_text(tex, encoding="utf-8")
 
 
+def write_table_envelope(cal: dict):
+    res = json.loads((ROOT / "experiment" / "analysis" / "results.json").read_text(encoding="utf-8"))
+    bnd = json.loads((ROOT / "verification" / "root_selection" / "full_summary_tsummary.json").read_text(encoding="utf-8"))
+    sw = json.loads((ROOT / "verification" / "same_week" / "results.json").read_text(encoding="utf-8"))
+
+    cores = [k for k in res["summary"]["M0"]["convergence"] if k.startswith("core_") and "_spill" in k]
+    c_bias = [res["summary"]["M0"]["bias"][f"{k}|tau"]["mean"] for k in cores]
+    c_cov = [100.0 * res["summary"]["M0"]["coverage"][f"{k}|tau"]["mean"] for k in cores]
+
+    b0 = [x for x in bnd if x["key"][0] == 0.0][0]
+    b_weak_gi = [x["cov_gi_t"] for x in bnd if x["key"][0] in (0.05, 0.1)]
+    b_weak_m0 = [x["cov_m0_t"] for x in bnd if x["key"][0] in (0.05, 0.1)]
+
+    sw_tpk = sw["arms"]["same_week"]["tau+kappa"]
+    sw_truth = sw["truth"]["tau+kappa"]
+    sw_frac = sw_tpk["bias"] / sw_truth
+
+    tpk_c = cal["calibrated"]["params"]["tpk"]
+    tpk_h = cal["high_noise"]["params"]["tpk"]
+    wcr_lo = min(tpk_c["cov_wcr_webb6"], tpk_c["cov_wcr_rademacher"], tpk_h["cov_wcr_webb6"], tpk_h["cov_wcr_rademacher"])
+    wcr_hi = max(tpk_c["cov_wcr_webb6"], tpk_c["cov_wcr_rademacher"], tpk_h["cov_wcr_webb6"], tpk_h["cov_wcr_rademacher"])
+    jk_lo = min(tpk_c["cov_jackknife"], tpk_h["cov_jackknife"])
+    jk_hi = max(tpk_c["cov_jackknife"], tpk_h["cov_jackknife"])
+    jk_se_lo = 100.0 * (min(tpk_c["jk_se_ratio"], tpk_h["jk_se_ratio"]) - 1.0)
+    jk_se_hi = 100.0 * (max(tpk_c["jk_se_ratio"], tpk_h["jk_se_ratio"]) - 1.0)
+    pr_lo = min(tpk_c["cov_pairs"], tpk_h["cov_pairs"])
+    pr_hi = max(tpk_c["cov_pairs"], tpk_h["cov_pairs"])
+    t15_lo = min(tpk_c["cov_t15"], tpk_h["cov_t15"])
+    t15_hi = max(tpk_c["cov_t15"], tpk_h["cov_t15"])
+
+    x2_tpk = (
+        res["summary"]["M0"]["bias"]["X2_reporting_drops_after_adoption|tau"]["mean"]
+        + res["summary"]["M0"]["bias"]["X2_reporting_drops_after_adoption|kappa"]["mean"]
+    )
+    x2_phi = res["summary"]["M0"]["bias"]["X2_reporting_drops_after_adoption|phi"]["mean"]
+
+    tex = rf"""\begin{{table}}[!t]
+\centering
+\caption{{Operating envelope and diagnostic workflow for weekly QD-GMM across data-generating and observation regimes.}}
+\label{{tab:envelope}}
+\footnotesize
+\setlength{{\tabcolsep}}{{3.4pt}}
+\begin{{adjustbox}}{{max width=\linewidth}}
+\begin{{tabular}}{{llll}}
+\toprule
+regime / data structure & estimator & simulation performance & recommended usage \\
+\midrule
+Multi-week GI, feedback, spillover ($\phi_0>0$) & M0 & bias ${min(c_bias):.3f}$ to ${max(c_bias):.3f}$; cov.\ {min(c_cov):.1f}\%--{max(c_cov):.1f}\% & primary estimator (maintained conds.) \\
+Zero/weak contagion ($\phi_0\approx 0$) & M0-GI (post hoc) & cov.\ {b0['cov_gi_z']:.3f}--{b0['cov_gi_t']:.3f} ($\phi_0=0$); {min(b_weak_gi):.2f}--{max(b_weak_gi):.2f} ($\phi_0\in[0.05,0.10]$; vs.\ M0 {min(b_weak_m0):.2f}--{max(b_weak_m0):.2f}) & profile $[0,3]$; post hoc M0-GI; $S_1(\phi)$ \\
+Substantial same-week mass ($w_0\gtrsim 0.3$) & sub-weekly Eq. & weekly M0 bias $\approx {sw_frac:.2f}\times$ total (cov.\ {sw_tpk['coverage']:.2f}) & switch to sub-weekly model \\
+Moderate/unequal clusters (e.g.\ $G=16$) & M0 + WCR / JK & cal.\ cov.\ {wcr_lo:.3f}--{wcr_hi:.3f} (WCR), {jk_lo:.3f}--{jk_hi:.3f} (JK, SE $+{jk_se_lo:.0f}$--${jk_se_hi:.0f}$\%); Pairs {pr_lo:.3f}--{pr_hi:.3f} & report WCR-score \& JK; Pairs supp. \\
+Policy-linked ascertainment (violates A7) & working M0 + diag. & biases $\tau+\kappa$ ($\approx {x2_tpk:.2f}$) \& $\phi$ ($+{x2_phi:.2f}$) in X2 & onset/placebo diag.; working output only \\
+\bottomrule
+\end{{tabular}}
+\end{{adjustbox}}
+\par\smallskip\parbox{{\linewidth}}{{\scriptsize Summary of operating limits generated dynamically from core ($R=8000$), boundary validation ($R=2000$; Web Appendix~C), same-week ($R=1000$ per arm), and design-calibrated finite-cluster ($R={cal['R']}$, MCSE $\approx 0.010$; nested Pairs $R={cal.get('R_pairs', 200)}$, MCSE $\approx 0.020$; vs.\ ${t15_lo:.3f}$--${t15_hi:.3f}$ for $t_{{15}}$, assuming the maintained working model under A7 and $\phi_0={cal['calibration']['beta_true'][2]:.3f}$) experiments. Note that jackknife is slightly conservative (SE ratio $+{jk_se_lo:.0f}$--${jk_se_hi:.0f}$\%) while M0-GI avoids boundary collapse at $\phi_0=0$ (where M0 covers at {b0['cov_m0_t']:.2f}) at a modest weak-contagion coverage cost relative to M0. Diagnostics separate regimes in which M0 serves as the primary estimator under the maintained renewal, timing, and separable-reporting (Assumption~A7) conditions from regimes requiring post hoc boundary heuristics, sub-weekly models, finite-cluster calibration, or exploratory working-model handling.}}
+\end{{table}}
+"""
+    (TAB_DIR / "table_envelope.tex").write_text(tex, encoding="utf-8")
+
+
 def main():
     app = json.loads(APP_PATH.read_text(encoding="utf-8"))
     cal = json.loads(CAL_PATH.read_text(encoding="utf-8"))
+    write_table_envelope(cal)
     write_table_7(app)
     write_table_7b(app)
     write_table_11(app)
@@ -647,7 +720,7 @@ def main():
     write_table_15(app)
     write_table_16(app)
     write_table_18_placebos(app)
-    print("Generated all 9 German Varicella application LaTeX tables in tables/.")
+    print("Generated all 10 German Varicella & envelope LaTeX tables in tables/.")
 
 
 if __name__ == "__main__":

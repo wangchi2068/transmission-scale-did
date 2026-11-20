@@ -24,18 +24,22 @@ those diagnostics flags that working-model contrasts cannot be interpreted as pu
 transmission effects. Third is finite-cluster inference: Theorem~\ref{thm:asy} is a large-$G$
 result; when cluster counts are moderate or unequal (such as Germany's $G=16$ states), design
 calibrations show $t_{G-1}$ under-coverage and unshrunk border-pair adjustments
-(Remark~\ref{rem:testable}) can become indefinite, making null-imposed WCR-score wild bootstrap,
-pairs cluster bootstrap, and jackknife checks essential \citep{kline2012score,ferman2019inference,canay2021wild}.
+(Remark~\ref{rem:testable}) can become indefinite, making null-imposed WCR-score wild bootstrap
+and delete-one-cluster jackknife checks essential alongside pairs cluster bootstrap-$t$ as a
+supplementary robustness check \citep{kline2012score,ferman2019inference,canay2021wild}.
 
 On sparse German varicella surveillance counts, the framework demonstrates practical
-implementation behaviour: QD-GMM handles 58.8\% zeros without dropping county-weeks and preserves
-a negative working contrast where two-step EpiEstim flips sign across county and NUTS-2 scales
-($+0.064$ vs.\ $-0.102$), while design-calibrated simulations confirm coverage improvements from
-WCR-score. Framing parallel trends on the log reproduction number \citep{roth2023parallel}
-separates local from imported force of infection \citep{elenev2025staggered} and complements
-unconfoundedness approaches \citep{callaway2023pandemic}. Natural methodological extensions include
-sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood
-feedback models \citep{bonhomme2025feedback}, sub-weekly nowcasted estimating equations,
-reporting-invariant wastewater signals \citep{goldstein2024wastewater}, and joint modelling of
-serial intervals, vaccination uptake, and reporting delays
-\citep{siedler2010varicella,suzuki2023varicella,goldwasser2026rt}.
+implementation behaviour: QD-GMM handles 58.8\% zeros without dropping county-weeks and remains
+negative across county and NUTS-2 scales where two-step EpiEstim shifts from $+0.064$ to
+$-0.102$ ($-0.239$ vs.\ $-0.147$ for M0), while design-calibrated simulations confirm coverage
+improvements from WCR-score under the maintained working model. Framing parallel trends on the log
+reproduction number reflects multiplicative epidemic growth, whose scale sensitivity under
+functional-form shifts is highlighted by \citet{roth2023parallel}, separates local from imported
+force of infection, parallels recent staggered-adoption frameworks with cross-unit policy spillovers
+\citep{elenev2025staggered}, and complements unconfoundedness approaches
+\citep{callaway2023pandemic}. Natural methodological extensions include sequential efficiency bounds
+\citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood feedback models
+\citep{bonhomme2025feedback}, sub-weekly nowcasted estimating equations, reporting-invariant
+wastewater signals \citep{goldstein2024wastewater}, and joint modelling of serial intervals,
+vaccination uptake, temperature seasonality, and reporting delays
+\citep{siedler2010varicella,rieck2020impfquoten,suzuki2023varicella,goldwasser2026rt}.

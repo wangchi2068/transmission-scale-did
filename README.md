@@ -1,9 +1,9 @@
 # 传播尺度双重差分（QD-GMM）
 
 论文、LaTeX 源码、实验代码与验证材料。当前仓库为未按期刊 25 页正文限制压缩的完整工作稿（正式投稿版将根据目标期刊要求另行排版），以方法理论、25 组预设模拟、适用包络界定与稀疏真实面板说明性实现为主线，完整德国水痘敏感性与诊断透明归档于网络支持材料：
-- 英文主稿 `main.pdf`（共 36 页；Sections 1--5 + Back Matter + References 共 28 页，含 `endfloat` 排出的 Figure 1--3 与 Table 1--4）：首页为标题/摘要（202 词，≤ 225），完整保留方案与偏离披露（Protocol & Departures）、适用包络指南表（Table 3）以及德国稀疏水痘面板说明性实现（§4，Table 4）。
-- 网络补充材料 `supporting_information.pdf`（共 49 页）：Web Appendices A--F（含 Web Tables 1--16 与 Web Figures 1--5）及附带文献，与主稿通过 `xr` 双向交叉引用。
-- 中文阅读稿 `paper_zh/main.pdf`（共 25 页，已与最新英文稿逐节同步）。
+- 英文主稿 `main.pdf`（共 38 页；Sections 1--5 + Back Matter + References 共 30 页，含 `endfloat` 排出的 Figure 1--3 与 Table 1--4）：首页为标题/摘要（205 词，≤ 225），完整保留方案与偏离披露（Protocol & Departures）、适用包络指南表（Table 3）以及德国稀疏水痘面板说明性实现（§4，Table 4）。
+- 网络补充材料 `supporting_information.pdf`（共 50 页）：Web Appendices A--F（含 Web Tables 1--16 与 Web Figures 1--5）及附带文献，与主稿通过 `xr` 双向交叉引用。
+- 中文阅读稿 `paper_zh/main.pdf`（共 26 页，已与最新英文稿逐节同步）。
 
 ## 目录
 
@@ -41,14 +41,15 @@ python scripts/qa_checks.py
 python scripts/section_pages.py
 ```
 
-德国水痘面板与图表复现（Python 3.11，见 `experiment/code/README.md` 与 `experiment/data/data_contract.md`；存档 SurvStat 数据提取日期 **2026-11-19**；单线程机器运行校准模拟时间约增倍，默认使用最多 4 个工作进程）：
+德国水痘面板与图表复现（Python 3.11，见 `experiment/code/README.md` 与 `experiment/data/data_contract.md`；存档 SurvStat 数据提取日期 **2026-11-19**，易变运行日期写入 `fetch_metadata.json` 使规范化重下载与存档 SHA-256 一致；`calibrated_sim_germany.py` 默认最多启用 16 个工作进程）：
 ```bash
-python experiment/data/fetch_germany.py --check     # 校验 2026-11-19 提取的 LF 原始文件与 SHA-256（3/3 OK）
-python experiment/code/data_prep.py                 # 校验 SHA-256（0 个插补县）并生成 processed/panel.npz
-python experiment/code/application.py               # 生成 germany_application_results.json
-python experiment/code/calibrated_sim_germany.py    # 400 县 x 261 周校准模拟 (R=500 x 2，含 WCR-score、刀切法与 M2/M3/NUTS-2)
-python experiment/code/make_figure_germany.py       # 生成 Figure 3 (fig_03_application) 与 Web Figure 5 (fig_web_05_diagnostics)
-python experiment/code/make_tables_germany.py       # 生成 Table 4 及 Web Appendix F 全部附表 (含 Web Table 16)
+python experiment/data/fetch_germany.py --check            # 校验 2026-11-19 提取的 LF 原始文件与 SHA-256（3/3 OK）
+python experiment/data/fetch_germany.py --verify-download  # 从公共接口在线重下载并规范化比对存档 SHA-256（3/3 OK）
+python experiment/code/data_prep.py                        # 校验 SHA-256（0 个插补县）并生成 processed/panel.npz
+python experiment/code/application.py                      # 生成 germany_application_results.json
+python experiment/code/calibrated_sim_germany.py           # 400 县 x 261 周校准模拟 (R=500 x 2，含 WCR-score、统一刀切、嵌套 pairs R=200/B=199 与 M2 先验敏感性/NUTS-2 全局检查)
+python experiment/code/make_figure_germany.py              # 生成 Figure 3 (fig_03_application) 与 Web Figure 5 (fig_web_05_diagnostics)
+python experiment/code/make_tables_germany.py              # 动态生成 Table 3--4 及 Web Appendix F 全部附表（共 10 张表）
 ```
 
 ## 主要结果

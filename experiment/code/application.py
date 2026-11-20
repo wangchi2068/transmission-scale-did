@@ -231,13 +231,14 @@ def jackknife_m0(d: dict, w: np.ndarray, lag: int = 1, phi_bar: float = 0.5) -> 
     """Delete-one-state jackknife (re-restricting W to the 15 kept states and row-normalising)."""
     G = len(d["states"])
     ests = []
+    oks = []
     by_state = {}
     A_full = (d["W"] > 0).astype(float).tocsr()
     for g in range(G):
         keep = d["cl"] != g
         Ak = A_full[keep][:, keep]
         deg = np.asarray(Ak.sum(1)).ravel()
-        # Keep only non-isolated counties if any (dropping a state could isolate a tiny border county? check)
+        # Drop any county left isolated when its enclosing state is removed (e.g. Berlin without Brandenburg)
         sub_keep = deg > 0
         if not sub_keep.all():
             idx_k = np.where(keep)[0][sub_keep]
@@ -256,6 +257,9 @@ def jackknife_m0(d: dict, w: np.ndarray, lag: int = 1, phi_bar: float = 0.5) -> 
         pk = dgp.build_panel(Yk, Dk, Wk.tocsr(), omk, clk, w=w, S=3)
         sp = qdgmm.spec_m0(pk, phi_bar=phi_bar)
         m0 = qdgmm.fit(pk, sp, starts=[[-0.3, 0.0, 0.3], [0.0, 0.0, 0.5]])
+        if not m0.get("ok"):
+            raise RuntimeError(f"Jackknife fold state={int(d['states'][g])} failed to converge")
+        oks.append(bool(m0["ok"]))
         b = np.array([m0["est"]["tau"], m0["est"]["kappa"], m0["est"]["phi"], m0["est"]["tau"] + m0["est"]["kappa"]])
         ests.append(b)
         by_state[int(d["states"][g])] = dict(tau=float(b[0]), kappa=float(b[1]), phi=float(b[2]), tpk=float(b[3]))
@@ -263,6 +267,7 @@ def jackknife_m0(d: dict, w: np.ndarray, lag: int = 1, phi_bar: float = 0.5) -> 
     ebar = E.mean(0)
     se_jk = np.sqrt((G - 1) / G * ((E - ebar) ** 2).sum(0))
     return dict(
+        ok_folds=int(sum(oks)),
         se=dict(tau=float(se_jk[0]), kappa=float(se_jk[1]), phi=float(se_jk[2]), tpk=float(se_jk[3])),
         tpk_range=[float(E[:, 3].min()), float(E[:, 3].max())],
         phi_range=[float(E[:, 2].min()), float(E[:, 2].max())],
@@ -827,6 +832,12 @@ def main():
                                float(r["est"]["tau"] + tc * r["se"]["tau"])]
         comparators[nm] = rec
         print(f"  {nm}: est={r.get('est')}, se={r.get('se')}", flush=True)
+    m2_priors = {}
+    for lbl, a_pr, b_pr in [("default_a1_b5", 1.0, 5.0), ("moderate_a0.25_b5", 0.25, 5.0),
+                            ("weak_a0.1_b5", 0.1, 5.0), ("ultralow_a0.01_b100", 0.01, 100.0)]:
+        rp = cmp.twfe_ols(cmp.cori_log_r(panel, a=a_pr, b=b_pr), panel["D"], panel["cl"], int(panel["G"]))
+        m2_priors[lbl] = dict(a=a_pr, b=b_pr, tau=rp["est"]["tau"], se=rp["se"]["tau"])
+    comparators["M2_prior_sensitivity"] = m2_priors
 
     # 4. Remark 4 adjacent-state score dependence
     rem4 = remark4_adjacent_dependence(d, panel, beta0)

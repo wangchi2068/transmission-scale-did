@@ -183,16 +183,28 @@ def fetch_rki(out_path: Path):
                 still.append(rid)
         missing_rids = still
 
+    pop_fallback = dict(sorted(pop_fallback.items()))
+
     import datetime
     payload = {
         "disease": "[PathogenOut].[KategorieNz].[Krankheit DE].&[Windpocken]",
-        "extracted_date": datetime.date.today().isoformat(),
-        "archive_baseline_date": ARCHIVE_EXTRACTION_DATE,
         "years": years_data,
         "population_2017": pop_2017,
         "population_fallback": pop_fallback,
     }
     out_path.write_bytes(json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8"))
+    meta_path = out_path.parent / "fetch_metadata.json"
+    meta_path.write_bytes(
+        json.dumps(
+            {
+                "extracted_date": datetime.date.today().isoformat(),
+                "archive_baseline_date": ARCHIVE_EXTRACTION_DATE,
+                "grand_total_cases": grand_total,
+            },
+            ensure_ascii=True,
+            indent=2,
+        ).encode("utf-8")
+    )
     print(f"Wrote {out_path} ({out_path.stat().st_size} bytes, total={grand_total})", flush=True)
 
 
@@ -212,7 +224,7 @@ def fetch_holidays(out_path: Path):
                 seen.add(it["id"])
                 uniq.append(it)
         out[code] = {"iso": iso, "name": name, "holidays": uniq}
-    out_path.write_bytes(json.dumps(out, ensure_ascii=False, indent=1).encode("utf-8"))
+    out_path.write_bytes(json.dumps(out, ensure_ascii=True, indent=1).encode("utf-8"))
     print(f"Wrote {out_path} ({out_path.stat().st_size} bytes)", flush=True)
 
 
@@ -254,7 +266,7 @@ def main():
             raise
         print(
             f"NOTE: Fresh upstream fetch differs from {ARCHIVE_EXTRACTION_DATE} archive checksum "
-            f"(expected when SurvStat updates retroactive case corrections):\n  {exc}"
+            f"(upstream records, boundary geometry, or holidays may have changed since the archived snapshot):\n  {exc}"
         )
 
 

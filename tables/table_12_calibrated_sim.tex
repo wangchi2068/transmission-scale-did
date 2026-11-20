@@ -1,51 +1,59 @@
 \begin{table}[!t]
 \centering
-\caption{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R=500$): finite-cluster interval coverage, null reference distributions of $J_{LM}$ and $S_3$, and comparator distortion under known truth ($\tau+\kappa=-0.239$).}
+\caption{Application-calibrated simulation on the German varicella design ($N=400$, $G=16$ states, $T=261$, $R=500$; nested pairs $R=200, B=199$): finite-cluster interval coverage, null reference distributions of $J_{LM}$ and $S_3$, and comparator distortion under known truth ($\tau+\kappa=-0.239$).}
 \label{tab:rev-calsim}
 \footnotesize
-\setlength{\tabcolsep}{2.6pt}
+\setlength{\tabcolsep}{2.4pt}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{llrrrrrrrrr}
+\begin{tabular}{llrrrrrrrrrr}
 \toprule
-design & parameter & bias & emp.\ SD & mean SE & $t_{15}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) & JK ($t_{15}$) \\
+design & parameter & bias & emp.\ SD & mean SE & $t_{15}$ & wild (M) & wild (W6) & WCR (W6) & WCR (Rad) & JK ($t_{15}$) & Pairs ($t$) \\
 \midrule
-\multicolumn{11}{l}{\emph{(a) Interval performance, M0 ($G = 16$ unequal state clusters; Monte Carlo SE on coverage $\approx 0.010$ at $R=500$)}} \\
-cal & $\tau+\kappa$ & -0.003 & 0.080 & 0.069 & 0.902 & 0.872 & 0.894 & 0.936 & 0.934 & 0.966 \\
- & $\tau$ & -0.004 & 0.198 & 0.177 & 0.930 & 0.864 & 0.920 & -- & -- & -- \\
- & $\kappa$ & 0.000 & 0.203 & 0.186 & 0.932 & 0.904 & 0.924 & -- & -- & -- \\
- & $\phi$ & 0.005 & 0.054 & 0.051 & 0.934 & 0.914 & 0.928 & -- & -- & -- \\
-high-noise & $\tau+\kappa$ & -0.016 & 0.136 & 0.113 & 0.904 & 0.866 & 0.894 & 0.946 & 0.946 & 0.964 \\
- & $\tau$ & 0.002 & 0.219 & 0.210 & 0.948 & 0.914 & 0.942 & -- & -- & -- \\
- & $\kappa$ & -0.019 & 0.229 & 0.215 & 0.934 & 0.896 & 0.922 & -- & -- & -- \\
- & $\phi$ & 0.025 & 0.060 & 0.070 & 0.952 & 0.922 & 0.950 & -- & -- & -- \\
+\multicolumn{12}{l}{\emph{(a) Interval performance, M0 ($G = 16$ unequal state clusters; MCSE on coverage $\approx 0.010$ at $R=500$, $\approx 0.020$ for Pairs at $R=200$)}} \\
+cal & $\tau+\kappa$ & -0.003 & 0.080 & 0.069 & 0.902 & 0.872 & 0.894 & 0.936 & 0.934 & 0.970 & 0.915 \\
+ & $\tau$ & -0.004 & 0.198 & 0.177 & 0.930 & 0.864 & 0.920 & -- & -- & -- & -- \\
+ & $\kappa$ & 0.000 & 0.203 & 0.186 & 0.932 & 0.904 & 0.924 & -- & -- & -- & -- \\
+ & $\phi$ & 0.005 & 0.054 & 0.051 & 0.934 & 0.914 & 0.928 & -- & -- & -- & -- \\
+high-noise & $\tau+\kappa$ & -0.016 & 0.136 & 0.113 & 0.904 & 0.866 & 0.894 & 0.946 & 0.946 & 0.960 & 0.945 \\
+ & $\tau$ & 0.002 & 0.219 & 0.210 & 0.948 & 0.914 & 0.942 & -- & -- & -- & -- \\
+ & $\kappa$ & -0.019 & 0.229 & 0.215 & 0.934 & 0.896 & 0.922 & -- & -- & -- & -- \\
+ & $\phi$ & 0.025 & 0.060 & 0.070 & 0.952 & 0.922 & 0.950 & -- & -- & -- & -- \\
 \midrule
-\multicolumn{11}{l}{\emph{(b) Finite-sample null distributions of over-identification and root-selection statistics}} \\
-design & statistic & mean & q95 & q99 & max & application & \multicolumn{4}{r}{exceed ($p_{\mathrm{cal}}$)} \\
+\multicolumn{12}{l}{\emph{(b) Finite-sample null distributions of over-identification and root-selection statistics}} \\
+design & statistic & mean & q95 & q99 & max & application & \multicolumn{5}{r}{exceed ($p_{\mathrm{cal}}$)} \\
 \midrule
-cal & $J_{LM,\mathrm{oi}}$ & 2.02 & 5.33 & 7.27 & 9.19 & 9.12 & \multicolumn{4}{r}{1/500 (0.004)} \\
- & $J_{LM,\mathrm{inv}}$ & 1.89 & 4.59 & 6.92 & 7.52 & 4.10 & \multicolumn{4}{r}{43/500 (0.088)} \\
- & $S_{3,\mathrm{oi}}$ & 2.46 & 6.12 & 7.99 & 9.89 & 9.11 & \multicolumn{4}{r}{1/500 (0.004)} \\
- & $S_{3,\mathrm{inv}}$ & 2.32 & 5.34 & 7.39 & 9.20 & 4.26 & \multicolumn{4}{r}{68/500 (0.138)} \\
-high-noise & $J_{LM,\mathrm{oi}}$ & 2.04 & 5.18 & 6.99 & 7.41 & 9.12 & \multicolumn{4}{r}{0/500 (0.002)} \\
- & $J_{LM,\mathrm{inv}}$ & 1.96 & 5.02 & 6.65 & 8.72 & 4.10 & \multicolumn{4}{r}{45/500 (0.092)} \\
- & $S_{3,\mathrm{oi}}$ & 2.60 & 6.29 & 7.61 & 9.58 & 9.11 & \multicolumn{4}{r}{2/500 (0.006)} \\
- & $S_{3,\mathrm{inv}}$ & 2.51 & 6.06 & 7.44 & 9.41 & 4.26 & \multicolumn{4}{r}{77/500 (0.156)} \\
+cal & $J_{LM,\mathrm{oi}}$ & 2.02 & 5.33 & 7.27 & 9.19 & 9.12 & \multicolumn{5}{r}{1/500 (0.004)} \\
+ & $J_{LM,\mathrm{inv}}$ & 1.89 & 4.59 & 6.92 & 7.52 & 4.10 & \multicolumn{5}{r}{43/500 (0.088)} \\
+ & $S_{3,\mathrm{oi}}$ & 2.46 & 6.12 & 7.99 & 9.89 & 9.11 & \multicolumn{5}{r}{1/500 (0.004)} \\
+ & $S_{3,\mathrm{inv}}$ & 2.32 & 5.34 & 7.39 & 9.20 & 4.26 & \multicolumn{5}{r}{68/500 (0.138)} \\
+high-noise & $J_{LM,\mathrm{oi}}$ & 2.04 & 5.18 & 6.99 & 7.41 & 9.12 & \multicolumn{5}{r}{0/500 (0.002)} \\
+ & $J_{LM,\mathrm{inv}}$ & 1.96 & 5.02 & 6.65 & 8.72 & 4.10 & \multicolumn{5}{r}{45/500 (0.092)} \\
+ & $S_{3,\mathrm{oi}}$ & 2.60 & 6.29 & 7.61 & 9.58 & 9.11 & \multicolumn{5}{r}{2/500 (0.006)} \\
+ & $S_{3,\mathrm{inv}}$ & 2.51 & 6.06 & 7.44 & 9.41 & 4.26 & \multicolumn{5}{r}{77/500 (0.156)} \\
 \midrule
-\multicolumn{11}{l}{\emph{(c) Comparator and spatial aggregation performance against known generating truth ($\tau+\kappa=-0.239$, $\phi=0.326$)}} \\
-design & method & \multicolumn{2}{l}{level (zero share)} & mean & bias (MCSE) & RMSE & \multicolumn{4}{r}{sign / $\hat\phi$ note} \\
+\multicolumn{12}{l}{\emph{(c) Comparator and spatial aggregation performance against known generating truth ($\tau+\kappa=-0.239$, $\phi=0.326$)}} \\
+design & method & \multicolumn{2}{l}{level (zero share)} & mean & bias (MCSE) & RMSE & \multicolumn{5}{r}{convergence / mechanism note} \\
 \midrule
-cal & M0 & \multicolumn{2}{l}{county (54.5\% zeros)} & -0.243 & -0.003 (0.004) & 0.080 & \multicolumn{4}{r}{--} \\
- & M2 (EpiEstim) & \multicolumn{2}{l}{county (54.5\% zeros)} & -0.015 & +0.224 (0.001) & 0.225 & \multicolumn{4}{r}{pos: 22.8\%} \\
- & M3 ($\log(Y+1)$ TWFE) & \multicolumn{2}{l}{county (54.5\% zeros)} & -0.080 & +0.159 (0.000) & 0.159 & \multicolumn{4}{r}{--} \\
- & M0 & \multicolumn{2}{l}{NUTS-2 (2.3\% zeros)} & -0.226 & +0.013 (0.005) & 0.096 & \multicolumn{4}{r}{$\hat\phi$: 0.113} \\
- & M2 (EpiEstim) & \multicolumn{2}{l}{NUTS-2 (2.3\% zeros)} & -0.164 & +0.076 (0.002) & 0.083 & \multicolumn{4}{r}{neg: 100.0\%} \\
-high-noise & M0 & \multicolumn{2}{l}{county (57.8\% zeros)} & -0.256 & -0.016 (0.006) & 0.137 & \multicolumn{4}{r}{--} \\
- & M2 (EpiEstim) & \multicolumn{2}{l}{county (57.8\% zeros)} & -0.012 & +0.227 (0.001) & 0.229 & \multicolumn{4}{r}{pos: 32.6\%} \\
- & M3 ($\log(Y+1)$ TWFE) & \multicolumn{2}{l}{county (57.8\% zeros)} & -0.075 & +0.164 (0.001) & 0.165 & \multicolumn{4}{r}{--} \\
- & M0 & \multicolumn{2}{l}{NUTS-2 (3.6\% zeros)} & -0.248 & -0.008 (0.007) & 0.158 & \multicolumn{4}{r}{$\hat\phi$: 0.170} \\
- & M2 (EpiEstim) & \multicolumn{2}{l}{NUTS-2 (3.6\% zeros)} & -0.156 & +0.083 (0.002) & 0.096 & \multicolumn{4}{r}{neg: 100.0\%} \\
+cal & M0 & \multicolumn{2}{l}{county (54.5\% zeros)} & -0.243 & -0.003 (0.004) & 0.080 & \multicolumn{5}{r}{$n=500/500$} \\
+ & M2 (EpiEstim, $a=1,b=5$) & \multicolumn{2}{l}{county (54.5\% zeros)} & -0.015 & +0.224 (0.001) & 0.225 & \multicolumn{5}{r}{pos: 22.8\%} \\
+ & M2 (weak prior $a=0.1$) & \multicolumn{2}{l}{county (54.5\% zeros)} & -0.140 & +0.099 (0.001) & 0.102 & \multicolumn{5}{r}{halves bias} \\
+ & M2 (noise-free $Y=\mu$, $a=1$) & \multicolumn{2}{l}{county (deterministic)} & -0.027 & +0.212 (0.001) & 0.213 & \multicolumn{5}{r}{noise/0 share: +0.012} \\
+ & M3 ($\log(Y+1)$ TWFE) & \multicolumn{2}{l}{county (54.5\% zeros)} & -0.080 & +0.159 (0.000) & 0.159 & \multicolumn{5}{r}{outcome slope} \\
+ & M0 (unconstrained) & \multicolumn{2}{l}{NUTS-2 (2.3\% zeros)} & -0.226 & +0.013 (0.005) & 0.096 & \multicolumn{5}{r}{$n=449$, $\hat\phi$: 0.113} \\
+ & M0 (global $\phi\ge 0$) & \multicolumn{2}{l}{NUTS-2 (2.3\% zeros)} & -0.225 & +0.014 (0.004) & 0.097 & \multicolumn{5}{r}{$n=500$, bnd: 33.8\%, $\hat\phi$: 0.120} \\
+ & M2 (EpiEstim, $a=1,b=5$) & \multicolumn{2}{l}{NUTS-2 (2.3\% zeros)} & -0.164 & +0.076 (0.002) & 0.083 & \multicolumn{5}{r}{neg: 100.0\%} \\
+ & M2 (weak prior $a=0.1$) & \multicolumn{2}{l}{NUTS-2 (2.3\% zeros)} & -0.240 & -0.001 (0.002) & 0.044 & \multicolumn{5}{r}{near-zero bias} \\
+high-noise & M0 & \multicolumn{2}{l}{county (57.8\% zeros)} & -0.256 & -0.016 (0.006) & 0.137 & \multicolumn{5}{r}{$n=500/500$} \\
+ & M2 (EpiEstim, $a=1,b=5$) & \multicolumn{2}{l}{county (57.8\% zeros)} & -0.012 & +0.227 (0.001) & 0.229 & \multicolumn{5}{r}{pos: 32.6\%} \\
+ & M2 (weak prior $a=0.1$) & \multicolumn{2}{l}{county (57.8\% zeros)} & -0.125 & +0.114 (0.001) & 0.119 & \multicolumn{5}{r}{halves bias} \\
+ & M2 (noise-free $Y=\mu$, $a=1$) & \multicolumn{2}{l}{county (deterministic)} & -0.027 & +0.213 (0.001) & 0.214 & \multicolumn{5}{r}{noise/0 share: +0.014} \\
+ & M3 ($\log(Y+1)$ TWFE) & \multicolumn{2}{l}{county (57.8\% zeros)} & -0.075 & +0.164 (0.001) & 0.165 & \multicolumn{5}{r}{outcome slope} \\
+ & M0 (unconstrained) & \multicolumn{2}{l}{NUTS-2 (3.6\% zeros)} & -0.248 & -0.008 (0.007) & 0.158 & \multicolumn{5}{r}{$n=446$, $\hat\phi$: 0.170} \\
+ & M0 (global $\phi\ge 0$) & \multicolumn{2}{l}{NUTS-2 (3.6\% zeros)} & -0.247 & -0.008 (0.007) & 0.157 & \multicolumn{5}{r}{$n=500$, bnd: 25.0\%, $\hat\phi$: 0.160} \\
+ & M2 (EpiEstim, $a=1,b=5$) & \multicolumn{2}{l}{NUTS-2 (3.6\% zeros)} & -0.156 & +0.083 (0.002) & 0.096 & \multicolumn{5}{r}{neg: 100.0\%} \\
+ & M2 (weak prior $a=0.1$) & \multicolumn{2}{l}{NUTS-2 (3.6\% zeros)} & -0.238 & +0.002 (0.003) & 0.060 & \multicolumn{5}{r}{near-zero bias} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) working weights, truth set to primary M0 ($\tau=-0.300$, $\kappa=0.060$, $\phi=0.326$), NB2 $k=4.96$ and state $\times$ week log-normal shock SD $\sigma=0.202$ (\emph{cal}), or $k/2$ and $2\sigma$ (\emph{high-noise}). Unique interior root in 100.0\% (\emph{cal}) and 100.0\% (\emph{high-noise}). For $\tau+\kappa$ in \emph{cal}, sandwich SEs understate empirical SD by 14.5\% (mean SE / emp.\ SD = 0.855); both $t_{15}$ and unrestricted wild score under-cover, whereas restricted score wild bootstrap (WCR-score; $B=399$) and delete-one-state jackknife (JK) cover closer to 0.95. Panel~(c) quantifies exact M2 (EpiEstim $\log R$) Jensen bias against known truth at simulated county vs.\ NUTS-2 zero rates alongside M0's own aggregation shift. Source: \texttt{experiment/analysis/germany\_calibrated\_sim.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Calibrated DGP retains the observed 400-county network, 261-week summer holiday schedule, Vink et al.\ (2014) working weights, truth set to primary M0 ($\tau=-0.300$, $\kappa=0.060$, $\phi=0.326$), NB2 $k=4.96$ and state $\times$ week log-normal shock SD $\sigma=0.202$ (\emph{cal}), or $k/2$ and $2\sigma$ (\emph{high-noise}). All rates assume the maintained working model (Assumption~A7 and parallel trends hold). County M0 achieves 500/500 (100.0\%, \emph{cal}) and 500/500 (100.0\%, \emph{high-noise}) unique interior convergence; sandwich SEs understate $\tau+\kappa$ SD by 14.5\% (SE ratio 0.855; 0.830 high-noise). Unified delete-one-state jackknife (JK; 500/500 converged) is slightly conservative (SE ratio 1.142 \emph{cal}, 1.126 \emph{high-noise}), WCR-score ($B=399$) covers at 0.934--0.946, and nested pairs cluster bootstrap-$t$ ($R=200, B=199$; $\approx 199/199$ inner convergence) covers at 0.915 (\emph{cal}) and 0.945 (\emph{high-noise}). In Panel~(c), county M2 positive bias under default EpiEstim prior ($+0.224$ \emph{cal}) is driven primarily by prior pseudo-counts under small expected counts (noise-free $Y=\mu$ gives $+0.212$; noise/zero realizations add only $+0.012$; weakening prior to $a=0.1$ drops bias to $+0.099$), while M3 estimates the $\log(Y+1)$ TWFE slope rather than $\tau+\kappa$. At NUTS-2, unconstrained M0 converges on 449/500 (\emph{cal}) and 446/500 (\emph{high-noise}) draws (failures cross $\Lambda(\phi)\le 0$; $\hat\phi$ bias -0.212 and -0.156), whereas global grid search ($\phi\ge 0$) resolves 500/500 draws with 33.8\% (\emph{cal}) and 25.0\% (\emph{high-noise}) selecting $\phi=0$. Source: \texttt{experiment/analysis/germany\_calibrated\_sim.json}.}
 \end{table}

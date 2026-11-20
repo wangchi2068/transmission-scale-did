@@ -9,7 +9,7 @@ This directory contains the public raw datasets, automated download script (`fet
 
 ## Raw Inputs (`experiment/data/raw/germany/`)
 
-Archived SurvStat extraction date: **`2026-11-19`** (OpenHolidays and AGS GeoJSON fetched same day; persisted at `https://github.com/wangchi2068/transmission-scale-did`). Run `python experiment/data/fetch_germany.py` to download fresh upstream copies (noting that live RKI SurvStat counts may reflect subsequent retroactive case corrections) or `--check` to verify the exact `2026-11-19` LF archive.
+Archived SurvStat extraction date: **`2026-11-19`** (OpenHolidays and AGS GeoJSON fetched same day; persisted at `https://github.com/wangchi2068/transmission-scale-did`). Run `python experiment/data/fetch_germany.py` to download fresh upstream copies canonically (volatile fetch-date metadata is written separately to `fetch_metadata.json` so canonical re-downloads match the archived LF SHA-256 checksums whenever upstream records have not changed) or `--check` to verify the exact `2026-11-19` LF archive.
 
 | File | Source & Query Specification | Access / Licence | Bytes (LF) | SHA-256 |
 | --- | --- | --- | ---: | --- |

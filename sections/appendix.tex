@@ -633,10 +633,13 @@ induced by the reference value, and global identification (A6(iv)) fails in thes
 The application uses three public raw files stored under \path{experiment/data/raw/germany/}
 (archived snapshot extracted on 2026-11-19 at
 \url{https://github.com/wangchi2068/transmission-scale-did}), retrievable via the download script
-\path{experiment/data/fetch_germany.py}, verified by their LF SHA-256 checksums in
-\path{experiment/data/checksums.tsv} (with \path{.gitattributes} locking raw data files as binary
-to prevent cross-platform line-ending drift), and processed deterministically by
-\path{experiment/code/data_prep.py} (documented with source licences and exact query syntax in
+\path{experiment/data/fetch_germany.py} (which writes volatile run-date metadata separately to
+\texttt{fetch\_metadata.json} so canonical re-downloads reproduce the archived LF SHA-256 checksums
+in \path{experiment/data/checksums.tsv} when upstream records remain unchanged, with
+\path{.gitattributes} locking raw data files as binary), and processed deterministically by
+\path{experiment/code/data_prep.py}. Source licences are public SurvStat@RKI 2.0 open surveillance
+data, OpenHolidays public API (MIT / open data compiling official KMK schedules), and BKG /
+GeoBasis-DE Data licence Germany via \texttt{geofeatures-ags-germany} (see also
 \path{experiment/data/data_contract.md}).
 
 \begin{enumerate}
@@ -658,7 +661,7 @@ for the three counties with zero reported cases in 2017: Starnberg \texttt{09188
 \texttt{09763}, and Hildburghausen \texttt{16069}; zero imputed counties; total national population
 82.89 million), entering solely through $\omega_i=\text{population}_i/10^5$.
 \item \emph{Exposure.} Official federal-state school holiday schedules (Kultusministerkonferenz)
-for 2014--2019 were obtained via the OpenHolidays API for all 16 German states (\texttt{DE-SH}
+for 2014--2019 were obtained via the OpenHolidays API (MIT / open data) for all 16 German states (\texttt{DE-SH}
 through \texttt{DE-TH}), covering summer, Easter, autumn, winter, Pentecost, and Christmas
 holidays. For each county $i$ and ISO week $t$ (Monday--Sunday), $D^{(0)}_{it}=1$ if at least four
 of the seven days fall inside the state's summer school holiday (\emph{Sommerferien}), and
@@ -742,22 +745,35 @@ gives critical values of 2.242 ($\tau$), 2.366 ($\kappa$), 2.439 ($\phi$) and 2.
 yielding $[-0.385,-0.094]$ for $\tau+\kappa$.
 
 \emph{Calibrated finite-cluster coverage and comparator distortion.} Web Table~\ref{tab:rev-calsim}
-evaluates $t_{15}$, unrestricted wild score, null-imposed WCR-score ($B=399$ per draw), and
-delete-one-state jackknife $t_{15}$ intervals alongside M2 and M3 under known truth
-($\tau+\kappa=-0.239$, $\phi=0.326$) on the exact German 400-county, 261-week design ($R=500$ draws
-each in calibrated and high-noise arms; Monte Carlo SE on coverage $\approx 0.010$). Under the
-baseline calibrated design ($k=4.96$, $\sigma=0.2025$), $t_{15}$ coverage is 0.930--0.934 for
-$\tau$, $\kappa$ and $\phi$, but drops to 0.902 for $\tau+\kappa$ because the clustered sandwich SE
-averages 85.5\% of the true Monte Carlo SD (SE ratio $0.855$; high-noise SE ratio $0.830$,
-coverage 0.904). Unrestricted score wild intervals remain undercovering (0.872 Mammen, 0.894 Webb6),
-whereas WCR-score restores coverage to 0.936 (Webb6) and 0.934 (Rademacher; 0.946 under both in
-high-noise), and delete-one-state jackknife $t_{15}$ covers at 0.966 (0.964 high-noise; mean JK SE
-ratio 1.155 calibrated, 1.135 high-noise). Pairs bootstrap coverage was not simulated because each
-multinomial draw requires nested nonlinear GMM optimisation across 1{,}000 panels. Under known truth
-in Web Table~\ref{tab:rev-calsim}(c), simulated county zero shares (54.5\% calibrated, 57.8\%
-high-noise) induce a positive M2 bias of $+0.224$ ($+0.227$ high-noise; positive estimates in
-22.8\% and 32.6\% of draws), which drops by two-thirds to $+0.076$ ($+0.083$) under NUTS-2
-aggregation (2.3\%--3.6\% zeros) while NUTS-2 M0 bias remains $+0.013$ ($-0.008$).
+evaluates $t_{15}$, unrestricted wild score, null-imposed WCR-score ($B=399$ per draw), and the
+unified delete-one-state jackknife $t_{15}$ (dropping any isolated county such as Berlin when
+Brandenburg is omitted, using fixed non-oracle starts, matching \texttt{application.py}) alongside
+a reduced nested pairs cluster bootstrap-$t$ benchmark ($R=200$, $B=199$, MCSE $\approx 0.020$)
+and comparator benchmarks under known truth ($\tau+\kappa=-0.239$, $\phi=0.326$) assuming the
+maintained working model (Assumption~A7 and parallel trends hold; $R=500$ draws each in
+calibrated and high-noise arms; coverage MCSE $\approx 0.010$). Under the baseline calibrated
+design ($k=4.96$, $\sigma=0.2025$), $t_{15}$ coverage is 0.930--0.934 for $\tau$, $\kappa$ and
+$\phi$, but drops to 0.902 for $\tau+\kappa$ because the clustered sandwich SE averages 85.5\% of
+the true Monte Carlo SD (SE ratio $0.855$; high-noise SE ratio $0.830$, coverage 0.904).
+Unrestricted score wild intervals remain undercovering (0.872 Mammen, 0.894 Webb6), whereas
+WCR-score restores coverage to 0.936 (Webb6) and 0.934 (Rademacher; 0.946 under both in
+high-noise), unified jackknife $t_{15}$ (500/500 converged) covers conservatively at 0.970 (0.960
+high-noise; mean JK SE ratio 1.142 calibrated, 1.126 high-noise, overstating empirical SD by
+$\approx 13$--$14\%$), and nested pairs cluster bootstrap-$t$ covers at 0.915 (0.945 high-noise;
+mean $198.9/199$ inner draws converged). Under known truth in Web Table~\ref{tab:rev-calsim}(c),
+county M2 bias under the default EpiEstim Gamma$(1,5)$ prior ($+0.224$ calibrated, $+0.227$
+high-noise; mean $-0.015$; positive in 22.8\% and 32.6\% of draws) is dominated by prior
+pseudo-counts under small expected counts: noise-free conditional expectations $\mu$ leave $+0.212$
+($+0.213$) bias while sampling noise and zero realizations contribute only $+0.012$ ($+0.014$),
+and weakening the prior to $a=0.1, b=5$ halves county M2 bias to $+0.099$ ($+0.114$; observed
+county M2 flips from $+0.064$ to $-0.093$, and ultra-weak $a=0.01, b=100$ reduces simulated
+bias to $+0.016$ calibrated, $+0.045$ high-noise). County M3 exhibits $+0.159$ ($+0.164$)
+discrepancy relative to $\tau+\kappa$, reflecting its $\log(Y+1)$ TWFE target slope. At NUTS-2
+aggregation (2.3\%--3.6\% zeros), default-prior M2 bias drops to $+0.076$ ($+0.083$) and weak-prior
+M2 ($a=0.1$) eliminates bias ($-0.001$ / $+0.002$), while unconstrained non-oracle NUTS-2 M0
+converges on 449/500 calibrated and 446/500 high-noise draws ($\Lambda(\phi)\le 0$ failures;
+$\hat\phi$ bias $-0.212$ / $-0.156$) and global $\phi\ge 0$ search resolves 500/500 draws with
+33.8\% (calibrated) and 25.0\% (high-noise) selecting $\phi=0$.
 
 \emph{Unshrunk adjacent-state covariance (Remark~\ref{rem:testable}).} Adding the 29 shared-border
 state-pair score cross-terms to $\hat\Omega$ yields cluster score correlations of $+0.175$ ($\tau$),
@@ -814,7 +830,7 @@ $\phi=0.326$), and matches the empirical negative binomial dispersion ($k=4.96$)
 week log-normal shock SD ($\sigma=0.2025$); a high-noise variant halves $k$ and doubles $\sigma$
 ($R=500$ draws each). Web Table~\ref{tab:rev-calsim} reports interval coverage (including WCR-score
 and jackknife), finite-sample null reference distributions, and known-truth comparator performance in
-Panel~(c). All 1{,}000 draws converge to a unique interior root. In the observed panel,
+Panel~(c). All 1{,}000 county M0 draws converge to a unique interior root. In the observed panel,
 reference-value invariance passes ($J_{LM,\mathrm{inv}}=4.10$, calibrated $p=0.088$;
 $S_{3,\mathrm{inv}}=4.26$, calibrated $p=0.138$), whereas $J_{LM,\mathrm{oi}}=9.12$ clearly exceeds
 the calibrated 95th percentile ($5.33$, calibrated $p=0.004$; high-noise q95 $=5.18$, $p=0.002$)
@@ -898,8 +914,10 @@ short non-summer break shows a significant negative notification dip in lag 0 ($
 all $p<0.05$) followed by a positive lag-2 rebound ($+0.241$, CI $[0.066,0.416]$ for Easter;
 $+0.150$, $[0.035,0.264]$ for Autumn; Web Figure~\ref{fig:web-diag}(b)), reproducing a shared
 holiday reporting-suppression and post-break catch-up pattern that directly probes the
-separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$; alongside the vaccination-era
-regime described in \citealp{siedler2010varicella,reuss2010varicella}). Shifted-calendar pre-window
+separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$; alongside vaccination uptake
+heterogeneity spanning early rollout and the 2015--2019 panel window,
+\citealp{siedler2010varicella,reuss2010varicella,rieck2020impfquoten}, and state-level holiday
+confounding discussed in \citealp{vonbismarckosten2022schools}). Shifted-calendar pre-window
 indicators at leads $3,2,1$ are positive ($+0.296$, $+0.248$, $+0.328$; contrasting with the
 event-time bin check in F.5 that controls explicitly for holiday duration rather than overlapping
 indicator shifts), while $-1$ to $+4$ trace lags 0--5. Against 200 cross-state schedule

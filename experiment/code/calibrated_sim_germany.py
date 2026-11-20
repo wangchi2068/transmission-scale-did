@@ -16,6 +16,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 
+import argparse
 import json
 import sys
 import time
@@ -24,7 +25,7 @@ from pathlib import Path
 
 import numpy as np
 import scipy.sparse as sps
-from scipy import stats
+from scipy import optimize, stats
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "experiment" / "code"))
@@ -34,10 +35,13 @@ sys.path.insert(0, str(ROOT / "verification" / "application"))
 import application as app
 import comparators as cmp
 import dgp
+import qdgmm
 import wild_bootstrap as WB
 from qdx import QDX, inv_extras, oi_extras, tsum
 
 OUT_PATH = ROOT / "experiment" / "analysis" / "germany_calibrated_sim.json"
+NUTS_STARTS = [[-0.3, 0.0, 0.3], [-0.2, -0.1, 0.5], [0.0, 0.0, 0.5], [0.0, 0.0, 0.05]]
+JK_STARTS = [[-0.3, 0.0, 0.3], [0.0, 0.0, 0.5]]
 
 _G_STATE = {}
 
@@ -47,8 +51,109 @@ def _init_worker(state_dict):
     _G_STATE.update(state_dict)
 
 
+def _pairs_bootstrap_fast(mod: qdgmm.QDModel, beta_hat: np.ndarray, B: int, seed: int) -> dict:
+    """Fast vectorized pairs cluster bootstrap-t on cluster moments matching WB.pairs_moment_bootstrap."""
+    rng = np.random.default_rng(seed)
+    G, Tm1, N = mod.G, mod.T - 1, mod.N
+    Y0, Y1 = mod.Y[:-1], mod.Y[1:]
+    L, Nb, om = mod.L, mod.Nb, mod.om
+    X0, X1 = mod.X[0], mod.X[1]
+    dX0, dX1 = mod.dX[0], mod.dX[1]
+    Z = np.stack(mod.Zpar, axis=0)
+    s, cl, fscale = mod.s, mod.cl, mod.fscale
+    cl_mat = (cl[:, None] == np.arange(G)[None, :]).astype(float)
+    sY0 = s * Y0
+    Z_Y0 = np.einsum("mtn,tn->mn", Z, Y0)
+    ts = []
+    fails = 0
+    for _ in range(B):
+        m_g = rng.multinomial(G, np.full(G, 1.0 / G)).astype(float)
+        w_unit = m_g[cl]
+        den = (sY0 * w_unit).sum(1)
+        if np.any(den <= 0):
+            fails += 1
+            continue
+        ws = w_unit[None, :] * s
+        wZ = w_unit[None, None, :] * Z
+        rhs = (Z_Y0 * w_unit[None, :]).sum(1)
+
+        def prof_w(beta):
+            lam = L + beta[2] * Nb + om
+            if np.any(lam <= 0) or not np.all(np.isfinite(beta)):
+                return np.full(3, 1e6 * fscale), np.eye(3)
+            eta = beta[0] * X0 + beta[1] * X1
+            q_ = np.exp(np.clip(eta[:-1] - eta[1:], -50, 50)) * lam[:-1] / lam[1:]
+            Yq = Y1 * q_
+            num = (ws * Yq).sum(1)
+            if np.any(num <= 0):
+                return np.full(3, 1e6 * fscale), np.eye(3)
+            Ed = num / den
+            Yr = Yq / Ed[:, None]
+            F = ((wZ * Yr[None, :, :]).sum((1, 2)) - rhs) / N
+            r = Nb / lam
+            rr = r[:-1] - r[1:]
+            sYr = ws * Yr
+            a = sYr.sum(1)
+            dxs = np.stack([dX0, dX1, rr], axis=0)
+            bb = np.einsum("tn,ptn->tp", sYr, dxs)
+            cm = np.einsum("mtn,tn->mt", wZ, Yr)
+            H = np.einsum("mtn,tn,ptn->mp", wZ, Yr, dxs)
+            Jp = (H - cm @ (bb / a[:, None])) / N
+            return F, Jp
+
+        sol = optimize.root(prof_w, beta_hat, jac=True, method="hybr", options={"xtol": 1e-10, "maxfev": 400})
+        F_end, _ = prof_w(sol.x)
+        if not sol.success or np.max(np.abs(F_end)) > 1e-7 * fscale or (mod.spec.phi_free and sol.x[mod.K] < 0):
+            fails += 1
+            continue
+        bx = sol.x
+        lam = L + bx[2] * Nb + om
+        eta = bx[0] * X0 + bx[1] * X1
+        q_ = np.exp(np.clip(eta[:-1] - eta[1:], -50, 50)) * lam[:-1] / lam[1:]
+        Yq = Y1 * q_
+        Ed = (ws * Yq).sum(1) / den
+        Yr = Yq / Ed[:, None]
+        v = Yr - Y0
+        rr = (Nb / lam)[:-1] - (Nb / lam)[1:]
+        dxs = np.stack([dX0, dX1, rr], axis=0)
+        gw = (s * v) @ cl_mat
+        gz = np.einsum("mtn,ng->mg", Z * v[None, :, :], cl_mat)
+        gg = np.vstack([gw, gz])
+        sYr = ws * Yr
+        a = sYr.sum(1)
+        bb = np.einsum("tn,ptn->tp", sYr, dxs)
+        cm = np.einsum("mtn,tn->mt", wZ, Yr)
+        H = np.einsum("mtn,tn,ptn->mp", wZ, Yr, dxs)
+        J = np.zeros((Tm1 + 3, Tm1 + 3))
+        J[np.arange(Tm1), np.arange(Tm1)] = -a
+        J[:Tm1, Tm1:] = bb
+        J[Tm1:, :Tm1] = -cm
+        J[Tm1:, Tm1:] = H
+        Gam_b = J / G
+        Om_b = (gg * m_g[None, :]) @ gg.T / G
+        try:
+            Gi_b = np.linalg.inv(Gam_b)
+        except np.linalg.LinAlgError:
+            fails += 1
+            continue
+        Vb_b = (Gi_b @ Om_b @ Gi_b.T / G * G / (G - 1))[Tm1:, Tm1:]
+        if not np.all(np.isfinite(Vb_b)) or np.any(np.diag(Vb_b) <= 0):
+            fails += 1
+            continue
+        se_b = np.sqrt(np.diag(Vb_b))
+        se_tot_b = np.sqrt(max(Vb_b[0, 0] + Vb_b[1, 1] + 2.0 * Vb_b[0, 1], 1e-300))
+        db = bx - beta_hat
+        ts.append([db[0] / se_b[0], db[1] / se_b[1], db[2] / se_b[2], (db[0] + db[1]) / se_tot_b])
+
+    if len(ts) < 20:
+        return dict(ok=len(ts), fails=fails, B=B, q95=[np.nan] * 4)
+    ts_arr = np.asarray(ts, float)
+    q = np.quantile(np.abs(ts_arr), [0.9, 0.95, 0.975], axis=0)
+    return dict(ok=len(ts_arr), fails=fails, B=B, q90=q[0].tolist(), q95=q[1].tolist(), q975=q[2].tolist())
+
+
 def _run_one(args):
-    r, seed_base, k_nb, sig_sw = args
+    r, seed_base, k_nb, sig_sw, r_pairs, b_pairs = args
     st = _G_STATE
     Y_pre = st["Y_pre"]
     D_full = st["D_full"]
@@ -69,6 +174,7 @@ def _run_one(args):
     rng = np.random.default_rng(seed_base + r)
     Ys = np.zeros((3 + T_sim, N), dtype=float)
     Ys[:3] = Y_pre
+    mu_mat = np.zeros((T_sim, N), dtype=float)
     for j in range(T_sim):
         t = 3 + j
         L = w[0] * Ys[t - 1] + w[1] * Ys[t - 2] + w[2] * Ys[t - 3]
@@ -77,6 +183,7 @@ def _run_one(args):
         if sig_sw > 0:
             eps = sig_sw * rng.standard_normal(G)
             mu = mu * np.exp(eps - 0.5 * sig_sw ** 2)[cl]
+        mu_mat[j] = mu
         Ys[t] = dgp._draw_nb(rng, mu, k_nb)
 
     ps = dgp.build_panel(Ys, D_full, W, omega, cl, w=w, S=3)
@@ -101,12 +208,24 @@ def _run_one(args):
     pw_w6 = app.wcr_score_p_tpk0(X, eh, tpk_true, 399, seed_base + 300000 + r, "webb6")
     pw_rad = app.wcr_score_p_tpk0(X, eh, tpk_true, 399, seed_base + 400000 + r, "rademacher")
 
-    # Delete-one-state jackknife (G=16) for tpk
+    # Reduced nested pairs cluster bootstrap-t on first r_pairs draws
+    pairs_cov = None
+    pairs_q95 = np.nan
+    pairs_ok = 0
+    if r < r_pairs:
+        mod_p = qdgmm.QDModel(ps, qdgmm.spec_m0(ps, phi_bar=0.5))
+        pb = _pairs_bootstrap_fast(mod_p, eh, b_pairs, seed_base + 500000 + r)
+        pairs_ok = int(pb["ok"])
+        pairs_q95 = float(pb["q95"][3])
+        if np.isfinite(pairs_q95):
+            pairs_cov = bool(abs(tpk - tpk_true) <= pairs_q95 * tpk_se)
+
+    # Delete-one-state jackknife (G=16) unified with application.py (drops isolated counties, fixed non-oracle starts)
     jk_tpks = []
-    for keep, Dg, Wg, om_g, cl_inv in jk_pre:
-        ps_g = dgp.build_panel(Ys[:, keep], Dg, Wg, om_g, cl_inv, w=w, S=3)
+    for keep_mask, Dg, Wg, om_g, cl_inv in jk_pre:
+        ps_g = dgp.build_panel(Ys[:, keep_mask], Dg, Wg, om_g, cl_inv, w=w, S=3)
         Xg = QDX(ps_g, {"tau": ps_g["D"], "kappa": ps_g["Db"]}, phi_bar=0.5)
-        eh_g, ok_g, _ = Xg.fit(starts=[eh, beta_true])
+        eh_g, ok_g, _ = Xg.fit(starts=JK_STARTS)
         if ok_g:
             jk_tpks.append(float(eh_g[0] + eh_g[1]))
     if len(jk_tpks) == G:
@@ -117,21 +236,50 @@ def _run_one(args):
         jk_se = np.nan
         cov_jk = False
 
-    # Comparators under known truth: county M2, county M3, and NUTS-2 M0 & M2
+    # Comparators under known truth: county M2 (default + weaker priors + noise-free L check), M3, and NUTS-2 M0 & M2
     m2_c = cmp.m2_logr_did(ps)
+    m2_c_weak = cmp.twfe_ols(cmp.cori_log_r(ps, a=0.1, b=5.0), ps["D"], ps["cl"], G)
+    m2_c_ultralow = cmp.twfe_ols(cmp.cori_log_r(ps, a=0.01, b=100.0), ps["D"], ps["cl"], G)
+    lr_nf = np.log((1.0 + mu_mat) / (0.2 + ps["L"]))
+    m2_c_nf = cmp.twfe_ols(lr_nf, ps["D"], ps["cl"], G)
     m3_c = cmp.m3_logy_twfe(ps)
     m2_c_tau = float(m2_c["est"]["tau"]) if m2_c.get("ok") else np.nan
+    m2_c_weak_tau = float(m2_c_weak["est"]["tau"]) if m2_c_weak.get("ok") else np.nan
+    m2_c_ultra_tau = float(m2_c_ultralow["est"]["tau"]) if m2_c_ultralow.get("ok") else np.nan
+    m2_c_nf_tau = float(m2_c_nf["est"]["tau"]) if m2_c_nf.get("ok") else np.nan
     m3_c_tau = float(m3_c["est"]["tau"]) if m3_c.get("ok") else np.nan
     c_zero_share = float((ps["Y"] == 0).mean())
 
     Y2s = Ys @ nuts_agg["A_sum"]
     p2 = dgp.build_panel(Y2s, nuts_agg["D2l"], nuts_agg["W2"], nuts_agg["om2"], nuts_agg["cl2"], w=w, S=3)
     X2 = QDX(p2, {"tau": p2["D"], "kappa": p2["Db"]}, phi_bar=0.5)
-    eh2, ok2, _ = X2.fit(starts=[eh, beta_true])
+    eh2, ok2, _ = X2.fit(starts=NUTS_STARTS)
     m0_n2_tpk = float(eh2[0] + eh2[1]) if ok2 else np.nan
     m0_n2_phi = float(eh2[2]) if ok2 else np.nan
+
+    grid_chk = np.array([0.0, 0.05, 0.15, 0.3, 0.5, 0.8, 1.2, 2.0, 3.0])
+    cands2, _ = X2.global_roots(grid_chk)
+    ints2 = [c for c in cands2 if c[0] == "interior"]
+    bnds2 = [c for c in cands2 if c[0] == "boundary"]
+    if ints2:
+        sel2 = ints2[0]
+        m0_n2_glob_tpk = float(sel2[1][0] + sel2[1][1])
+        m0_n2_glob_phi = float(sel2[1][2])
+        m0_n2_glob_bnd = False
+    elif bnds2:
+        sel2 = bnds2[0]
+        m0_n2_glob_tpk = float(sel2[1][0] + sel2[1][1])
+        m0_n2_glob_phi = 0.0
+        m0_n2_glob_bnd = True
+    else:
+        m0_n2_glob_tpk = np.nan
+        m0_n2_glob_phi = np.nan
+        m0_n2_glob_bnd = False
+
     m2_n2 = cmp.m2_logr_did(p2)
+    m2_n2_weak = cmp.twfe_ols(cmp.cori_log_r(p2, a=0.1, b=5.0), p2["D"], p2["cl"], int(p2["G"]))
     m2_n2_tau = float(m2_n2["est"]["tau"]) if m2_n2.get("ok") else np.nan
+    m2_n2_weak_tau = float(m2_n2_weak["est"]["tau"]) if m2_n2_weak.get("ok") else np.nan
     n2_zero_share = float((p2["Y"] == 0).mean())
 
     # Over-identification statistics
@@ -141,8 +289,7 @@ def _run_one(args):
     s3_oi = app.score_s3_at_beta(X, eh, [0, 1])["S3"]
     s3_inv = app.score_s3_at_beta(X, eh, [2, 3])["S3"]
 
-    # Check root multiplicity on compact grid
-    grid_chk = np.array([0.0, 0.05, 0.15, 0.3, 0.5, 0.8, 1.2, 2.0, 3.0])
+    # Check county root multiplicity on compact grid
     cands, _ = X.global_roots(grid_chk)
     n_int = sum(1 for c in cands if c[0] == "interior")
 
@@ -159,16 +306,26 @@ def _run_one(args):
         cov_wild_web=(err <= np.asarray(ww["q95"]) * ses).tolist(),
         cov_wcr_web=bool(pw_w6 > 0.05) if np.isfinite(pw_w6) else False,
         cov_wcr_rad=bool(pw_rad > 0.05) if np.isfinite(pw_rad) else False,
+        pairs_cov=pairs_cov,
+        pairs_q95=pairs_q95,
+        pairs_ok=pairs_ok,
         jk_se=float(jk_se),
         cov_jackknife=cov_jk,
         jk_ok=(len(jk_tpks) == G),
         c_zero_share=c_zero_share,
         n2_zero_share=n2_zero_share,
         m2_county=m2_c_tau,
+        m2_county_weak=m2_c_weak_tau,
+        m2_county_ultralow=m2_c_ultra_tau,
+        m2_county_noisefree=m2_c_nf_tau,
         m3_county=m3_c_tau,
         m0_nuts2_tpk=m0_n2_tpk,
         m0_nuts2_phi=m0_n2_phi,
+        m0_nuts2_glob_tpk=m0_n2_glob_tpk,
+        m0_nuts2_glob_phi=m0_n2_glob_phi,
+        m0_nuts2_glob_bnd=m0_n2_glob_bnd,
         m2_nuts2=m2_n2_tau,
+        m2_nuts2_weak=m2_n2_weak_tau,
         j_oi=float(j_oi),
         j_inv=float(j_inv),
         s3_oi=float(s3_oi),
@@ -228,6 +385,10 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
     jk_ok = [r for r in ok_res if r.get("jk_ok")]
     cov_jk = float(np.mean([r["cov_jackknife"] for r in jk_ok]))
     mean_jk_se = float(np.mean([r["jk_se"] for r in jk_ok]))
+    pairs_res = [r for r in ok_res if r.get("pairs_cov") is not None]
+    cov_pairs = float(np.mean([r["pairs_cov"] for r in pairs_res])) if pairs_res else float("nan")
+    pairs_mean_ok = float(np.mean([r["pairs_ok"] for r in pairs_res])) if pairs_res else 0.0
+    pairs_mean_q95 = float(np.mean([r["pairs_q95"] for r in pairs_res])) if pairs_res else float("nan")
     tpk_true = float(beta_true[0] + beta_true[1])
     trues = np.array([beta_true[0], beta_true[1], beta_true[2], tpk_true])
     names = ["tau", "kappa", "phi", "tpk"]
@@ -252,20 +413,34 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
             rec_p["mean_jk_se"] = mean_jk_se
             rec_p["jk_se_ratio"] = float(mean_jk_se / vals[:, k].std(ddof=1))
             rec_p["jk_ok"] = int(len(jk_ok))
+            rec_p["cov_pairs"] = cov_pairs
+            rec_p["n_pairs"] = int(len(pairs_res))
+            rec_p["pairs_mean_ok"] = pairs_mean_ok
+            rec_p["pairs_mean_q95"] = pairs_mean_q95
         params[nm] = rec_p
 
+    m2_c_arr = np.array([r["m2_county"] for r in ok_res])
+    m2_c_nf_arr = np.array([r["m2_county_noisefree"] for r in ok_res])
     comparators = dict(
         truth_tpk=tpk_true,
         truth_phi=float(beta_true[2]),
         county_zero_share=float(np.mean([r["c_zero_share"] for r in ok_res])),
         nuts2_zero_share=float(np.mean([r["n2_zero_share"] for r in ok_res])),
         M0_county=_summ_est(vals[:, 3], tpk_true),
-        M2_county=_summ_est(np.array([r["m2_county"] for r in ok_res]), tpk_true),
+        M2_county=_summ_est(m2_c_arr, tpk_true),
+        M2_county_weak=_summ_est(np.array([r["m2_county_weak"] for r in ok_res]), tpk_true),
+        M2_county_ultralow=_summ_est(np.array([r["m2_county_ultralow"] for r in ok_res]), tpk_true),
+        M2_county_noisefree=_summ_est(m2_c_nf_arr, tpk_true),
+        M2_county_noise_zero_component=float(np.nanmean(m2_c_arr - m2_c_nf_arr)),
         M3_county=_summ_est(np.array([r["m3_county"] for r in ok_res]), tpk_true),
         M0_nuts2_tpk=_summ_est(np.array([r["m0_nuts2_tpk"] for r in ok_res]), tpk_true),
         M0_nuts2_phi=_summ_est(np.array([r["m0_nuts2_phi"] for r in ok_res]), float(beta_true[2])),
+        M0_nuts2_global_tpk=_summ_est(np.array([r["m0_nuts2_glob_tpk"] for r in ok_res]), tpk_true),
+        M0_nuts2_global_phi=_summ_est(np.array([r["m0_nuts2_glob_phi"] for r in ok_res]), float(beta_true[2])),
+        M0_nuts2_global_boundary_share=float(np.mean([r["m0_nuts2_glob_bnd"] for r in ok_res])),
         M2_nuts2=_summ_est(np.array([r["m2_nuts2"] for r in ok_res]), tpk_true),
-        M2_county_pos_share=float(np.mean(np.array([r["m2_county"] for r in ok_res]) > 0)),
+        M2_nuts2_weak=_summ_est(np.array([r["m2_nuts2_weak"] for r in ok_res]), tpk_true),
+        M2_county_pos_share=float(np.mean(m2_c_arr > 0)),
         M2_nuts2_neg_share=float(np.mean(np.array([r["m2_nuts2"] for r in ok_res]) < 0)),
     )
 
@@ -302,6 +477,13 @@ def summarise_runs(res_list: list[dict], beta_true: np.ndarray, obs_stats: dict)
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--R", type=int, default=500)
+    ap.add_argument("--r-pairs", type=int, default=200)
+    ap.add_argument("--b-pairs", type=int, default=199)
+    ap.add_argument("--workers", type=int, default=max(1, min(os.cpu_count() or 4, 16)))
+    args = ap.parse_args()
+
     t0 = time.time()
     d = app.load_data()
     app_res = json.loads((ROOT / "experiment" / "analysis" / "germany_application_results.json").read_text(encoding="utf-8"))
@@ -325,14 +507,24 @@ def main():
     cl = d["cl"]
     W = d["W"]
     omega = d["pop"] / 1e5
+    A_full = (W > 0).astype(float).tocsr()
     jk_pre = []
     for g in range(G):
         keep = cl != g
-        Wg = W[keep][:, keep]
-        rs = np.asarray(Wg.sum(1)).ravel()
-        Wg = sps.diags(np.where(rs > 0, 1.0 / np.maximum(rs, 1.0), 0.0)) @ Wg
-        _, cl_inv = np.unique(cl[keep], return_inverse=True)
-        jk_pre.append((keep, D_full[:, keep], Wg, omega[keep], cl_inv))
+        Ak = A_full[keep][:, keep]
+        deg = np.asarray(Ak.sum(1)).ravel()
+        sub_keep = deg > 0
+        if not sub_keep.all():
+            idx_k = np.where(keep)[0][sub_keep]
+            keep_mask = np.zeros(len(cl), dtype=bool)
+            keep_mask[idx_k] = True
+            Ak = A_full[keep_mask][:, keep_mask]
+            deg = np.asarray(Ak.sum(1)).ravel()
+        else:
+            keep_mask = keep
+        Wk = sps.diags(1.0 / deg) @ Ak
+        _, cl_inv = np.unique(cl[keep_mask], return_inverse=True)
+        jk_pre.append((keep_mask, D_full[:, keep_mask], Wk.tocsr(), omega[keep_mask], cl_inv))
 
     n2 = d["nuts2"]
     K = int(n2.max()) + 1
@@ -370,12 +562,16 @@ def main():
         nuts_agg=nuts_agg,
     )
 
-    R = 500
-    n_workers = max(1, min(os.cpu_count() or 4, 4))
-    print(f"Running R={R} base calibrated + R={R} high-noise stress draws on {n_workers} workers...", flush=True)
+    R = args.R
+    r_pairs = args.r_pairs
+    b_pairs = args.b_pairs
+    n_workers = args.workers
+    print(f"Running R={R} base calibrated + R={R} high-noise stress draws (pairs R={r_pairs}, B={b_pairs}) on {n_workers} workers...", flush=True)
 
     out = dict(
         R=R,
+        R_pairs=r_pairs,
+        B_pairs=b_pairs,
         calibration=dict(k_nb=cal["k_nb"], sig_sw=cal["sig_sw"], beta_true=beta_true.tolist()),
         obs_stats=obs_stats,
     )
@@ -384,9 +580,9 @@ def main():
         ("high_noise", 2026121900, 0.5, 2.0),
     ]:
         t1 = time.time()
-        tasks = [(r, seed_base, cal["k_nb"] * k_mult, cal["sig_sw"] * s_mult) for r in range(R)]
+        tasks = [(r, seed_base, cal["k_nb"] * k_mult, cal["sig_sw"] * s_mult, r_pairs, b_pairs) for r in range(R)]
         with ProcessPoolExecutor(max_workers=n_workers, initializer=_init_worker, initargs=(state_dict,)) as ex:
-            results = list(ex.map(_run_one, tasks, chunksize=8))
+            results = list(ex.map(_run_one, tasks, chunksize=1))
         summ = summarise_runs(results, beta_true, obs_stats)
         summ["k_nb"] = float(cal["k_nb"] * k_mult)
         summ["sig_sw"] = float(cal["sig_sw"] * s_mult)
@@ -396,10 +592,11 @@ def main():
         cc = summ["comparators"]
         print(
             f"  [{tag}] {summ['R_ok']}/{R} ok in {summ['seconds']}s | tpk: bias={p_tpk['bias']:+.4f}, "
-            f"t15={p_tpk['cov_t15']:.3f}, JK={p_tpk['cov_jackknife']:.3f}, WCR_W6={p_tpk['cov_wcr_webb6']:.3f}, "
-            f"WCR_Rad={p_tpk['cov_wcr_rademacher']:.3f} | zero={cc['county_zero_share']:.3f}->{cc['nuts2_zero_share']:.3f} | "
-            f"M2_c bias={cc['M2_county']['bias']:+.3f} (pos={cc['M2_county_pos_share']:.2f}), "
-            f"M2_n2 bias={cc['M2_nuts2']['bias']:+.3f}, M0_n2 bias={cc['M0_nuts2_tpk']['bias']:+.3f}",
+            f"t15={p_tpk['cov_t15']:.3f}, JK={p_tpk['cov_jackknife']:.3f} ({p_tpk['jk_ok']}), "
+            f"WCR_W6={p_tpk['cov_wcr_webb6']:.3f}, WCR_Rad={p_tpk['cov_wcr_rademacher']:.3f}, "
+            f"Pairs={p_tpk['cov_pairs']:.3f} (n={p_tpk['n_pairs']}) | "
+            f"M2_c={cc['M2_county']['bias']:+.3f} (weak={cc['M2_county_weak']['bias']:+.3f}), "
+            f"M0_n2 n={cc['M0_nuts2_tpk']['n']} (glob bnd={cc['M0_nuts2_global_boundary_share']:.2f})",
             flush=True,
         )
 
