@@ -59,6 +59,15 @@ We thank the referee for the extraordinarily thorough verification across `main.
 
 ---
 
+## Response to Section 10 Suggestions (Scope & Feasibility for Beyond 7/10)
+
+We appreciate the referee's constructive suggestions on how the German empirical implementation could be extended further toward a structural causal application and an exhaustive finite-cluster benchmark. After careful consideration, we retain our current scope for the following reasons:
+
+1. **Symptom-onset data and joint reporting--transmission cascade modelling:** Publicly available `SurvStat@RKI 2.0` exports are aggregated strictly by notification week (*Meldewoche*) rather than symptom-onset date, and routine county-level varicella surveillance lacks an auxiliary ascertainment anchor (such as sentinel testing or serological panels) needed to separately identify time-varying reporting delays from biological transmission without strong parametric delay assumptions. As the referee notes in Section 1, reframing §4 as an *illustrative sparse-count implementation* rather than a causal holiday-effect study resolves the prior causal overclaim cleanly: the application now fulfills its methodological purpose by validating Theorem 3(a)'s small-count `M2` distortion against known truth in design-calibrated simulations (`Web Table 11(c)`, Web p.40) and demonstrating how onset-week and non-summer placebo diagnostics expose Assumption A7 violations in practice (§4.4 `main.pdf` p.20, Web Appendix F.7 Web p.38--39). Joint nowcasting and ascertainment-delay cascades remain a natural standalone extension already highlighted in §5 (`main.pdf` p.21).
+2. **Nested Monte Carlo simulation of nonlinear pairs cluster bootstrap-$t$:** In commit `3252fb6`, we implemented full 16-fold delete-one-state jackknife ($t_{15}$) inference inside `experiment/code/calibrated_sim_germany.py` across all $R=500 \times 2$ design-calibrated panels (`500/500` converged in both arms), establishing empirical coverage of `0.966` (`0.964` high-noise). Together with `WCR-score` (`0.934`--`0.946`), **every finite-cluster inference method recommended in Table 3 (`main.pdf` p.35) now has direct Monte Carlo coverage backing**. By contrast, `pairs cluster bootstrap-t` is *not* recommended in Table 3 and appears in §4.3 (`main.pdf` p.19) solely as an observed-sample sensitivity check explicitly flagged as `"coverage not simulated"`. Nesting $B$ nonlinear GMM profile optimizations inside 1,000 outer Monte Carlo panels (where the current simulation including 16-fold jackknife already takes `488.6s`) would multiply computation by orders of magnitude while offering limited methodological return, especially because `pairs` resampling across $G=16$ strongly unbalanced states can yield degenerate cluster weights.
+
+---
+
 ## Verified Final Repository & Build Checks
 
 - `python experiment/data/fetch_germany.py --check`: **3/3 OK** (`2,475,214` / `261,944` / `1,289,615` bytes).
