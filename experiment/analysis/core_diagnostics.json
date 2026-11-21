@@ -1,0 +1,176 @@
+{
+  "scen5_se_outliers": {
+    "R": 400,
+    "n_ok": 386,
+    "n_fail": 14,
+    "emp_sd": 0.06998922333951571,
+    "emp_iqr_sd": 0.06402847705070983,
+    "se_mean": 7.7623550809960316,
+    "se_median": 0.07446935540917093,
+    "se_iqr": 0.015218676958413557,
+    "se_p95": 0.09840283026748362,
+    "se_p99": 0.1507629001261436,
+    "se_max": 2966.4631787103135,
+    "share_se_gt_0_5": 0.0051813471502590676,
+    "relerr_median_se": 0.06401174146371402,
+    "top5_outliers": [
+      {
+        "se": 2966.4631787103135,
+        "phi": 0.0883068216364619,
+        "tau": -0.1796594167176259
+      },
+      {
+        "se": 0.6941312245099144,
+        "phi": 3.4354579315769014,
+        "tau": 0.1190875964963984
+      },
+      {
+        "se": 0.22709068300133678,
+        "phi": 3.5102846008902615,
+        "tau": 0.14253427304276303
+      },
+      {
+        "se": 0.15367327359787644,
+        "phi": 0.1247715333536278,
+        "tau": -0.0661980018860565
+      },
+      {
+        "se": 0.1502493048076026,
+        "phi": 0.06483560629637812,
+        "tau": -0.2481579244782232
+      }
+    ]
+  },
+  "oracle_cluster_mass": {
+    "scen14": {
+      "sid": 14,
+      "R": 80,
+      "raw_max_cluster_share_mean": 0.267931362553395,
+      "raw_max_cluster_share_max": 0.6949460939087797,
+      "raw_hhi_mean": 0.13119892558188745,
+      "raw_effective_G_mean": 11.881448214088667,
+      "m0_max_cluster_share_mean": 0.02864204857767777,
+      "m0_max_cluster_share_max": 0.03313573455054819,
+      "m0_effective_G_mean": 48.11072790160864,
+      "oracle_emp_sd": 0.05774942549088841,
+      "oracle_mean_se": 0.03688467927802309,
+      "oracle_se_ratio": 0.6387020990164253
+    },
+    "scen16": {
+      "sid": 16,
+      "R": 80,
+      "raw_max_cluster_share_mean": 0.2580149113658982,
+      "raw_max_cluster_share_max": 0.7541123474302523,
+      "raw_hhi_mean": 0.12334250597133281,
+      "raw_effective_G_mean": 12.581858559217405,
+      "m0_max_cluster_share_mean": 0.028473427252293126,
+      "m0_max_cluster_share_max": 0.033113049212920985,
+      "m0_effective_G_mean": 48.26884805509801,
+      "oracle_emp_sd": 0.0661575726166505,
+      "oracle_mean_se": 0.037753438188057306,
+      "oracle_se_ratio": 0.5706593621083906
+    }
+  },
+  "m1bc_failures": {
+    "1": {
+      "conv": {
+        "p": 0.998625,
+        "mcse": 0.00041429297830762455,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 11
+      }
+    },
+    "2": {
+      "conv": {
+        "p": 0.147,
+        "mcse": 0.003959024501060836,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 6824
+      }
+    },
+    "3": {
+      "conv": {
+        "p": 1.0,
+        "mcse": 0.0,
+        "n": 8000
+      },
+      "reasons": {}
+    },
+    "4": {
+      "conv": {
+        "p": 0.238875,
+        "mcse": 0.00476725463939939,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 6089
+      }
+    },
+    "21": {
+      "conv": {
+        "p": 0.277,
+        "mcse": 0.005003386353261159,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 5784
+      }
+    },
+    "22": {
+      "conv": {
+        "p": 0.934625,
+        "mcse": 0.0027636278099402232,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 523
+      }
+    },
+    "23": {
+      "conv": {
+        "p": 0.280625,
+        "mcse": 0.005023377964266177,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 5755
+      }
+    },
+    "24": {
+      "conv": {
+        "p": 0.17425,
+        "mcse": 0.0042409747921321106,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 6606
+      }
+    },
+    "25": {
+      "conv": {
+        "p": 0.119875,
+        "mcse": 0.0036315455452017946,
+        "n": 8000
+      },
+      "reasons": {
+        "half-panel fit failed: no within-unit variation in D": 7041
+      }
+    }
+  },
+  "x2_psi_abs_bias": {
+    "R": 100,
+    "n_ok": 100,
+    "psi_dagger_median": 69894463.46081689,
+    "psi_dagger_mean": 87470111.30771971,
+    "psi_hat_median": 79791594599.2435,
+    "psi_hat_mean": 107245326787.59984,
+    "abs_bias_mean": 107157856676.29213,
+    "abs_bias_median": 79716150855.86444,
+    "rel_bias_median": 1056.1089777860238,
+    "rel_bias_mean": 1239.2278681587266
+  }
+}

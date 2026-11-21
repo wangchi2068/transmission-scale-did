@@ -1,5 +1,7 @@
 # verification/application —— 应用部分的辅助检验
 
+> **Provenance note (E8)**: `wild_bootstrap.py` (`score_wild_bootstrap`, `pairs_moment_bootstrap`) and `STROBE_checklist.md` are active components for the German varicella implementation (`experiment/code/application.py`, $N=400, G=16, T=261$). The earlier scripts `tau_kappa.py`, `total_ci.py`, `timing.py`, `m0et_revised.py` / `m0et_revised.json` below document the **retired US COVID-19 mask-order prototype** ($N=3{,}091, G=49$) and are retained for historical audit only.
+
 | 文件 | 内容 |
 |---|---|
 | `tau_kappa.py` / `tau_kappa.json` | 州级政策的 tau 与 kappa 共线性、tau+kappa 合并效应 |

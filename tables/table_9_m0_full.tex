@@ -37,5 +37,5 @@ scenario & bias (MCSE) & empSE (MCSE) & modSE & rel.\ err.\ SE (MCSE) & RMSE (MC
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize Primary estimator M0, $\tau$: Monte Carlo performance measures with Monte Carlo standard errors (Morris, White and Crowther, 2019). empSE = sd of $\hat\tau$ (ddof 1); modSE = mean cluster-robust SE; rel.\ err.\ SE = modSE/empSE$-1$; cov.\ (\%) of 95\% $t_{G-1}$ intervals; conv.\ = share (\%) of replications in which the solver converged. R = 8000 per scenario.}
+\par\smallskip\parbox{\linewidth}{\scriptsize Primary estimator M0, $\tau$: Monte Carlo performance measures with Monte Carlo standard errors (Morris, White and Crowther, 2019). empSE = sd of $\hat\tau$ (ddof 1); modSE = mean cluster-robust SE; rel.\ err.\ SE = modSE/empSE$-1$; cov.\ (\%) of 95\% $t_{G-1}$ intervals; conv.\ = share (\%) of replications in which the solver converged. In Scenario~5 ($\phi_0=0$, no spillover), arithmetic mean SE (0.455, rel.\ err.\ 5.089, MCSE $1.65\times 10^4$) is dominated by $<0.6\%$ extreme near-boundary Jacobian draws (e.g.\ SE $>2900$ at $\hat\phi\approx 0.09$); over $R=400$ diagnostic draws, median SE is 0.074 (IQR 0.015, $+6.4\%$ vs.\ empSD). R = 8000 per scenario.}
 \end{table}

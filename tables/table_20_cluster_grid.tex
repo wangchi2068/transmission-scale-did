@@ -1,0 +1,27 @@
+\begin{table}[!t]
+\centering
+\caption{Controlled finite-cluster coverage across pure $G \in \{10,\dots,100\}$ at fixed $N=2400$ and across German cluster-size skewness $\times T$ at $N=400, G=16$ ($\tau+\kappa$, $R=250$).}
+\label{tab:rev-clustergrid}
+\footnotesize
+\setlength{\tabcolsep}{2.6pt}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+design cell & bias & emp.\ SD & mean SE (ratio) & $t_{G-1}$ & $t_{G-2}$ & JK (SE ratio) & WCR-W6 & WCR-Rad \\
+\midrule
+Grid A: $G=10, N=2400, T=12$, bal.\ (FB) & +0.001 & 0.106 & 0.082 (0.773) & 0.988 & 0.988 & 0.992 (1.129) & 0.956 & 0.972 \\
+Grid A: $G=16, N=2400, T=12$, bal.\ (FB) & +0.002 & 0.059 & 0.056 (0.947) & 0.996 & 0.996 & 0.996 (1.104) & 0.944 & 0.956 \\
+Grid A: $G=20, N=2400, T=12$, bal.\ (FB) & -0.002 & 0.055 & 0.054 (0.976) & 0.968 & 0.968 & 0.988 (1.091) & 0.960 & 0.960 \\
+Grid A: $G=30, N=2400, T=12$, bal.\ (FB) & -0.001 & 0.056 & 0.055 (0.973) & 0.976 & 0.976 & 0.988 (1.077) & 0.948 & 0.948 \\
+Grid A: $G=50, N=2400, T=12$, bal.\ (FB) & -0.000 & 0.056 & 0.055 (0.984) & 0.960 & 0.960 & 0.980 (1.102) & 0.936 & 0.936 \\
+Grid A: $G=100, N=2400, T=12$, bal.\ (FB) & -0.002 & 0.059 & 0.057 (0.958) & 0.960 & 0.960 & 0.988 (1.110) & 0.952 & 0.948 \\
+\midrule
+Grid B: $G=16, N=400, T=12$, bal.\ (RD) & +0.009 & 0.082 & 0.073 (0.883) & 0.960 & 0.960 & 0.996 (1.103) & 0.936 & 0.944 \\
+Grid B: $G=16, N=400, T=60$, bal.\ (RD) & +0.015 & 0.064 & 0.065 (1.012) & 0.948 & 0.948 & 0.992 (1.290) & 0.948 & 0.948 \\
+Grid B: $G=16, N=400, T=12$, DE-skew (RD) & +0.005 & 0.175 & 0.164 (0.934) & 0.948 & 0.948 & 0.987 (1.125) & 0.944 & 0.948 \\
+Grid B: $G=16, N=400, T=60$, DE-skew (RD) & +0.017 & 0.113 & 0.087 (0.768) & 0.944 & 0.944 & 0.996 (1.237) & 0.952 & 0.944 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip\parbox{\linewidth}{\scriptsize Grid~A isolates pure $G \in \{10,16,20,30,50,100\}$ under balanced clusters at fixed $N=2400, T=12$ (feedback adoption): sandwich SE ratios stay near 1 for $G \ge 16$ (0.947--0.984) and $t_{G-1}$ avoids under-coverage. Grid~B crosses balanced vs.\ German federal-state cluster sizes ($1$ to $96$ counties out of $400$) against $T \in \{12, 60\}$ profiled week effects under staggered random adoption (so late-horizon cases remain active): neither $T=60$ alone (SE ratio 1.012 balanced) nor DE-skewness at $T=12$ (SE ratio 0.934) replicates the German SE shortfall; it is specifically the interaction of severe cluster-size skewness and long-$T$ week profiling that lowers SE ratio to 0.768 at $T=60$, while WCR-score (Webb6: 0.952) and delete-one-cluster jackknife (0.996, SE ratio 1.237) maintain nominal coverage. Note $t_{G-2}$ mimics fixed-$G$ $t$-test adjustments \citep{hwang2021simple}. Source: \texttt{verification/root\_selection/cluster\_grid\_results.json}.}
+\end{table}

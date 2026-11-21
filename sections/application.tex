@@ -4,11 +4,11 @@
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_03_application.png}
-\caption{Illustrative implementation on German county-level varicella notifications (2015--2019, $N=400$, $G=16$ federal states, $T=261$ weeks). (a) Working-model log-rate coefficient ($\hat\tau+\hat\kappa$, or $\hat\tau$) and 95\% intervals across QD-GMM M0 ($t_{15}$, WCR-score Webb6, and pairs cluster bootstrap-$t$), comparators (M0$'$, M1--M4), and NUTS-2 aggregation ($N=38$, reducing zero county-weeks from 58.8\% to 2.9\% and reversing two-step EpiEstim M2 from $+0.064$ to $-0.102$). (b) Profiled Stock--Wright $S_1(\phi)$ curve over $\phi\in[0,3]$ with boundary inset, showing local interior root $\hat\phi=0.327$ and exact-moment $F_{1,15}$ set $[0.21,2.45]$ (shaded).}
+\caption{Illustrative implementation on German county-level varicella notifications (2015--2019, $N=400$, $G=16$ federal states, $T=261$ weeks). (a) Working-model log-rate coefficient ($\hat\tau+\hat\kappa$, or $\hat\tau$) and 95\% intervals across QD-GMM M0 ($t_{15}$, WCR-score Webb6, and pairs cluster bootstrap-$t$), comparators (M0$'$, M1--M4), and NUTS-2 aggregation ($N=38$, reducing zero county-weeks from 58.8\% to 2.9\% and reversing two-step EpiEstim M2 from $+0.064$ to $-0.102$). (b) Profiled Stock--Wright $S_1(\phi)$ curve over $\phi\in[0,3]$ with boundary inset, showing local interior root $\hat\phi=0.327$ and exact-moment $F_{1,15}$ set $[0.21,2.45]$ (shaded). [Alt text: Two-panel plot of the German varicella testbed showing working-model estimates and confidence intervals across methods and aggregations in panel (a), and profiled Stock-Wright S1 confidence curve with boundary inset in panel (b).]}
 \label{fig:app}
 \end{figure}
 
-To demonstrate computation, comparator behaviour under extreme sparsity, and finite-cluster
+To demonstrate computation, comparator behavior under extreme sparsity, and finite-cluster
 calibration in real epidemic surveillance data, we implement QD-GMM on five years of weekly German
 county-level varicella (\emph{Windpocken}) notifications paired with federal-state summer school
 holidays (2015--2019; \citealp{faensen2006survnet}). School holidays have long served as natural
@@ -18,16 +18,16 @@ reopening \citep{isphording2021schools,vonbismarckosten2022schools}. Most closel
 methodological spirit, \citet{adda2016economic} studies French weekly varicella incidence across
 school closures first via outcome-scale event regressions (Section~III) and then via a dynamic
 spatial transmission equation with a three-week lag and cross-regional terms (Section~IV, Table~VI);
-unlike parametric endemic likelihood or linearised specifications, QD-GMM absorbs unrestricted
+unlike parametric endemic likelihood or linearized specifications, QD-GMM absorbs unrestricted
 unit fixed effects by forward quasi-differencing, handles incidence-driven feedback via
 predetermined instruments, and pairs point estimation with finite-cluster and separable-reporting
-diagnostics. Here this German panel serves as a computational and diagnostic testbed in three
+diagnostics. Here this German panel serves strictly as a computational and diagnostic testbed in three
 respects. First, \citet{vink2014serial} report a mean varicella serial interval of roughly 14.0 days;
-discretising a log-normal working surrogate with those moments onto weekly lags $s=1,2,3$ gives
+discretizing a log-normal working surrogate with those moments onto weekly lags $s=1,2,3$ gives
 $w=(0.141,0.720,0.138)$ with negligible within-week mass ($w_0=2.6\times 10^{-6}$, while serial
 and generation intervals share similar means but differ in dispersion). Second, county-week
 notifications are sparse (58.8\% zeros, median 0, mean 1.10), testing small-count comparator
-behaviour. Third, cluster sizes vary sharply across Germany's $G=16$ states (1 county in Berlin and
+behavior. Third, cluster sizes vary sharply across Germany's $G=16$ states (1 county in Berlin and
 Hamburg to 96 in Bavaria; median 16.5), providing a realistic few-cluster setting.
 
 \subsection{Data and working-model implementation}
@@ -39,123 +39,109 @@ Weekly notified counts come from the Robert Koch Institute SurvStat@RKI 2.0 data
 2019-W52, 115{,}129 notifications, plus $S=3$ pre-sample weeks; Web Appendix~\ref{app:data}).
 Official state summer holiday schedules come from OpenHolidays, and county adjacency comes from
 official BKG VG250 five-digit AGS polygons (1{,}044 undirected edges, mean degree 5.22,
-row-normalised $W$; Web Appendix~\ref{app:data}). As a
-post hoc baseline working specification, exposure $D_{it}$ codes a one-week-lagged indicator for a
-majority of summer holiday days ($\ge 4$ of 7 days) in state $g(i)$ (11.8\% of county-weeks);
-because varicella's 10--21 day incubation window (mean $\approx$14--16 days) plus notification
-delays could align biological transmission more closely with lags 2--3 (which yield more negative
-working contrasts of $-0.332$ [$95\%$ CI $-0.716,0.051$] and $-0.542$ [$-0.823,-0.261$], whereas
-dropping BW/BY shifts lag 2 to $+0.031$ and pooling all holidays gives $+0.060$; Web Appendix~\ref{app:diag}),
-lag sensitivity underscores why this panel is treated strictly as an illustrative working implementation.
-Background importation uses $\omega_i=\text{population}_i/10^5$, and inference clusters by state
+row-normalized $W$; Web Appendix~\ref{app:data}). As a working exposure definition motivated by the
+10--21 day varicella incubation period (mean $\approx 14$ days; \citealp{vink2014serial}) followed by
+case notification, onset of reduced school contact first projects onto weekly notification rates at a
+one-to-three week delay; we code a baseline one-week-lagged majority-week indicator ($D_{it}$, $\ge 4$
+holiday days, 11.8\% treated) and evaluate lags 0--4 on equal footing (Web Appendix~\ref{app:diag}),
+noting that both the lag choice and all sensitivities were formulated post hoc during revision.
+Unlike the absorbing-adoption benchmark in Theorem~\ref{thm:ident}(b) and
+Propositions~\ref{prop:sources}--\ref{prop:hetero}, school holidays turn on and off annually, so
+Theorem~\ref{thm:ident}(a) and Theorem~\ref{thm:asy} cover two-way switching regimes (onsets minus
+reopenings), where pooled M0 estimates an average of entry and exit contrasts. Under Assumption~A7
+(Proposition~\ref{prop:ascertainment}), valid identification for $\phi_0>0$ would additionally
+require uniform county reporting factors ($c_i=c_j$ across neighboring counties) as well as constant
+holiday ascertainment; both conditions fail here, reinforcing why this panel illustrates working-model
+computation and diagnostics rather than causal effects. Background importation is normalized by
+$\omega_i=\text{population}_i/10^5$ and profiled across sensitivity scalings below; inference clusters by state
 ($G=16$). Because exposure varies at the state level, interior counties satisfy $D_{it}=\bar D_{it}$,
 making $\tau+\kappa$ the baseline working-model coefficient.
 
-Without dropping any zero-count county-weeks, local QD-GMM M0 ($\bar\phi=0.5$) converges to a
-unique interior root $\hat\phi=0.327$ (SE $0.0566$, 95\% $t_{15}$ CI $[0.206,0.447]$;
-Figure~\ref{fig:app}(b)), with baseline working-model coefficients $\hat\tau=-0.292$ ($[-0.847,0.262]$),
-$\hat\kappa=0.052$ ($[-0.547,0.651]$), and $\hat\tau+\hat\kappa=-0.240$ (SE $0.0584$, 95\% $t_{15}$
-CI $[-0.365,-0.116]$; Table~\ref{tab:app}). The numerical value $\hat\tau+\hat\kappa=-0.240$ is
-reported strictly as a working-model implementation output and is not interpreted as a causal
-school-holiday effect. Moreover, the interior root is qualified by the broader root and
-over-identification diagnostics: under exact working moments $S_1(0)=5.80$ ($p_F=0.029$) and the
-95\% $S_1(F)$ set is $[0.21,2.45]$, yet the pre-specified global rule M0-G selects the $\phi=0$
-boundary ($\hat\tau+\hat\kappa=-0.216$, Table~\ref{tab:app}) because $S_{3,\mathrm{oi}}$ slightly
-favours $\phi=0$ over the interior root ($9.156$ vs.\ $9.161$), and M0-GI retains the interior root
-only under $S_{3,\mathrm{inv}}$.
+Without dropping any zero-count county-weeks, identification-robust diagnostics quantify both signal
+and structural fragility ahead of point selection: under exact working moments $S_1(0)=5.80$
+($p_F=0.029$) rejects zero coupling and yields a connected $F_{1,15}$ set $[0.21,2.45]$ with
+Stock--Wright Bonferroni 95\% projection $[-0.493,-0.082]$ for $\tau+\kappa$
+(Figure~\ref{fig:app}(b), Web Table~\ref{tab:rev-robust}), yet the $F_{3,14}$-calibrated joint and
+invariance sets ($S_{3,\mathrm{oi}}(F)$, $S_{3,\mathrm{inv}}(F)$) span the entire $[0,3]$ grid
+while $S_{3,\mathrm{oi}}(\chi^2)$ is empty. Local QD-GMM M0 ($\bar\phi=0.5$) converges to interior
+root $\hat\phi=0.327$ (SE $0.057$) with working-model contrast $\hat\tau+\hat\kappa=-0.240$ (SE
+$0.058$, 95\% $t_{15}$ CI $[-0.365,-0.116]$; Table~\ref{tab:app}); pre-specified global rule M0-G
+selects the $\phi=0$ boundary ($\hat\tau+\hat\kappa=-0.216$) because $S_{3,\mathrm{oi}}$ slightly
+favors $\phi=0$ ($9.156$ vs.\ $9.161$), whereas M0-GI retains the interior root under
+$S_{3,\mathrm{inv}}$. In line with major diagnostic boundaries (Table~\ref{tab:envelope}), across
+five working GI surrogates $\hat\tau+\hat\kappa$ spans $[-0.247,-0.213]$ (CI union
+$[-0.366,-0.088]$) while $\hat\phi$ spans $[0.239,0.477]$, convolving exposure and GI weights by
+stochastic notification delays ($0$--$2.8$ days) moves $\hat\tau+\hat\kappa$ to $[-0.614,-0.240]$
+($J_{LM,\mathrm{oi}}$ $p_F=0.063$ at 2.8~d), and profiling background importation across
+$\omega_i\times[0.1,10]$ shifts $\hat\phi$ monotonically from $0.783$ to $-0.118$ and treated
+$\hat\psi^\dagger$ more than sevenfold (Web Tables~\ref{tab:rev-gi} and \ref{tab:rev-ascert}).
+Consequently, these point estimates are reported strictly as working-model computational outputs and
+are not interpreted causally.
 
 \subsection{Sparse-count estimator comparison}
 \label{ss:app-comp}
 
-On the observed surveillance panel, standard comparators exhibit distinct small-count patterns
-(Table~\ref{tab:app}, Figure~\ref{fig:app}(a)). At the county level (58.8\% zeros), two-step
-EpiEstim log-$R$ DiD (M2) yields $+0.064$ ($[0.036,0.093]$); aggregating identical counts into
-Germany's $N=38$ NUTS-2 regions lowers zeros to 2.9\%, moving M2 to $-0.102$ ($[-0.150,-0.055]$)
-while M0 moves from $-0.240$ to $-0.147$ ($[-0.280,-0.013]$), $\log(Y+1)$ TWFE (M3) gives
-$-0.102$, and Poisson fixed effects (M1) and pooled QMLE (M4) estimate near-zero spatial coupling
-($0.058$ and $0.002$). Because M0 itself shifts across observed aggregation levels, Web
-Table~\ref{tab:rev-calsim}(c) evaluates comparators against known generating truth
-($\tau+\kappa=-0.240$, $\phi=0.327$) under the maintained calibrated working model
-(Section~\ref{ss:app-wcr}): under simulated county zero shares (54.5\% calibrated, 57.8\%
-high-noise), county M0 bias is $-0.006$ ($-0.020$ high-noise), whereas county M2 suffers a bias of
-$+0.227$ ($+0.227$ high-noise; mean $-0.013$, positive in 23.6\% and 32.2\% of draws) and county
-M3 gives $+0.160$ ($+0.164$ high-noise, reflecting in part that M3 targets the $\log(Y+1)$ TWFE
-slope rather than $\tau+\kappa$). Importantly, the observed $+0.064$ county M2 contrast lies $+4.33$
-simulated SDs above the calibrated M2 mean ($-0.013$, SD $0.018$; $+2.74$ SDs in high noise, mean
-$-0.014$, SD $0.028$), showing that calibrated working dynamics do not alone account for the
-empirical sign reversal without additional mechanisms such as holiday reporting shifts. Within the
-maintained-model simulations, replacing random counts $Y$ by deterministic expectations $\mu$ under
-the default EpiEstim Gamma$(1,5)$ prior leaves $+0.215$ bias ($+0.213$ high-noise), with sampling
-noise and zeros adding only $+0.012$ ($+0.014$); weakening the prior monotonically reduces
-simulated county M2 bias from $+0.227$ through $+0.157$ at moderate $(0.25,5)$ ($+0.162$
-high-noise) and $+0.103$ at weak $(0.1,5)$ ($+0.112$ high-noise; reducing simulated NUTS-2 M2 bias
-to $+0.004$ calibrated and $-0.003$ high-noise, indistinguishable from zero within MCSE) to
-$+0.024$ at ultra-low $(0.01,100)$ ($+0.041$ high-noise), confirming that within the maintained
-working model M2's distortion is dominated by prior pseudo-counts under small expected counts. On
-the observed panel, however, varying the prior moves M2 non-monotonically from $+0.064$ (SE $0.013$)
-to $-0.025$ (SE $0.013$) at $(0.25,5)$, $-0.093$ (SE $0.017$) at $(0.1,5)$, and $-0.075$ (SE
-$0.037$) at $(0.01,100)$, leaving positive standardized gaps relative to calibrated (and high-noise)
-simulated means across every prior ($z=+3.05/+1.83$, $+1.93/+1.04$, and $+3.14/+1.87$) and
-underscoring that empirical features outside the maintained generator---such as holiday reporting
-shifts---also affect the observed series. Aggregating simulated panels to NUTS-2 (2.3\%--3.5\%
-zeros) cuts default-prior M2 bias to $+0.079$ ($+0.080$), whereas spatial coarsening degrades M0
-contagion identification: under the primary $\phi\ge 0$ global grid rule, all 500/500 NUTS-2
-panels resolve with $30.4\%$ calibrated and $22.0\%$ high-noise selecting the $\phi=0$ boundary
-($\tau+\kappa$ bias $+0.010$ / $-0.009$, $\hat\phi$ mean $0.131$ / $0.170$, bias $-0.196$ /
-$-0.156$). When the unconstrained solver is run without enforcing $\phi\ge 0$, it converges on
-453/500 calibrated and 465/500 high-noise panels, of which 105 (23.2\%) and 75 (16.1\%) select
-infeasible negative roots $\hat\phi<0$; restricting to the converged non-negative subset gives
-$\hat\phi$ means $0.188$ ($n=348$, bias $-0.139$) and $0.218$ ($n=390$, bias $-0.108$; vs.\
-$-0.201$ / $-0.152$ across all converged unconstrained fits), while the failed unconstrained fits
-stalled at finite residuals short of root tolerance on the $\phi<0$ side (45/47 calibrated, 32/35
-high-noise; 0/47 and 0/35 entered $\Lambda(\phi)\le 0$).
+On the observed surveillance panel, standard comparators exhibit distinct small-count behavior
+(Table~\ref{tab:app}, Figure~\ref{fig:app}(a)). At county level (58.8\% zeros), two-step EpiEstim
+log-$R$ DiD (M2) yields $+0.064$ ($[0.036,0.093]$); aggregating identical counts to $N=38$ NUTS-2
+regions reduces zeros to 2.9\% and reverses M2 to $-0.102$ ($[-0.150,-0.055]$), while M0 shifts
+to $-0.147$ ($[-0.280,-0.013]$), $\log(Y+1)$ TWFE (M3, targeting outcome log slope) gives $-0.102$,
+and Poisson FE (M1) and pooled QMLE (M4) estimate near-zero spatial coupling ($0.058$ and $0.002$).
+Evaluated against known truth in the maintained German calibrated simulation (Web
+Table~\ref{tab:rev-calsim}(c)), county M0 bias is small ($-0.006$ calibrated, $-0.020$ high-noise)
+while default Gamma$(1,5)$ M2 bias is $+0.227$---dominated by prior pseudo-counts under low expected
+counts ($+0.215$ on noise-free expectations, falling monotonically to $+0.024$ at ultra-weak
+prior $(0.01,100)$)---whereas on the observed panel M2 exceeds calibrated means by $+1.93$ to
+$+4.33$ SDs across all priors, implicating mechanisms beyond the maintained generator such as
+holiday reporting shifts. At NUTS-2, global $\phi\ge 0$ M0 search resolves all draws (22\%--30\%
+selecting boundary $\phi=0$), whereas unconstrained optimization stalls or converges to $\hat\phi<0$
+in 23\% (calibrated) and 16\% (high-noise) of converged fits (full breakdowns in Web
+Appendix~\ref{app:fewcluster}).
 
 \input{tables/table_7_application}
 
-\subsection{Finite-cluster calibration}
+\subsection{Finite-cluster calibration and spatial dependence diagnostics}
 \label{ss:app-wcr}
 
-Because $G=16$ states span 1 to 96 counties (Bavaria holds 24\% of all counties), we evaluate
-finite-cluster interval coverage in simulations calibrated to the exact BKG VG250 400-county,
-261-week German design assuming the maintained working model (Assumption~A7 and parallel trends hold
-at $\tau=-0.292$, $\kappa=0.052$, $\phi=0.327$; $R=500$ draws in baseline and high-noise arms,
-coverage MCSE at $0.95$ equals $0.0097\approx 0.010$; Web Appendix~\ref{app:fewcluster}, Web
-Table~\ref{tab:rev-calsim}). Across all 1{,}000 simulated panels, county-level M0 achieves 100\%
-unique interior convergence with small bias on $\tau+\kappa$ ($-0.006$ calibrated, $-0.020$
-high-noise), yet conventional state-clustered $t_{15}$ intervals undercover at $0.898$ ($0.888$
-high-noise; exact binomial $p<0.001$ vs.\ $0.95$) because sandwich SEs understate sampling
-variability by 15.0\% (SE ratio $0.850$; $0.838$ high-noise). Null-imposed restricted score wild
-cluster bootstrap (WCR-score; \citealp{kline2012score}) improves coverage to $0.928$ (Webb6,
-$p=0.030$) and $0.934$ (Rademacher, $p=0.101$; $0.940$ and $0.942$ in high noise). The unified
-delete-one-state jackknife $t_{15}$ procedure (500/500 converged) covers conservatively at $0.956$
-in both arms ($p=0.608$), overstating empirical SD by $\approx 14$--$15\%$ (SE ratio $1.147$
-calibrated, $1.139$ high-noise). Full nested pairs cluster bootstrap-$t$ ($R=500$, $B=199$, MCSE at
-$0.95$ equals $0.0097\approx 0.010$) improves on $t_{15}$ and covers at $0.932$ calibrated
-(466/500, exact binomial $p=0.080$ vs.\ $0.95$) and $0.946$ high-noise (473/500, $p=0.681$). On the
-observed panel, WCR-score widens the M0 interval to $[-0.420,-0.140]$ (Webb6, width $0.280$) and
-$[-0.430,-0.120]$ (Rademacher, width $0.310$), similar in width to unified delete-one-state
-jackknife ($[-0.376,-0.105]$, width $0.271$) and pairs cluster bootstrap-$t$ ($[-0.386,-0.095]$,
-width $0.291$).
+Because $G=16$ states span 1 to 96 counties (Bavaria holds 24\% of all counties), we calibrate
+finite-cluster inference on the exact 400-county, 261-week German network assuming the maintained
+working model ($R=500$ in baseline and high-noise arms, MCSE $\approx 0.010$; Web
+Appendix~\ref{app:fewcluster}, Web Table~\ref{tab:rev-calsim}). County M0 achieves 100\% unique
+interior convergence with small bias, yet state-clustered $t_{15}$ intervals undercover $\tau+\kappa$
+at $0.898$ ($0.888$ high-noise, $p<0.001$) because sandwich SEs understate sampling SD by 15.0\%
+(SE ratio $0.850$; $0.838$ high-noise). Controlled $G$ and skewness $\times T$ experiments (Web
+Table~\ref{tab:rev-clustergrid}, $R=250$) establish the exact mechanism: balanced designs give SE
+ratios $0.947$--$0.984$ for $G\ge 16$, and neither long horizons ($T=60$ balanced, ratio $1.012$)
+nor skewness at $T=12$ (ratio $0.934$) compresses SEs; rather, extreme cluster skewness interacted
+with long-$T$ week profiling drops the ratio to $0.768$ at $T=60$. Within the calibrated design,
+null-imposed WCR-score bootstrap improves coverage to $0.928$ (Webb6) and $0.934$ (Rademacher;
+$0.940$--$0.942$ high-noise), unified delete-one-state jackknife $t_{15}$ covers conservatively at
+$0.956$ (SE $+14$--$15\%$), and nested pairs cluster bootstrap-$t$ ($B=199$) improves to
+$0.932$--$0.946$. On the observed panel, exact root-finding WCR-score (\texttt{brentq} tolerance $<10^{-4}$)
+widens the M0 interval to $[-0.422,-0.131]$ (Webb6) and $[-0.438,-0.119]$ (Rademacher),
+comparable to delete-one-state jackknife ($[-0.376,-0.105]$) and pairs bootstrap-$t$
+($[-0.386,-0.095]$). To probe Assumption~A4 and A4$'$, a formal permutation test on the 29
+adjacent state pairs ($B=2000$, Web Appendix~\ref{app:fewcluster}) finds no statistically
+significant adjacent score correlation ($Z_{A4}=-0.295$, $p_{\mathrm{perm}}=0.767$ for total-policy
+influence; $Z_{A4}\in[-0.520,0.966]$, $p_{\mathrm{perm}}\in[0.350,0.627]$ across individual scores),
+while A4$'$ sensitivity SEs under PSD spatial adjustment ($0.0703$) and four-macroregion clustering
+($0.0617$) remain modest refinements around the baseline sandwich SE ($0.0584$).
 
 \subsection{Scope statement}
 \label{ss:app-scope}
 
-This implementation demonstrates computation, sparse-count comparator behaviour against known
-simulation truth, and finite-cluster calibration in a real surveillance panel. The SurvStat@RKI
-counts follow notification week (\emph{Meldewoche}) rather than symptom onset, and additional
-diagnostics in Web Appendices~\ref{app:fewcluster}--\ref{app:diag} weigh directly against a
-structural causal interpretation: (i) lagged working moments are rejected by $J_{LM,\mathrm{oi}}=9.16$
-($p_{\mathrm{cal}}=0.002$), $S_{3,\mathrm{oi}}(\chi^2)$ is empty across all $\bar\phi$, and
-$F$-calibrated joint and invariance sets span the entire $[0,3]$ grid (Web Table~\ref{tab:rev-robust});
-and (ii) immediate summer onset-week drops ($\hat\tau_0+c_0\hat\kappa=-0.208$, $p=0.049$) and
-universal lag-0 notification dips followed by lag-2 rebounds across non-summer school breaks
-(Web Figure~\ref{fig:web-diag}, Web Table~\ref{tab:rev-placebo}) place this panel in Table~\ref{tab:envelope}'s
-Assumption~A7-violating regime (where simulation X2 also showed $+0.424$ upward bias on $\hat\phi$,
-so $\hat\phi=0.327$ may absorb reporting variation), alongside non-rotating southern calendars and
-heterogeneous varicella vaccination uptake documented both during early programme rollout
-\citep{siedler2010varicella,reuss2010varicella} and in cross-sectional RKI-KV and 2018
-school-entry snapshots showing roughly 15-percentage-point spreads across states and KV regions
-around the panel window \citep{rieck2020impfquoten} (any differential state-level uptake trends
-interacting with calendar season may not be fully absorbed by common week effects). We therefore use the
-German panel strictly as an illustrative sparse-count implementation rather than a causal estimate
-of summer holiday transmission effects.
+Overall, the German varicella testbed illustrates computation, sparse-count prior distortion, and
+finite-cluster screening, while its diagnostics rule out causal attribution: (i) counts use
+notification week (\emph{Meldewoche}), lagged working moments are rejected ($J_{LM,\mathrm{oi}}=9.16$,
+$p_{\mathrm{cal}}=0.002$), and sensitivity to lag ($0$--$4$ weeks), regional $\times$ week FE, and
+dropping non-rotating southern states BW/BY leaves estimates unstable (Web
+Appendix~\ref{app:diag}); (ii) although pre-window event-time bins around summer onset appear flat
+($p_F=0.763$), overlapping shifted calendars show significant positive pre-window leads ($+0.247$ to
+$+0.328$, $p\le 0.030$), and summer onset week already falls immediately ($\hat\tau_0+c_0\hat\kappa=-0.208$,
+$p=0.049$); and (iii) all four non-summer school breaks show sharp lag-0 notification drops
+($-0.199$ to $-0.497$) followed by lag-2 catch-up rebounds (Web Figure~\ref{fig:web-diag}, Web
+Table~\ref{tab:rev-placebo}, $B=2000$ schedule permutation $p=0.0075$ at lag 1), placing this panel
+in Table~\ref{tab:envelope}'s Assumption~A7-violating regime alongside heterogeneous state
+vaccination uptake documented during early program rollout and 2018 school-entry surveys
+\citep{siedler2010varicella,reuss2010varicella,rieck2020impfquoten}. We therefore use this panel
+strictly as a computational and diagnostic testbed rather than a causal estimate of school holidays.

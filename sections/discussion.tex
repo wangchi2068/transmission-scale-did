@@ -5,46 +5,55 @@ Placing parallel trends on the log reproduction number with imported infection p
 eliminating unrestricted unit effects via forward quasi-differencing delivers a DiD estimator that
 accommodates self-exciting transmission, incidence-driven policy feedback, and lagged spatial
 contagion while retaining closed-form week profiling and cluster-robust sandwich inference. Across
-25 pre-specified simulation scenarios covering feedback, spillovers, overdispersion, and small
-counts, QD-GMM achieves essentially zero bias and nominal coverage where outcome-scale, Poisson
-fixed-effects, and two-step $R$ regressions fail systematically.
+the eight interior-contagion ($\phi_0>0$) maintained-model core scenarios and four null scenarios
+($R=8000$), M0 achieves essentially zero bias and nominal coverage when the working renewal model,
+timing, and separable reporting hold---a regime where outcome-scale, Poisson fixed-effects, and
+two-step log-$R$ comparators fail under feedback, omitted spillovers, or small-count prior
+distortion (especially once the Gamma$(1,5)$ prior pseudo-count is weakened). By contrast, when
+contagion lies on the $\phi_0=0$ boundary, when reporting changes after policy adoption (X2), or
+when pooled constant-effect M0 is applied under dynamic effect build-up (X5), the pre-specified
+estimator breaks down.
 
 Three operating limits and diagnostic practices govern weekly QD-GMM in empirical work
-(Table~\ref{tab:envelope}). First is root uniqueness and boundary behaviour: when true contagion
-$\phi_0$ lies near zero, population moments can exhibit a second root shifting with $\bar\phi$, so
-practitioners should profile $[0,3]$ and cross-check M0-G and M0-GI against Stock--Wright
-identification-robust confidence sets \citep{stock2000weak,andrews2012identification,kleibergen2005testing}.
-Second is temporal aggregation and separable reporting: Section~\ref{ss:sameweek} establishes that
-weekly QD-GMM suits multi-week generation intervals (such as varicella, measles, or mumps), whereas
-fast pathogens ($w_0\gtrsim 0.3$) require sub-weekly estimating equations \citep{lison2024nowcast}.
-Moreover, non-summer holiday placebos and onset-week diagnostics in Web Appendix~\ref{app:diag}
-directly probe the separable ascertainment restriction in Assumption~A7 ($c_{it}=c_i c_t$): a
-common week factor $c_t$ cannot absorb policy- or holiday-specific reporting shifts, so failing
-those diagnostics flags that working-model contrasts cannot be interpreted as pure biological
-transmission effects. Third is finite-cluster inference: Theorem~\ref{thm:asy} is a large-$G$
-result; when cluster counts are moderate or unequal (such as Germany's $G=16$ states), design
-calibrations show $t_{G-1}$ under-coverage and unshrunk border-pair adjustments
-(Remark~\ref{rem:testable}) can become indefinite, making null-imposed WCR-score wild bootstrap
-and delete-one-cluster jackknife checks essential alongside pairs cluster bootstrap-$t$ as a
-supplementary robustness check \citep{kline2012score,ferman2019inference,canay2021wild}.
+(Table~\ref{tab:envelope}). First is root uniqueness and boundary behavior: when true contagion
+$\phi_0$ lies near zero, population moments can exhibit a second root shifting with $\bar\phi$, and
+heuristics such as M0-G and M0-GI lack post-selection coverage guarantees; practitioners should
+profile $[0,3]$ and treat $S_1(0)$ testing alongside Stock--Wright $S_1(\phi)$ projection sets
+\citep{stock2000weak,kleibergen2005testing,andrews2017subvector,cox2026simple} as primary
+identification-robust inference. Second is temporal aggregation, reporting delay, and separable
+ascertainment: non-nested daily branching simulations ($R=500$) show that unadjusted daily-to-weekly
+reporting delays attenuate M0 upward unless aligned, while Section~\ref{ss:sameweek}'s graded
+$w_0\in[0,0.30]$ and matched-treated-share experiments confirm that weekly M0 suits multi-week
+generation intervals (such as varicella, measles, or mumps) whereas degradation grows markedly at
+$w_0=0.20$--$0.30$, calling for sub-weekly estimating equations \citep{lison2024nowcast}. Moreover,
+non-summer holiday placebos and onset-week diagnostics in Web Appendix~\ref{app:diag} directly probe
+the separable and edge-homogeneous ascertainment restriction in Proposition~\ref{prop:ascertainment}
+($c_{it}=c_ic_t$ with $c_i=c_j$ when $\phi_0>0$), flagging when reporting shifts prevent causal
+interpretation. Third is finite-cluster inference: Theorem~\ref{thm:asy} is a large-$G$, fixed-$T$
+result. Our controlled cluster-size $\times T$ experiments show that severe cluster skewness
+combined with long-$T$ week profiling compresses sandwich SEs, making null-imposed WCR-score wild
+bootstrap \citep{cameron2008bootstrap,kline2012score,webb2023reworking} and delete-one-cluster
+jackknife checks \citep{mackinnon2023guide,mackinnon2023jackknife} (improving calibrated coverage
+to $0.928$--$0.956$ under the maintained model alongside fixed-$G$ $t$ references;
+\citealp{hwang2021simple,ferman2019inference,canay2021wild}) essential whenever $G$ is moderate and
+unbalanced.
 
-On sparse German varicella surveillance counts, the framework demonstrates practical
-implementation behaviour: QD-GMM handles 58.8\% zeros without dropping county-weeks and remains
-negative across county and NUTS-2 scales where two-step EpiEstim shifts from $+0.064$ to
-$-0.102$ ($-0.240$ vs.\ $-0.147$ for M0), while design-calibrated simulations show coverage
-improvements from WCR-score and jackknife under the maintained working model. Framing parallel trends on the log
-reproduction number addresses the functional-form sensitivity identified by \citet{roth2023parallel}:
-under renewal dynamics, interventions scale transmission multiplicatively through
-$\Lambda_{it}(\phi_0)$ rather than adding linearly to case counts, so parallel trends on
-$\log R_{it}$ remain invariant to baseline incidence levels ($e^{\alpha_i}$) and separate local
-from imported force of infection; in the German panel, pre-window event bins on this scale are
-flat ($p_F=0.763$), whereas overlapping shifted indicators and short-holiday placebos show that
-holiday reporting shifts violate Assumption~A7. The framework further parallels recent
-staggered-adoption models with cross-unit policy spillovers \citep{elenev2025staggered} and
-complements unconfoundedness approaches \citep{callaway2023pandemic}. Natural methodological
-extensions include sequential efficiency bounds
-\citep{chamberlain1992sequential,chamberlain2022feedback}, likelihood feedback models
-\citep{bonhomme2025feedback}, sub-weekly nowcasted estimating equations, reporting-invariant
-wastewater signals \citep{goldstein2024wastewater}, and joint modelling of serial intervals,
-vaccination uptake, temperature seasonality, and reporting delays
-\citep{siedler2010varicella,rieck2020impfquoten,suzuki2023varicella,goldwasser2026rt}.
+On sparse German varicella surveillance counts, the framework demonstrates computational behavior
+and diagnostic screening without dropping 58.8\% zeros: QD-GMM remains negative across county and
+NUTS-2 scales ($-0.240$ vs.\ $-0.147$) where two-step EpiEstim shifts sign from $+0.064$ to
+$-0.102$, while design-calibrated simulations show coverage improvements from WCR-score and
+jackknife under the maintained working model. Framing parallel trends on the log reproduction number
+chooses a scale that is structurally natural under multiplicative renewal dynamics rather than
+eliminating functional-form assumptions \citep{roth2023parallel}; this scale choice still requires
+empirical validation. Although pre-window event bins around German summer onset appear flat
+($p_F=0.763$), overlapping shifted calendars show positive leads ($+0.247$ to $+0.328$) and short
+non-summer holidays display lag-0 drops with lag-2 rebounds, showing that holiday notification shifts
+violate Assumption~A7. Our spatial spillover term $\kappa\bar D_{it}$ also captures only geographic
+contiguity rather than broader social-mobility spillovers \citep{zhao2021interdependent},
+complementing recent interference DiD designs \citep{hettinger2025doubly,elenev2025staggered,xu2023did,xu2026dynamic}
+and unconfoundedness approaches \citep{callaway2023pandemic}. Natural methodological extensions
+include sequential efficiency bounds \citep{chamberlain1992sequential,chamberlain2022feedback},
+likelihood feedback models \citep{bonhomme2025feedback}, sub-weekly nowcasted estimating equations,
+reporting-invariant wastewater signals \citep{goldstein2024wastewater}, and joint modeling of
+serial intervals, vaccination uptake, temperature seasonality, and reporting delays
+\citep{siedler2010varicella,rieck2020impfquoten,suzuki2023varicella,trevisin2023spatially,goldwasser2026rt}.

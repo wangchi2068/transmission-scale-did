@@ -6,6 +6,10 @@ Writes: experiment/analysis/germany_application_results.json
 """
 from __future__ import annotations
 
+import os
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+    os.environ.setdefault(_v, "1")
+
 import json
 import sys
 import time
@@ -466,19 +470,84 @@ def remark4_adjacent_dependence(d: dict, panel: dict, beta: np.ndarray) -> dict:
         return res
 
     corr = {}
+    pairs = [(i, j) for i, j in zip(*np.nonzero(Adj)) if i < j]
+    z_a4 = {}
+    p_a4_norm = {}
+    rng_a4 = np.random.default_rng(20261121)
+    idx_i = np.array([i for i, _ in pairs], dtype=int)
+    idx_j = np.array([j for _, j in pairs], dtype=int)
+    p_a4_perm = {}
+    B_a4 = 2000
     for k, n in enumerate(names):
         r = gg[Tm1 + k]
         num = sum(r[i] * r[j] for i, j in zip(*np.nonzero(Adj))) / Adj.sum()
         corr[n] = float(num / (r @ r / G))
-    se_adj = se_from(Om + cross)
+        prod = r[idx_i] * r[idx_j]
+        stat_k = float(prod.sum() / np.sqrt(max(float(np.sum(prod ** 2)), 1e-30)))
+        z_a4[n] = stat_k
+        p_a4_norm[n] = float(2.0 * stats.norm.sf(abs(stat_k)))
+        obs_abs = abs(stat_k)
+        cnt_p = 0
+        for _ in range(B_a4):
+            rp = r[rng_a4.permutation(G)]
+            pp = rp[idx_i] * rp[idx_j]
+            st_p = float(pp.sum() / np.sqrt(max(float(np.sum(pp ** 2)), 1e-30)))
+            if abs(st_p) >= obs_abs:
+                cnt_p += 1
+        p_a4_perm[n] = float((cnt_p + 1) / (B_a4 + 1))
+
+    # Also test A4 directly on total-policy influence score tau + kappa
+    infl_b = (-Gi @ gg)[Tm1:, :]
+    infl_tpk = infl_b[0] + infl_b[1]
+    num_tpk = float(np.sum(infl_tpk[idx_i] * infl_tpk[idx_j]) / len(pairs))
+    corr["tpk_infl"] = float(num_tpk / float(np.mean(infl_tpk ** 2)))
+    prod_tpk = infl_tpk[idx_i] * infl_tpk[idx_j]
+    z_tpk = float(prod_tpk.sum() / np.sqrt(max(float(np.sum(prod_tpk ** 2)), 1e-30)))
+    z_a4["tpk_infl"] = z_tpk
+    p_a4_norm["tpk_infl"] = float(2.0 * stats.norm.sf(abs(z_tpk)))
+    cnt_tp = 0
+    for _ in range(B_a4):
+        rp = infl_tpk[rng_a4.permutation(G)]
+        pp = rp[idx_i] * rp[idx_j]
+        st_p = float(pp.sum() / np.sqrt(max(float(np.sum(pp ** 2)), 1e-30)))
+        if abs(st_p) >= abs(z_tpk):
+            cnt_tp += 1
+    p_a4_perm["tpk_infl"] = float((cnt_tp + 1) / (B_a4 + 1))
+
+    # Raw adjacent covariance & eigenvalue-clipped PSD spatial-adjacent HAC (Assumption A4')
+    Om_adj_raw = Om + cross
+    ew_om, ev_om = np.linalg.eigh(Om_adj_raw)
+    min_eig_om_raw = float(ew_om.min())
+    Om_adj_psd = (ev_om * np.maximum(ew_om, 0.0)) @ ev_om.T
+
+    # Macro-region (G=4: North, West, South, East) aggregated cluster SEs (Assumption A4')
+    state_reg = np.array([int(d["region"][cl == g][0]) for g in range(G)], dtype=int)
+    _, reg_inv = np.unique(state_reg, return_inverse=True)
+    G_reg = int(reg_inv.max()) + 1
+    gg_reg = np.column_stack([gg[:, reg_inv == rg].sum(1) for rg in range(G_reg)])
+    Om_reg = gg_reg @ gg_reg.T / G_reg
+    # Adjust G_reg scaling vs Gi (which divides by G): Vb_reg = (Gi_unnorm @ (sum_r g_r g_r') @ Gi_unnorm') * G_reg/(G_reg-1)
+    # Since Gi = (G^{-1} sum_g Gamma_g)^{-1}, Vb = (Gi/G) * (sum_g g_g g_g') * (Gi/G)' * G/(G-1).
+    sum_gg_reg = gg_reg @ gg_reg.T
+    Vb_reg = (Gi @ (sum_gg_reg / G) @ Gi.T / G * G_reg / max(1, G_reg - 1))[Tm1:, Tm1:]
+    se_reg = {n: float(np.sqrt(Vb_reg[k, k])) if Vb_reg[k, k] > 0 else float("nan") for k, n in enumerate(names)}
+    v_reg_tpk = Vb_reg[0, 0] + Vb_reg[1, 1] + 2.0 * Vb_reg[0, 1]
+    se_reg["tpk"] = float(np.sqrt(v_reg_tpk)) if v_reg_tpk > 0 else float("nan")
+
+    se_adj = se_from(Om_adj_raw)
+    se_adj_psd = se_from(Om_adj_psd)
     return dict(
         G=G,
         adjacent_state_pairs=int(Adj.sum() // 2),
         mean_state_neighbours=float(Adj.sum(1).mean()),
         se_cluster=se_from(Om),
         se_with_adjacent=se_adj,
+        se_with_adjacent_psd=se_adj_psd,
+        min_eig_Omega_raw=min_eig_om_raw,
+        se_macroregion_G4=dict(G_reg=G_reg, **se_reg),
         non_psd=bool(se_adj["non_psd"]),
         adj_pair_score_corr=corr,
+        a4_formal_test=dict(B_perm=B_a4, z_normal=z_a4, p_normal=p_a4_norm, p_perm=p_a4_perm),
     )
 
 
@@ -545,13 +614,27 @@ def wcr_score_p_tpk0(X: QDX, beta_hat: np.ndarray, tpk0: float, B: int = 999, se
 def wcr_score_ci(panel: dict, beta_hat: np.ndarray, B: int = 999, seed: int = 20261119, weight: str = "webb6") -> dict:
     X = QDX(panel, {"tau": panel["D"], "kappa": panel["Db"]}, phi_bar=0.5)
     tpk_hat = float(beta_hat[0] + beta_hat[1])
-    grid = np.linspace(tpk_hat - 0.35, tpk_hat + 0.35, 71)
+    grid = np.linspace(tpk_hat - 0.40, tpk_hat + 0.40, 81)
     pvals = [wcr_score_p_tpk0(X, beta_hat, float(g), B=B, seed=seed, weight=weight) for g in grid]
     acc = [float(g) for g, pv in zip(grid, pvals) if np.isfinite(pv) and pv > 0.05]
     p_zero = wcr_score_p_tpk0(X, beta_hat, 0.0, B=B, seed=seed, weight=weight)
+    ci_lo, ci_hi = (float(min(acc)), float(max(acc))) if acc else (float("nan"), float("nan"))
+    # Refine endpoints via deterministic root-finding (fixing RNG seed) to < 1e-4 precision
+    def _f_ep(c_val: float) -> float:
+        pv = wcr_score_p_tpk0(X, beta_hat, float(c_val), B=B, seed=seed, weight=weight)
+        return float(pv - 0.05) if np.isfinite(pv) else -0.05
+    crossings = [(float(g0), float(g1)) for g0, g1, p0, p1 in zip(grid[:-1], grid[1:], pvals[:-1], pvals[1:])
+                 if np.isfinite(p0) and np.isfinite(p1) and (p0 - 0.05) * (p1 - 0.05) <= 0 and (p0 != p1)]
+    if crossings:
+        try:
+            ci_lo = float(optimize.brentq(_f_ep, crossings[0][0], crossings[0][1], xtol=1e-4, maxiter=25))
+            ci_hi = float(optimize.brentq(_f_ep, crossings[-1][0], crossings[-1][1], xtol=1e-4, maxiter=25))
+        except Exception:
+            pass
     return dict(
         weight=weight, B=B, p_at_zero=float(p_zero),
-        ci=[float(min(acc)), float(max(acc))] if acc else [float("nan"), float("nan")],
+        endpoint_tol=1e-4,
+        ci=[float(ci_lo), float(ci_hi)],
     )
 
 
@@ -700,7 +783,7 @@ def fit_structured_spec(d: dict, w: np.ndarray, D_mat: np.ndarray | None = None,
     )
 
 
-def state_permutation_placebo(d: dict, w: np.ndarray, lag: int = 1, B: int = 200, seed: int = 20261119) -> dict:
+def state_permutation_placebo(d: dict, w: np.ndarray, lag: int = 1, B: int = 2000, seed: int = 20261119) -> dict:
     """Permute the 16 federal states' summer holiday schedules across states (randomization inference)."""
     rng = np.random.default_rng(seed + lag)
     st_cols = [np.where(d["cl"] == g)[0][0] for g in range(len(d["states"]))]
@@ -717,12 +800,39 @@ def state_permutation_placebo(d: dict, w: np.ndarray, lag: int = 1, B: int = 200
         if rp["ok"]:
             tpks.append(float(rp["est"]["tau"] + rp["est"]["kappa"]))
     arr = np.asarray(tpks, float)
+    n_ok = int(len(arr))
+    c_1s = int((arr <= obs).sum())
+    c_2s = int((np.abs(arr) >= abs(obs)).sum())
     return dict(
-        lag=lag, B=B, n_ok=int(len(arr)), obs_tpk=obs,
+        lag=lag, B=B, n_ok=n_ok, obs_tpk=obs,
         mean=float(arr.mean()), sd=float(arr.std()),
         q05=float(np.quantile(arr, 0.05)), q50=float(np.median(arr)), q95=float(np.quantile(arr, 0.95)),
-        p_one_sided=float((arr <= obs).mean()), p_two_sided=float((np.abs(arr) >= abs(obs)).mean()),
+        count_one_sided=c_1s, count_two_sided=c_2s,
+        formula="(count + 1) / (n_ok + 1)",
+        p_one_sided=float((c_1s + 1) / (n_ok + 1)),
+        p_two_sided=float((c_2s + 1) / (n_ok + 1)),
     )
+
+
+def delay_convolution_sensitivity(d: dict, w: np.ndarray) -> dict:
+    """Simple reporting-delay convolution sensitivity (Major Comment 6(e)):
+    models fractional notification spillover p_del in {0.0, 0.2, 0.3, 0.4} into next week."""
+    out = {}
+    D1 = lag_matrix(d["D_summer"], 1)
+    D2 = lag_matrix(d["D_summer"], 2)
+    for pd in (0.0, 0.2, 0.3, 0.4):
+        D_eff = (1.0 - pd) * D1 + pd * D2
+        # Convolve 3-week GI (w1, w2, w3) with discrete notification kernel (1-pd, pd) on lags 1..3
+        w_conv = np.array([(1.0 - pd) * w[0], (1.0 - pd) * w[1] + pd * w[0], (1.0 - pd) * w[2] + pd * w[1]], float)
+        w_conv /= w_conv.sum()
+        p_deff = make_panel(d, w, D_eff, lag=0)
+        p_both = make_panel(d, w_conv, D_eff, lag=0)
+        out[f"p_del_{pd:.1f}"] = dict(
+            p_del=float(pd), mean_delay_days=float(7.0 * pd),
+            D_eff_only=strip_private(fit_m0_full(p_deff)),
+            D_eff_and_w_conv=strip_private(fit_m0_full(p_both)),
+        )
+    return out
 
 
 def nuts2_aggregation(d: dict, w: np.ndarray, lag: int = 1) -> dict:
@@ -861,13 +971,18 @@ def main():
     omega_psi = {}
     for pb in (0.25, 1.0):
         sens[f"phi_bar_{pb:g}"] = strip_private(fit_m0_full(panel, phi_bar=pb))
-    for om in (0.25, 4.0):
+    omega_profile = {}
+    for om in (0.1, 0.25, 0.5, 1.0, 2.0, 4.0, 10.0):
         p_om = make_panel(d, w, d["D_summer"], lag=1, omega_mult=om)
         r_om = fit_m0_full(p_om)
-        sens[f"omega_x_{om:g}"] = strip_private(r_om)
+        r_om_pub = strip_private(r_om)
         def _idx_om(b, p_o=p_om):
             return b[0] * p_o["D"] + b[1] * p_o["Db"], float(b[2])
-        omega_psi[f"omega_x_{om:g}"] = psi_mod.psi_with_se(p_om["Yall"], p_om, r_om["_beta"], r_om["_Vb"], _idx_om)
+        psi_om = psi_mod.psi_with_se(p_om["Yall"], p_om, r_om["_beta"], r_om["_Vb"], _idx_om)
+        omega_profile[f"omega_x_{om:g}"] = dict(mult=float(om), fit=r_om_pub, psi=psi_om)
+        if om in (0.25, 4.0):
+            sens[f"omega_x_{om:g}"] = r_om_pub
+            omega_psi[f"omega_x_{om:g}"] = psi_om
     for lg in (0, 2, 3, 4):
         p_lg = make_panel(d, w, d["D_summer"], lag=lg)
         sens[f"summer_lag_{lg}"] = strip_private(fit_m0_full(p_lg))
@@ -890,6 +1005,18 @@ def main():
         g_i = gi_weekly(mn, sd_, S=3)
         p_gi = make_panel(d, np.array(g_i["w"]), d["D_summer"], lag=1)
         gi_sens[nm] = dict(gi=g_i, fit=strip_private(fit_m0_full(p_gi)))
+
+    gi_union = dict(
+        tpk_est_range=[float(min(v["fit"]["est"]["tpk"] for v in gi_sens.values())),
+                       float(max(v["fit"]["est"]["tpk"] for v in gi_sens.values()))],
+        tpk_ci_union=[float(min(v["fit"]["ci_t"]["tpk"][0] for v in gi_sens.values())),
+                      float(max(v["fit"]["ci_t"]["tpk"][1] for v in gi_sens.values()))],
+        phi_est_range=[float(min(v["fit"]["est"]["phi"] for v in gi_sens.values())),
+                       float(max(v["fit"]["est"]["phi"] for v in gi_sens.values()))],
+        phi_ci_union=[float(min(v["fit"]["ci_t"]["phi"][0] for v in gi_sens.values())),
+                      float(max(v["fit"]["ci_t"]["phi"][1] for v in gi_sens.values()))],
+    )
+    delay_sens = delay_convolution_sensitivity(d, w)
 
     # Regional x week FE, non-rotating large-state exclusions (BW & BY), state trends & harmonics, 2016-2019
     wks = d["weeks"]
@@ -944,8 +1071,8 @@ def main():
             lg_eff = 1 + sh
         time_shifts[f"shift_{sh:+d}"] = strip_private(fit_m0_full(make_panel(d, w, Ds, lag=lg_eff)))
     perm_placebo = dict(
-        lag1=state_permutation_placebo(d, w, lag=1, B=200, seed=20261119),
-        lag2=state_permutation_placebo(d, w, lag=2, B=200, seed=20261119),
+        lag1=state_permutation_placebo(d, w, lag=1, B=2000, seed=20261119),
+        lag2=state_permutation_placebo(d, w, lag=2, B=2000, seed=20261119),
     )
 
     # NUTS-2 spatial aggregation
@@ -978,7 +1105,10 @@ def main():
         event_time_with_leads=ev_leads,
         event_time_no_leads=ev_noleads,
         sensitivities=sens,
+        omega_profile=omega_profile,
         gi_sensitivity=gi_sens,
+        gi_union=gi_union,
+        delay_sensitivity=delay_sens,
         regional_fe=regional,
         by_year=by_year,
         all_holidays=all_hol,

@@ -6,7 +6,7 @@
 \label{ss:bias}
 
 Parts (a)--(c) take $\kappa_0=\phi_0=0$ and the pressure $\Lambda_{it}=L_{it}+\omega_i$ as
-known, which favours the comparators. $\ddot D_{it}$ denotes two-way demeaned $D_{it}$ in a
+known, which favors the comparators. $\ddot D_{it}$ denotes two-way demeaned $D_{it}$ in a
 balanced panel, $d^2=\lim N^{-1}\E\sum_{i,t}\ddot D_{it}{}^2>0$, and limits are taken as
 $G\to\infty$ with $T$ fixed.
 
@@ -44,7 +44,7 @@ independent noise, the pseudo-true week-2 log growth $\tilde h_d$ in group $D_{i
 \label{eq:t2fe}
 \end{equation}
 and $\hat\tau_1\to_p\tilde h_1-\tilde h_0$. Because $\Lambda_{i2}=Y_{i1}+\omega_i$, $\tilde h_d\ne h_0+\tau_0d$, and in general
-$\tilde h_1-\tilde h_0\ne\tau_0$, even when $D_{i2}$ is randomised.
+$\tilde h_1-\tilde h_0\ne\tau_0$, even when $D_{i2}$ is randomized.
 \item[(c)] \emph{Two-way fixed effects on $\log(Y+1)$.} The slope $\hat\tau_3$ satisfies
 \[
 \hat\tau_3-\tau_0=\frac{\sum\ddot D_{it}\log\Lambda_{it}}{\sum\ddot D_{it}{}^2}+\frac{-\sum\ddot D_{it}b^{(1)}_{it}+\sum\ddot D_{it}\eta^{(1)}_{it}}{\sum\ddot D_{it}{}^2},
@@ -83,9 +83,9 @@ rate.
 Part (b) illustrates the classical fixed-$T$ inconsistency of the Poisson fixed-effects estimator
 \citep{hausman1984count} when regressors, here the lagged-outcome offset, are predetermined rather
 than strictly exogenous \citep{wooldridge1997multiplicative,wooldridge1999distribution,blundell2002count};
-it holds even with randomised adoption, but in the randomised designs of Web Appendix~\ref{app:numeric}
+it holds even with randomized adoption, but in the randomized designs of Web Appendix~\ref{app:numeric}
 the bias is $-0.004$, so (b) is an illustration rather than a practical concern there. Part (c) is
-the log-linearisation problem of \citet{santossilva2006log} and \citet{chen2024logs} combined with
+the log-linearization problem of \citet{santossilva2006log} and \citet{chen2024logs} combined with
 an omitted pressure term; Poisson-based difference-in-differences \citep{wooldridge2023nonlinear}
 removes the former but not the latter.
 Split-panel jackknife corrections \citep{dhaene2015splitpanel} assume stationarity, which week
@@ -180,14 +180,14 @@ $\Psi=\plim G^{-1}\sum_{(i,t)\in\mathcal P}\partial\nu_{it}(\theta_0)/\partial\t
 The naive rescaling $Y_{it}e^{-\tau D_{it}-\kappa\bar D_{it}}$ ignores that averted cases would
 themselves have infected others; Theorem~\ref{thm:psi} propagates the counterfactual through the
 renewal equation and the network. Part (b) is a standard delta-method consequence of
-Theorem~\ref{thm:asy} and adds no new asymptotic argument. Inference in (b) targets the realised-path quantity
+Theorem~\ref{thm:asy} and adds no new asymptotic argument. Inference in (b) targets the realized-path quantity
 $\psi^\dagger$, whose expectation is $\psi$.
 
 \begin{remark}[Process noise and depletion]
 \label{rem:psi}
 $\psi^\dagger_{\mathcal P}-\psi_{\mathcal P}$ is a sum of mean-zero, locally dependent terms.
-Unlike the moment contributions, these terms are correlated across neighbouring clusters, because
-$\nu_{it}$ depends on neighbours' outcomes. A variance estimator for the population-level
+Unlike the moment contributions, these terms are correlated across neighboring clusters, because
+$\nu_{it}$ depends on neighbors' outcomes. A variance estimator for the population-level
 $\psi_{\mathcal P}$ would add a cluster-graph HAC term; we conjecture that it is consistent but do
 not prove it. If susceptible depletion multiplies the mean in A1 by
 $1-C_{i,t-1}/P_i$, where $C$ is cumulative cases and $P$ population, the recursion is no longer
@@ -200,13 +200,19 @@ effect estimates drift with time since exposure \citep{janvin2025depletion}.
 Lemma~\ref{lem:mds} implies that moment contributions of adjacent clusters are uncorrelated,
 which can be checked directly. In the application, the correlations of the state score
 contributions over the 29 adjacent German state pairs are 0.175 ($\tau$), 0.123 ($\kappa$) and $-0.119$
-($\phi$). Adding the adjacent-pair cross-products to $\hat\Omega$ produces a non-positive-semidefinite
-adjusted covariance matrix ($\min\mathrm{eig}=-0.016$, with a negative diagonal variance entry on $\tau$),
-even as the formal quadratic form for $\hat\tau+\hat\kappa$ drops from 0.0584 to 0.0500
-and for $\hat\phi$ from 0.0566 to 0.0356; because this sample-analogue HAC matrix is indefinite, it
-provides no basis for treating the ordinary state-clustered sandwich as conservative (consistent with
-the calibrated simulation in Web Table~\ref{tab:rev-calsim}, where sandwich SEs under-state empirical
-SD by 15.0\%, SE ratio $0.850$). The
+($\phi$), with $-0.073$ on the total-policy influence score $\tau+\kappa$. Formal standardized
+pair-product statistics ($Z_{A4}=0.966$, $0.903$, $-0.520$, and $-0.295$; $B=2000$ randomization
+$p=0.350$, $0.403$, $0.627$, and $0.767$) are indistinguishable from zero noise at $G=16$. Adding the
+unshrunk adjacent-pair cross-products to $\hat\Omega$ produces a non-positive-semidefinite
+adjusted covariance matrix ($\min\mathrm{eig}=-0.016$ on $\hat V_b$, with a negative diagonal
+variance entry on $\tau$), even as the formal quadratic form for $\hat\tau+\hat\kappa$ drops from
+0.0584 to 0.0500 and for $\hat\phi$ from 0.0566 to 0.0356; under Assumption~A4$'$, eigenvalue-clipped
+PSD spatial adjustment widens SE($\hat\tau+\hat\kappa$) from $0.0584$ to $0.0703$ and
+macro-region ($G=4$) clustering gives $0.0617$. Because the unshrunk sample HAC matrix is indefinite,
+it provides no basis for treating the ordinary state-clustered sandwich as conservative (consistent
+with the calibrated simulation in Web Table~\ref{tab:rev-calsim}, where sandwich SEs understate
+empirical SD by 15.0\%, SE ratio $0.850$, driven by cluster-size skewness $\times T$ in Web
+Table~\ref{tab:rev-clustergrid}). The
 $J$ test of Corollary~\ref{cor:J}, in the spirit of \citet{arellano1991tests}, checks the
 multiplicative renewal structure against extra predetermined instruments. A sensitivity analysis
 lagging $D$ by one week checks sensitivity to policy-timing alignment. Sequential ignorability
@@ -226,7 +232,7 @@ week. If an infection crosses a cluster boundary inside the same week and both c
 recorded in that week, the two week-$t$ innovations are dependent given $\F_{t-1}$, and A4 fails
 exactly where it matters. When does that happen, and what does it cost?
 
-First, the assumption is about the innovations, not the outcomes. Neighbouring clusters share
+First, the assumption is about the innovations, not the outcomes. Neighboring clusters share
 history through $\bar D$ and through the network pressure $\Lambda$, and Lemma~\ref{lem:mds}
 accounts for that by weighting each moment contribution with a $\F_{s-1}$-measurable factor. What
 A4 excludes is a correlation that arrives in the same week as the outcome, before it can enter
@@ -239,13 +245,14 @@ by that model and may also change the covariance structure of the quasi-differen
 moments need not be martingale differences, so neither the consistency argument nor the conventional
 cluster-robust sandwich follows without additional conditions. The direction and magnitude of parameter and variance distortions are not determined by the weekly
 model alone. For fast-generation pathogens such as SARS-CoV-2, roughly 30\% of transmission falls
-within the same week; the matched simulation in Section~\ref{ss:sameweek} generates within-week
-own-unit renewal ($w_0=0.3$, 14.5\% nonlinear within-week re-infection share) and aggregates it to
-weeks, yielding a bias of roughly 15\% of the true effect, coverage of 0.89 for $\tau$ and 0.78 for
-$\tau+\kappa$, and an unpowered $J$ test. By contrast, for longer-generation pathogens such as
-varicella in Section~\ref{s:application}, the generation interval places less than $10^{-5}$ of its
-mass within the same week ($w_0=2.6\times 10^{-6}$), so the within-week aggregation bias mechanism is
-negligible.
+within the same week; the graded grid and matched-control experiments in Section~\ref{ss:sameweek}
+generate within-week own-unit renewal across $w_0\in[0,0.30]$ and aggregate to weeks. At $w_0=0.30$
+(14.2\% nonlinear within-week reinfection share, or 34.0\% including seeded same-week incidence),
+bias on $\tau+\kappa$ reaches $-0.053$ (coverage 0.783; 0.890 for $\tau$) in the unadjusted arm and
+$-0.046$ (coverage 0.859) under treated-share matching, with an unpowered $J$ test (4.8\%). By
+contrast, for longer-generation pathogens such as varicella in Section~\ref{s:application}, the
+generation interval places less than $10^{-5}$ of its mass within the same week
+($w_0=2.6\times 10^{-6}$), so the within-week aggregation bias mechanism is negligible.
 
 Third, dependence created by same-week transmission can link innovations across clusters before
 the next period's information set is observed. This is distinct from the lagged cross-cluster
