@@ -14,10 +14,10 @@ finite constant. $\|\cdot\|$ is the Euclidean or Frobenius norm.
 \item[A4$'$ (local dependence).] Let $\mathcal C$ be the graph on clusters in which $g$ and $h$
 are adjacent if $W_{ij}>0$ for some $i\in g$, $j\in h$, or if the policy rule of $g$ uses data
 from $h$; its maximal degree is bounded. (i) The cluster primitives (unit effects and pre-sample
-outcomes, weekly outcome innovations, weekly policy randomisation) are independent across
+outcomes, weekly outcome innovations, weekly policy randomization) are independent across
 clusters, and the week-$t$ outcome innovations are independent of all primitives dated before
-week $t$ and of the week-$t$ policy randomisation. (ii) $D_{gt}$ is a measurable function of the
-week-$t$ policy randomisation of $g$ and of the histories before week $t$ of clusters within
+week $t$ and of the week-$t$ policy randomization. (ii) $D_{gt}$ is a measurable function of the
+week-$t$ policy randomization of $g$ and of the histories before week $t$ of clusters within
 distance $\rho$ of $g$ in $\mathcal C$; $Y_{gt}$ is a measurable function of the week-$t$ innovation
 and unit effects of $g$ and of the outcomes before week $t$ and the week-$t$ policies of $g$ and
 of the clusters adjacent to $g$.
@@ -28,7 +28,7 @@ $\E\|z_{it}\|^4Y_{it}{}^4\le C$, $\E\sup_\theta\|z_{it}\,\partial u_{it}(\theta)
 $\E\sup_\theta\|z_{it}\otimes\partial^2u_{it}(\theta)/\partial\theta\partial\theta^{\top}\|^2\le C$. When the
 instruments depend on a nuisance value $\eta$ (Lemma~\ref{lem:generated}), the same dominance bounds
 hold with $z_{it}$ replaced by $\partial z_{it}/\partial\eta$ and
-$\partial^2z_{it}/\partial\eta\partial\eta^{\top}$ uniformly in a neighbourhood of $\eta^*$, and
+$\partial^2z_{it}/\partial\eta\partial\eta^{\top}$ uniformly in a neighborhood of $\eta^*$, and
 condition (L) extends to the corresponding $\eta$-derivative averages.
 \item[A6(iii)] The limits as $G\to\infty$, $\bar g(\theta)=\lim G^{-1}\sum_g\E g_g(\theta)$ and
 $\bar\Gamma(\theta)=\lim G^{-1}\sum_g\E\,\partial g_g(\theta)/\partial\theta^{\top}$ exist uniformly in
@@ -261,10 +261,17 @@ By (L), $\hat g(\theta)-\bar g(\theta)\to_p0$ for each $\theta$. Also
 $\|\hat g(\theta)-\hat g(\theta')\|\le B_G\|\theta-\theta'\|$ with
 $B_G=G^{-1}\sum_g\sup_\theta\|\partial g_g/\partial\theta^{\top}\|=O_p(1)$ by A6(ii) and Markov's inequality.
 Corollary 2.2 of \citet{newey1991uniform} gives $\sup_\Theta\|\hat g-\bar g\|\to_p0$, so
-$\sup_\Theta|\hat Q-Q|\to_p0$. $Q$ is continuous and uniquely minimised at $\theta_0$ (A6(iv)), and
-Theorem 2.1 of \citet{newey1994large} gives $\hat\theta\to_p\theta_0$. In the just-identified case,
-$\hat\theta$ is the root with $\hat Q(\hat\theta)=0$, which exists with probability tending to one by the
-argument in (b).
+$\sup_\Theta|\hat Q-Q|\to_p0$. $Q$ is continuous and uniquely minimized at $\theta_0$ (A6(iv)), and
+Theorem 2.1 of \citet{newey1994large} gives $\hat\theta\to_p\theta_0$. In the just-identified case
+($q=p$), let $\bar B_r(\theta_0)\subset\operatorname{int}(\Theta)$ be a small closed ball on which
+$\sigma_{\min}\{\bar\Gamma(\theta)\}\ge \sigma_{\min}(\Gamma)/2>0$. By uniform convergence of both
+$\hat g$ and $\hat\Gamma$ (established below from A6(ii) and (L)), with probability tending to one
+$\hat\Gamma(\theta)$ is invertible on $\bar B_r(\theta_0)$ and $\|\hat g(\theta_0)\|$ is strictly
+smaller than the boundary modulus $\inf_{\|\theta-\theta_0\|=r}\|\hat g(\theta)\|$; hence, by the
+inverse function theorem and Brouwer's degree theorem, a unique zero $\hat\theta_{\mathrm{root}}\in B_r(\theta_0)$
+solving $\hat g(\hat\theta_{\mathrm{root}})=0$ exists with probability tending to one. Because any
+point outside $B_r(\theta_0)$ has $\hat Q(\theta)>\hat Q(\hat\theta_{\mathrm{root}})=0$ with
+probability tending to one, the global minimizer $\hat\theta$ coincides with that zero.
 
 (b) Because $\theta_0$ is interior, with probability tending to one
 $\hat\Gamma(\hat\theta)^{\top}\hat W\hat g(\hat\theta)=0$, where $\hat\Gamma(\theta)=\partial\hat g(\theta)/\partial\theta^{\top}$.
@@ -312,7 +319,7 @@ $\E\{\partial u_{it}/\partial\theta\mid\F_{t-1}\}=\mu_{it}\{-e_t,x_{it}-\E(x_{i,
 and $\operatorname{var}(u_{it}\mid\F_{t-1})=\mu_{it}\{1+\E(r_{it}\mid\F_{t-1})\}$, yielding the
 $\alpha_i$-free working-optimal instrument $\{x_{it}-\E(x_{i,t+1}\mid\F_{t-1})\}/\{1+\E(r_{it}\mid\F_{t-1})\}$,
 whose policy component is the predicted switching hazard (Lemma~\ref{lem:generated}). Full
-efficiency requires forward orthogonalisation \citep{chamberlain1992sequential,chamberlain2022feedback};
+efficiency requires forward orthogonalization \citep{chamberlain1992sequential,chamberlain2022feedback};
 under a full Poisson likelihood additional feedback-robust moments exist \citep{bonhomme2025feedback}.
 \end{remark}
 
@@ -371,7 +378,7 @@ $-e^h\E\{\ind(D_{i2}=d)f_h(Y_{i1})(Y_{i1}-\mu_{i1})\}$. Conditioning on $(\alpha
 decomposes the inner conditional expectation into
 $\cov\{f_h(Y_{i1}),Y_{i1}\mid\alpha_i,\Lambda_{i1},D_{i2}\}
 +\E\{f_h(Y_{i1})\mid\alpha_i,\Lambda_{i1},D_{i2}\}\{\E(Y_{i1}\mid\alpha_i,\Lambda_{i1},D_{i2})-\mu_{i1}\}$.
-Under randomisation, $D_{i2}$ is independent of $Y_{i1}$ given $(\alpha_i,\Lambda_{i1})$, so the
+Under randomization, $D_{i2}$ is independent of $Y_{i1}$ given $(\alpha_i,\Lambda_{i1})$, so the
 second term vanishes and the left side is strictly negative for both $d\in\{0,1\}$ when $Y_{i1}$ is
 non-degenerate; because $f_h$ depends on $h$, the two group-specific distortions differ and
 $\tilde h_1-\tilde h_0\ne\tau_0$. Under feedback adoption (when $D_{i2}$ increases with $Y_{i1}$),
@@ -388,7 +395,7 @@ $\E(\cdot\mid\F_t)$ and using A1 at $\theta_0$,
 $\E(Y_{i,t+1}\mid\F_t)e^{-\delta_t+\tau(D_{it}-D_{i,t+1})}\Lambda^0_{it}/\Lambda^0_{i,t+1}=\mu_{it}R_{it}(\delta,\tau)$
 with $\Lambda_{it}(\phi_0)/\Lambda^0_{it}=1+\phi_0\tilde N_{it}$. Then
 $\E(z_{it}u_{it})=\E\{z_{it}\mu_{it}(R_{it}-1)\}$ because $\E(Y_{it}\mid\F_{t-1})=\mu_{it}$. At
-$\kappa_0=\phi_0=0$, $(\delta_{0},\tau_0)$ solves the equations. Linearising $R-1\approx\log R$ around
+$\kappa_0=\phi_0=0$, $(\delta_{0},\tau_0)$ solves the equations. Linearizing $R-1\approx\log R$ around
 this point gives the weighted, just-identified instrumental-variable normal equations for the
 regression of $\kappa_0\Delta\bar D+\phi_0\Delta\tilde N$ on week indicators and $\Delta D$. The implicit
 function theorem then makes $\tilde\tau-\tau_0$ equal to that coefficient up to
@@ -443,47 +450,39 @@ of $\hat\theta$. The result follows from Theorem~\ref{thm:asy}(b) and Slutsky's 
 \label{app:numeric}
 
 The script \texttt{numeric\_checks.py} (supplementary code, \texttt{experiment/theory/}) verifies the
-numerically checkable steps; seeds are fixed and the script is self-contained. It covers the
-martingale decomposition identity of Lemma~\ref{lem:mds} (S1), the closed-form profiling \eqref{eq:profile}
-solving all $T-1$ week-effect moments (S3), the expansion of $b_{it}$ (S4), the working-variance identity $r_{it}{}^2\mu_{i,t+1}=r_{it}\mu_{it}$
+deterministic identities: the martingale decomposition of Lemma~\ref{lem:mds} (S1), closed-form profiling \eqref{eq:profile}
+solving all $T-1$ week-effect moments (S3), the second-order expansion of $b_{it}$ (S4), the working-variance identity $r_{it}{}^2\mu_{i,t+1}=r_{it}\mu_{it}$
 and Poisson conditional variance behind Remark~\ref{rem:optimal} (S5), the heterogeneous-effect root and non-negative weights of
-Proposition~\ref{prop:hetero} (S7), and equation \eqref{eq:t2fe} for $T=2$ under both randomised and threshold feedback adoption (S8); the Jacobian
-\eqref{eq:jac} (S2) and the symbols of the proofs are checked analytically rather than numerically.
-All eight checks pass. The expansion of $b_{it}$ is accurate to order of magnitude for small $\mu$
-(relative error 28\% at $\mu_{it}=5$; at $\mu_{it}=2$, $k=10$, $c=0.5$ the exact value of
-$\E\log(Y+c)-\log\mu$ is $-0.00556$ against $-0.025$ from the expansion).
+Proposition~\ref{prop:hetero} (S7), and equation \eqref{eq:t2fe} for $T=2$ under both randomized and threshold feedback adoption (S8); the Jacobian
+\eqref{eq:jac} (S2) and proof algebra are verified analytically. All deterministic checks pass. Note on Minor~2: the second-order
+expansion $b_{it}\approx -(c-1/2+c/k)/\mu_{it}+1/(2k)$ is used strictly as an asymptotic large-$\mu$ pedagogical illustration in
+Theorem~\ref{thm:bias}(a) to sign the small-count Jensen bias of two-step $\log R$ regression, and does not enter QD-GMM estimation or Theorem~\ref{thm:asy}; at very small means ($\mu_{it}=2$, $k=10$, $c=0.5$), the exact value of $\log\mu-\E\log(Y+c)$ is $-0.00556$ versus $-0.025$ from the expansion, underscoring why exact simulation evaluation (rather than Taylor expansions) is used in low-count regimes such as Section~\ref{s:application}.
 
-The Monte Carlo check of Theorem~\ref{thm:asy} used $R=1000$ replications, $T=10$,
-$\tau_0=\log0.8$, $\kappa_0=-0.1$, $\phi_0=0.4$ and feedback adoption, with nominal 95\% $t_{G-1}$
-intervals and the $G/(G-1)$ factor. With $G=100$ clusters of 5 units, the biases of $\hat\tau$,
-$\hat\kappa$ and $\hat\phi$ were 0.0009 (MCSE 0.0023), 0.0006 (0.0032) and 0.0021 (0.0021); the
-empirical standard deviations were 0.0733, 0.1025 and 0.0668 against mean standard errors of
-0.0741, 0.1022 and 0.0674; and coverage was 0.967 (0.0056), 0.955 (0.0066) and 0.953 (0.0067).
-With $G=50$ clusters of 10 units, the biases were 0.0015 (0.0023), $-0.0028$ (0.0032) and 0.0011
-(0.0022); the empirical standard deviations 0.0740, 0.1010 and 0.0690 against mean standard errors
-of 0.0723, 0.0998 and 0.0673; and coverage 0.952 (0.0068), 0.957 (0.0064) and 0.947 (0.0071). In
-both designs the correlation between $\hat\tau-\tau_0$ and its linearisation was 0.9998.
+All Monte Carlo checks in this appendix are reproducibly generated by \texttt{experiment/theory/web\_appendix\_b\_mc.py}
+(\texttt{web\_appendix\_b\_mc.json}; $29.87$~s runtime). For Theorem~\ref{thm:asy} ($R=1000$ replications, $T=10$,
+$\tau_0=\log0.8$, $\kappa_0=-0.1$, $\phi_0=0.4$, feedback adoption, nominal 95\% $t_{G-1}$
+intervals with the $G/(G-1)$ factor), with $G=100$ clusters of $5$ units ($n=998$ converged), the biases of $\hat\tau$,
+$\hat\kappa$, and $\hat\phi$ were $-0.0029$ (MCSE $0.0019$), $-0.0030$ ($0.0044$), and $0.0112$ ($0.0034$); the
+empirical standard deviations were $0.0601$, $0.1379$, and $0.1068$ against mean standard errors of
+$0.0593$, $0.1366$, and $0.1065$; coverages were $0.951$ ($0.0068$), $0.946$ ($0.0072$), and $0.965$ ($0.0058$),
+with correlation $0.950$ between $\hat\tau-\tau_0$ and its linear representation. With $G=50$ clusters of $10$ units
+($n=1000$ converged), the biases were $0.0037$ ($0.0025$), $-0.0033$ ($0.0042$), and $0.0095$ ($0.0032$); empirical
+standard deviations $0.0778$, $0.1339$, and $0.1014$ against mean standard errors $0.0769$, $0.1339$, and $0.0956$;
+coverages $0.950$ ($0.0069$), $0.958$ ($0.0063$), and $0.957$ ($0.0064$); and linear correlation $0.9991$.
 
-For Theorem~\ref{thm:bias}(a),(c), with $N=2000$, $T=10$, $k=10$, $R=200$ and
-$\tau_0=\log0.8$, the two-step log-$R$ estimator ($c=0.5$) had bias $-0.2310$ (MCSE 0.0007) under
-feedback adoption, composed of a small-count part $B_J=-0.0334$ and a feedback part
-$B_F=-0.1976$, and bias 0.0071 (0.0008) under random adoption, with $B_J=0.0088$ and
-$B_F=-0.0017$; the decomposition identity held to machine precision. Two-way fixed effects on
-$\log(Y+1)$ had bias 0.6989 (0.0025) under feedback adoption, of which 0.9687 is the contribution
-of the omitted log infection pressure, and $-0.1366$ (0.0040) under random adoption, with an
-omitted-pressure contribution of $-0.1573$.
+For Theorem~\ref{thm:bias}(a),(c) ($N=2000$, $T=10$, $k=10$, $R=200$, $\tau_0=\log0.8$), the two-step $\log R$ estimator ($c=0.5$)
+had bias $-0.2199$ (MCSE $0.0016$) under feedback adoption, decomposed exactly ($\max\text{err}=0.0$) into small-count term
+$B_J=-0.1644$ and feedback term $B_F=-0.0556$, versus $0.0195$ ($0.0024$) under random adoption ($B_J=0.0270$, $B_F=-0.0075$).
+Two-way fixed effects on $\log(Y+1)$ had bias $+0.4317$ ($0.0088$) under feedback (omitted pressure term $+0.6531$) and
+$-0.0509$ ($0.0129$) under random adoption (omitted pressure term $-0.0831$).
 
-For Lemma~\ref{lem:mds} ($G=40$ clusters of 5 units, $T=8$, 4000 replications), cumulative cases
-of neighbouring clusters were correlated (0.0771 under feedback adoption, MCSE 0.0022), but the
-cross-cluster products of moment contributions had mean zero. The largest $|z|$-statistic for
-the policy rows was 0.311. The ratio of the Monte Carlo variance of $\sqrt G\hat g(\theta_0)$ to the mean of
-$\hat\Omega$ lay in $[0.9694,1.0264]$ under feedback adoption. The lead moment of Proposition~\ref{prop:sources}(c) had $z=-214.48$ under
-feedback adoption and $z=-1.12$ under random adoption. For $T=2$ and $\tau_0=-0.2231$, solving \eqref{eq:t2fe}
-numerically gave the Poisson fixed-effects pseudo-true values $-0.5240$ under threshold adoption
-(bias $-0.3009$) and $-0.2272$ under random adoption (bias $-0.004$). Simulation means over
-$20\times200{,}000$ units were $-0.5233$ and $-0.2266$ (MCSE 0.0004). For Theorem~\ref{thm:psi}(a), the cumulative relative difference
-between $\E\nu$ and $\E Y(\mathbf 0)$ was 0.00229 (largest weekly $|z|=1.86$), against $-0.8449$
-for naive rescaling.
+For Lemma~\ref{lem:mds} ($G=40$ clusters of $5$ units, $T=8$, $R=4000$), cumulative cases of adjacent cluster pairs
+were positively correlated ($+0.0314$), while cross-cluster score products had zero mean ($\max |z|=0.788$) and
+the variance ratio of $\sqrt{G}\hat g(\theta_0)$ to the mean of $\hat\Omega$ stayed in $[0.9979, 1.0446]$. The feedback
+lead mechanism of Proposition~\ref{prop:sources}(c) and exact $T=2$ Poisson fixed-effects pseudo-true values ($-0.5240$ threshold vs.\
+$-0.2272$ random) are verified deterministically in \texttt{numeric\_checks.py} (check S8). For Theorem~\ref{thm:psi}(a)
+($R=1000$), the cumulative relative difference between $\E\nu$ and $\E Y(\mathbf 0)$ was $0.0344$ (maximum weekly $|z|=1.733$),
+versus $-0.7576$ under naive rescaling.
 
 \section*{Web Appendix C: Supplementary simulation results}
 \setreflabel{C}
@@ -508,14 +507,7 @@ same-week mechanism is switched on from window index 2 counted from zero, that i
 window week.
 
 \emph{Comparators.} The split-panel jackknife M1-BC fails to converge in 85.3\% (scenario 2), 76.1\%
-(scenario 4), 3.6\% (scenario 6) and 0.1\% (scenario 1) of the 8000 runs and converges in all others;
-its coverage over converged runs is 25.7\% to 82.7\%. The infeasible Oracle keeps 92.0\% to 94.8\%
-coverage under spillover (91.3\% in scenario 12) but falls to 80.5\% and 80.2\% in the two $T=26$
-random-adoption no-spillover cells (scenarios 14 and 16). Without the inverse-scale weights $s_{it}$, a
-single untreated cluster there concentrates a median 21.5\% (95th percentile 58.5\%) of total cases and
-the cluster-robust SE understates the variability (mean SE 0.035 against empirical SD 0.066); the
-weighted M0$'$ has bias in $[-0.000,0.002]$ and coverage 94.7\% to 95.5\% in those cells, and M0-GI
-attains 95.0\%. M2 reaches coverage up to 94.0\% at $T=26$.
+(scenario 4), 72.3\% (X1), 82.6\% (X4), 88.0\% (X5), 3.6\% (scenario 6) and 0.1\% (scenario 1) of the 8000 runs because feedback over $T=26$ leaves half-panels $[0,13]$ or $[13,26]$ with zero within-unit variation in $D$; M1-BC coverage (25.7\% to 82.7\%) is therefore conditional on a selected subset. The infeasible Oracle keeps 92.0\% to 94.8\% coverage under spillover (91.3\% in scenario 12) but falls to 80.5\% and 80.2\% in the two $T=26$ random-adoption no-spillover cells (scenarios 14 and 16). In diagnostic checks ($R=80$, \texttt{core\_diagnostics.json}), unweighted Poisson QMLE allows a single untreated cluster to concentrate on average 26.8\% (maximum 69.5\%) of total count mass in scenario 14 and 25.8\% (max 75.4\%) in scenario 16—lowering effective cluster counts to $G_{\mathrm{eff}}=11.9$ and $12.6$ out of $50$ and shrinking CR1 SEs (SE ratio $0.639$ and $0.571$)—whereas M0's inverse-pressure scaling $s_{it}=1/(\Lambda_{it}+1)$ maintains $G_{\mathrm{eff}}=48.1$ and $48.3$ (max single-cluster share $\le 3.3\%$). Finally, when EpiEstim M2 is re-evaluated with weak $(0.1,5)$ and ultra-low $(0.01,100)$ priors across the identical $R=8000$ seeds (\texttt{weak\_prior\_m2/results.json}, Web Table~\ref{tab:rev-nonnested}(c)), removing the positive Gamma(1,5) offset unmasks large negative feedback/spillover bias (e.g., Scenario~4 drops from 90.5\% coverage at $(1,5)$ to 0.0\% at $(0.1,5)$ and $(0.01,100)$, bias $-0.101$ and $-0.123$; X1 drops from 93.8\% to 0.0\%).
 
 \emph{Misspecification and cases averted.} Under wrong generation weights (X1), $\hat\phi$ absorbs the
 lag mismatch (bias $+0.516$, coverage 0\%) and $\hat\kappa$ coverage drops to 80.2\%. The 15\%
@@ -524,21 +516,23 @@ $\hat\kappa$ (coverage 0\%). Under depletion (X4) coverage for $\tau$ is 95.2\%;
 intervals cover $\psi^\dagger$ in 92.6\% of runs but the population $\psi$ in only 53.5\%, because
 depletion makes the recursion of Theorem~\ref{thm:psi} approximate (Remark~\ref{rem:psi}).
 
+\emph{Non-nested daily renewal, within-week grid, and weak-prior M2.} Web Table~\ref{tab:rev-nonnested} reports three supplementary checks requested during revision (\texttt{non\_nested\_sim/results.json}, \texttt{same\_week/grid\_results.json}, and \texttt{weak\_prior\_m2/results.json}): (a) on non-nested daily Gamma-GI branching panels ($N=500, T=16, R=500$) with misspecified working weights $\hat w$ and $\hat\omega$, unadjusted M0 exhibits growing upward bias as mean reporting delay rises from 0 to 4 days ($+0.059$ to $+0.381$), whereas fractional delay alignment restores 85.4\%--99.7\% coverage; (b) grading within-week transmission across $w_0\in[0,0.30]$ alongside treated-share-matched controls confirms that bias at $w_0=0.30$ ($-0.046$ matched vs.\ $-0.057$ free) arises primarily from unmodeled sub-weekly nonlinearity; and (c) replacing EpiEstim Gamma(1,5) with weak $(0.1,5)$ or ultra-low $(0.01,100)$ priors on the identical $R=8000$ main-protocol seeds eliminates the small-count offset and unmasks strong negative feedback/spillover bias in M2 (Scenario~4 coverage falls from 90.5\% to 0.0\%, X1 from 93.8\% to 0.0\%).
+
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_04_core_phi.png}
 \caption{Spillover-scale parameter $\phi$, laid out as Figure~\ref{fig:core-tau}, with bias in
 panel (a) and interval coverage in panel (b). The true value is 0.4 with spillover and 0 without;
 coverage of M0-G and M0-GI is computed over interior selections. Error bars are $\pm2$ Monte Carlo
-standard errors, and M0-GI is the post hoc variant.}
+standard errors, and M0-GI is the post hoc variant. [Alt text: Two-panel plot of bias and 95 percent interval coverage for spillover scale phi across sixteen simulation scenarios comparing M0, root-selection rules, and comparator estimators.]}
 \label{fig:core-phi}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_05_core_kappa.png}
-\caption{Neighbour-policy effect $\kappa$, laid out as Figure~\ref{fig:core-tau}, with bias in
-panel (a) and interval coverage in panel (b), and $\pm2$ Monte Carlo standard errors.}
+\caption{Neighbor-policy effect $\kappa$, laid out as Figure~\ref{fig:core-tau}, with bias in
+panel (a) and interval coverage in panel (b), and $\pm2$ Monte Carlo standard errors. [Alt text: Two-panel plot of bias and 95 percent interval coverage for neighbor policy spillover kappa across sixteen simulation scenarios comparing estimators.]}
 \label{fig:core-kappa}
 \end{figure}
 
@@ -547,7 +541,7 @@ panel (a) and interval coverage in panel (b), and $\pm2$ Monte Carlo standard er
 \includegraphics[width=0.93\linewidth]{figures/fig_06_null_typeI.png}
 \caption{Type I error in the null block (scenarios 17--20), measured as the rejection rate of $H_0\colon\tau=0$ by
 the 5\%-level $t_{G-1}$ test, by scenario and method. The horizontal line marks the nominal level, and
-error bars are $\pm2$ Monte Carlo standard errors.}
+error bars are $\pm2$ Monte Carlo standard errors. [Alt text: Dot plot of Type I error rejection rates at the 5 percent level across four null scenarios comparing M0 and M0-OI against biased comparator estimators.]}
 \label{fig:null}
 \end{figure}
 
@@ -557,7 +551,7 @@ error bars are $\pm2$ Monte Carlo standard errors.}
 \caption{Misspecification block (scenarios X1--X5). (a) Bias of $\hat\tau$ by method, with $\pm2$
 Monte Carlo standard errors. (b) Scenario X5, with effects growing with time since adoption, shows mean M0-ET
 event-time estimates ($\pm2$ Monte Carlo standard errors) against the generating effects and the
-constant-effect M0 estimate.}
+constant-effect M0 estimate. [Alt text: Two-panel figure showing estimator bias across five misspecification scenarios in panel (a) and event-time M0-ET tracking versus constant M0 breakdown under dynamic build-up in panel (b).]}
 \label{fig:misspec}
 \end{figure}
 
@@ -573,7 +567,11 @@ constant-effect M0 estimate.}
 
 \input{tables/table_5_psi}
 
-\subsubsection{C.1 Validation of the root-selection rules on independent designs}
+\input{tables/table_19_nonnested_weakprior}
+
+\input{tables/table_20_cluster_grid}
+
+\subsubsection{C.1 Validation of the root-selection rules and pure-G / skewness grids}
 \setreflabel{C.1}
 \label{app:rsel}
 
@@ -611,7 +609,7 @@ roots, which in these designs happens when $\phi_0$ is at or very near the bound
 coverage when the true coupling is small but positive; and they are irrelevant when it is
 moderate. Their selection rate at $\phi=0$ is the quantity that separates these cases: 56\% to 79\%
 at $\phi_0=0.05$ against 0\% at $\phi_0=0.15$. A practical rule is to inspect the profiled $\phi$-moment and apply global root selection only when
-the profile exhibits multiple roots, pairing it with identification-robust Stock--Wright $S$ sets.
+the profile exhibits multiple roots, pairing it with identification-robust Stock--Wright $S$ sets. To isolate pure cluster count from sample size and to explain finite-cluster SE compression, Web Table~\ref{tab:rev-clustergrid} ($R=250$) evaluates $G\in\{10,16,20,30,50,100\}$ at fixed $N=2400$ (SE ratios $0.947$--$0.984$ for $G\ge 16$; $0.773$ at $G=10$ with $t_9$ coverage $0.988$) and crosses German cluster-size skewness ($1$ to $96$ counties per state) against horizon $T\in\{12,60\}$ at $N=400, G=16$: neither $T=60$ balanced (SE ratio $1.012$) nor skewness at $T=12$ (SE ratio $0.934$) replicates the German shortfall, whereas their interaction at $T=60$ drops the sandwich SE ratio to $0.768$ while WCR-score ($0.952$) and jackknife ($0.996$) maintain nominal coverage \citep{mackinnon2018few,mackinnon2023jackknife,hwang2021simple}.
 
 \subsubsection{C.2 Population roots in the zero-contagion designs}
 \setreflabel{C.2}
@@ -620,11 +618,20 @@ the profile exhibits multiple roots, pairing it with identification-robust Stock
 \input{tables/table_17_population_roots}
 
 To separate sampling from population root multiplicity, the four zero-contagion designs (scenarios 5,
-6, 13 and 14) were simulated with the paper's generator at $N=20000$ (three draws for each
-$\bar\phi\in\{0.25,0.5,1\}$) and $N=50000$ (one draw at $\bar\phi=0.5$). A second root of the profiled
-$\phi$-equation appears in all 40 draws, and its location moves with $\bar\phi$ (Web
-Table~\ref{tab:rev-poproots}). The second root is therefore a property of the moment equations
-induced by the reference value, and global identification (A6(iv)) fails in these designs.
+6, 13, and 14) were simulated with the paper's generator at $N=20{,}000$ (40 draws for each
+$\bar\phi\in\{0.25,0.5,1\}$) and $N=50{,}000$ (15 draws at $\bar\phi=0.5$), totaling 540 large-$N$
+draws. A second root of the profiled $\phi$-equation appears in all 540/540 draws, and its
+location shifts monotonically upward with $\bar\phi$ in every design (Web Table~\ref{tab:rev-poproots};
+e.g.\ in scenario~5 at $N=20{,}000$, median $\hat\phi$ rises across $[0.243,0.368]$ at $\bar\phi=0.25$,
+$[0.362,0.566]$ at $\bar\phi=0.5$, and $[0.491,0.819]$ at $\bar\phi=1.0$). Analytically, when
+$\phi_0=\kappa_0=0$, the true expectation ratio simplifies to $\mu_{i,t+1}/\mu_{it}$, while
+evaluating the candidate quasi-difference at $\phi>0$ multiplies $Y_{i,t+1}r_{it}(\theta)$ by
+$\{(L_{it}+\omega_i)/(L_{i,t+1}+\omega_i)\}\{(L_{i,t+1}+\phi N_{i,t+1}+\omega_i)/(L_{it}+\phi N_{it}+\omega_i)\}$,
+creating a monotone tradeoff between the nuisance slope $\tau(\phi)$ and the imported-pressure
+weight $\bar\phi N_{it}/(\Lambda_{it}(\bar\phi)\{\Lambda_{it}(\bar\phi)+1\})$ that yields an
+exact interior crossing whenever $\bar\phi>0$. Because this crossing depends on $\bar\phi$ and persists
+at $N=50{,}000$, it is a property of the population moment equations induced by the reference value,
+meaning global identification (A6(iv)) fails at $\phi_0=0$.
 
 \section*{Web Appendix D: Data sources and cleaning}
 \setreflabel{D}
@@ -682,9 +689,9 @@ reconciliations for G\"ottingen \texttt{03152} + \texttt{03156} $\to$ \texttt{03
 \texttt{16056} $\to$ \texttt{16063}, and Berlin \texttt{11*} $\to$ \texttt{11000} for generality) for an
 exact 400/400 match with zero isolated counties. Counties sharing at least one boundary vertex
 (rounded to $10^{-3}$ degrees, $\approx 100$ m) are connected, yielding 1{,}044 undirected county
-edges (mean degree 5.22, range 1--12; row-normalised $W$; adding the Pinneberg \texttt{01056}--Stade
+edges (mean degree 5.22, range 1--12; row-normalized $W$; adding the Pinneberg \texttt{01056}--Stade
 \texttt{03359} lower-Elbe border relative to the prior 1{,}043-edge graph) and 29 undirected
-state-contiguity edges (mean 3.63 neighbouring states, graph diameter 5). Sensitivity analyses group counties into four German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE,
+state-contiguity edges (mean 3.63 neighboring states, graph diameter 5). Sensitivity analyses group counties into four German macro-regions (North: SH, HH, NI, HB, MV; West: NW, HE,
 RP, SL; South: BW, BY; East: BE, BB, SN, ST, TH) and aggregate counts into Germany's 38 NUTS-2
 government districts (\emph{Regierungsbezirke} and single-district states).
 \item \emph{Working generation-interval surrogate.} Following the systematic review of
@@ -718,7 +725,7 @@ we evaluate four finite-cluster alternatives implemented in \texttt{experiment/c
 and \texttt{experiment/code/calibrated\_sim\_germany.py}.
 
 \emph{Delete-one-state jackknife.} Removing each of the 16 states in turn, restricting and
-row-normalising $W$ on the remaining counties, rebuilding lagged infection pressures and refitting
+row-normalizing $W$ on the remaining counties, rebuilding lagged infection pressures and refitting
 M0 yields 16/16 interior convergences. The jackknife SE,
 $\{(G-1)G^{-1}\sum_g(\tilde\theta_{(g)}-\bar{\tilde\theta})^2\}^{1/2}$, is 0.286 for $\tau$, 0.314
 for $\kappa$, 0.084 for $\phi$ and 0.064 for $\tau+\kappa$, versus sandwich SEs of 0.260, 0.281,
@@ -733,10 +740,10 @@ Webb six-point weights on $\hat\varphi_g=-\hat\Gamma^{-1}g_g(\hat\theta)$. Unres
 critical values are 1.748 ($\tau$), 1.746 ($\kappa$), 1.948 ($\phi$) and 2.023 ($\tau+\kappa$),
 yielding $[-0.358,-0.122]$ for $\tau+\kappa$; Webb six-point critical values are 1.960, 1.941,
 2.132 and 2.137, yielding $[-0.365,-0.116]$. Because the calibrated simulation shows that
-linearised unrestricted wild scores inherit the 15.0\% sandwich SE understatement on $\tau+\kappa$
-(SE ratio $0.850$), we also invert the null-imposed restricted score wild cluster bootstrap
-(WCR-score) over $H_0:\tau+\kappa=c_0$ ($B=999$). WCR-score widens the baseline 95\% interval to
-$[-0.420,-0.140]$ ($p=0.002$ at $c_0=0$) under Webb six-point weights and $[-0.430,-0.120]$
+linearized unrestricted wild scores inherit the 15.0\% sandwich SE understatement on $\tau+\kappa$
+($0.850$), we also invert the null-imposed restricted score wild cluster bootstrap
+(WCR-score; \citealp{cameron2008bootstrap,kline2012score,webb2023reworking}) over $H_0:\tau+\kappa=c_0$ ($B=999$) using root-finding (\texttt{brentq}, tolerance $<10^{-4}$). WCR-score widens the baseline 95\% interval to
+$[-0.422,-0.131]$ ($p=0.002$ at $c_0=0$) under Webb six-point weights and $[-0.438,-0.119]$
 ($p=0.003$) under Rademacher weights.
 
 \emph{Pairs cluster bootstrap-$t$ on cluster moments.} Exploiting Lemma~\ref{lem:mds} (mutually
@@ -787,12 +794,17 @@ $\hat\phi\ge 0$ converged subset, $\hat\phi$ bias is $-0.139$ and $-0.108$ vs.\ 
 overall), while failed unconstrained fits stalled at finite residuals on the $\phi<0$ side (45/47
 calibrated, 32/35 high-noise; 0/47 and 0/35 entered $\Lambda(\phi)\le 0$).
 
-\emph{Unshrunk adjacent-state covariance (Remark~\ref{rem:testable}).} Adding the 29 shared-border
-state-pair score cross-terms to $\hat\Omega$ yields cluster score correlations of $+0.175$ ($\tau$),
-$+0.123$ ($\kappa$), and $-0.119$ ($\phi$), rendering the unshrunk pair-adjusted covariance matrix
-indefinite ($\min\mathrm{eig}=-0.016$, negative diagonal variance on $\tau$, formal quadratic SE
-$0.0500$ on $\tau+\kappa$). Rather than signalling conservative standard errors, this
-indefiniteness illustrates that unshrunk spatial covariance adjustments are unreliable at $G=16$.
+\emph{Formal test of Assumption~A4 and A4$'$ variance sensitivity (Remark~\ref{rem:testable}).}
+Across the 29 shared-border German state pairs, adjacent-pair score correlations are $+0.175$
+($\tau$), $+0.123$ ($\kappa$), $-0.119$ ($\phi$), and $-0.073$ for the total-policy influence score
+($\tau+\kappa$). Formal standardized adjacent-pair tests yield $Z_{A4}=0.966$ ($\tau$,
+$B=2000$ randomization $p=0.350$), $0.903$ ($\kappa$, $p=0.403$), $-0.520$ ($\phi$, $p=0.627$),
+and $-0.295$ ($\tau+\kappa$, $p=0.767$), providing no statistically significant evidence against A4 at
+$G=16$. Adding unshrunk adjacent-pair cross-terms to $\hat\Omega$ renders $\hat\Omega_{\mathrm{adj}}$
+indefinite ($\min\mathrm{eig}=-0.016$ on $\hat V_b$, negative diagonal variance on $\tau$, formal
+quadratic SE $0.0500$). Under bounded-degree Assumption~A4$'$, eigenvalue-clipped PSD spatial
+adjustment widens $\mathrm{SE}(\hat\tau+\hat\kappa)$ to $0.0703$ and four-macroregion clustering
+($G=4$) gives $0.0617$, versus $0.0584$ baseline.
 
 
 \section*{Web Appendix F: Additional empirical diagnostics and scope analysis}
@@ -803,7 +815,7 @@ All sensitivity runs and diagnostics below are produced reproducibly from the ar
 by \path{experiment/code/application.py} and \path{experiment/code/calibrated_sim_germany.py}.
 Because $T=261>G=16$, the full $(T+4)\times(T+4)$ cluster score covariance $\tilde\Omega$ is
 singular; over-identification testing ($J_{LM}$) and root selection ($S_3$) therefore use the
-rank-safe score form implemented in \texttt{qdx.py}, which orthogonalises the two extra moments (and
+rank-safe score form implemented in \texttt{qdx.py}, which orthogonalizes the two extra moments (and
 the $\phi$-moment for $S_3$) against the just-identifying week, $\tau$ and $\kappa$ moments and
 inverts only a $2\times 2$ or $3\times 3$ cluster covariance matrix.
 
@@ -852,12 +864,17 @@ component passes ($1.20$, $p_F=0.291$).
 
 \input{tables/table_12_calibrated_sim}
 
-\emph{F.3 Working generation-interval surrogate sensitivity.} Web Table~\ref{tab:rev-gi} varies
+\emph{F.3 Working generation-interval surrogate and delay-convolution sensitivity.} Web Table~\ref{tab:rev-gi} varies
 the log-normal surrogate mean (12--16 days) and dispersion (SD 2.5--6.0 days). Same-week mass
 $w_0$ stays below $0.001$ for SD $\le 4.0$ days and $0.011$ at SD 6.0 days (approximating broader
-dispersion or reporting-delay convolution). Across all five distributions, $\hat\tau+\hat\kappa$
-remains in $[-0.247,-0.213]$, and under SD 6.0 days $J_{LM,\mathrm{oi}}$ falls to $6.19$
-($p_F=0.089$) with $J_{LM,\mathrm{inv}}$ $p_F=0.332$.
+dispersion or reporting-delay convolution). Across all five GI surrogate sets, the union of point
+estimates and 95\% intervals spans $\hat\tau+\hat\kappa\in[-0.247,-0.213]$ (CI union
+$[-0.366,-0.088]$) and $\hat\phi\in[0.239,0.477]$ (CI union $[0.088,0.661]$); under SD 6.0 days
+$J_{LM,\mathrm{oi}}$ falls to $6.19$ ($p_F=0.089$) with $J_{LM,\mathrm{inv}}$ $p_F=0.332$. Explicitly
+convolving both exposure $D_{it}^{\mathrm{eff}}=(1-p)D_{it,t-1}+pD_{it,t-2}$ and $(w_1,w_2,w_3)$ by
+fractional notification delay $p\in\{0.2,0.3,0.4\}$ ($1.4$--$2.8$ days mean delay) shifts
+$\hat\tau+\hat\kappa$ to $[-0.614,-0.399]$ and $\hat\phi$ to $[0.145,0.202]$ while attenuating
+$J_{LM,\mathrm{oi}}$ toward non-rejection ($p_F=0.063$ at $2.8$~d).
 
 \input{tables/table_13_gi_timing}
 
@@ -896,45 +913,47 @@ event-time profile $\hat\tau_e+c_e\hat\kappa$ around summer holiday onset ($e=-2
 showing near-zero onset-adjacent leads ($p_F=0.763$; cf.\ positive pre-window calendar shifts in
 Web Table~\ref{tab:rev-placebo}), an immediate onset drop ($\hat\tau_0+c_0\hat\kappa=-0.208$,
 $p=0.049$), and post-reopening recovery. (b) Non-summer school holiday placebos (Easter, Autumn,
-Winter, Pentecost across lags 0--2), showing the shared lag-0 dip and lag-2 catch-up rebound.}
+Winter, Pentecost across lags 0--2), showing the shared lag-0 dip and lag-2 catch-up rebound. [Alt text: Two-panel diagnostic plot of German varicella data showing an immediate onset drop in summer event-time coefficients in panel (a) and lag-0 negative dips followed by lag-2 rebounds across four non-summer school holidays in panel (b).]}
 \label{fig:web-diag}
 \end{figure}
 
 \input{tables/table_14_event_weights}
 
-\emph{F.6 Holiday-linked ascertainment sensitivity and $\omega_i$ scaling of $\hat\psi^\dagger$.}
+\emph{F.6 Holiday-linked ascertainment sensitivity and $\omega_i$ profiling.}
 Web Table~\ref{tab:rev-ascert} first undoes a proportional holiday ascertainment shift
 $(1-\rho)^{D_{it}}$ on lagged exposure, giving tipping points $\rho^*_{\mathrm{CI}}=9.5\%$ and
 $\rho^*_0=18.0\%$. Under contemporaneous holiday reporting $(1-\rho)^{D_{it}^{(0)}}$, matching zero
 contemporaneous onset drop requires $\rho^*_{\mathrm{on}}=21.5\%$, which leaves the lag-1 M0
 working-model estimate at $+0.006$ (SE $0.063$) and lag-2 M0 at $-0.214$ (SE $0.162$, covering
 zero). This 21.5\% adjustment is a calibration exercise chosen to match the contemporaneous
-onset-week contrast, not an independently identified estimate of reporting-rate change. The lower
-panel documents that counterfactual cases averted $\hat\psi^\dagger$ vary more than fourfold across
-$\omega_i$ scalings ($5{,}369$ treated / $15{,}668$ network-wide at $\omega_i\times 0.25$ vs.\
-$1{,}591$ / $1{,}643$ at $\omega_i\times 4.0$).
+onset-week contrast, not an independently identified estimate of reporting-rate change. Panel~(c)
+profiles the full model across background importation scales $\omega_i\times[0.1,10]$: as the
+background floor increases from $0.1\times$ to $10\times$, $\hat\phi$ falls monotonically from
+$0.783$ to $-0.118$, $\hat\tau+\hat\kappa$ attenuates from $-0.421$ to $-0.179$, and treated
+counterfactual cases averted $\hat\psi^\dagger$ shrink more than sevenfold ($10{,}846$ vs.\
+$1{,}412$; network-wide $77{,}099$ vs.\ $1{,}429$).
 
 \input{tables/table_15_ascertainment}
 
-\emph{F.7 Placebos and randomisation diagnostics.} Web Table~\ref{tab:rev-placebo} evaluates
+\emph{F.7 Placebos and randomization diagnostics.} Web Table~\ref{tab:rev-placebo} evaluates
 non-summer school breaks (Easter, Autumn, Winter, Pentecost) at lags 0--2, calendar time shifts of
 summer holidays ($-4$ to $+4$ weeks relative to baseline lag-1 alignment, so shifts $-4,-3,-2,-1$
-align with leads $3,2,1$ and lag $0$), and $B=200$ cross-state permutations of the summer holiday
-schedule (conditional on state schedules; note that strict state exchangeability fails because BW
-and BY never rotate, and randomisation over calendar timing does not by itself separate reporting
-from transmission because both track holiday dates; \citealp{vonbismarckosten2022schools}). Every
-short non-summer break shows a significant negative notification dip in lag 0 ($-0.199$ to $-0.497$,
-all $p<0.05$) followed by a positive lag-2 rebound ($+0.241$, CI $[0.065,0.417]$ for Easter;
-$+0.150$, $[0.035,0.264]$ for Autumn; Web Figure~\ref{fig:web-diag}(b)), reproducing a shared
-holiday reporting-suppression and post-break catch-up pattern that directly probes the
-separable-reporting restriction in Assumption~A7 ($c_{it}=c_i c_t$; alongside regional
-vaccination uptake differences documented during early rollout and in cross-sectional RKI-KV / 2018
-school-entry snapshots, \citealp{siedler2010varicella,reuss2010varicella,rieck2020impfquoten}, and state-level holiday
-confounding discussed in \citealp{vonbismarckosten2022schools}). Shifted-calendar pre-window
+align with leads $3,2,1$ and lag $0$), and $B=2000$ cross-state permutations of the summer holiday
+schedule (conditional on state schedules; strict state exchangeability fails because BW and BY never
+rotate, and randomization over calendar timing does not separate reporting from transmission because
+both track holiday dates; \citealp{vonbismarckosten2022schools}). Every short non-summer break
+shows a sharp negative notification dip in lag 0 ($-0.199$ to $-0.497$, all $p<0.05$) followed by a
+positive lag-2 rebound ($+0.241$, CI $[0.065,0.417]$ for Easter; $+0.150$, $[0.035,0.264]$ for
+Autumn; Web Figure~\ref{fig:web-diag}(b)), reproducing a shared holiday reporting-suppression and
+post-break catch-up pattern that directly probes the separable-reporting restriction in
+Assumption~A7 ($c_{it}=c_i c_t$; alongside regional vaccination uptake differences documented during
+early rollout and in cross-sectional RKI-KV / 2018 school-entry snapshots,
+\citealp{siedler2010varicella,reuss2010varicella,rieck2020impfquoten}). Shifted-calendar pre-window
 indicators at leads $3,2,1$ are positive ($+0.296$, $+0.247$, $+0.328$; contrasting with the
 event-time bin check in F.5 that controls explicitly for holiday duration rather than overlapping
-indicator shifts), while $-1$ to $+4$ trace lags 0--5. Against 200 cross-state schedule
-permutations, the observed lag-1 coefficient ($-0.240$) lies at two-sided $p=0.010$ (minimum
-attainable two-sided value at $B=200$; permutation mean $-0.001$, SD $0.089$; lag-2 $p=0.060$).
+indicator shifts), while $-1$ to $+4$ trace lags 0--5. Against $B=2000$ cross-state schedule
+permutations using $p=(\mathrm{count}+1)/(B+1)$, the observed lag-1 contrast ($-0.240$) gives
+one-sided $p=0.0025$ ($4/2000$) and two-sided $p=0.0075$ ($14/2000$; permutation mean $-0.001$, SD
+$0.086$; lag-2 one- and two-sided $p=0.0295$).
 
 \input{tables/table_18_placebos}

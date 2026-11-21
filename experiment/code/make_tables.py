@@ -66,6 +66,31 @@ def short_name(s):
     return s.name
 
 
+_MISSPEC_LABELS = {
+    21: "X1: wrong generation interval",
+    22: "X2: reporting drops after adoption",
+    23: "X3: heterogeneous effects",
+    24: "X4: susceptible depletion",
+    25: "X5: dynamic effects",
+}
+
+
+def row_label(s, scen):
+    obj = scen[s]
+    p = obj.params
+    if obj.block == "core":
+        return "%d $N=%d$, $T=%d$, %s, %s" % (
+            s, p.N, p.T, "FB" if p.adopt == "feedback" else "RD",
+            "spill" if p.phi > 0 else "no spill",
+        )
+    if obj.block == "null":
+        return "%d $N=%d$, $T=%d$, %s, $k=%s$" % (
+            s, p.N, p.T, "FB" if p.adopt == "feedback" else "RD",
+            "10" if math.isfinite(p.k) else r"\infty",
+        )
+    return "%d %s" % (s, _MISSPEC_LABELS.get(s, obj.name.replace("_", r"\_")))
+
+
 def tabular(colspec, header, body, note, caption, label):
     lines = [r"\begin{table}[!t]", r"\centering", r"\caption{%s}" % caption, r"\label{%s}" % label,
              r"\footnotesize", r"\setlength{\tabcolsep}{3.5pt}",
@@ -103,9 +128,12 @@ def table_core_tau(t, scen):
     note = ("Core scenarios, policy effect $\\tau_0=\\log 0.8$. bias = mean$(\\hat\\tau)-\\tau_0$; cov = coverage (\\%%) "
             "of 95\\%% $t_{G-1}$ intervals. FB = feedback adoption, RD = random adoption; spill = $(\\phi_0,\\kappa_0)"
             "=(0.4,-0.1)$ vs $(0,0)$. %s per scenario; largest MCSE: bias %s, coverage %s (percentage points). "
-            "Biases and coverages are computed over converged replications (convergence rates in the supplementary "
-            "table). M2 and M3 target $\\tau$ on different scales and are shown against $\\tau_0$ as in the "
-            "pre-specified protocol." % (rr, fmt(maxof(mb)), fmt(maxof(mc), pct=True)))
+            "Biases and coverages are computed over converged replications (convergence rates in Web Appendix~C; "
+            "notice M1-BC fails in 85.3\\%% and 76.1\\%% of draws in Scenarios~2 and~4 due to zero within-unit variation in $D$ "
+            "on half-panels, so its coverage reflects a selected subset). Oracle under-coverage in no-spillover $T=26$ scenarios "
+            "(80.5\\%% in 14, 80.2\\%% in 16) arises because unweighted Poisson QMLE concentrates cluster score mass ($G_{\\mathrm{eff}}\\approx 11.9$--$12.6$ "
+            "out of 50), unlike M0 $1/(\\Lambda+1)$ scaling ($G_{\\mathrm{eff}}\\approx 48.1$--$48.3$). M2 and M3 target $\\tau$ on different scales "
+            "and are shown against $\\tau_0$ per the pre-specified protocol (weak-prior M2 results in Web Appendix~C)." % (rr, fmt(maxof(mb)), fmt(maxof(mc), pct=True)))
     return tabular("cccc" + "rr" * len(meths), head, body, note,
                    r"Bias (mean of estimate minus true value over replications) and coverage of nominal 95\% confidence intervals for $\tau$ in the 16 core scenarios.", "tab:sim-core-tau"), n
 
@@ -176,7 +204,7 @@ def table_misspec(t, scen):
             cells += [fmt(t.get(s, "M0", par, "bias")), fmt(t.get(s, "M0", par, "coverage"), pct=True)]
         J = t.scen.get(s, {}).get("J_reject_05", {}).get("p")
         cells += [fmt(J, pct=True), fmt(t.get(s, "M1", "tau", "bias")), fmt(t.get(s, "M2", "tau", "bias"))]
-        body.append(scen[s].name.replace("_", r"\_") + " & " + " & ".join(cells) + r" \\")
+        body.append(_MISSPEC_LABELS.get(s, scen[s].name.replace("_", r"\_")) + " & " + " & ".join(cells) + r" \\")
     # X3 targets and X5 event-time rows
     extra = []
     if 23 in t.scen:
@@ -217,12 +245,15 @@ def table_psi(t, scen):
                       fmt(t.get(s, m, par, "coverage", "population"), pct=True)]
         cells += [fmt(t.get(s, "M0_G", "psi_treated", "relbias_median", "dagger")),
                   fmt(t.get(s, "M0_G", "psi_treated", "coverage", "dagger"), pct=True)]
-        body.append(str(s) + " " + scen[s].name.replace("_", r"\_") + " & " + " & ".join(cells) + r" \\")
+        body.append(row_label(s, scen) + " & " + " & ".join(cells) + r" \\")
     rr, n = r_range(t, sids)
     note = ("Cases averted. rel.\\ bias = median over replications of $(\\hat\\psi-\\psi^\\dagger)/|\\psi^\\dagger|$; "
             "cov$^\\dagger$ = coverage (\\%%) of the replication-specific target $\\psi^\\dagger$ (Theorem~4(b)); "
             "cov$^{\\rm pop}$ = coverage of the population $\\psi$ estimated from common-random-number "
-            "counterfactual pairs (descriptive; under-coverage is expected with spillover, Remark~3). %s." % rr)
+            "counterfactual pairs (descriptive; under-coverage is expected with spillover, Remark~3). "
+            "In Scenario~22 (X2), upward $\\hat\\phi$ bias ($+0.424$) makes the counterfactual recursion supercritical, "
+            "yielding absolute treated bias $+1.07\\times 10^{11}$ mean ($+7.97\\times 10^{10}$ median vs.\\ $\\psi^\\dagger$ "
+            "median $6.99\\times 10^7$ in the $R=100$ diagnostic check; \\texttt{core\\_diagnostics.json}). %s." % rr)
     return tabular("l" + "r" * 8, head, body, note, r"Inference for the number of cases averted $\psi$: relative bias and coverage of nominal 95\% confidence intervals.",
                    "tab:sim-psi"), n
 
@@ -239,7 +270,7 @@ def table_roots(t, scen):
                  fmt(c.get("M0_G", {}).get("p"), pct=True)]
         cells += [fmt(d.get(k, {}).get("p"), pct=True) for k in ("M0G_multiple_roots", "M0G_no_interior_root",
                                                                   "M0G_at_boundary", "M0G_differs_from_M0")]
-        body.append(str(s) + " " + scen[s].name.replace("_", r"\_") + " & " + " & ".join(cells) + r" \\")
+        body.append(row_label(s, scen) + " & " + " & ".join(cells) + r" \\")
     rr, n = r_range(t, sids)
     note = ("Root diagnostics of the profiled QD-GMM equations over the grid $\\phi\\in[0,3]$ (M0-G): share (\\%%) "
             "of replications with more than one interior root, with no interior root, in which the minimum-$Q$ "
@@ -256,7 +287,7 @@ def table_m0gi(t, scen):
     if not any(t.get(s, "M0_GI", "tau", "n_ok") for s in sids):
         return None, 0
     head = [r"scenario & $\phi_0$ & \multicolumn{2}{c}{M0} & \multicolumn{2}{c}{M0-G} & "
-            r"\multicolumn{5}{c}{M0-GI (post hoc)} & bound.\ & $R_{\rm GI}$ \\",
+            r"\multicolumn{5}{c}{M0-GI (post hoc)} & boundary & $R_{\rm GI}$ \\",
             r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-11}",
             r" & & bias & cov & bias & cov & bias & empSE & modSE & RMSE & cov & GI & \\"]
     body, mb, mc, Rs = [], [], [], []
@@ -273,15 +304,15 @@ def table_m0gi(t, scen):
             Rs.append(r)
         mb.append(t.get(s, "M0_GI", "tau", "bias_mcse"))
         mc.append(t.get(s, "M0_GI", "tau", "coverage_mcse"))
-        body.append(str(s) + " " + scen[s].name.replace("_", r"\_") + " & " + " & ".join(cells) + r" \\")
+        body.append(row_label(s, scen) + " & " + " & ".join(cells) + r" \\")
     rr, n = r_range(t, sids)
-    note = ("Post-hoc root-selection variant M0-GI (not pre-specified; added after the no-spillover failure of "
-            "M0 and M0-G was observed, experiment\\_design.md deviation~7): same candidate roots as M0-G, "
-            "selection criterion built from the $\\phi$-instrument at reference values $0.05$ and $2$ instead of "
-            "the M0-OI instruments. Same data sets (seeds) as the main run; M0 and M0-G: %s, M0-GI: $R_{\\rm GI}$ "
-            "replications (bias, cov over the replications it reached). Column \\emph{boundary GI}: share (\\%%) of boundary "
-            "($\\hat\\phi=0$) selections by M0-GI. Largest MCSE for M0-GI: bias %s, coverage %s (percentage points)."
-            % (rr, fmt(maxof(mb)), fmt(maxof(mc), pct=True)))
+    note = ("Post-hoc root-selection variant M0-GI (not pre-specified; added after the zero-coupling failure of "
+            "M0 and M0-G was observed; see Section~\\ref{s:simulation} for the departures from the design document): "
+            "same candidate roots as M0-G, selection criterion built from the $\\phi$-instrument at reference values "
+            "$0.05$ and $2$ instead of the M0-OI instruments. Same data sets (seeds) as the main run; M0 and M0-G: %s, "
+            "M0-GI: $R_{\\rm GI}$ replications (bias, cov over the replications it reached). Column \\emph{boundary GI}: "
+            "share (\\%%) of boundary ($\\hat\\phi=0$) selections by M0-GI. Largest MCSE for M0-GI: bias %s, coverage %s "
+            "(percentage points)." % (rr, fmt(maxof(mb)), fmt(maxof(mc), pct=True)))
     return tabular("lr" + "rr" * 2 + "rrrrr" + "rr", head, body, note,
                    r"Post-hoc root selection M0-GI versus the pre-specified M0 and M0-G ($\tau$): bias (mean over replications) and coverage of nominal 95\% confidence intervals.", "tab:sim-m0gi"), \
         (min(Rs) if Rs else 0)
@@ -302,12 +333,15 @@ def table_m0_full(t, scen):
     for s in sids:
         cells = [pm("bias")(s), pm("empSE")(s), fmt(t.get(s, "M0", "tau", "modelSE")), pm("relerr_SE")(s),
                  pm("RMSE")(s), pm("coverage", True)(s), fmt(t.get(s, "M0", "tau", "conv"), pct=True)]
-        body.append(str(s) + " " + scen[s].name.replace("_", r"\_") + " & " + " & ".join(cells) + r" \\")
+        body.append(row_label(s, scen) + " & " + " & ".join(cells) + r" \\")
     rr, n = r_range(t, sids)
     note = ("Primary estimator M0, $\\tau$: Monte Carlo performance measures with Monte Carlo standard errors "
             "(Morris, White and Crowther, 2019). empSE = sd of $\\hat\\tau$ (ddof 1); modSE = mean cluster-robust "
             "SE; rel.\\ err.\\ SE = modSE/empSE$-1$; cov.\\ (\\%%) of 95\\%% $t_{G-1}$ intervals; conv.\\ = share "
-            "(\\%%) of replications in which the solver converged. %s per scenario." % rr)
+            "(\\%%) of replications in which the solver converged. In Scenario~5 ($\\phi_0=0$, no spillover), "
+            "arithmetic mean SE (0.455, rel.\\ err.\\ 5.089, MCSE $1.65\\times 10^4$) is dominated by $<0.6\\%%$ "
+            "extreme near-boundary Jacobian draws (e.g.\\ SE $>2900$ at $\\hat\\phi\\approx 0.09$); over $R=400$ "
+            "diagnostic draws, median SE is 0.074 (IQR 0.015, $+6.4\\%%$ vs.\\ empSD). %s per scenario." % rr)
     return tabular("lrrrrrrr", head, body, note, r"Full performance measures for M0 ($\tau$), all scenarios: bias (mean over replications), empirical and model standard errors, RMSE and coverage of nominal 95\% confidence intervals, with Monte Carlo standard errors.",
                    "tab:sim-m0-full"), n
 
@@ -368,13 +402,14 @@ def main(argv=None):
     t = T(res)
     scen = sc.build_scenarios()
     os.makedirs(a.outdir, exist_ok=True)
+    # Legacy results["application"] is from the retired US mask-order prototype;
+    # active Table 4 (table_7_application.tex) is owned by experiment/code/make_tables_germany.py.
     specs = [("tab:sim-core-tau", "table_1_core_tau.tex", table_core_tau(t, scen)),
              ("tab:sim-core-spill", "table_2_core_spill.tex", table_core_spill(t, scen)),
              ("tab:sim-null", "table_3_null.tex", table_null(t, scen)),
              ("tab:sim-misspec", "table_4_misspec.tex", table_misspec(t, scen)),
              ("tab:sim-psi", "table_5_psi.tex", table_psi(t, scen)),
              ("tab:sim-roots", "table_6_roots.tex", table_roots(t, scen)),
-             ("tab:app", "table_7_application.tex", table_application(res.get("application"))),
              ("tab:sim-m0gi", "table_8_m0gi_posthoc.tex", table_m0gi(t, scen)),
              ("tab:sim-m0-full", "table_9_m0_full.tex", table_m0_full(t, scen))]
     entries = []
@@ -382,21 +417,16 @@ def main(argv=None):
         if tex is None:
             continue
         path = os.path.join(a.outdir, fn)
-        with open(path, "w") as fh:
+        with open(path, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(tex)
         with open(path, "rb") as fh:
             dig = hashlib.sha256(fh.read()).hexdigest()
-        entries.append(dict(id=tid, path=fn, sha256=dig, generator="src/make_tables.py",
-                            data_sources=[os.path.relpath(a.results, RUN)],
+        entries.append(dict(id=tid, path=fn, sha256=dig, generator="experiment/code/make_tables.py",
+                            data_sources=[os.path.relpath(a.results, RUN).replace("\\", "/")],
                             display="raw", n_seeds=n,
                             std_ddof=res.get("statistics", {}).get("std_ddof", 1),
-                            note="cells are Monte Carlo performance measures over n_seeds replications (MCSE in "
-                                 "table note)" if tid != "tab:app" else "point estimates with 95% CIs (single "
-                                                                        "observed data set)"))
-    man = dict(schema_version=1, provenance=res.get("provenance"), tables=entries)
-    with open(os.path.join(a.outdir, "manifest.json"), "w") as fh:
-        json.dump(man, fh, indent=1)
-    print("[tables] wrote %d tables to %s" % (len(entries), os.path.relpath(a.outdir, RUN)))
+                            note="cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"))
+    print("[tables] wrote %d core simulation tables to %s (run scripts/rebuild_manifest.py to refresh full manifest)" % (len(entries), os.path.relpath(a.outdir, RUN)))
     return 0
 
 

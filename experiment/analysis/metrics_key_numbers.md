@@ -156,7 +156,9 @@ supplementary (M0-GI): {"path": "sim/rows_m0gi.jsonl", "n_rows": 200000, "merged
 X3 (sid 23) M0 tau vs switcher mean: bias 0.005 cov 94.0%; vs first-order pseudo-true: bias 0.005 cov 94.0%
 X5 (sid 25) M0-ET bins e0..e6: bias -0.000, -0.000, -0.000, -0.000, -0.000, -0.000, -0.000; coverage 95.8%, 95.5%, 95.4%, 95.5%, 95.7%, 95.5%, 95.3%
 
-## Application (3091 units, G = 49 states, T = 26 weeks, 2020-06-01 to 2020-11-23; t crit 2.0106)
+## [ARCHIVED LEGACY PROTOTYPE] Application (3091 units, G = 49 states, T = 26 weeks, 2020-06-01 to 2020-11-23; t crit 2.0106)
+
+> **Provenance note (E8)**: This section records numbers from the retired US mask-order prototype stored in `results.json["application"]`. Active German varicella numbers (`N=400, G=16, T=261`) live in `experiment/analysis/germany_application_results.json` and `experiment/analysis/germany_calibrated_sim.json`.
 
 | analysis | method | tau (95% CI) | kappa (95% CI) | phi (95% CI) | boundary |
 |---|---|---|---|---|---|

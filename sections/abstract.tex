@@ -3,22 +3,24 @@ Panels of reported cases are standard for evaluating epidemic policies, yet outc
 difference-in-differences rests on assumptions infectious-disease counts violate: transmission is
 self-exciting, policies respond to rising incidence, and units infect one another. We place parallel
 trends on the log reproduction number of a renewal model with imported infection pressure and
-estimate policy effects by quasi-differenced generalized method of moments. Forward
-quasi-differencing removes unrestricted unit effects, while predetermined instruments accommodate
-incidence-driven feedback. Excluding unmodelled same-week cross-cluster transmission, cluster
+estimate policy effects by forward quasi-differenced generalized method of moments. Forward
+quasi-differencing eliminates unrestricted unit effects, while predetermined instruments accommodate
+incidence-driven feedback. Excluding unmodeled same-week cross-cluster transmission, cluster
 scores form a martingale difference array across weeks, validating ordinary cluster-robust
-variance and closed-form week profiling. We also develop diagnostics for boundary multiple roots,
-weak identification, temporal aggregation, and finite-cluster inference. Across pre-specified
-simulations with feedback, spillover, and overdispersion ($R=8000$), direct-effect bias spans
-$-0.002$ to $0.001$ (94.5\%--95.4\% coverage), outperforming comparators, while boundary and
-same-week ($w_0=0.3$) experiments define operating limits. An illustrative implementation on German
-county varicella data (400 counties, 16 states, 2015--2019; 58.8\% zeros) demonstrates computation
-without zero deletion, two-step log-reproduction-number small-count bias evaluated against
-design-calibrated simulation truth, and finite-cluster inference where restricted score wild
-bootstrap and jackknife intervals restore coverage while pairs cluster bootstrap-$t$ improves on $t_{15}$. Because surveillance counts follow notification week with holiday-linked
-reporting changes, this implementation is illustrative rather than a causal estimate of school
-holidays.
+variance and closed-form week profiling. We assemble and calibrate diagnostics for boundary
+multiple roots, weak identification, temporal aggregation, and finite-cluster inference. Across
+interior-contagion maintained-model simulations with feedback and spatial spillover across eight
+thousand replications, direct-effect bias stays near zero with nominal coverage, outperforming
+comparators when the working renewal model, timing, and separable reporting hold. Non-nested daily
+branching simulations, graded within-week transmission grids, zero-contagion boundary designs, and
+weak-prior log-reproduction regressions delineate operating limits. An illustrative sparse-count
+implementation on five-year German county varicella data illustrates computation without zero
+deletion, small-count two-step bias mechanisms, and finite-cluster wild score bootstrap and
+jackknife calibration improvements over cluster-robust studentized approximations. Because public
+surveillance records follow notification week alongside holiday-linked reporting shifts, this
+application serves strictly as a diagnostic and sparse-count testbed rather than causal estimation
+of school holidays.
 \end{abstract}
 \begin{keywords}
-Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Operating limits; Renewal equation.
+Causal inference; Difference-in-differences; Generalized method of moments; Infectious disease epidemiology; Interference; Renewal equation.
 \end{keywords}

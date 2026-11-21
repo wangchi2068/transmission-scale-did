@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "provenance": {
     "mode": "measured",
     "source": "Monte Carlo run of src/simulate.py, rows sim/rows.jsonl, aggregated by src/aggregate.py",
@@ -25,241 +25,255 @@
       "note": "M0_GI is a post-hoc addition (run-sim-application, experiment_design.md deviation 7), fitted by src/simulate_supp.py on the same seeds/data sets; its measures use the replications it reached (scenarios[sid].supp_R)"
     }
   },
+  "note": "Complete provenance manifest covering all 22 active tables (Main Tables 1-4 and Web Tables 1-18).",
   "tables": [
     {
       "id": "tab:sim-core-tau",
       "path": "table_1_core_tau.tex",
-      "sha256": "240216d4b4c7deb853611f92cd0288e1dbdedef826b78fee107578fb8dcbee0f",
-      "generator": "src/make_tables.py",
+      "sha256": "a4736ccde90ddefdedb9df9b9dd8ce7f9355954272c0fd0e722f21b5922aeb37",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "results.json"
+        "experiment/analysis/results.json"
       ],
-      "display": "raw",
       "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
-    },
-    {
-      "id": "tab:sim-core-spill",
-      "path": "table_2_core_spill.tex",
-      "sha256": "ce11c8ac862f7187dc6bb2fe36e3d41317dbcb6c0ab25c5fe962b925b18f0656",
-      "generator": "src/make_tables.py",
-      "data_sources": [
-        "results.json"
-      ],
-      "display": "raw",
-      "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
-    },
-    {
-      "id": "tab:sim-null",
-      "path": "table_3_null.tex",
-      "sha256": "ad88589d281a9d6c8fcf5b3ea3cb8e0b8375e53f89ec68be4ee5cc2439ff2d03",
-      "generator": "src/make_tables.py",
-      "data_sources": [
-        "results.json"
-      ],
-      "display": "raw",
-      "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
-    },
-    {
-      "id": "tab:sim-misspec",
-      "path": "table_4_misspec.tex",
-      "sha256": "b07d0a29da2146136aa0edfcc31507ceac643bf87fea1d2cd848a9762e4392c2",
-      "generator": "src/make_tables.py",
-      "data_sources": [
-        "results.json"
-      ],
-      "display": "raw",
-      "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
-    },
-    {
-      "id": "tab:sim-psi",
-      "path": "table_5_psi.tex",
-      "sha256": "225877914a671cab994c9978c06d54a900123405a73aea9d2b669ea82368afda",
-      "generator": "src/make_tables.py",
-      "data_sources": [
-        "results.json"
-      ],
-      "display": "raw",
-      "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
-    },
-    {
-      "id": "tab:sim-roots",
-      "path": "table_6_roots.tex",
-      "sha256": "f064af5865d9707d0f04e799c6fd4ce2cadea1a483c9d8bbcb38371e119484c3",
-      "generator": "src/make_tables.py",
-      "data_sources": [
-        "results.json"
-      ],
-      "display": "raw",
-      "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
-    },
-    {
-      "id": "tab:app",
-      "path": "table_7_application.tex",
-      "sha256": "ad2af14b1471ab7e099715950e7a623ef6513ae6a1e0e399a453cea8ce9526fb",
-      "generator": "src/make_tables.py",
-      "data_sources": [
-        "results.json"
-      ],
-      "display": "raw",
-      "n_seeds": 1,
-      "std_ddof": 1,
-      "note": "point estimates with 95% CIs (single observed data set)"
+      "note": "Main Table 1: core tau bias and coverage across comparators"
     },
     {
       "id": "tab:sim-m0gi",
       "path": "table_8_m0gi_posthoc.tex",
       "sha256": "9aba309da2f549b49f9d039e5fffc5484eef3d3685a16b6b81ed37b51a074b59",
-      "generator": "src/make_tables.py",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "results.json"
+        "experiment/analysis/results.json"
       ],
-      "display": "raw",
       "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+      "note": "Main Table 2: post-hoc M0-GI vs pre-specified M0 and M0-G"
+    },
+    {
+      "id": "tab:envelope",
+      "path": "table_envelope.tex",
+      "sha256": "ae366b986cc86e7e6052943232117c9a863dc5a04d0a27781fa4c3d433bbd686",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/results.json",
+        "experiment/analysis/germany_calibrated_sim.json",
+        "verification/same_week/results.json",
+        "verification/root_selection/full_summary_tsummary.json"
+      ],
+      "n_seeds": null,
+      "note": "Main Table 3: operating envelope and diagnostic workflow"
+    },
+    {
+      "id": "tab:app",
+      "path": "table_7_application.tex",
+      "sha256": "ac5c31e9484887670104177897d12aa16d4169e782018d9833dfeb2d5654a0e7",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/germany_application_results.json"
+      ],
+      "n_seeds": 1,
+      "note": "Main Table 4: sparse German varicella illustrative implementation"
     },
     {
       "id": "tab:sim-m0-full",
       "path": "table_9_m0_full.tex",
-      "sha256": "5625961613a021becfd31960b5ec6866e254387775197df760f40bc2b5b5e0cd",
-      "generator": "src/make_tables.py",
+      "sha256": "791f96c20122666c035a35589773ce6f5f3225294b287e6f9439aebef9258343",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "results.json"
+        "experiment/analysis/results.json"
       ],
-      "display": "raw",
       "n_seeds": 8000,
-      "std_ddof": 1,
-      "note": "cells are Monte Carlo performance measures over n_seeds replications (MCSE in table note)"
+      "note": "Web Table: full M0 tau performance measures with MCSEs"
     },
     {
-      "id": "tab:rev-regional",
-      "path": "table_11_regional.tex",
-      "sha256": "6d31d406e22c3e2b8061c671fa56b3c2d3a5d4a8f6a1ef14a7281426683d82c0",
-      "generator": "verification/revision/make_revision_tables.py",
+      "id": "tab:sim-core-spill",
+      "path": "table_2_core_spill.tex",
+      "sha256": "15d0bab21d8c83aeac72b786284da75d3ffc35ce613abdb1dfc3c2792993e7b6",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "verification/revision/regional_fe/results.json",
-        "verification/revision/calibrated_sim/results.json"
+        "experiment/analysis/results.json"
       ],
-      "display": "raw",
-      "n_seeds": 1,
-      "std_ddof": null,
-      "note": "point estimates, 95% CIs and test statistics (single observed data set); reference column from the calibrated simulation (revision analysis, post hoc); n_seeds = 1: single observed data set (filled in revise-english)"
+      "n_seeds": 8000,
+      "note": "Web Table: core spillover parameters kappa and phi"
     },
     {
-      "id": "tab:rev-calsim",
-      "path": "table_12_calibrated_sim.tex",
-      "sha256": "67cefc091bf55dd1963be9df2b93366a35f73ac26b6e3dd11ca1924b507d659f",
-      "generator": "verification/revision/make_revision_tables.py",
+      "id": "tab:sim-null",
+      "path": "table_3_null.tex",
+      "sha256": "ad88589d281a9d6c8fcf5b3ea3cb8e0b8375e53f89ec68be4ee5cc2439ff2d03",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "verification/revision/calibrated_sim/results.json"
+        "experiment/analysis/results.json"
       ],
-      "display": "raw",
-      "n_seeds": 600,
-      "std_ddof": 1,
-      "note": "Monte Carlo measures; n_seeds = cal design (high-noise design R = 300) (revision analysis, post hoc)"
+      "n_seeds": 8000,
+      "note": "Web Table: Type I error under null tau0=0"
     },
     {
-      "id": "tab:rev-gi",
-      "path": "table_13_gi_timing.tex",
-      "sha256": "a4386b22fbc84ff3bb250f380f7db6687e8ef97051cc4f933861e8d401b57ef5",
-      "generator": "verification/revision/make_revision_tables.py",
+      "id": "tab:sim-roots",
+      "path": "table_6_roots.tex",
+      "sha256": "f064af5865d9707d0f04e799c6fd4ce2cadea1a483c9d8bbcb38371e119484c3",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "verification/revision/gi_timing/results.json"
+        "experiment/analysis/results.json"
       ],
-      "display": "raw",
-      "n_seeds": 1,
-      "std_ddof": null,
-      "note": "point estimates with 95% CIs (single observed data set) (revision analysis, post hoc); n_seeds = 1: single observed data set (filled in revise-english)"
+      "n_seeds": 8000,
+      "note": "Web Table: multiple roots and boundary solutions"
     },
     {
-      "id": "tab:rev-event",
-      "path": "table_14_event_weights.tex",
-      "sha256": "4e0f6f49e791ec781424acf2fb0ce67464f734e812a900bbccb07db7517045fc",
-      "generator": "verification/revision/make_revision_tables.py",
+      "id": "tab:sim-misspec",
+      "path": "table_4_misspec.tex",
+      "sha256": "b07d0a29da2146136aa0edfcc31507ceac643bf87fea1d2cd848a9762e4392c2",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "verification/revision/event_time/results.json"
+        "experiment/analysis/results.json"
       ],
-      "display": "raw",
-      "n_seeds": 1,
-      "std_ddof": null,
-      "note": "point estimates and SEs (single observed data set) (revision analysis, post hoc); n_seeds = 1: single observed data set (filled in revise-english)"
+      "n_seeds": 8000,
+      "note": "Web Table: M0 under X1-X5 misspecification"
     },
     {
-      "id": "tab:rev-ascert",
-      "path": "table_15_ascertainment.tex",
-      "sha256": "f92e7d1178356e9ace0ef2778254009edcf5efe1b28a708aea3f9b5eacf56137",
-      "generator": "verification/revision/make_revision_tables.py",
+      "id": "tab:sim-psi",
+      "path": "table_5_psi.tex",
+      "sha256": "3a13666920d14498416b0e2f42b254733a05e2a8cb9ed6ac6c32e431c35b2ff0",
+      "generator": "experiment/code/make_tables.py",
       "data_sources": [
-        "verification/revision/ascertainment/results.json"
+        "experiment/analysis/results.json",
+        "experiment/analysis/core_diagnostics.json"
       ],
-      "display": "raw",
-      "n_seeds": 1,
-      "std_ddof": null,
-      "note": "point estimates with 95% CIs (single observed data set) (revision analysis, post hoc); n_seeds = 1: single observed data set (filled in revise-english)"
+      "n_seeds": 8000,
+      "note": "Web Table: cases averted psi inference"
     },
     {
-      "id": "tab:rev-robust",
-      "path": "table_16_robust_sets.tex",
-      "sha256": "74ccadf2d96b4318c31e25541efd354125bf64fbf4bf96372d10429ad2555ffb",
+      "id": "tab:rev-rsel",
+      "path": "table_10_rsel.tex",
+      "sha256": "b37822431672670dccf5d61734db9fc1924327adab68dd4b282e07528fd51066",
       "generator": "verification/revision/make_revision_tables.py",
       "data_sources": [
-        "verification/revision/robust_sets/results.json"
+        "verification/root_selection/full_summary_tsummary.json"
       ],
-      "display": "raw",
-      "n_seeds": 1,
-      "std_ddof": null,
-      "note": "confidence sets (single observed data set) (revision analysis, post hoc); n_seeds = 1: single observed data set (filled in revise-english)"
+      "n_seeds": 2000,
+      "note": "Web Table: boundary root selection validation"
     },
     {
       "id": "tab:rev-poproots",
       "path": "table_17_population_roots.tex",
-      "sha256": "0739528f99800dda6311ace9a6c8802cda669acfe31d56dc0f48188f22b922cf",
+      "sha256": "50ec152792e9fa6a940d590a39980eb579d874a046f38eae10180711ccf820ee",
       "generator": "verification/revision/make_revision_tables.py",
       "data_sources": [
         "verification/revision/population_roots/results.json"
       ],
-      "display": "raw",
-      "n_seeds": 40,
-      "std_ddof": 1,
-      "note": "roots per simulated draw; n_seeds = number of draws (revision analysis, post hoc)"
+      "n_seeds": null,
+      "note": "Web Table: large-N population second-root multiplicity"
+    },
+    {
+      "id": "tab:rev-nonnested",
+      "path": "table_19_nonnested_weakprior.tex",
+      "sha256": "835cd3367c2332c15ab64fe9bcf324f9240b2eaa8b7916674bf7726dded50653",
+      "generator": "experiment/code/make_verification_tables.py",
+      "data_sources": [
+        "verification/non_nested_sim/results.json",
+        "verification/same_week/grid_results.json",
+        "verification/weak_prior_m2/results.json"
+      ],
+      "n_seeds": null,
+      "note": "Web Table: non-nested daily DGP, same-week w0 grid, and weak-prior M2"
+    },
+    {
+      "id": "tab:rev-clustergrid",
+      "path": "table_20_cluster_grid.tex",
+      "sha256": "9c4d0bd55acafd53e727d502c63951960caf77a84a40db3f56ece3a2a34155cb",
+      "generator": "experiment/code/make_verification_tables.py",
+      "data_sources": [
+        "verification/root_selection/cluster_grid_results.json"
+      ],
+      "n_seeds": 250,
+      "note": "Web Table: controlled G=10..100 and skewness x T grid"
     },
     {
       "id": "tab:app-all",
       "path": "table_7b_application_sensitivity.tex",
-      "sha256": "b5b50e0121b1fb8a081c1c52cbd930651d7d255535ad41ad9dab65c33a328117",
-      "generator": "scripts/split_app_table.py",
+      "sha256": "bb524756cf35c29ebc6a3e4a334c2d245c6a4b2e8515937488a8fb8cda7f1dfa",
+      "generator": "experiment/code/make_tables_germany.py",
       "data_sources": [
-        "experiment/analysis/results.json"
+        "experiment/analysis/germany_application_results.json"
       ],
-      "display": "raw",
       "n_seeds": 1,
-      "std_ddof": null,
-      "note": "point estimates with 95% CIs (single observed data set); registered in revise-prep (was missing from the manifest); n_seeds = 1: single observed data set (filled in revise-english)"
+      "note": "Web Table: German application temporal, threshold, and subsample sensitivities"
     },
     {
-      "id": "tab:rsel",
-      "path": "table_10_rsel.tex",
-      "sha256": "cdcbf1cbfa0a8700c2f635269f9bec6f31b45c188e61ff600dc6c9f40dae761b",
-      "generator": "verification/root_selection/build_rsel_table.py",
+      "id": "tab:rev-gi",
+      "path": "table_13_gi_timing.tex",
+      "sha256": "ccf7d1f525dff8560449f895e632fb63954dd080afe9ea2a46b14c004a58f4c0",
+      "generator": "experiment/code/make_tables_germany.py",
       "data_sources": [
-        "verification/root_selection"
+        "experiment/analysis/germany_application_results.json"
       ],
-      "display": "raw",
-      "n_seeds": 2000,
-      "std_ddof": null,
-      "note": "root-selection rerun summary; registered in revise-prep (was missing from the manifest); n_seeds = R per design (each design R = 2000) (filled in revise-english)"
+      "n_seeds": 1,
+      "note": "Web Table: generation-interval and reporting-dispersion sensitivity"
+    },
+    {
+      "id": "tab:rev-regional",
+      "path": "table_11_regional.tex",
+      "sha256": "f42b954016ae99c8e9f4a45baaba77912ed8eaa93e97fd5ea4e32905ec0d9c94",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/germany_application_results.json"
+      ],
+      "n_seeds": 1,
+      "note": "Web Table: regional FE, BW/BY exclusion, trends, and seasonal harmonics"
+    },
+    {
+      "id": "tab:rev-calsim",
+      "path": "table_12_calibrated_sim.tex",
+      "sha256": "59a3d017625f24330824eef3ba433276b7a98869dc09c71c35278728fc49959a",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/germany_calibrated_sim.json"
+      ],
+      "n_seeds": 500,
+      "note": "Web Table: German design-calibrated few-cluster simulation"
+    },
+    {
+      "id": "tab:rev-robust",
+      "path": "table_16_robust_sets.tex",
+      "sha256": "b6b142fa5c214dd6d28f991400418bd4f0fb4aa398295da676bc779969873503",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/germany_application_results.json"
+      ],
+      "n_seeds": 1,
+      "note": "Web Table: Stock-Wright confidence sets"
+    },
+    {
+      "id": "tab:rev-event",
+      "path": "table_14_event_weights.tex",
+      "sha256": "24194df7262988fb2e1a64df89c34db74a2d70adeaa69aeda7071b446c4025c8",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/germany_application_results.json"
+      ],
+      "n_seeds": 1,
+      "note": "Web Table: event-time dynamic profile on total-policy scale"
+    },
+    {
+      "id": "tab:rev-ascert",
+      "path": "table_15_ascertainment.tex",
+      "sha256": "6661bfdec9cb396f080f050302936eb9c92ea4fcf332b716a593eaedaecc3acb",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/germany_application_results.json"
+      ],
+      "n_seeds": 1,
+      "note": "Web Table: ascertainment tipping points and omega sensitivity"
+    },
+    {
+      "id": "tab:rev-placebo",
+      "path": "table_18_placebos.tex",
+      "sha256": "b8e9aa92beea0cb77a6106ae7e1f4adbc9aec887a395a6d5f09f24bed5fd48e1",
+      "generator": "experiment/code/make_tables_germany.py",
+      "data_sources": [
+        "experiment/analysis/germany_application_results.json"
+      ],
+      "n_seeds": 1,
+      "note": "Web Table: non-summer placebos, calendar shifts, and cross-state permutations"
     }
   ]
 }

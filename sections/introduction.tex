@@ -2,9 +2,9 @@
 \label{s:intro}
 
 Panels of reported cases by county or region are standard for evaluating non-pharmaceutical
-interventions such as school closures, mobility restrictions and community mandates. In practice,
+interventions such as school closures, mobility restrictions, and community mandates. In practice,
 effects are commonly estimated by event studies, two-way fixed-effects regressions of case growth
-or log cases, regional comparisons and synthetic controls
+or log cases, regional comparisons, and synthetic controls
 \citep{hsiang2020anticontagion,chernozhukov2021masks,mitze2020masks}, importing the
 difference-in-differences logic of policy evaluation
 \citep{callaway2021did,roth2023trending,haber2021impact}. Epidemic data strain that logic on
@@ -14,60 +14,60 @@ designs treat as error. Weekly cases arise from earlier cases through the genera
 counts or log counts fail even under no policy \citep{gauthier2021twfe,feng2024parallel}. Policy
 adoption often responds to rising incidence, invalidating strict exogeneity and conventional unit
 fixed effects \citep{imai2019fixed,zhang2025timevarying}. Finally, units are spatially coupled:
-infections cross borders and neighbours' interventions alter contact patterns
-\citep{hudgens2008interference,halloran2016dependent,aronow2017exposure}, biasing estimates when
-spillovers are omitted \citep{enriquez2025spillovers}.
+infections cross borders and neighbors' interventions alter contact patterns
+\citep{halloran1995causal,hudgens2008interference,ogburn2014causal,halloran2016dependent,aronow2017exposure,cai2021contagion},
+biasing estimates when spillovers are omitted \citep{zhao2021interdependent,enriquez2025spillovers}.
 
-Existing approaches each resolve one piece of this structure. \citet{feng2024parallel} place
-parallel trends on cohort-based log effective reproduction numbers, omitting spillovers and relying
-on first-step reproduction-number estimates subject to small-count Jensen bias and
-generation-interval distortions \citep{gostic2020practical}. Semi-mechanistic renewal models in
-Bayesian \citep{flaxman2020npi,brauner2021npi,bhatt2023semimech} or frequentist form
-\citep{bong2024frequentist,bong2024augmented}, SIR-motivated unconfoundedness
-\citep{callaway2023pandemic} and structural growth models \citep{chernozhukov2021masks} condition on
-the observed past rather than eliminating unrestricted unit effects. Spatio-temporal count models
-\citep{held2005hhh,meyer2014powerlaw,alaimo2024poissonar} capture contagion coupling without
-incidence-driven policy feedback, whereas spatial and network difference-in-differences designs
-\citep{kosfeld2021spatial,butts2021spatial,forastiere2021network,xu2023did,sun2025didnetwork}
-model spillovers on the outcome scale without renewal dynamics. Quasi-differenced sequential
-moments remove multiplicative unit effects under predetermined regressors
-\citep{chamberlain1992sequential,wooldridge1997multiplicative,windmeijer2000moment,blundell2002count}
-but have not been integrated with renewal transmission, spatial contagion and formal validity
-diagnostics.
+Existing approaches each resolve pieces of this structure. \citet{feng2024parallel} similarly place
+parallel trends on the log transmission rate scale and employ wild cluster bootstrap for few-cluster
+inference, though omitting spillovers and relying on first-step reproduction-number estimates subject
+to small-count Jensen bias and generation-interval distortions \citep{gostic2020practical,green2022heterogeneous}.
+Semi-mechanistic renewal models in Bayesian \citep{flaxman2020npi,brauner2021npi,bhatt2023semimech}
+or frequentist form \citep[including the sequential martingale-score variance argument in Proposition~5.8 of][]{bong2024frequentist,bong2024augmented},
+SIR-motivated unconfoundedness and mobility-adjusted causal models \citep{callaway2023pandemic,bonvini2022mobility},
+and structural growth regressions \citep{chernozhukov2021masks} condition on observed history without
+eliminating unrestricted unit effects. Spatio-temporal count models
+\citep{held2005hhh,meyer2014powerlaw,alaimo2024poissonar} model spatial coupling without policy feedback,
+while spatial and network difference-in-differences designs
+\citep{kosfeld2021spatial,butts2021spatial,forastiere2021network,hettinger2025doubly,xu2023did,xu2026dynamic,sun2025didnetwork}
+handle outcome-scale or dynamic interference without renewal pressure. In dynamic count panels,
+forward quasi-differenced sequential moments eliminating multiplicative unit effects under
+predetermined regressors originate in \citet{chamberlain1992sequential},
+\citet{wooldridge1997multiplicative}, \citet{windmeijer2000moment}, \citet{blundell2002count}, and
+\citet{windmeijer2008gmm}, and spatial count extensions with spillovers and multiplicative fixed
+effects appear in \citet{abdelmoula2007spatial}, \citet{schweikert2021copycat}, and
+\citet{glaser2022spatial}.
 
-This paper develops quasi-differenced generalized method of moments (QD-GMM) on the
-renewal-transmission scale together with a formal operating-domain and diagnostic toolkit for
-epidemic policy evaluation. Parallel trends are placed on the log reproduction number of a renewal
-equation whose infection pressure imports cases from neighbouring units; a forward
-quasi-difference eliminates unrestricted unit effects; instruments built solely from the observed
-past permit incidence-driven feedback; and policy spillovers enter through the share of treated
-neighbours. Three methodological contributions follow. First, under cross-cluster timing
-conditions excluding unmodelled same-week cross-cluster transmission, cluster scores form a
-martingale difference array across weeks despite lagged inter-cluster contagion, so the ordinary
-cluster-robust sandwich applies without spatial HAC adjustment and week effects profile out in
-closed form. Second, across pre-specified simulations spanning feedback adoption, network
-spillover, overdispersion and small counts ($R=8000$), QD-GMM recovers direct effects with bias
-between $-0.002$ and $0.001$ and 95\% coverage of 94.5\% to 95.4\% where outcome-scale, Poisson
-fixed-effects and two-step log-$R$ comparators fail. Third, boundary ($\phi_0=0$), same-week
-($w_0=0.3$) and diagnostic experiments---profiled contagion curves, score-form over-identification
-tests ($J_{LM}$), Stock--Wright identification-robust sets and restricted score wild cluster
-bootstrap calibration---define the estimator's operating envelope and detect when weekly renewal or
-separable-reporting assumptions break down.
+The contribution of this paper is the specific combination of renewal-equation-weighted
+multiplicative infection pressure, contemporaneous policy spillovers $\kappa$, parallel trends on
+the log reproduction number scale, and forward quasi-differenced martingale-difference inference
+under Assumption~A4. Three contributions follow. First, under cross-cluster timing conditions
+excluding unmodeled same-week cross-cluster transmission, cluster scores form a martingale
+difference array across weeks despite lagged inter-cluster contagion, adapting sequential score
+and cluster-boundary arguments \citep{bester2011inference,bong2024frequentist} so ordinary
+cluster-robust variance applies without spatial HAC correction and week effects profile out in
+closed form. Second, in pre-specified simulations ($R=8000$) when the working renewal model, timing,
+and interior contagion hold, QD-GMM recovers direct effects with bias between $-0.002$ and $0.001$
+(94.5\%--95.4\% coverage) where outcome-scale, Poisson fixed-effects, and two-step log-$R$
+comparators fail; complementary non-nested daily branching simulations ($R=500$) and weak-prior
+comparisons delineate how reporting delays and prior pseudo-counts drive comparator performance.
+Third, we combine and calibrate established identification-robust, boundary, same-week grid, and
+few-cluster tools---profiled contagion curves, score-form $J_{LM}$ and $Z_{\mathrm{A4}}$ tests,
+Stock--Wright sets \citep{stock2000weak,cox2026simple}, and restricted score wild cluster bootstrap
+\citep{kline2012score,webb2023reworking}---to map the estimator's operating envelope (Table~\ref{tab:envelope}).
 
-We illustrate the procedure using five years of German county-level weekly varicella
-notifications (400 counties, 16 federal states, 2015--2019; 58.8\% zero county-weeks;
+We illustrate computation and diagnostic screening using five years of German county-level weekly
+varicella notifications (400 counties, 16 federal states, 2015--2019; 58.8\% zero county-weeks;
 \citealp{faensen2006survnet,vink2014serial,cauchemez2008school,jackson2014varicella}). In this
-sparse panel, QD-GMM computes cleanly without dropping zeros and recovers an interior coupling
-estimate, whereas two-step EpiEstim log-$R$ regression departs in sign from M0 at the county
-level before turning negative upon spatial aggregation to NUTS-2 regions (2.9\% zeros);
-design-calibrated simulations attribute most of M2's county bias to prior pseudo-counts under
-small expected counts while showing that calibrated working dynamics do not alone reproduce the
-observed positive county sign. Design-calibrated simulations with $G=16$ unequal states further demonstrate how
-null-imposed restricted score bootstrap intervals (WCR-score) improve finite-cluster coverage over
-standard $t_{15}$ approximations. Because the public surveillance stream follows reporting week
-rather than symptom onset and observation processes vary around school holidays, we treat this
-application strictly as an illustrative sparse-count implementation rather than a causal estimate
-of school holiday effects. Sections~\ref{s:methods}--\ref{s:discussion} present the model,
-simulations, illustrative implementation and operating scope; Web Appendices~A--F provide proofs,
-adapted comparator results, numerical checks, supplementary simulations, data provenance,
-few-cluster inference and full empirical diagnostics.
+sparse panel, QD-GMM computes cleanly without dropping zeros, whereas two-step EpiEstim log-$R$
+regression shifts sign from county to NUTS-2 aggregation (2.9\% zeros); calibrated simulations link
+county bias in M2 to prior pseudo-counts while showing that calibrated working dynamics alone do not
+explain the empirical county sign. Design-calibrated simulations ($G=16$ unequal states) further
+show how restricted score wild bootstrap and delete-one-state jackknife intervals improve coverage
+over $t_{15}$ approximations under the maintained working model. Because the public surveillance stream follows
+reporting week alongside holiday-linked ascertainment shifts, this application serves strictly as an
+illustrative sparse-count and diagnostic testbed rather than a causal estimate of school holiday
+effects. Sections~\ref{s:methods}--\ref{s:discussion} present the model, simulations, illustrative
+testbed, and operating scope; Supplementary Material (Web Appendices~A--F) provides proofs,
+adapted comparator results, numerical checks, non-nested and few-cluster grid simulations, data
+provenance, and full empirical diagnostics.

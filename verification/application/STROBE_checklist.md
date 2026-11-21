@@ -1,28 +1,18 @@
-# STROBE checklist for the mask-order application
+# STROBE / Record Checklist for the German Varicella Implementation
 
-Item numbers follow STROBE (von Elm et al., 2007) for cross-sectional/cohort observational studies.
+Mapped to the active illustrative implementation (`experiment/code/application.py`, 400 German counties in $G=16$ federal states, 2015--2019, $T=261$ estimation weeks; replacing the earlier archived US mask-order prototype):
 
-| Item | Where it is reported |
+| Item | Location in Manuscript / Supporting Information |
 |---|---|
-| 1 Title and abstract | Abstract; Section 4 title names the design, the exposure and the outcome |
-| 2 Background/rationale | Section 1, paragraphs 1-3 |
-| 3 Objectives | Section 1, last paragraph; Section 4, first paragraph |
-| 4 Study design | Section 4, first paragraph (county-week panel, 26 weeks) |
-| 5 Setting | Section 4, first paragraph (3091 counties in 49 clusters, 2020-06-01 to 2020-11-23) |
-| 6 Participants | Section 4, first paragraph (units and clusters); no exclusion beyond Alaska, Hawaii and territories |
-| 7 Variables | Section 2.1 (model) and Section 4, first paragraph (outcome, exposure) |
-| 8 Data sources/measurement | Section 4, first paragraph; Web Appendix D |
-| 9 Bias | Section 4, first paragraph (opt-outs not coded); Section 4, fourth paragraph (ascertainment) |
-| 10 Study size | Section 4, first paragraph (3091 units x 26 weeks; all counties in the window) |
-| 11 Quantitative variables | Section 2.1: counts enter multiplicatively through the renewal mean |
-| 12 Statistical methods | Section 2 (QD-GMM) and Section 4, second paragraph (state clustering, t_{G-1}, J test, sensitivity analyses) |
-| 12e Sensitivity analyses | Section 4, fourth paragraph and Web Table 8: generation interval, network, policy timing, background input, reference value, excluded states |
-| 14 Descriptive data | Section 4, first paragraph |
-| 15 Outcome data | Section 4, first paragraph: 11,528,182 cases |
-| 16 Main results | Section 4, third paragraph, and Table 3 |
-| 17 Other analyses | Section 4, third and fourth paragraphs: comparators, event time, lead regression, cases averted |
-| 18 Key results | Section 4, third paragraph, and Section 5, first paragraph |
-| 19 Limitations | Section 5, second and third paragraphs |
-| 20 Interpretation | Section 5 |
-| 21 Generalisability | Section 5 |
-| 22 Funding | Back matter |
+| Title & abstract | `sections/abstract.tex` (states count data, sparse surveillance panel, illustrative scope) |
+| Background & rationale | `sections/introduction.tex` ($\S 1$), `sections/application.tex` ($\S 4$ opening) |
+| Study design & objectives | `sections/application.tex` ($\S 4.1$: computational and diagnostic sparse-count testbed) |
+| Setting, dates & eligibility | `sections/application.tex` ($\S 4.1$), `experiment/data/data_contract.md`, Web Appendix~D |
+| Data sources & SHA-256 provenance | `sections/backmatter.tex`, `experiment/data/fetch_germany.py`, `experiment/data/checksums_germany.sha256` |
+| Variables & exposure coding | `sections/application.tex` ($\S 4.1$: one-week-lagged state summer holiday $\ge 4$/7 days, population $\omega_i$, adjacency $W$; sensitivity grids Table~7b) |
+| Bias, reporting & diagnostic checks | `sections/application.tex` ($\S 4.3$--$\S 4.4$), Table~3 (`tab:envelope`), Web Appendices~D--F (Tables~11--18) |
+| Quantitative variables & zero handling | `sections/application.tex` ($\S 4.1$--$\S 4.2$, 58.8\% county-week zeros retained without deletion; NUTS-2 aggregation) |
+| Statistical methods & few-cluster inference | `sections/methods.tex` ($\S 2$), `sections/application.tex` ($\S 4.3$: $t_{15}$, WCR-score Webb6/Rademacher, jackknife, pairs bootstrap, Stock--Wright $S_1$/$S_3$, A4/A4') |
+| Descriptive & main working results | `sections/application.tex` ($\S 4.1$--$\S 4.2$), `tables/table_7_application.tex`, `figures/fig_03_application.pdf` |
+| Limitations & scope statement | `sections/application.tex` ($\S 4.4$ Scope statement: notification-week reporting, Assumption~A7 failure, non-absorbing seasonal holidays, non-causal framing) |
+| Funding & reproducibility | `sections/backmatter.tex`, `scripts/rebuild_manifest.py`, `tables/manifest.json` |

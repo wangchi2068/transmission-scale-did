@@ -1,6 +1,6 @@
 \begin{table}[!t]
 \centering
-\caption{Placebo and randomisation diagnostics: non-summer school holidays (lags 0--2), time-shifted summer calendars, and cross-state schedule permutations.}
+\caption{Placebo and randomization diagnostics: non-summer school holidays (lags 0--2), time-shifted summer calendars, and cross-state schedule permutations.}
 \label{tab:rev-placebo}
 \footnotesize
 \setlength{\tabcolsep}{3.0pt}
@@ -36,13 +36,13 @@ calendar shift & \multicolumn{2}{r}{$\hat\tau+\hat\kappa$ (95\% $t_{15}$ CI)} & 
 +3 wk (lag 4) & \multicolumn{2}{r}{-0.344 (-0.512, -0.177)} & 0.0005 & 0.326 (0.205, 0.447) & 9.28 (0.034) \\
 +4 wk (lag 5) & \multicolumn{2}{r}{-0.184 (-0.340, -0.028)} & 0.0240 & 0.336 (0.216, 0.456) & 9.16 (0.036) \\
 \midrule
-\multicolumn{6}{l}{\emph{(c) Cross-state randomisation test (permuting the 16 states' summer schedules across states, B=200)}} \\
+\multicolumn{6}{l}{\emph{(c) Cross-state randomization test (permuting the 16 states' summer schedules across states, B=2000)}} \\
 specification & observed & perm.\ mean (SD) & [5th, 95th] & \multicolumn{2}{r}{$p$ (1-sided / 2-sided)} \\
 \midrule
-Summer perm. (lag 1) & -0.240 & -0.001 (0.089) & [-0.150, +0.151] & \multicolumn{2}{r}{0.005 / 0.010} \\
-Summer perm. (lag 2) & -0.332 & -0.016 (0.145) & [-0.339, +0.172] & \multicolumn{2}{r}{0.060 / 0.060} \\
+Summer perm. (lag 1) & -0.240 & -0.001 (0.086) & [-0.135, +0.150] & \multicolumn{2}{r}{0.0025 / 0.0075} \\
+Summer perm. (lag 2) & -0.332 & -0.000 (0.131) & [-0.289, +0.171] & \multicolumn{2}{r}{0.0295 / 0.0295} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip\parbox{\linewidth}{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) permutes whole state schedules ($B=200$, minimum attainable two-sided $p=0.010$; exchangeability is imperfect because BW and BY never rotate, and schedule permutations reflect both contact and reporting changes aligned with holiday calendars). Panel (b) reveals positive pre-window slopes at overlapping calendar shifts $-4$ to $-2$ weeks (leads 3--1) and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
+\par\smallskip\parbox{\linewidth}{\scriptsize All four short holidays (Panel a) exhibit sharp negative lag-0 dips ($-0.20$ to $-0.50$), near-zero lag-1 contrasts, and positive lag-2 rebounds ($+0.07$ to $+0.24$, matching the 14-day serial-interval echo of contemporaneous holiday reporting suppression). Panel (c) permutes whole state schedules ($B=2000$, $p = (\mathrm{count}+1)/(2000+1)$; minimum attainable $p=0.0005$; exchangeability is imperfect because BW and BY never rotate, and schedule permutations reflect both contact and reporting changes aligned with holiday calendars). Panel (b) reveals positive pre-window slopes at overlapping calendar shifts $-4$ to $-2$ weeks (leads 3--1) and maximum negative magnitude at $+2$ weeks (lag 3). Source: \texttt{experiment/analysis/germany\_application\_results.json}.}
 \end{table}

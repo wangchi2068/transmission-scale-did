@@ -8,8 +8,8 @@ design follows \citet{morris2019ademp}.
 
 \subsection{Design}
 
-Counties sit uniformly on the unit square, linked to their six nearest neighbours by a symmetrised,
-row-normalised adjacency $W$ and grouped into 50 contiguous state clusters. Unit effects combine
+Counties sit uniformly on the unit square, linked to their six nearest neighbors by a symmetrized,
+row-normalized adjacency $W$ and grouped into 50 contiguous state clusters. Unit effects combine
 state, county and adoption-propensity components, correlating adoption with baseline transmission.
 Outcomes follow \eqref{eq:mean} with $S=2$, generation weights $(0.85,0.15)$, population-proportional
 background $\omega$, negative binomial ($k=10$) or Poisson ($k=\infty$) innovations, and week effects
@@ -41,33 +41,65 @@ was quartered to keep $T=26$ counts realistic; (ii) replications rose from 1000 
 2~MCSE fell below 0.01; (iii) an offset error in M1 (and M1-BC) was corrected after the pilot, and
 fewer Poisson fixed-effects variants were retained; (iv) M0-G was added after the pilot revealed
 root multiplicity, before the full runs; and (v) M0-GI was added after interim boundary failures
-and is post hoc, evaluated on the identical data sets. The validation designs of Web
-Appendix~\ref{app:rsel}, the population root checks of Web Appendix~\ref{app:poproots}, the
-same-week stress test of Section~\ref{ss:sameweek}, and essentially all choices in the German
+the validation designs of Web Appendix~\ref{app:rsel}, the population root checks of Web
+Appendix~\ref{app:poproots}, the same-week stress test of Section~\ref{ss:sameweek}, the
+non-nested daily branching, same-week grid, weak-prior M2, and cluster-grid checks of Web
+Tables~\ref{tab:rev-nonnested}--\ref{tab:rev-clustergrid}, and essentially all choices in the German
 varicella empirical application and calibrated finite-cluster simulation of
-Section~\ref{s:application} were introduced post hoc during revision and are labelled accordingly.
+Section~\ref{s:application} were introduced post hoc during revision and are labeled
+accordingly. Across the study, the 25 simulation scenarios and M0, M0-OI, M0-ET, M0$'$, and M1--M4 are
+pre-specified; M0-G and protocol refinements (i)--(iii) preceded final full runs; and M0-GI, the
+validation grids, same-week stress tests, non-nested/weak-prior/cluster-grid checks, and the German
+implementation were added post hoc during revision. The audit below summarizes the pre-specified
+versus post hoc classification across the study:
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lll}
+\toprule
+protocol tier & components & timing / multiplicity note \\
+\midrule
+Pre-specified & Scenarios 1--25; M0, M0-OI, M0-ET, M0$'$, M1--M4 & Primary confirmatory target ($R=8000$) \\
+Post-pilot (pre-full) & M0-G; scale adjustment (i); $R=8000$ (ii); M1 fix (iii) & Locked prior to final 8000-seed runs \\
+Post hoc (revision) & M0-GI; Web Apps.\ C.1--C.2; same-week / NN / cluster grids; & Exploratory diagnostics only; no \\
+                    & German varicella panel, A4/delay/$\omega_i$/WCR/calsim suite & formal multiplicity correction \\
+\bottomrule
+\end{tabular}
+\end{center}
+No multiplicity adjustment is applied across exploratory post hoc analyses \citep{weill2021flexibility}, which serve solely to bound
+and diagnose M0 behavior.
 
 \subsection{Results}
 \label{ss:simresults}
 
-\emph{With contagion.} Across all eight spillover scenarios, M0 recovers $\tau$: bias spans $-0.002$
+\emph{With contagion.} Across all eight interior-contagion spillover scenarios under the maintained
+working model ($\phi_0=0.4$), M0 recovers $\tau$: bias spans $-0.002$
 to $0.001$ (within 2 MCSE of zero in seven scenarios, and $-2.18$ MCSE at $-0.0017$ in scenario 1),
 with coverage 94.5\% to 95.4\% under both adoption rules (Table~\ref{tab:sim-core-tau},
 Figure~\ref{fig:core-tau}). Model SEs match empirical SDs within $-2.2\%$ to $0.9\%$ across all
 three parameters ($-3.5\%$ to $0.9\%$ including the null block), and power against $\tau_0=\log0.8$
-ranges from 77.1\% to 100\%. Biases of $\hat\phi$ and $\hat\kappa$ remain below 0.9\% of $\phi_0$ throughout (at most 0.0027
-across all spillover and null scenarios; Web Table~\ref{tab:sim-core-spill}).
-Comparators that ignore feedback, small counts or spillover are biased as Theorem~\ref{thm:bias}
-predicts: M1 by $-0.027$ to $-0.017$ (coverage 78.1\% to 88.2\%), M2 by $-0.110$ to $0.013$, M4 by
-$0.008$ to $0.139$, and M0$'$ by $-0.248$ to $-0.114$ (coverage at most 22.4\%); M1-BC, M3 and the
-Oracle are reported in Web Appendix~\ref{app:supp}.
+ranges from 77.1\% to 100\%. Biases of $\hat\phi$ and $\hat\kappa$ remain below 0.9\% of $\phi_0$ throughout (at most 0.004
+across all spillover and null scenarios; maximum $|\text{bias}|=0.0035$ on $\hat\phi$ in scenario~9; Web Table~\ref{tab:sim-core-spill}).
+Comparators fail when their structural premises are violated relative to the maintained renewal
+model: M1 by $-0.027$ to $-0.017$ (coverage 78.1\% to 88.2\%), M2 (default Gamma(1,5) prior) by
+$-0.110$ to $0.013$, M4 by $0.008$ to $0.139$, and M0$'$ by $-0.248$ to $-0.114$ (coverage at most
+22.4\%); M1-BC (whose half-panel estimator fails to converge in up to 88\% of $T=26$ feedback runs
+and therefore covers only a selected subset), M3 (which estimates a distinct $\log(Y+1)$ slope),
+the Oracle (whose unweighted counts concentrate up to 75.4\% of mass in single clusters under $T=26$
+random adoption, reducing effective clusters to $G_{\mathrm{eff}}\approx 12$ and shrinking CR1 SEs),
+and a weak-prior M2 re-evaluation on the identical $R=8000$ seeds (exposing $-0.041$ to $-0.231$
+negative bias once the small-count offset is removed; Web Table~\ref{tab:rev-nonnested}(c)) are
+reported in Web Appendix~\ref{app:supp}. Under non-nested daily Gamma-GI branching panels ($R=500$,
+$N=500, T=16$) with misspecified analyst weights and stochastic reporting delays (Web
+Table~\ref{tab:rev-nonnested}(a)), unadjusted weekly M0 incurs upward bias from $+0.059$ (0d delay)
+to $+0.381$ (4d delay), whereas fractional delay alignment restores 85.4\%--99.7\% coverage.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_01_core_tau.png}
 \caption{Policy effect $\tau$ across the 16 core scenarios ($R=8000$): (a) bias ($\pm2$ MCSE bars)
 and (b) 95\% $t_{G-1}$ coverage (shaded band 93\%--97\%). M0-GI is evaluated post hoc on identical
-data sets.}
+data sets. [Alt text: Two-panel comparison across sixteen scenarios showing near-zero M0 tau bias and nominal 95 percent coverage under positive spillover alongside boundary failure without spillover, compared against comparators and M0-GI.]}
 \label{fig:core-tau}
 \end{figure}
 
@@ -76,47 +108,53 @@ data sets.}
 severely (Web Table~\ref{tab:sim-null}). Under positive spillover all 8000 replications have a unique
 root and M0, M0-G and M0-GI coincide. When $\phi_0=\kappa_0=0$, which lies outside
 Theorem~\ref{thm:asy}, multiple interior roots appear in 47.2\% to 51.7\% of runs, trapping local M0
-at bias 0.132 to 0.469 and coverage 0.6\% to 38.8\% (Figure~\ref{fig:roots}). The second root is a property of the population moments: it appears in all 40 large-$N$ draws of
-the four zero-contagion designs and moves with $\bar\phi$ (Web Table~\ref{tab:rev-poproots}). The
-selection rules are heuristics without a stated guarantee. Added after the pilot, M0-G selects
-$\phi=0$ in 28.6\% to 44.8\% of runs (coverage 52.9\% to 71.0\%), whereas the post hoc invariance
-rule M0-GI selects it in 63.7\% to 80.9\% of runs, reducing bias to 0.000--0.052 and raising
-coverage to 87.5\%--95.2\% (Table~\ref{tab:sim-m0gi}). On nine independent validation designs
-($R=2000$ each; Web Appendix~\ref{app:rsel}), M0-GI restores coverage from 0.377 to 0.893 at
-$\phi_0=0$ but selects the boundary in 56\% to 79\% of runs at $\phi_0=0.05$, lowering coverage from
-0.960--0.970 to 0.921--0.935; the rules differ by at most 0.001 at $\phi_0=0.15$.
+at bias 0.132 to 0.469 and coverage 0.6\% to 38.8\% (Figure~\ref{fig:roots}). The second root is a
+property of the population moments: it appears in all 540 large-$N$ draws across the four
+zero-contagion designs (40 draws per $\bar\phi\in\{0.25,0.5,1.0\}$ at $N=20{,}000$ plus 15 draws
+at $N=50{,}000$, $\bar\phi=0.5$) and moves monotonically with $\bar\phi$ (Web
+Table~\ref{tab:rev-poproots}). The selection rules are heuristics without a stated guarantee. Added
+after the pilot, M0-G selects $\phi=0$ in 28.6\% to 44.8\% of runs (coverage 52.9\% to 71.0\%),
+whereas the post hoc invariance rule M0-GI selects it in 63.7\% to 80.9\% of runs, reducing bias to
+0.000--0.052 and raising coverage to 87.5\%--95.2\% (Table~\ref{tab:sim-m0gi}). On nine independent
+validation designs ($R=2000$ each; Web Appendix~\ref{app:rsel}), M0-GI improves $t_{G-1}$ coverage
+from 0.377 to 0.893 at $\phi_0=0$ but selects the boundary in 56\% to 79\% of runs at
+$\phi_0=0.05$, lowering coverage from 0.960--0.970 to 0.921--0.935; the rules differ by at most
+0.001 at $\phi_0=0.15$.
 
 \emph{Misspecification and cases averted.} Pooled constant-effect M0 breaks down under dynamic
 build-up (X5; bias 0.219, coverage 0\%), while event-time M0-ET recovers every bin with coverage
 95.3\% to 95.8\% (Remark~\ref{rem:dynamic}). Wrong generation weights (X1) leave $\hat\tau$ nearly
 unbiased (0.010, coverage 94.6\%) but are absorbed by $\hat\phi$ (bias $+0.516$); a 15\% post-adoption
 reporting drop (X2) shifts $\hat\tau+\hat\kappa$ by about $-0.35$; heterogeneity (X3) and depletion
-(X4) leave $\hat\tau$ nearly unbiased (Web Table~\ref{tab:sim-misspec}). Under spillover, realised
+(X4) leave $\hat\tau$ nearly unbiased (Web Table~\ref{tab:sim-misspec}). Under spillover, realized
 cases averted $\psi^\dagger$ have median relative bias within $\pm0.006$ for treated units
 ($\pm0.007$ network-wide) and interval coverage of
-85.7\% to 95.4\% for $\psi^\dagger$, but 72.1\% to 92.5\% for the population $\psi$, because the
-intervals omit process noise (Remark~\ref{rem:psi}; Web Table~\ref{tab:sim-psi}).
+85.7\% to 95.4\% for the realized-path estimand $\psi^\dagger$ (the unique target covered by Theorem~\ref{thm:psi}), versus 72.1\% to 92.5\% against population $\psi$ (where delta-method intervals omit process noise and are reported strictly descriptively; Remark~\ref{rem:psi}; Web Table~\ref{tab:sim-psi}). Under X2, $\psi^\dagger\approx 0$ so relative bias explodes ($1056\times$ median) and only the absolute bias ($+7.97\times 10^{10}$ median, $+1.07\times 10^{11}$ mean) is interpretable.
 
 \subsubsection{Same-week transmission}
 \label{ss:sameweek}
 
 The main designs exclude within-week contagion, so A1 and A4 hold exactly. To isolate the effect
 of weekly aggregation under within-week renewal (preserving A4 via unit-only same-week transfer),
-we simulated two $R=1000$ independent-seed arms on core $(N=500,T=12)$ feedback with
-$(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$: a weekly benchmark arm and a same-week arm
-activating daily unit re-infection from the third window week with nominal weight $w_0=0.3$ (re-entry
-$g=1.744$; nonlinear re-infection accounts for 14.5\% of total expected cases, or 34\% including
-same-week seeded incidence). The benchmark yields bias 0.001 (coverage 0.948); same-week renewal
-biases $\hat\tau$ by $-0.033$ (MCSE 0.001, coverage 0.890), $\hat\kappa$ by $-0.021$ (0.002, coverage
-0.939), and $\hat\tau+\hat\kappa$ by $-0.053$ (0.002, coverage 0.783), roughly one-sixth of the true
-sum. Sandwich SEs remain calibrated because A4 holds, so the under-coverage stems from bias, and the
-$J$ test has no power against it (4.8\% versus 4.9\% rejection in the benchmark). Dropping the first
-three weeks does not remove the bias ($-0.037$; Web Appendix~\ref{app:supp}). This $w_0=0.3$
-experiment demarcates the domain of validity of weekly aggregation: weekly QD-GMM is well suited to
-pathogens whose serial or generation intervals place negligible mass within a single week---such
-as varicella ($w_0<10^{-5}$ in Section~\ref{s:application}), measles or mumps---whereas
-fast-generation pathogens with substantial same-week mass ($w_0\gtrsim 0.3$, such as SARS-CoV-2) require sub-weekly estimating
-equations (Web Appendix~\ref{ss:weekwithin}).
+we simulated $R=1000$ independent-seed arms on core $(N=500,T=12)$ feedback with
+$(\tau_0,\kappa_0,\phi_0)=(\log0.8,-0.1,0.4)$ across a graded nominal same-week grid
+$w_0\in\{0.00, 0.05, 0.10, 0.20, 0.30\}$ alongside treated-share-matched controls
+(\texttt{verification/same\_week/grid\_results.json}, Web Table~\ref{tab:rev-nonnested}(b)). At the
+grid benchmark ($w_0=0$), bias is $+0.003$ (MCSE $0.002$, coverage $0.955$) for $\tau$ and $+0.002$
+($0.947$) for $\tau+\kappa$; on the original two-arm run (\texttt{same\_week/results.json}), benchmark
+$\tau$ bias is $0.000$ ($+0.0005$, coverage $0.948$) and $w_0=0.30$ yields $\tau$ bias $-0.033$
+(MCSE $0.001$, coverage $0.890$), $\kappa$ bias $-0.021$ ($0.002$, $0.939$), and $\tau+\kappa$ bias
+$-0.053$ (MCSE $0.001$, coverage $0.783$; Hansen's $J$ rejection $4.8\%$ vs.\ $4.9\%$). Along the graded
+grid, runtime nonlinear reinfection rises smoothly from $2.5\%$ ($7.2\%$ including seeded incidence) at
+$w_0=0.05$ to $14.2\%$ ($34.0\%$ seeded) at $w_0=0.30$, while mean treated share shifts from $0.652$
+($w_0=0$) to $0.551$ ($w_0=0.30$). Matching the treated share at $0.652$ leaves $\tau+\kappa$ bias
+virtually unchanged ($-0.046$, coverage $0.859$ vs.\ $-0.057$, $0.772$ unadjusted at $w_0=0.30$),
+confirming that distortion stems predominantly from unmodeled within-week nonlinearity rather than
+shorter exposure windows. Degradation is mild for $w_0\le 0.10$ (coverage $0.942$--$0.957$) and
+marked for $w_0\ge 0.20$, demarcating weekly QD-GMM for multi-week serial-interval pathogens---such as
+varicella ($w_0<10^{-5}$ in Section~\ref{s:application}), measles, or mumps---whereas fast-generation
+pathogens ($w_0\gtrsim 0.2$--$0.3$, such as SARS-CoV-2) require sub-weekly estimating equations (Web
+Appendix~\ref{ss:weekwithin}).
 
 \input{tables/table_1_core_tau}
 
@@ -124,7 +162,7 @@ equations (Web Appendix~\ref{ss:weekwithin}).
 \centering
 \includegraphics[width=\linewidth]{figures/fig_02_roots.png}
 \caption{Profiled QD-GMM root diagnostics across $\phi\in[0,3]$ ($R=8000$, $\pm2$ MCSE bars):
-shares with multiple interior roots, $\phi=0$ boundary selection and M0-G divergence from M0.}
+shares with multiple interior roots, $\phi=0$ boundary selection and M0-G divergence from M0. [Alt text: Diagnostic panel plots across simulation scenarios showing rates of multiple interior roots near zero spillover, phi equals zero boundary selections, and M0-G divergence from local M0.]}
 \label{fig:roots}
 \end{figure}
 

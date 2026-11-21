@@ -42,7 +42,18 @@ diagnostics (pilot outputs are in `logs/` and are labelled "not paper numbers").
 |---|---|---|---|---|
 | 7 | additional estimator **M0-GI** (post hoc) | — | M0-G with a different selection criterion: same candidate roots (grid φ ∈ [0, 3], sign-change refinement, boundary φ = 0), but Q is built from the M0 moments plus the φ-instrument evaluated at other reference values, N/Λ(0.05) and N/Λ(2.0) (`qdgmm.fit_global(selection="inv")`, `qdgmm.spec_selection_inv`). Run by `../code/simulate_supp.py` on the *same seeds and data sets* as the main run (rows `sim/rows_m0gi.jsonl`, merged by (sid, rep) in `../code/aggregate.py`, data fingerprint checked); measures use the replications it reached (`scenarios[sid].supp_R`) | interim R = 200 results showed M0 and the pre-specified M0-G under-covering τ in every no-spillover core scenario (M0 cov. 0–38 %, M0-G 46–78 %). Diagnosis (a local diagnostic script, not distributed): no code defect; with φ0 = 0 the M0 equations have a spurious root that tracks φ̄ (global identification at the boundary, flagged as unproven in theory). Instruments at other reference values are valid at the true root for any reference value but not at a φ̄-dependent spurious root. A 40-rep diagnostic (local, not distributed) motivated the choice. **M0 remains the pre-specified primary estimator and M0-G the pre-specified remedy; both are reported unchanged. M0-GI is reported separately and labelled post hoc everywhere (Table 8, figures 1–2, application table).** |
 
-## 3. Application (`../code/application.py`, data in `data_contract.md`)
+## 3. Application (`../code/application.py` [active German varicella]; legacy US prototype archived)
+
+* **Note on provenance (E8)**: The original Section 3 below documented the **retired US county COVID-19
+  mask-order prototype** (`G=49` states, `3,091` counties, Ferretti/Nishiura intervals, Kansas/Texas
+  exclusion). In the submitted and revised manuscript (`sections/application.tex`, `tables/table_7_application.tex`),
+  that US prototype is superseded by the **German county-level weekly varicella implementation** (`N=400`
+  counties, `G=16` federal states, `T=261` weeks, ISO 2015-W01 to 2019-W52; `../code/application.py`,
+  `../code/calibrated_sim_germany.py`, `../data/data_contract.md`). The `"application"` key inside `results.json`
+  and earlier prototype scripts under `verification/application/` and `verification/revision/` (except
+  `population_roots/`) remain read-only historical artifacts and are no longer wired to any active manuscript table.
+
+Legacy US mask-order prototype choices preserved for historical audit only:
 
 Main specification: M0 with Ferretti generation interval, adjacency network, ω = pop/10⁵, φ̄ = 0.5, all
 comparators (M0-G, M0-OI with J, M0′, M0-ET, M1, M1-BC, M2, M3, M4), φ-profile, ψ for M0 and M0-G.

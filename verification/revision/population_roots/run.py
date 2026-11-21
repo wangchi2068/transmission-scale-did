@@ -11,6 +11,10 @@ is recorded (true tau = log 0.8 = -0.223, kappa = 0).
 
 Run (from this folder):  OMP_NUM_THREADS=1 python3 -I run.py --workers 2 > log.txt 2>&1
 """
+import os
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+    os.environ.setdefault(_v, "1")
+
 import argparse
 import dataclasses
 import json
@@ -27,7 +31,7 @@ import scenarios as sc  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 SCEN = sc.build_scenarios(sc.load_calibration())
-GRID = np.r_[np.arange(-0.10, 0.0, 0.02), np.arange(0.0, 0.2, 0.02), np.arange(0.2, 1.5, 0.05), np.arange(1.5, 3.01, 0.25)]
+GRID = np.array([0.0, 0.05, 0.15, 0.30, 0.50, 0.75, 1.05, 1.50, 3.00])
 _GEO = {}
 
 
@@ -53,9 +57,22 @@ def job(args):
     roots = []
     for (p0, f0, b0), (p1, f1, b1) in zip(prof[:-1], prof[1:]):
         if f0 is not None and f1 is not None and np.sign(f0) != np.sign(f1):
-            w = abs(f0) / (abs(f0) + abs(f1))
-            roots.append(dict(phi=(1 - w) * p0 + w * p1, bracket=[p0, p1],
-                              coef=[(1 - w) * u + w * v for u, v in zip(b0, b1)]))
+            from scipy import optimize
+            last_coef = [b0]
+            def _f_root(ph):
+                bc, okc, Fc = qdgmm._solve_given_phi(mod, float(ph), np.asarray(last_coef[0]))
+                if okc:
+                    last_coef[0] = [float(v) for v in bc]
+                return float(Fc)
+            try:
+                phi_r = float(optimize.brentq(_f_root, p0, p1, xtol=1e-4, rtol=1e-4))
+                bc, okc, _ = qdgmm._solve_given_phi(mod, phi_r, np.asarray(last_coef[0]))
+                coef_r = [float(v) for v in bc] if okc else last_coef[0]
+            except Exception:
+                w = abs(f0) / (abs(f0) + abs(f1))
+                phi_r = (1 - w) * p0 + w * p1
+                coef_r = [(1 - w) * u + w * v for u, v in zip(b0, b1)]
+            roots.append(dict(phi=phi_r, bracket=[p0, p1], coef=coef_r))
     f0 = [f for (ph, f, _) in prof if abs(ph) < 1e-12][0]
     return dict(sid=sid, scenario=scen.name, N=N, rep=rep, seed=seed, phi_bar=phi_bar, G=int(panel["G"]),
                 truth=dict(tau=float(p.tau), kappa=float(p.kappa), phi=float(p.phi)), F_at_0=f0, roots=roots,
@@ -67,22 +84,27 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--sids", default="5,6,13,14")
-    ap.add_argument("--reps", type=int, default=3)
+    ap.add_argument("--reps", type=int, default=200)
+    ap.add_argument("--reps50k", type=int, default=50)
     a = ap.parse_args()
     sids = [int(s) for s in a.sids.split(",")]
     jobs = [(s, 20000, r, pb) for s in sids for pb in (0.25, 0.5, 1.0) for r in range(a.reps)]
-    jobs += [(s, 50000, 0, 0.5) for s in sids]
+    jobs += [(s, 50000, r, 0.5) for s in sids for r in range(a.reps50k)]
     print("jobs", len(jobs), "git", env.git_sha(), flush=True)
     if a.workers > 1:
-        import multiprocessing as mp
-        it = mp.get_context("fork").Pool(a.workers).imap_unordered(job, jobs)
+        from concurrent.futures import ProcessPoolExecutor
+        out = []
+        with ProcessPoolExecutor(max_workers=a.workers) as ex:
+            for rec in ex.map(job, jobs, chunksize=1):
+                out.append(rec)
+                print(time.strftime("%H:%M:%S", time.gmtime()), rec["sid"], rec["N"], rec["phi_bar"], rec["rep"], rec["secs"], "s",
+                      "roots", [(round(r["phi"], 3), [round(c, 3) for c in r["coef"]]) for r in rec["roots"]], flush=True)
     else:
-        it = map(job, jobs)
-    out = []
-    for rec in it:
-        out.append(rec)
-        print(time.strftime("%H:%M:%S", time.gmtime()), rec["sid"], rec["N"], rec["phi_bar"], rec["rep"], rec["secs"], "s",
-              "roots", [(round(r["phi"], 3), [round(c, 3) for c in r["coef"]]) for r in rec["roots"]], flush=True)
+        out = []
+        for rec in map(job, jobs):
+            out.append(rec)
+            print(time.strftime("%H:%M:%S", time.gmtime()), rec["sid"], rec["N"], rec["phi_bar"], rec["rep"], rec["secs"], "s",
+                  "roots", [(round(r["phi"], 3), [round(c, 3) for c in r["coef"]]) for r in rec["roots"]], flush=True)
     out.sort(key=lambda r: (r["sid"], r["N"], r["phi_bar"], r["rep"]))
     summ = []
     for s in sids:

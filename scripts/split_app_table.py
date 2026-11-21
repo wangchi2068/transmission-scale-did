@@ -1,4 +1,6 @@
-"""Split Table 3: main estimates stay in the body, sensitivity rows go to a Web Table."""
+"""[ARCHIVED LEGACY HELPER] Split US mask-order Table 3 prototype.
+Superseded by experiment/code/make_tables_germany.py for the active German varicella panel.
+"""
 from pathlib import Path
 import json
 import sys
